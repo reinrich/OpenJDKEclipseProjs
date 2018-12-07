@@ -53,3 +53,13 @@ Troubleshooting
 * OpenJDK build fails
   - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects scm version information,
   but fails when mixing git and hg. Try renaming the .git directories and refer to them with `--git-dir=<name>`
+
+* Git revision information for OpenJDK sources missing. This is because the projects themselves are kept in a git repository which hides the outer OpenJDK repository. Follow the follwing instructions to solve this.
+  - Open the project explorer
+  - Select all projects from this repo.
+  - Right-click selection > Team > Disconnect
+  - Right-click selection > Team > Share Project
+  - Select git then press next
+  - Select "Use or create repository in parent folder of project"
+  - Select `../..` for every project and click finish.
+  - To check for success open for example jvm.cpp, then right click the line number column and select "Show Revision Information". If this works then the issue is solved.
