@@ -3,8 +3,20 @@ Eclipse Projects for OpenJDK Sources
 
 This is a collection of Eclipse projects for OpenJDK:
 
+**C/C++ Projects**
+
 * **hotspot**: CDT project for hotspot sources. Platforms are modelled as CDT Build Configurations.
 * **jd_native**: subset of native sources bisedes hotspot. E.g. java.base, jdk.jdwp.agent.
+
+**Java Projects**
+
+* **java.base**: sources of the java.base module
+* **java.management**: sources of the java.management module
+* **jdk.jdi**: sources of the java.jdi module
+* **test.compiler.testlibrary**: hotspot jit compiler test library
+* **test.jdk**: jdk regression tests (jdk jtreg tests)
+* **test.lib**: jdk test library.
+
 
 Setup
 =====
