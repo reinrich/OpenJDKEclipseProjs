@@ -47,3 +47,9 @@ Setup
 10. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
     `linux_x86_64`, `linux_ppc_64`, and `linux_s390_64` are the only supported build configurations.
 
+Troubleshooting
+===============
+
+* OpenJDK build fails
+  - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects scm version information,
+  but fails when mixing git and hg. Try renaming the .git directories and refer to them with --git-dir=<name>
