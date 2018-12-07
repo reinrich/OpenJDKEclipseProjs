@@ -52,4 +52,4 @@ Troubleshooting
 
 * OpenJDK build fails
   - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects scm version information,
-  but fails when mixing git and hg. Try renaming the .git directories and refer to them with --git-dir=<name>
+  but fails when mixing git and hg. Try renaming the .git directories and refer to them with `--git-dir=<name>`
