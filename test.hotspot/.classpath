@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="test.hotspot"/>
+	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/GetOwnedMonitorInfo"/>
+	<classpathentry kind="src" path="test.hotspot/compiler"/>
+	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/GetOwnedMonitorStackDepthInfo"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
 		<attributes>
 			<attribute name="module" value="true"/>
