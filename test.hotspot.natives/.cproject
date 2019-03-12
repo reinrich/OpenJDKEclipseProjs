@@ -98,6 +98,12 @@
                         </toolChain>
                         					
                     </folderInfo>
+                    					
+                    <sourceEntries>
+                        						
+                        <entry excluding="test.hotspot.serviceability.jvmti/8036666/|test.hotspot.serviceability.jvmti/AddModuleExportsAndOpens/|test.hotspot.serviceability.jvmti/AddModuleReads/|test.hotspot.serviceability.jvmti/AddModuleUsesAndProvides/|test.hotspot.serviceability.jvmti/CanGenerateAllClassHook/|test.hotspot.serviceability.jvmti/FieldAccessWatch/|test.hotspot.serviceability.jvmti/GetLocalVariable/|test.hotspot.serviceability.jvmti/GetModulesInfo/|test.hotspot.serviceability.jvmti/GetNamedModule/|test.hotspot.serviceability.jvmti/GetSystemProperty/|test.hotspot.serviceability.jvmti/HeapMonitor/|test.hotspot.serviceability.jvmti/IsModifiableModule/|test.hotspot.serviceability.jvmti/ModuleAwareAgents/|test.hotspot.serviceability.jvmti/NotifyFramePop/|test.hotspot.serviceability.jvmti/StartPhase/|test.hotspot.serviceability.jvmti/VMEvent/|test.hotspot.serviceability.jvmti/GetObjectSizeClass.java|test.hotspot.serviceability.jvmti/GetObjectSizeClassAgent.java|test.hotspot.serviceability.jvmti/GetObjectSizeOverflow.java|test.hotspot.serviceability.jvmti/GetObjectSizeOverflowAgent.java|test.hotspot.serviceability.jvmti/RetransformClassesZeroLength.java|test.hotspot.serviceability.jvmti/TestLambdaFormRetransformation.java|test.hotspot.serviceability.jvmti/TestRedefineWithUnresolvedClass.java|test.hotspot.serviceability.jvmti/UnresolvedClassAgent.java|test.hotspot.serviceability.jvmti/UnresolvedClassAgent.mf|.cproject|.project" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+                        					
+                    </sourceEntries>
                     				
                 </configuration>
                 			
@@ -129,8 +135,18 @@
     	
     <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
     	
-    <storageModule moduleId="refreshScope"/>
+    <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="Debug">
+            			
+            <resource resourceType="PROJECT" workspacePath="/test.hotspot.natives"/>
+            		
+        </configuration>
+        	
+    </storageModule>
     	
     <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+    	
+    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
     
 </cproject>
