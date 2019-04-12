@@ -30,5 +30,15 @@
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/src/hotspot</locationURI>
 		</link>
+		<link>
+			<name>gtest_test_src</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/gtest</locationURI>
+		</link>
+		<link>
+			<name>gtest_src</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/test/fmw/gtest</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
