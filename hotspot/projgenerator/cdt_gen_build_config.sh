@@ -268,7 +268,7 @@ function add_included_files_using_cxx_cmdline() {
     # modify cmdline to let the compiler print included files
     case $OS in
         linux|bsd)   SED_CXX_SHOW_INCLUDES="s!-c -MMD \(-MP \|\)-MF .\+\.o!-E -H -o /dev/null!";;
-        solaris)   SED_CXX_SHOW_INCLUDES="s!-c -xMMD \(-xMP \|\)-xMF .\+\.o!-E -H!";;
+        solaris)   SED_CXX_SHOW_INCLUDES="s!-c .\+\.o!-E -H!";;
         aix)
             SED_CD="1i cd ${WORK_DIR}"
             SED_CXX_SHOW_INCLUDES="s!-c -qmakedep=gcc .\+\.o!-qsyntaxonly -qlist -qshowinc!"
@@ -280,7 +280,7 @@ function add_included_files_using_cxx_cmdline() {
         *)       report_and_exit "unhandled OS case ($OS)";;
     esac
     $GSED -e "$SED_CD" -e "$SED_CXX_SHOW_INCLUDES" -e "$SED_CAT_AND_DEL_LST_FILE" <$cmdline_file >$cmdline_file_mod
-    
+
     # execute modified cmdline
     case $OS in
         linux|bsd)
@@ -621,6 +621,7 @@ initialize
 
 CMDLINE_FILE_PATTERNS=(
 #     jni.
+#     g1CollectedHeap.
 #     concurrentMarkSweepGeneration.
 # #    dependencyContext.
 # #    jvm.

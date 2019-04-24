@@ -1,2 +1,5 @@
 # Ignore class files compiled by eclipse
 bin
+
+# cannot checkin solaris headers
+solaris_sparc_64
