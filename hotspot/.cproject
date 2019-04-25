@@ -6388,5 +6388,63 @@
         </scannerConfigBuildInfo>
         	
     </storageModule>
+    	
+    <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="linux_s390_64">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="linux_x86_64">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="windows_x86_64_todo">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="solaris_x86_64_todo">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="aix_ppc_64_todo">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="linux_x86_64_with_gtest">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="linux_ppc_64">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="bsd_x86_64_todo">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="solaris_sparc_64_todo">
+            			
+            <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+            		
+        </configuration>
+        	
+    </storageModule>
     
 </cproject>

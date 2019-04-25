@@ -6,15 +6,23 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-			<triggers>clean,full,incremental,</triggers>
+			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
+			<triggers>full,incremental,</triggers>
 			<arguments>
+				<dictionary>
+					<key>LaunchConfigHandle</key>
+					<value>&lt;project&gt;/.externalToolBuilders/org.eclipse.cdt.managedbuilder.core.genmakebuilder.launch</value>
+				</dictionary>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
+			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
 			<triggers>full,incremental,</triggers>
 			<arguments>
+				<dictionary>
+					<key>LaunchConfigHandle</key>
+					<value>&lt;project&gt;/.externalToolBuilders/org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder.launch</value>
+				</dictionary>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
@@ -26,9 +34,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>hotspot_src</name>
+			<name>gtest_src</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/src/hotspot</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/test/fmw/gtest</locationURI>
 		</link>
 		<link>
 			<name>gtest_test_src</name>
@@ -36,9 +44,9 @@
 			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/gtest</locationURI>
 		</link>
 		<link>
-			<name>gtest_src</name>
+			<name>hotspot_src</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/fmw/gtest</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/src/hotspot</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
