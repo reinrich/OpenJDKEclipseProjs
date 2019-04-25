@@ -4573,6 +4573,8 @@
                                     									
                                     <listOptionValue builtIn="false" value="_Crun_inline_placement"/>
                                     									
+                                    <listOptionValue builtIn="false" value="_LP64"/>
+                                    									
                                     <listOptionValue builtIn="false" value="_NMT_NOINLINE_"/>
                                     									
                                     <listOptionValue builtIn="false" value="__STDC_CONSTANT_MACROS"/>
@@ -4680,6 +4682,8 @@
                                     <listOptionValue builtIn="false" value="TARGET_COMPILER_solstudio"/>
                                     									
                                     <listOptionValue builtIn="false" value="_Crun_inline_placement"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_LP64"/>
                                     									
                                     <listOptionValue builtIn="false" value="_NMT_NOINLINE_"/>
                                     									

@@ -394,6 +394,7 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
                 echo "__hidden"   >>$ALL_DEFINES
                 echo "__symbolic" >>$ALL_DEFINES
                 echo "__thread"   >>$ALL_DEFINES
+                echo "_LP64"      >>$ALL_DEFINES
             fi
             ;;
         aix)
