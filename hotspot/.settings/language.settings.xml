@@ -45,7 +45,7 @@
         	
     </configuration>
     	
-    <configuration id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.1717802879" name="bsd_x86_64_todo">
+    <configuration id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.1717802879" name="bsd_x86_64">
         		
         <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
             			
@@ -133,7 +133,7 @@
         	
     </configuration>
     	
-    <configuration id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.569206305.22026276" name="solaris_sparc_64_todo">
+    <configuration id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.569206305.22026276" name="solaris_sparc_64">
         		
         <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
             			
