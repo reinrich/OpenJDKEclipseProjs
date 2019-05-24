@@ -3,3 +3,4 @@ bin
 
 # cannot checkin solaris headers
 solaris_sparc_64
+bsd_x86_64
