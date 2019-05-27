@@ -1,6 +1,3 @@
 # Ignore class files compiled by eclipse
 bin
-
-# cannot checkin solaris headers
-solaris_sparc_64
-bsd_x86_64
+hotspot_cdtproj_closed_src_includes
