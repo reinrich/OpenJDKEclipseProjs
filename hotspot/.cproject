@@ -1311,8 +1311,6 @@
                         						
                         <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/HotSpot/windows_x86_64"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/HotSpot/windows_x86_64"/>
-                        						
                         <entry flags="RESOLVED" kind="libraryFile" name="HotSpot" srcPrefixMapping="" srcRootPath=""/>
                         					
                     </externalSetting>
@@ -1468,6 +1466,34 @@
                                     <listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS"/>
                                     									
                                     <listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__cdecl"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__fastcall"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__forceinline=__inline"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__int16=short"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__int32=int"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;__int64=long long&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__int8=char"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__pragma(v)"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__restrict"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__sptr"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__stdcall"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__unaligned"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__uptr"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__w64"/>
                                     								
                                 </option>
                                 								
@@ -1596,6 +1622,34 @@
                                     <listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS"/>
                                     									
                                     <listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__cdecl"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__fastcall"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__forceinline=__inline"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__int16=short"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__int32=int"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;__int64=long long&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__int8=char"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__pragma(v)"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__restrict"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__sptr"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__stdcall"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__unaligned"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__uptr"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__w64"/>
                                     								
                                 </option>
                                 								
