@@ -51,8 +51,45 @@ cd %~dp0
 
 EOF
 
+function array_contains_element () {
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
+}
+
+function find_links() {
+    EXCLUDED_DIRS=(
+        hotspot_cdtproj_closed_src_includes # covered in second step
+    )
+    
+    # first step: open source
+    for D in $(ls "$SYS_HEADERS_ARCHIVE") ; do
+        if array_contains_element $D "${EXCLUDED_DIRS[@]}" ; then
+            echo "Excluding directory $SYS_HEADERS_ARCHIVE/$D" 1>&2
+        else
+            echo "Processing directory $SYS_HEADERS_ARCHIVE/$D" 1>&2
+            find "$SYS_HEADERS_ARCHIVE/$D" -type l
+        fi
+    done
+
+    # second step: closed source
+    EXCLUDED_DIRS=(
+        windows_x86_64   # There are no symbolic links among MS Vis. C++ includes
+    )
+    
+    for D in $(ls "$SYS_HEADERS_ARCHIVE/hotspot_cdtproj_closed_src_includes") ; do
+        if array_contains_element $D "${EXCLUDED_DIRS[@]}" ; then
+            echo "Excluding directory $SYS_HEADERS_ARCHIVE/hotspot_cdtproj_closed_src_includes/$D" 1>&2
+        else
+            echo "Processing directory $SYS_HEADERS_ARCHIVE/$D" 1>&2
+            find "$SYS_HEADERS_ARCHIVE/hotspot_cdtproj_closed_src_includes/$D" -type l
+        fi
+    done
+}
+
 # change to proj root directory
-(cd $PROJ_ROOT && find "$SYS_HEADERS_ARCHIVE" -type l | process_link) >> $OUTPUT_FILE
+(cd $PROJ_ROOT && find_links | process_link) >> $OUTPUT_FILE
 
 echo pause >> $OUTPUT_FILE
 
