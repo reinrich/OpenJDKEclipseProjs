@@ -1301,7 +1301,7 @@
         		
         <cconfiguration id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491">
             			
-            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491" moduleId="org.eclipse.cdt.core.settings" name="windows_x86_64_todo">
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491" moduleId="org.eclipse.cdt.core.settings" name="windows_x86_64">
                 				
                 <externalSettings>
                     					
@@ -1311,7 +1311,7 @@
                         						
                         <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/HotSpot/windows_x86_64"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/HotSpot/windows_x86_64_todo"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/HotSpot/windows_x86_64"/>
                         						
                         <entry flags="RESOLVED" kind="libraryFile" name="HotSpot" srcPrefixMapping="" srcRootPath=""/>
                         					
@@ -1339,7 +1339,7 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491" name="windows_x86_64_todo" parent="cdt.managedbuild.config.gnu.so.debug">
+                <configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491" name="windows_x86_64" parent="cdt.managedbuild.config.gnu.so.debug">
                     					
                     <folderInfo id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491." name="/" resourcePath="">
                         						
@@ -1355,13 +1355,121 @@
                                 								
                                 <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.411202090" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/gtest_test_src}&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/Professional/VC/Tools/MSVC/14.15.26726/atlmfc/include}&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/gtest_src/include}&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/Professional/VC/Tools/MSVC/14.15.26726/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/cppwinrt}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/shared}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/ucrt}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/um}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/winrt}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/Include/um}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/windows}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/windows/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os_cpu/windows_x86}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/precompiled}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/java_base_include/share/native/libjimage}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base/win32}&quot;"/>
                                     								
                                 </option>
                                 								
-                                <option id="gnu.cpp.compiler.option.preprocessor.def.847231511" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false"/>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.847231511" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="AMD64"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="ASSERT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="COMPILER1"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="COMPILER2"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="DONT_USE_PRECOMPILED_HEADER"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="ECLIPSE_CDT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=&quot;amd64&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_visCPP"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_windows"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="NOMINMAX"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="TARGET_ARCH_x86"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="TARGET_COMPILER_visCPP"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="WIN32_LEAN_AND_MEAN"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_CPPRTTI"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_DLL"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_INTEGRAL_MAX_BITS=64"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_JNI_IMPLEMENTATION_"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_LP64=1"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_BUILD=0"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_EXTENSIONS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_FULL_VER=191526726"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_VER=1915"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_M_AMD64=100"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_M_X64=100"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_NMT_NOINLINE_"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_WIN32"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_WIN64"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_WINDOWS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__STDC_CONSTANT_MACROS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
+                                    								
+                                </option>
                                 								
                                 <option id="gnu.cpp.compiler.option.optimization.level.2085385136" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
                                 								
@@ -1375,13 +1483,121 @@
                                 								
                                 <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.822211712" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/gtest_test_src}&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/Professional/VC/Tools/MSVC/14.15.26726/atlmfc/include}&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/gtest_src/include}&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/Professional/VC/Tools/MSVC/14.15.26726/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/cppwinrt}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/shared}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/ucrt}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/um}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/winrt}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/sys_headers/cygdrive/c/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/Include/um}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/windows}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/windows/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os_cpu/windows_x86}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/precompiled}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/java_base_include/share/native/libjimage}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base/win32}&quot;"/>
                                     								
                                 </option>
                                 								
-                                <option id="gnu.c.compiler.option.preprocessor.def.symbols.797529352" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false"/>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.797529352" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="AMD64"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="ASSERT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="COMPILER1"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="COMPILER2"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="DONT_USE_PRECOMPILED_HEADER"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="ECLIPSE_CDT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=&quot;amd64&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_visCPP"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_windows"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="NOMINMAX"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="TARGET_ARCH_x86"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="TARGET_COMPILER_visCPP"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="WIN32_LEAN_AND_MEAN"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_CPPRTTI"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_DLL"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_INTEGRAL_MAX_BITS=64"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_JNI_IMPLEMENTATION_"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_LP64=1"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_BUILD=0"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_EXTENSIONS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_FULL_VER=191526726"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MSC_VER=1915"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_MT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_M_AMD64=100"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_M_X64=100"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_NMT_NOINLINE_"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_WIN32"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_WIN64"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_WINDOWS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__STDC_CONSTANT_MACROS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
+                                    								
+                                </option>
                                 								
                                 <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1981570326" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
                                 								
@@ -1413,13 +1629,7 @@
                             							
                             <tool id="cdt.managedbuild.tool.gnu.assembler.base.442308766" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.1792110487" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/gtest_test_src}&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/gtest_src/include}&quot;"/>
-                                    								
-                                </option>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.both.asm.option.include.paths.1792110487" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1336353156" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
                                 							
@@ -7929,7 +8139,7 @@
             		
         </configuration>
         		
-        <configuration configurationName="windows_x86_64_todo">
+        <configuration configurationName="windows_x86_64">
             			
             <resource resourceType="PROJECT" workspacePath="/HotSpot"/>
             		
