@@ -393,7 +393,7 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
             # it, so we add it here
             echo "/usr/include" >>$ALL_INCLUDE_DIRS
             if [ $OS = solaris ] ; then
-                $GSED "s!-c -xMMD \(-xMP \|\)-xMF .*!-E -xdumpmacros $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
+                $GSED "s!-c .*!-E -xdumpmacros $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
             else
                 $GSED "s!-c .\+\.o .*\$!-E -dM -o $predefines_file $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
             fi
@@ -401,6 +401,7 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
 
             # execute modified cmdline
             $EXEC_SCRIPT_ON_BUILD_HOST $cxx_predefines_cmdline_file 2>$predefines_file 1>/dev/null
+            assert_file_not_empty $predefines_file
 
             EXCL_ARG_MACROS='/#define [^ ]\+(/! p'
             $GSED -n "$EXCL_ARG_MACROS" <$predefines_file | $GSED '/#define \([^ ]\+\) \(.*\)/s//\1=\2/ ; /#define \(.*\)/s//\1/' >>$ALL_DEFINES
@@ -658,6 +659,7 @@ EOF
 initialize
 
 CMDLINE_FILE_PATTERNS=(
+#     globalDefinitions.
 #     jni.
 #     g1CollectedHeap.
 #     concurrentMarkSweepGeneration.
