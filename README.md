@@ -33,8 +33,8 @@ Setup
 4. Open Eclipse
 
 5. C++ indexer settings: Menu > Window > Preferences > C/C++ > Indexer
-  * uncheck all checkboxes in "Indexer options"
-  * check "Use active build configuration"
+   * uncheck all checkboxes in "Indexer options"
+   * check "Use active build configuration"
   
 6. Menu > File > Import > Existing Projects into Workspace
 
