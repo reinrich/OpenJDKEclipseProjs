@@ -16,6 +16,9 @@ if [ $# -ne 4 ] ; then
     echo
     echo "usage: [DEBUG_MODE=1] `basename $0` <build-host> <gnu-sed> <tmp dir> <dir with *.cmdline files>"
     echo
+    echo "    install <gnu-sed>: "
+    echo "         mac: brew install gnu-sed"
+    echo
     exit 1
 fi
 
@@ -65,6 +68,15 @@ function print_stack() {
 function TODO() {
     echo
     report_and_exit "*** TODO" 2
+}
+
+function assert_file_not_empty() {
+    if [ ! -f "$1" ] ; then
+        report_and_exit "File '$1' does not exist."
+    fi
+    if [ ! -s "$1" ] ; then
+        report_and_exit "File '$1' is empty."
+    fi
 }
 
 function debug_print() {
@@ -139,6 +151,7 @@ function initialize() {
     READLINK_BUILD_HOST=$READLINK
     SORT=sort
     FIND=find
+    XARGS=xargs
     if [ $OS = windows ] ; then
         # don't use find, sort, etc. in c:/WINDOWS/System32/ 
         SORT=/bin/sort
@@ -146,7 +159,9 @@ function initialize() {
     fi
     if [ $OS = bsd ] ; then
         READLINK=greadlink # https_proxy=http://proxy.wdf.sap.corp:8080/ brew install coreutils
+        READLINK_BUILD_HOST=$READLINK
         SORT=gsort
+        XARGS=gxargs
         FIND=gfind         # https_proxy=http://proxy.wdf.sap.corp:8080/ brew install findutils
     fi
     if [ $OS = solaris -o $OS = aix ] ; then
@@ -168,7 +183,7 @@ function initialize() {
     # find OUTPUTDIR looking for spec.gmk
     OUTPUTDIR="$CMDLINE_DIR"
     while [ ! -f "$OUTPUTDIR/spec.gmk" ] ; do
-        OUTPUTDIR="$(readlink -f "$OUTPUTDIR/..")"
+        OUTPUTDIR="$($READLINK -f "$OUTPUTDIR/..")"
         if [ "$OUTPUTDIR" = "/" ] ; then
             report_and_exit "Could not determine OUTPUTDIR, because spec.gmk was not found looking upwards from $CMDLINE_DIR"
         fi
@@ -200,7 +215,7 @@ function initialize() {
     GENSRC_DIR=gensrc
     OUTPUTDIR_IN_ARCHIVE_DIR=output
     OUTPUTDIR_IN_ARCHIVE_DIR_ABS=$SYS_HEADERS_AND_OUTPUTDIR_SRC_ARCHIVE_STEM_DIR_ABS/$OUTPUTDIR_IN_ARCHIVE_DIR # e.g. /tmp/cdt/work/hotspot_sys_headers_and_outputdir_src/windows_x86_64/gensrc
-    GENSRC_DIR_ABS=$(find $OUTPUTDIR/hotspot -name $GENSRC_DIR -type d)
+    GENSRC_DIR_ABS=$($FIND $OUTPUTDIR/hotspot -name $GENSRC_DIR -type d)
     [ -d "$GENSRC_DIR_ABS" ] || report_and_exit "Could not find GENSRC_DIR=$GENSRC_DIR in $OUTPUTDIR/hotspot"
     echo "GENSRC_DIR_ABS is $GENSRC_DIR_ABS"
     GENSRC_DIR_REL=$(echo $GENSRC_DIR_ABS|sed "s:${OUTPUTDIR}/::g")
@@ -267,20 +282,20 @@ function add_included_files_using_cxx_cmdline() {
 
     # modify cmdline to let the compiler print included files
     case $OS in
-        linux|bsd)   SED_CXX_SHOW_INCLUDES="s!-c -MMD \(-MP \|\)-MF .\+\.o!-E -H -o /dev/null!";;
-        solaris)   SED_CXX_SHOW_INCLUDES="s!-c -xMMD \(-xMP \|\)-xMF .\+\.o!-E -H!";;
+        linux|bsd)   SED_CXX_SHOW_INCLUDES="s!-c .\+\.o!-E -H -o /dev/null!";;
+        solaris)   SED_CXX_SHOW_INCLUDES="s!-c .\+\.o!-E -H!";;
         aix)
             SED_CD="1i cd ${WORK_DIR}"
             SED_CXX_SHOW_INCLUDES="s!-c -qmakedep=gcc .\+\.o!-qsyntaxonly -qlist -qshowinc!"
             SED_CAT_AND_DEL_LST_FILE='$a cat *.lst && rm *.lst'
             ;;
         windows)
-            SED_CXX_SHOW_INCLUDES="s!-c -showIncludes .\+\.obj!-E -showIncludes!"
+            SED_CXX_SHOW_INCLUDES="s!-c -Fo.\+\.obj!-E -showIncludes!"
             ;;
         *)       report_and_exit "unhandled OS case ($OS)";;
     esac
     $GSED -e "$SED_CD" -e "$SED_CXX_SHOW_INCLUDES" -e "$SED_CAT_AND_DEL_LST_FILE" <$cmdline_file >$cmdline_file_mod
-    
+
     # execute modified cmdline
     case $OS in
         linux|bsd)
@@ -301,6 +316,8 @@ function add_included_files_using_cxx_cmdline() {
             ;;
         *)  report_and_exit "unhandled OS case ($OS)";;
     esac
+
+    assert_file_not_empty $ALL_INCLUDED_FILES
 
     # remove duplicates
     mv $ALL_INCLUDED_FILES ${ALL_INCLUDED_FILES}.old
@@ -376,14 +393,15 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
             # it, so we add it here
             echo "/usr/include" >>$ALL_INCLUDE_DIRS
             if [ $OS = solaris ] ; then
-                $GSED "s!-c -xMMD \(-xMP \|\)-xMF .*!-E -xdumpmacros $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
+                $GSED "s!-c .*!-E -xdumpmacros $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
             else
-                $GSED "s!-c -MMD \(-MP \|\)-MF .*\$!-E -dM -o $predefines_file $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
+                $GSED "s!-c .\+\.o .*\$!-E -dM -o $predefines_file $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
             fi
 
 
             # execute modified cmdline
             $EXEC_SCRIPT_ON_BUILD_HOST $cxx_predefines_cmdline_file 2>$predefines_file 1>/dev/null
+            assert_file_not_empty $predefines_file
 
             EXCL_ARG_MACROS='/#define [^ ]\+(/! p'
             $GSED -n "$EXCL_ARG_MACROS" <$predefines_file | $GSED '/#define \([^ ]\+\) \(.*\)/s//\1=\2/ ; /#define \(.*\)/s//\1/' >>$ALL_DEFINES
@@ -394,6 +412,7 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
                 echo "__hidden"   >>$ALL_DEFINES
                 echo "__symbolic" >>$ALL_DEFINES
                 echo "__thread"   >>$ALL_DEFINES
+                echo "_LP64"      >>$ALL_DEFINES
             fi
             ;;
         aix)
@@ -413,14 +432,32 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
             extract_macro_definitions $predefines_file >> $ALL_DEFINES
             ;;
         windows)
-            CMDLINE_PATTERN_TO_REPLACE='-c -showIncludes .*'
-            $GSED "s!$CMDLINE_PATTERN_TO_REPLACE!-E -Bxread_predefs_from_env.cmd $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
+            # the following little program extracts the value of the environment variable MSC_CMD_FLAGS
+            cat << EOF > $WORK_DIR/read_predefs_from_env.c
+#include <stdio.h>
 
-            echo "@set MSC" > read_predefs_from_env.cmd # will be invoked because of -Bx option
+int main(int argc, char **argv, char **envp)
+{
+  for (char **env = envp; *env != 0; env++)
+  {
+    char *thisEnv = *env;
+    /* MSC_CMD_FLAGS=... */
+    if (strncmp(thisEnv, "MSC_CMD_FLAGS=", 14) == 0)
+      printf("%s\n", thisEnv+14);    
+  }
+  return 0;
+}
+EOF
+
+            # compile read_predefs_from_env.c
+            (cd $WORK_DIR && cl read_predefs_from_env.c)
+
+            CMDLINE_PATTERN_TO_REPLACE='-c -Fo.*'
+            $GSED "s!$CMDLINE_PATTERN_TO_REPLACE!-E -Bxread_predefs_from_env.exe $empty_cpp!" <$os_cmdline >$cxx_predefines_cmdline_file
 
             # execute modified cmdline
-            $EXEC_SCRIPT_ON_BUILD_HOST $cxx_predefines_cmdline_file >$predefines_file
-
+            (cd $WORK_DIR && $EXEC_SCRIPT_ON_BUILD_HOST $cxx_predefines_cmdline_file >$predefines_file)
+  
             extract_quoted_macro_definitions $predefines_file >> $ALL_DEFINES
 
             # Unfortunately we cannot use CDT's support for the Microsoft C++
@@ -431,7 +468,7 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
             # echo "_M_IX86=600" >> $ALL_DEFINES   # must not be defined in amd64 configurations
 	    # echo "_WIN32=1" >> $ALL_DEFINES      # this we get with the method above
 	    # echo "_MSC_VER=1400" >> $ALL_DEFINES # this we get with the method above
-	    
+
 	    # Microsoft specific modifiers that can be ignored
 	    echo "__cdecl" >> $ALL_DEFINES
 	    echo "__fastcall" >> $ALL_DEFINES
@@ -448,6 +485,8 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
 	    echo "__int16=short" >> $ALL_DEFINES
 	    echo "__int32=int" >> $ALL_DEFINES
 	    echo "__int64=long long" >> $ALL_DEFINES
+	    echo "__pragma(v)" >> $ALL_DEFINES
+            # Check if the above works!
             ;;
         *)  report_and_exit "unhandled OS case ($OS)";;
     esac
@@ -620,7 +659,9 @@ EOF
 initialize
 
 CMDLINE_FILE_PATTERNS=(
+#     globalDefinitions.
 #     jni.
+#     g1CollectedHeap.
 #     concurrentMarkSweepGeneration.
 # #    dependencyContext.
 # #    jvm.
@@ -698,7 +739,7 @@ unzip -o $OUTPUTDIR_SRC_FILES_ARCHIVE >${OUTPUTDIR_SRC_FILES_ARCHIVE}_unzip.log
 # zip system headers and referenced sources from outputdir
 cd $WORK_DIR
 # but remove dangling symlinks first
-find $SYS_HEADERS_AND_OUTPUTDIR_SRC_ARCHIVE_STEM_DIR -xtype l | xargs -r rm
+$FIND $SYS_HEADERS_AND_OUTPUTDIR_SRC_ARCHIVE_STEM_DIR -xtype l | $XARGS -r rm
 zip -y -r $SYS_HEADERS_AND_OUTPUTDIR_SRC_ARCHIVE $SYS_HEADERS_AND_OUTPUTDIR_SRC_ARCHIVE_STEM_DIR >${SYS_HEADERS_AND_OUTPUTDIR_SRC_ARCHIVE}.log
 
 generate_proj_settings

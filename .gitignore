@@ -1,2 +1,3 @@
 # Ignore class files compiled by eclipse
 bin
+hotspot_cdtproj_closed_src_includes

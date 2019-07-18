@@ -6,7 +6,7 @@ This is a collection of Eclipse projects for OpenJDK:
 **C/C++ Projects**
 
 * **hotspot**: CDT project for hotspot sources. Platforms are modelled as CDT Build Configurations.
-* **jd_native**: subset of native sources bisedes hotspot. E.g. java.base, jdk.jdwp.agent.
+* **jdk_native**: subset of native sources bisedes hotspot. E.g. java.base, jdk.jdwp.agent.
 
 **Java Projects**
 
@@ -33,8 +33,8 @@ Setup
 4. Open Eclipse
 
 5. C++ indexer settings: Menu > Window > Preferences > C/C++ > Indexer
-  * uncheck all checkboxes in "Indexer options"
-  * check "Use active build configuration"
+   * uncheck all checkboxes in "Indexer options"
+   * check "Use active build configuration"
   
 6. Menu > File > Import > Existing Projects into Workspace
 
@@ -46,6 +46,9 @@ Setup
 
 10. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
     `linux_x86_64`, `linux_ppc_64`, and `linux_s390_64` are the only supported build configurations.
+    You should be able to create hotspot build configurations for `windows_x86_64`, `bsd_x86_64`,
+    and `solaris_sparc_64` using `hotspot/projgenerator/cdt_gen_build_config.sh` yourself as I
+    cannot redistribute the required system and C++ compiler header files as part of this repository.
 
 Troubleshooting
 ===============
