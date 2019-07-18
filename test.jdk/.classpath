@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="test.jdk.com.sun.jdi"/>
+	<classpathentry excluding="*" including="jdk/" kind="src" path="test.jdk.packaged"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
 		<attributes>
 			<attribute name="module" value="true"/>
@@ -13,5 +14,6 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/test.lib"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/test.compiler.testlibrary"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jdk.jfr"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
