@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>test.jdk</name>
+	<name>jdk.jfr</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -16,14 +16,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>test.jdk.com.sun.jdi</name>
+			<name>jdk.jfr.share</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/jdk/com/sun/jdi</locationURI>
-		</link>
-		<link>
-			<name>test.jdk.packaged</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/jdk</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/src/jdk.jfr/share/classes</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
