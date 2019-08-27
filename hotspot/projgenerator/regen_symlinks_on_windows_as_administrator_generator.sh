@@ -26,7 +26,7 @@ function process_link() {
         link="${link//\//\\}"
         link_target="${link_target//\//\\}"
         # first delete the link
-        echo "del /A:S /F /Q \"$link\""
+        echo "del /A /F /Q \"$link\""
         if [ -d "$link_target_canon" ] ; then
             # target is a directory
             echo "mklink /D \"$link\" \"$link_target\""
