@@ -36,17 +36,17 @@
 		<link>
 			<name>gtest_src</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/fmw/gtest</locationURI>
+			<locationURI>JDK_REPO/test/fmw/gtest</locationURI>
 		</link>
 		<link>
 			<name>gtest_test_src</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/gtest</locationURI>
+			<locationURI>JDK_REPO/test/hotspot/gtest</locationURI>
 		</link>
 		<link>
 			<name>hotspot_src</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/src/hotspot</locationURI>
+			<locationURI>JDK_REPO/src/hotspot</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

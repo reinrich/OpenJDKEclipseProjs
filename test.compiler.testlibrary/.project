@@ -18,7 +18,7 @@
 		<link>
 			<name>test.compiler.testlibrary</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/jtreg</locationURI>
+			<locationURI>JDK_REPO/test/hotspot/jtreg</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

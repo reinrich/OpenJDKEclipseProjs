@@ -27,7 +27,7 @@
 		<link>
 			<name>test.hotspot.serviceability.jvmti</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/jtreg/serviceability/jvmti</locationURI>
+			<locationURI>JDK_REPO/test/hotspot/jtreg/serviceability/jvmti</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

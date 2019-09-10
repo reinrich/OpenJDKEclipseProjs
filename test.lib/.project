@@ -18,7 +18,7 @@
 		<link>
 			<name>test.lib</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/test/lib</locationURI>
+			<locationURI>JDK_REPO/test/lib</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
