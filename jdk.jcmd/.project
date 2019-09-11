@@ -18,7 +18,7 @@
 		<link>
 			<name>jdk.jcmd.share</name>
 			<type>2</type>
-			<locationURI>JDK_REPO/src/jdk.jcmd/share/classes</locationURI>
+			<locationURI>JDK_SRC/src/jdk.jcmd/share/classes</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

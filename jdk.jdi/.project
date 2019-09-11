@@ -18,7 +18,7 @@
 		<link>
 			<name>jdk.jdi.share</name>
 			<type>2</type>
-			<locationURI>JDK_REPO/src/jdk.jdi/share/classes</locationURI>
+			<locationURI>JDK_SRC/src/jdk.jdi/share/classes</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

@@ -18,12 +18,12 @@
 		<link>
 			<name>test.jdk.com.sun.jdi</name>
 			<type>2</type>
-			<locationURI>JDK_REPO/test/jdk/com/sun/jdi</locationURI>
+			<locationURI>JDK_SRC/test/jdk/com/sun/jdi</locationURI>
 		</link>
 		<link>
 			<name>test.jdk.packaged</name>
 			<type>2</type>
-			<locationURI>JDK_REPO/test/jdk</locationURI>
+			!<locationURI>JDK_SRC/test/jdk</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

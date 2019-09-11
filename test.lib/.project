@@ -18,7 +18,7 @@
 		<link>
 			<name>test.lib</name>
 			<type>2</type>
-			<locationURI>JDK_REPO/test/lib</locationURI>
+			<locationURI>JDK_SRC/test/lib</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
