@@ -33,19 +33,31 @@ Setup
    
 4. Open Eclipse
 
-5. C++ indexer settings: Menu > Window > Preferences > C/C++ > Indexer
+6. Create a linked resource (Menu > Window > Preferences > General > Workspace > Linked Resources) named JDK_SRC and set its value to the path of the clone of this repository created before.
+
+7. C++ indexer settings: Menu > Window > Preferences > C/C++ > Indexer
    * uncheck all checkboxes in "Indexer options"
    * check "Use active build configuration"
   
-6. Menu > File > Import > Existing Projects into Workspace
+8. Menu > File > Import > Existing Projects into Workspace
 
-7. Enter root directory of the cloned repo into "Select Root Directory"
+9. Enter root directory of the cloned repo into "Select Root Directory"
 
-8. Press TAB and select the projects you whish to import.
+10. Press TAB and select the projects you whish to import.
 
-9. Press finish.
+11. Press finish.
 
-10. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
+12. Git only:
+    * select all projects in the project explorer
+    * Right click on the selection
+    * Team > Disconnect
+    * Right click again on selection
+    * Team > Share Project > Git
+    * Press "Next"
+    * Check "Use or create repository in parent folder of project"
+    * Select "../.."
+
+13. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
     `linux_x86_64`, `linux_ppc_64`, and `linux_s390_64` are the only supported build configurations.
     You should be able to create hotspot build configurations for `windows_x86_64`, `bsd_x86_64`,
     and `solaris_sparc_64` using `hotspot/projgenerator/cdt_gen_build_config.sh` yourself as I
