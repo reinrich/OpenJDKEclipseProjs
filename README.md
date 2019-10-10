@@ -33,7 +33,7 @@ Setup
    
 4. Open Eclipse
 
-5. Create a linked resource (Preferences > General > Workspace > Linked Resources) named JDK_SRC and set its value to the path of the clone of this repository created before.
+5. Create a linked resource (Preferences > General > Workspace > Linked Resources) named JDK_SRC and set its value to the path of your OpenJDK source tree.
 
 6. C++ indexer settings: Menu > Window > Preferences > C/C++ > Indexer
    * uncheck all checkboxes in "Indexer options"
