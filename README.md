@@ -47,15 +47,14 @@ Setup
 
 11. Press finish.
 
-12. Git only:
+12. Git only: for revision information in Eclipse you have to change to the .git folder in your source tree root.
     * select all projects in the project explorer
-    * Right click on the selection
-    * Team > Disconnect
-    * Right click again on selection
-    * Team > Share Project > Git
+    * Right-click selection > Team > Disconnect
+    * Right-click selection > Team > Share Project > Git
     * Press "Next"
     * Check "Use or create repository in parent folder of project"
-    * Select "../.."
+    * Select "../.."  for every project and click finish.
+    * To check for success open for example jvm.cpp, then right click the line number column and select "Show Revision Information".
 
 13. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
     `linux_x86_64`, `linux_ppc_64`, and `linux_s390_64` are the only supported build configurations.
@@ -70,12 +69,4 @@ Troubleshooting
   - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects scm version information,
   but fails when mixing git and hg. You should position your clone of this repo outside the OpenJDK source tree.
 
-* Git revision information for OpenJDK sources missing. This is because the projects themselves are kept in a git repository which hides the outer OpenJDK repository. Follow the follwing instructions to solve this.
-  - Open the project explorer
-  - Select all projects from this repo.
-  - Right-click selection > Team > Disconnect
-  - Right-click selection > Team > Share Project
-  - Select git then press next
-  - Select "Use or create repository in parent folder of project"
-  - Select `../..` for every project and click finish.
-  - To check for success open for example jvm.cpp, then right click the line number column and select "Show Revision Information". If this works then the issue is solved.
+* Git revision information for OpenJDK sources missing. This is because the projects themselves are kept in a git repository which hides the outer OpenJDK repository. Follow instructions in Setup step 12.
