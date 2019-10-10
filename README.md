@@ -66,7 +66,7 @@ Troubleshooting
 ===============
 
 * OpenJDK build fails
-  - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects scm version information,
+  - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects VCS version information,
   but fails when mixing git and hg. You should position your clone of this repo outside the OpenJDK source tree.
 
 * Git revision information for OpenJDK sources missing. This is because the projects themselves are kept in a git repository which hides the outer OpenJDK repository. Follow instructions in Setup step 11.
