@@ -21,7 +21,7 @@ This is a collection of Eclipse projects for OpenJDK:
 Setup
 =====
 
-1. Get Eclipse >= 4.6 and CDT >= 9.2
+1. Get Eclipse >= 2019-03 and CDT >= 9.2
 
 2. Change into the root of an OpenJDK source tree and clone this repository: `git clone https://github.com/reinrich/OpenJDKEclipseProjs.git`
   NOTE: if not using git as VCS it might be better to position the clone outside of the OpenJDK source tree.
