@@ -33,21 +33,21 @@ Setup
    
 4. Open Eclipse
 
-6. Create a linked resource (Menu > Window > Preferences > General > Workspace > Linked Resources) named JDK_SRC and set its value to the path of the clone of this repository created before.
+5. Create a linked resource (Menu > Window > Preferences > General > Workspace > Linked Resources) named JDK_SRC and set its value to the path of the clone of this repository created before.
 
-7. C++ indexer settings: Menu > Window > Preferences > C/C++ > Indexer
+6. C++ indexer settings: Menu > Window > Preferences > C/C++ > Indexer
    * uncheck all checkboxes in "Indexer options"
    * check "Use active build configuration"
   
-8. Menu > File > Import > Existing Projects into Workspace
+7. Menu > File > Import > Existing Projects into Workspace
 
-9. Enter root directory of the cloned repo into "Select Root Directory"
+8. Enter root directory of the cloned repo into "Select Root Directory"
 
-10. Press TAB and select the projects you whish to import.
+9. Press TAB and select the projects you whish to import.
 
-11. Press finish.
+10. Press finish.
 
-12. Git only: for revision information in Eclipse you have to change to the .git folder in your source tree root.
+11. Git only: for revision information in Eclipse you have to change to the .git folder in your source tree root.
     * select all projects in the project explorer
     * Right-click selection > Team > Disconnect
     * Right-click selection > Team > Share Project > Git
@@ -56,7 +56,7 @@ Setup
     * Select "../.."  for every project and click finish.
     * To check for success open for example jvm.cpp, then right click the line number column and select "Show Revision Information".
 
-13. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
+12. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
     `linux_x86_64`, `linux_ppc_64`, and `linux_s390_64` are the only supported build configurations.
     You should be able to create hotspot build configurations for `windows_x86_64`, `bsd_x86_64`,
     and `solaris_sparc_64` using `hotspot/projgenerator/cdt_gen_build_config.sh` yourself as I
@@ -69,4 +69,4 @@ Troubleshooting
   - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects scm version information,
   but fails when mixing git and hg. You should position your clone of this repo outside the OpenJDK source tree.
 
-* Git revision information for OpenJDK sources missing. This is because the projects themselves are kept in a git repository which hides the outer OpenJDK repository. Follow instructions in Setup step 12.
+* Git revision information for OpenJDK sources missing. This is because the projects themselves are kept in a git repository which hides the outer OpenJDK repository. Follow instructions in Setup step 11.
