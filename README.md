@@ -23,8 +23,8 @@ Setup
 
 1. Get Eclipse >= 2019-03 and CDT >= 9.2
 
-2. Change into the root of an OpenJDK source tree and clone this repository: `git clone https://github.com/reinrich/OpenJDKEclipseProjs.git`
-  NOTE: if not using git as VCS it might be better to position the clone outside of the OpenJDK source tree.
+2. Change into the root of an OpenJDK source tree and clone this repository: `git clone https://github.com/reinrich/OpenJDKEclipseProjs.git`  
+   NOTE: if not using git as VCS it might be better to position the clone outside of the OpenJDK source tree.
 
 3. CDT Projects / MS Windows only: replace UNIX symbolic links in the system header archive with NTFS symbolic links:
    * open Explorer in the project directory, e.g. hotspot
@@ -68,7 +68,7 @@ Troubleshooting
 
 * OpenJDK build fails
   - This can happen if you use these projects in an mercurial (hg) OpenJDK work tree. The build collects scm version information,
-  but fails when mixing git and hg. Try renaming the .git directories and refer to them with `--git-dir=<name>`
+  but fails when mixing git and hg. You should position your clone of this repo outside the OpenJDK source tree.
 
 * Git revision information for OpenJDK sources missing. This is because the projects themselves are kept in a git repository which hides the outer OpenJDK repository. Follow the follwing instructions to solve this.
   - Open the project explorer
