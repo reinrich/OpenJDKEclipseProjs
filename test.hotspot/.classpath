@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/GetOwnedMonitorInfo"/>
+	<classpathentry excluding="ProblemList-Xcomp.txt|ProblemList-aot.txt|ProblemList-graal.txt|ProblemList-non-cds-mode.txt|ProblemList-zgc.txt|ProblemList.txt|TEST.ROOT|TEST.groups|TEST.quick-groups|applications/|containers/|gc/|gtest/|native_sanity/|resourcehogs/|runtime/|sanity/|serviceability/|serviceability/jvmti/GetOwnedMonitorInfo/|serviceability/jvmti/GetOwnedMonitorStackDepthInfo/|serviceability/jvmti/Heap/|test_env.sh|testlibrary/|testlibrary_tests/|vmTestbase/" kind="src" path="test.hotspot"/>
 	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/Heap"/>
-	<classpathentry excluding="aot/|arguments/|arraycopy/|c1/|c2/|calls/|cha/|ciReplay/|classUnloading/|codecache/|codegen/|compilercontrol/|controldependency/|cpuflags/|debug/|dependencies/|eliminateAutobox/|escapeAnalysis/|exceptions/|floatingpoint/|gcbarriers/|graalunit/|inlining/|integerArithmetic/|interpreter/|intrinsics/|jsr292/|jvmci/|linkage/|loopopts/|loopstripmining/|macronodes/|membars/|memoryinitialization/|onSpinWait/|oracle/|osr/|patches/|print/|profiling/|rangechecks/|reflection/|regalloc/|relocations/|rtm/|runtime/|stable/|startup/|stringopts/|testlibrary/|tiered/|types/|uncommontrap/|unsafe/|vectorization/|whitebox/" kind="src" path="test.hotspot/compiler"/>
 	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/GetOwnedMonitorStackDepthInfo"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
 		<attributes>
@@ -12,5 +12,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/test.lib"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/test.compiler.testlibrary"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java.management"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jdk.internal.vm.ci"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
