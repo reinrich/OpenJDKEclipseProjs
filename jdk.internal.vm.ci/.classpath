@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="jdk.internal.vm.ci.share/jdk.vm.ci.hotspot/src"/>
+	<classpathentry kind="src" path="jdk.internal.vm.ci.share/jdk.vm.ci.code/src"/>
+	<classpathentry kind="src" path="jdk.internal.vm.ci.share/jdk.vm.ci.common/src"/>
+	<classpathentry kind="src" path="jdk.internal.vm.ci.share/jdk.vm.ci.meta/src"/>
+	<classpathentry kind="src" path="jdk.internal.vm.ci.share/jdk.vm.ci.runtime/src"/>
+	<classpathentry kind="src" path="jdk.internal.vm.ci.share/jdk.vm.ci.services/src"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
