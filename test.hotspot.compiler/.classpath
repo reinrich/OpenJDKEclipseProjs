@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="ProblemList-Xcomp.txt|ProblemList-aot.txt|ProblemList-graal.txt|ProblemList-non-cds-mode.txt|ProblemList-zgc.txt|ProblemList.txt|TEST.ROOT|TEST.groups|TEST.quick-groups|applications/|containers/|gc/|gtest/|native_sanity/|resourcehogs/|runtime/|sanity/|serviceability/|test_env.sh|testlibrary/|testlibrary_tests/|vmTestbase/" kind="src" path="test.hotspot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/test.lib"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/test.compiler.testlibrary"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java.management"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jdk.internal.vm.ci"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
