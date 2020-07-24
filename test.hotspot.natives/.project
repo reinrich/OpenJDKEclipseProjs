@@ -25,6 +25,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>test.hotspot.runtime.tls</name>
+			<type>2</type>
+			<locationURI>JDK_SRC/test/hotspot/jtreg/runtime/TLS</locationURI>
+		</link>
+		<link>
 			<name>test.hotspot.serviceability.jvmti</name>
 			<type>2</type>
 			<locationURI>JDK_SRC/test/hotspot/jtreg/serviceability/jvmti</locationURI>

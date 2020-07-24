@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>test.jdk</name>
+	<name>test.jtreg-ext</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -16,9 +16,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>test.jdk.com.sun.jdi</name>
+			<name>test.jtreg-ext</name>
 			<type>2</type>
-			<locationURI>JDK_SRC/test/jdk/com/sun/jdi</locationURI>
+			<locationURI>JDK_SRC/test/jtreg-ext</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
