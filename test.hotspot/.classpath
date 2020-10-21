@@ -4,10 +4,11 @@
 	<classpathentry kind="src" path="test.hotspot/runtime/StackGuardPages"/>
 	<classpathentry kind="src" path="test.hotspot/runtime/Thread"/>
 	<classpathentry kind="src" path="test.hotspot/runtime/TLS"/>
-	<classpathentry excluding="ProblemList-Xcomp.txt|ProblemList-aot.txt|ProblemList-graal.txt|ProblemList-non-cds-mode.txt|ProblemList-zgc.txt|ProblemList.txt|TEST.ROOT|TEST.groups|TEST.quick-groups|applications/|containers/|gc/|gtest/|native_sanity/|resourcehogs/|runtime/|sanity/|serviceability/|serviceability/jvmti/GetOwnedMonitorInfo/|serviceability/jvmti/GetOwnedMonitorStackDepthInfo/|serviceability/jvmti/Heap/|test_env.sh|testlibrary/|testlibrary_tests/|vmTestbase/|compiler/jvmci/common/patches/jdk/internal/vm/ci/|compiler/jvmci/common/patches/jdk.internal.vm.ci/|runtime/StackGuardPages/" kind="src" path="test.hotspot"/>
+	<classpathentry excluding="ProblemList-Xcomp.txt|ProblemList-aot.txt|ProblemList-graal.txt|ProblemList-non-cds-mode.txt|ProblemList-zgc.txt|ProblemList.txt|TEST.ROOT|TEST.groups|TEST.quick-groups|applications/|containers/|gc/|gtest/|native_sanity/|resourcehogs/|runtime/|sanity/|serviceability/|serviceability/jvmti/GetOwnedMonitorInfo/|serviceability/jvmti/GetOwnedMonitorStackDepthInfo/|serviceability/jvmti/Heap/|test_env.sh|testlibrary/|testlibrary_tests/|vmTestbase/|compiler/jvmci/common/patches/jdk/internal/vm/ci/|compiler/jvmci/common/patches/jdk.internal.vm.ci/|runtime/StackGuardPages/|serviceability/jvmti/Heap/" kind="src" path="test.hotspot"/>
 	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/GetOwnedMonitorStackDepthInfo"/>
 	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/GetLocalVariable"/>
 	<classpathentry kind="src" output="bin_jdk.internal.vm.ci" path="test.hotspot/compiler/jvmci/common/patches/jdk.internal.vm.ci"/>
+	<classpathentry kind="src" path="test.hotspot/serviceability/jvmti/Heap"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
 		<attributes>
 			<attribute name="module" value="true"/>
