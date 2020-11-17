@@ -24,7 +24,7 @@ Setup
 1. Get Eclipse >= 2019-03 and CDT >= 9.2
 
 2. Change into the root of an OpenJDK source tree and clone this repository: `git clone https://github.com/reinrich/OpenJDKEclipseProjs.git`  
-   NOTE: if not using git as VCS it might be better to position the clone outside of the OpenJDK source tree.
+   NOTE: if not using git as VCS for the OpenJDK sources it might be better to position the clone outside of the OpenJDK source tree.
 
 3. CDT Projects / MS Windows only: replace UNIX symbolic links in the system header archive with NTFS symbolic links:
    * open Explorer in the project directory, e.g. hotspot
