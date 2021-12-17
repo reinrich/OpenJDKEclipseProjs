@@ -22,6 +22,8 @@ if [ $# -ne 4 ] ; then
     exit 1
 fi
 
+shopt -s extglob
+
 BUILD_HOST=$1
 GSED=$2
 TMP_DIR=$3
@@ -105,7 +107,7 @@ function exec_script_on_build_host_synchronized() {
 
 function initialize() {
     mkdir -p $WORK_DIR
-    cmdline_file=$CMDLINE_DIR/globalDefinitions.*.cmdline
+    cmdline_file=$CMDLINE_DIR/globalDefinitions.+(o|obj).cmdline
 
     if ! $GSED -n "/DONT_USE_PRECOMPILED_HEADER/! q 1" <$cmdline_file > /dev/null ; then
         echo

@@ -4124,12 +4124,206 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081" moduleId="org.eclipse.cdt.core.settings" name="linux_aarch64_64">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/HotSpot"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/HotSpot/linux_aarch64_64"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="HotSpot" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081" name="linux_aarch64_64" parent="cdt.managedbuild.config.gnu.so.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.1873955850" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.681863097" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
+							<builder buildPath="${workspace_loc:/HotSpot}/Debug" id="cdt.managedbuild.target.gnu.builder.so.debug.1992781128" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1839772812" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1948529271" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
+								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.2074326433" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.93624549" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.2001223903" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include/c++/10.3.0}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include/c++/10.3.0/aarch64-linux-gnu}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include/c++/10.3.0/backward}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/sysroot/usr/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include-fixed}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base/linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/aarch64}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/posix}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/posix/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os_cpu/linux_aarch64}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/precompiled}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/java_base_include/share/native/libjimage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/usr/include}&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.1658946987" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="AARCH64"/>
+									<listOptionValue builtIn="false" value="ASSERT"/>
+									<listOptionValue builtIn="false" value="CHECK_UNHANDLED_OOPS"/>
+									<listOptionValue builtIn="false" value="COMPILER1"/>
+									<listOptionValue builtIn="false" value="COMPILER2"/>
+									<listOptionValue builtIn="false" value="DONT_USE_PRECOMPILED_HEADER"/>
+									<listOptionValue builtIn="false" value="ECLIPSE_CDT"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=&quot;aarch64&quot;"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_aarch64"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
+									<listOptionValue builtIn="false" value="LIBC=gnu"/>
+									<listOptionValue builtIn="false" value="LINUX"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_aarch64"/>
+									<listOptionValue builtIn="false" value="TARGET_COMPILER_gcc"/>
+									<listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="_GNU_SOURCE"/>
+									<listOptionValue builtIn="false" value="_LP64=1"/>
+									<listOptionValue builtIn="false" value="_REENTRANT"/>
+									<listOptionValue builtIn="false" value="__STDC_CONSTANT_MACROS"/>
+									<listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS"/>
+									<listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
+									<listOptionValue builtIn="false" value="&quot;bash: /tmp/cdtgen/tmpdir/work/cxx_predefines.cmdline: No such file or directory&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1815991103" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.990994088" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.1421185321" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option id="gnu.c.compiler.so.debug.option.debugging.level.1112779009" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1939330670" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include/c++/10.3.0}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include/c++/10.3.0/aarch64-linux-gnu}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/include/c++/10.3.0/backward}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/sysroot/usr/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include-fixed}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base/linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/aarch64}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/linux}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/posix}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os/posix/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/os_cpu/linux_aarch64}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/precompiled}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/java_base_include/share/native/libjimage}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/usr/include}&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.748066891" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="AARCH64"/>
+									<listOptionValue builtIn="false" value="ASSERT"/>
+									<listOptionValue builtIn="false" value="CHECK_UNHANDLED_OOPS"/>
+									<listOptionValue builtIn="false" value="COMPILER1"/>
+									<listOptionValue builtIn="false" value="COMPILER2"/>
+									<listOptionValue builtIn="false" value="DONT_USE_PRECOMPILED_HEADER"/>
+									<listOptionValue builtIn="false" value="ECLIPSE_CDT"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=&quot;aarch64&quot;"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_aarch64"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
+									<listOptionValue builtIn="false" value="LIBC=gnu"/>
+									<listOptionValue builtIn="false" value="LINUX"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_aarch64"/>
+									<listOptionValue builtIn="false" value="TARGET_COMPILER_gcc"/>
+									<listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="_GNU_SOURCE"/>
+									<listOptionValue builtIn="false" value="_LP64=1"/>
+									<listOptionValue builtIn="false" value="_REENTRANT"/>
+									<listOptionValue builtIn="false" value="__STDC_CONSTANT_MACROS"/>
+									<listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS"/>
+									<listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
+									<listOptionValue builtIn="false" value="&quot;bash: /tmp/cdtgen/tmpdir/work/cxx_predefines.cmdline: No such file or directory&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1893064859" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.debug.445665041" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
+								<option defaultValue="true" id="gnu.c.link.so.debug.option.shared.2141247880" name="Shared (-shared)" superClass="gnu.c.link.so.debug.option.shared" valueType="boolean"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1406304987" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
+								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.1319210377" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.63389494" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.1992959535" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.both.asm.option.include.paths.1123696908" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1168125450" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/cpu/aarch64"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/linux"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_aarch64"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="HotSpot.cdt.managedbuild.target.gnu.so.451514469" name="Shared Library" projectType="cdt.managedbuild.target.gnu.so"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="linux_s390_64">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="linux_x86_64">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="solaris_sparc_64"/>
+		<configuration configurationName="bsd_x86_64"/>
+		<configuration configurationName="linux_aarch64_64"/>
+		<configuration configurationName="windows_x86_64">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="solaris_x86_64_todo">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="aix_ppc_64_todo">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="linux_x86_64_with_gtest">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="linux_ppc_64">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="bsd_x86_64_todo">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+		<configuration configurationName="solaris_sparc_64_todo">
+			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491.;cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1472692988;cdt.managedbuild.tool.gnu.cpp.compiler.input.274017494">
@@ -4151,6 +4345,9 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.1717802879;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.1717802879.;cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1294844964;cdt.managedbuild.tool.gnu.cpp.compiler.input.97529431">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081.;cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1948529271;cdt.managedbuild.tool.gnu.cpp.compiler.input.1815991103">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491.;cdt.managedbuild.tool.gnu.cpp.compiler.base.2017757156;cdt.managedbuild.tool.gnu.cpp.compiler.input.2033102101">
@@ -4213,6 +4410,9 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.553152813;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.553152813.;cdt.managedbuild.tool.gnu.c.compiler.so.debug.1079264888;cdt.managedbuild.tool.gnu.c.compiler.input.1258848701">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.580747081.;cdt.managedbuild.tool.gnu.c.compiler.so.debug.990994088;cdt.managedbuild.tool.gnu.c.compiler.input.1893064859">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.672707491.;org.eclipse.cdt.msvc.cl.c.dll.debug.2055321992;org.eclipse.cdt.msvc.cl.inputType.c.1685446352">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.msw.build.clScannerInfo"/>
 		</scannerConfigBuildInfo>
@@ -4222,34 +4422,5 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.645350299.798445360.569206305;cdt.managedbuild.config.gnu.so.debug.645350299.798445360.569206305.;cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1565026020;cdt.managedbuild.tool.gnu.cpp.compiler.input.1612530700">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-	</storageModule>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="linux_s390_64">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="linux_x86_64">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="windows_x86_64">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="solaris_x86_64_todo">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="aix_ppc_64_todo">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="linux_x86_64_with_gtest">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="linux_ppc_64">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="bsd_x86_64_todo">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
-		<configuration configurationName="solaris_sparc_64_todo">
-			<resource resourceType="PROJECT" workspacePath="/HotSpot"/>
-		</configuration>
 	</storageModule>
 </cproject>
