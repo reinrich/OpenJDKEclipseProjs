@@ -648,6 +648,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_x86"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -2505,6 +2506,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_ppc"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -4289,6 +4291,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_aarch64"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
