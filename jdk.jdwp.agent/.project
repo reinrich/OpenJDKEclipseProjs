@@ -18,7 +18,7 @@
 		<link>
 			<name>jdk.jdwp.agent.share</name>
 			<type>2</type>
-			<locationURI>JDK_SRC/src/jdk.jdwp.agent/share/classes</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/src/jdk.jdwp.agent/share/classes</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

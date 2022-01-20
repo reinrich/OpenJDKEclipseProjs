@@ -18,7 +18,7 @@
 		<link>
 			<name>jdk.incubator.vector.share</name>
 			<type>2</type>
-			<locationURI>JDK_SRC/src/jdk.incubator.vector/share/classes</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/src/jdk.incubator.vector/share/classes</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

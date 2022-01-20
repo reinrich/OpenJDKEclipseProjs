@@ -18,7 +18,7 @@
 		<link>
 			<name>java.management.share</name>
 			<type>2</type>
-			<locationURI>JDK_SRC/src/java.management/share/classes</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/src/java.management/share/classes</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

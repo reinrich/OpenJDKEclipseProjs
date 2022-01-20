@@ -18,7 +18,7 @@
 		<link>
 			<name>jdk.jfr.share</name>
 			<type>2</type>
-			<locationURI>JDK_SRC/src/jdk.jfr/share/classes</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/src/jdk.jfr/share/classes</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

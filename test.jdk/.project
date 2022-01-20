@@ -18,7 +18,7 @@
 		<link>
 			<name>test.jdk.com.sun.jdi</name>
 			<type>2</type>
-			<locationURI>JDK_SRC/test/jdk/com/sun/jdi</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/test/jdk/com/sun/jdi</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

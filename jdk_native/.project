@@ -28,17 +28,17 @@
 		<link>
 			<name>hotspot_src</name>
 			<type>2</type>
-			<locationURI>JDK_SRC/src/hotspot</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/src/hotspot</locationURI>
 		</link>
 		<link>
 			<name>java.base_src</name>
 			<type>2</type>
-			!<locationURI>JDK_SRC/src/java.base</locationURI>
+			!<locationURI>PARENT-2-PROJECT_LOC/src/java.base</locationURI>
 		</link>
 		<link>
 			<name>jdk.jdwp.agent_src</name>
 			<type>2</type>
-			!<locationURI>JDK_SRC/src/jdk.jdwp.agent</locationURI>
+			!<locationURI>PARENT-2-PROJECT_LOC/src/jdk.jdwp.agent</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
