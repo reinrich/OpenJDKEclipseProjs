@@ -20,5 +20,10 @@
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/test/jdk/com/sun/jdi</locationURI>
 		</link>
+		<link>
+			<name>test.jdk.java.lang.Thread.virtual</name>
+			<type>2</type>
+			<locationURI>JDK_SRC/test/jdk/java/lang/Thread/virtual</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
