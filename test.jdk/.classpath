@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="test.jdk.com.sun.jdi"/>
 	<classpathentry kind="src" path="test.jdk.java.lang.Thread.virtual"/>
+	<classpathentry kind="src" path="test.jdk.jdk.internal.vm.Continuation"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jdk.jfr">
 		<attributes>
 			<attribute name="module" value="true"/>

@@ -25,5 +25,10 @@
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/test/jdk/java/lang/Thread/virtual</locationURI>
 		</link>
+		<link>
+			<name>test.jdk.jdk.internal.vm.Continuation</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/test/jdk/jdk/internal/vm/Continuation</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
