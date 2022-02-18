@@ -11,6 +11,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
 		<attributes>
 			<attribute name="module" value="true"/>
+			<attribute name="add-exports" value="java.base/jdk.internal.vm=ALL-UNNAMED"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/jdk.jdi">
@@ -25,5 +26,6 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/test.lib"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/test.compiler.testlibrary"/>
+	<classpathentry kind="lib" path="/opt/usr/work/openjdk/tools/jtreg-6+2/lib/testng.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
