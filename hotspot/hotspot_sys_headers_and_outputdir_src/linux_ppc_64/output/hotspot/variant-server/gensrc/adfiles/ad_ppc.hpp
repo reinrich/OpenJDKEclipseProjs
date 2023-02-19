@@ -1,7 +1,7 @@
 #line 1 "ad_ppc.hpp"
 //
-// Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2012, 2017 SAP SE. All rights reserved.
+// Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012, 2022 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -31,7 +31,9 @@
 #define GENERATED_ADFILES_AD_HPP
 
 #include "memory/allocation.hpp"
+#include "oops/compressedOops.hpp"
 #include "code/nativeInst.hpp"
+#include "opto/output.hpp"
 #include "opto/machnode.hpp"
 #include "opto/node.hpp"
 #include "opto/regalloc.hpp"
@@ -67,214 +69,220 @@ enum MachOperands {
   /*   10 */  IMMI8,
   /*   11 */  IMMI16,
   /*   12 */  IMMIHI16,
-  /*   13 */  IMMINEGPOW2,
-  /*   14 */  IMMIPOW2MINUS1,
-  /*   15 */  IMMIPOWEROF2,
-  /*   16 */  UIMMI5,
-  /*   17 */  UIMMI6,
-  /*   18 */  UIMMI6_GE32,
-  /*   19 */  UIMMI15,
-  /*   20 */  UIMMI16,
-  /*   21 */  IMMI_0,
-  /*   22 */  IMMI_1,
-  /*   23 */  IMMI_MINUS1,
-  /*   24 */  IMMI_16,
-  /*   25 */  IMMI_24,
-  /*   26 */  IMMN,
-  /*   27 */  IMMN_0,
-  /*   28 */  IMMNKLASS,
-  /*   29 */  IMMNKLASS_NM,
-  /*   30 */  IMMP,
-  /*   31 */  IMMP_NM,
-  /*   32 */  IMMP_0,
-  /*   33 */  IMMP_0OR1,
-  /*   34 */  IMML,
-  /*   35 */  IMMLMAX30,
-  /*   36 */  IMML16,
-  /*   37 */  IMML16ALG4,
-  /*   38 */  IMML32HI16,
-  /*   39 */  IMML32,
-  /*   40 */  IMMLHIGHEST16,
-  /*   41 */  IMMLNEGPOW2,
-  /*   42 */  IMMLPOW2MINUS1,
-  /*   43 */  IMML_0,
-  /*   44 */  IMML_MINUS1,
-  /*   45 */  IMML_32BITS,
-  /*   46 */  UIMML16,
-  /*   47 */  IMMF,
-  /*   48 */  IMMF_0,
-  /*   49 */  IMMD,
-  /*   50 */  IREGIDST,
-  /*   51 */  IREGISRC,
-  /*   52 */  RSCRATCH1REGI,
-  /*   53 */  RSCRATCH2REGI,
-  /*   54 */  RARG1REGI,
-  /*   55 */  RARG2REGI,
-  /*   56 */  RARG3REGI,
-  /*   57 */  RARG4REGI,
-  /*   58 */  RARG1REGL,
-  /*   59 */  RARG2REGL,
-  /*   60 */  RARG3REGL,
-  /*   61 */  RARG4REGL,
-  /*   62 */  IREGPDST,
-  /*   63 */  IREGPDSTNOSCRATCH,
-  /*   64 */  IREGPSRC,
-  /*   65 */  THREADREGP,
-  /*   66 */  RSCRATCH1REGP,
-  /*   67 */  RSCRATCH2REGP,
-  /*   68 */  RARG1REGP,
-  /*   69 */  RARG2REGP,
-  /*   70 */  RARG3REGP,
-  /*   71 */  RARG4REGP,
-  /*   72 */  IREGNSRC,
-  /*   73 */  IREGNDST,
-  /*   74 */  IREGLDST,
-  /*   75 */  IREGLSRC,
-  /*   76 */  IREGL2ISRC,
-  /*   77 */  RSCRATCH1REGL,
-  /*   78 */  RSCRATCH2REGL,
-  /*   79 */  FLAGSREG,
-  /*   80 */  FLAGSREGSRC,
-  /*   81 */  FLAGSREGCR0,
-  /*   82 */  FLAGSREGCR1,
-  /*   83 */  FLAGSREGCR6,
-  /*   84 */  REGCTR,
-  /*   85 */  REGD,
-  /*   86 */  REGF,
-  /*   87 */  INLINE_CACHE_REGP,
-  /*   88 */  COMPILER_METHOD_OOP_REGP,
-  /*   89 */  INTERPRETER_METHOD_OOP_REGP,
-  /*   90 */  IREGP2N,
-  /*   91 */  IREGN2P,
-  /*   92 */  IREGN2P_KLASS,
-  /*   93 */  INDIRECT,
-  /*   94 */  INDOFFSET16,
-  /*   95 */  INDOFFSET16ALG4,
-  /*   96 */  INDIRECTNARROW,
-  /*   97 */  INDIRECTNARROW_KLASS,
-  /*   98 */  INDOFFSET16NARROW,
-  /*   99 */  INDOFFSET16NARROW_KLASS,
-  /*  100 */  INDOFFSET16NARROWALG4,
-  /*  101 */  INDOFFSET16NARROWALG4_KLASS,
-  /*  102 */  STACKSLOTI,
-  /*  103 */  STACKSLOTL,
-  /*  104 */  STACKSLOTP,
-  /*  105 */  STACKSLOTF,
-  /*  106 */  STACKSLOTD,
-  /*  107 */  CMPOP,
+  /*   13 */  IMMI32,
+  /*   14 */  IMMINEGPOW2,
+  /*   15 */  IMMIPOW2MINUS1,
+  /*   16 */  IMMIPOWEROF2,
+  /*   17 */  UIMMI5,
+  /*   18 */  UIMMI6,
+  /*   19 */  UIMMI6_GE32,
+  /*   20 */  UIMMI15,
+  /*   21 */  UIMMI16,
+  /*   22 */  IMMI_0,
+  /*   23 */  IMMI_1,
+  /*   24 */  IMMI_MINUS1,
+  /*   25 */  IMMI_16,
+  /*   26 */  IMMI_24,
+  /*   27 */  IMMN,
+  /*   28 */  IMMN_0,
+  /*   29 */  IMMNKLASS,
+  /*   30 */  IMMNKLASS_NM,
+  /*   31 */  IMMP,
+  /*   32 */  IMMP_NM,
+  /*   33 */  IMMP_0,
+  /*   34 */  IMMP_0OR1,
+  /*   35 */  IMML,
+  /*   36 */  IMMLMAX30,
+  /*   37 */  IMML16,
+  /*   38 */  IMML16ALG4,
+  /*   39 */  IMML32HI16,
+  /*   40 */  IMML32,
+  /*   41 */  IMML34,
+  /*   42 */  IMMLHIGHEST16,
+  /*   43 */  IMMLNEGPOW2,
+  /*   44 */  IMMLPOW2MINUS1,
+  /*   45 */  IMML_0,
+  /*   46 */  IMML_MINUS1,
+  /*   47 */  IMML_32BITS,
+  /*   48 */  UIMML16,
+  /*   49 */  IMMF,
+  /*   50 */  IMMF_0,
+  /*   51 */  IMMD,
+  /*   52 */  IMMD_0,
+  /*   53 */  IREGIDST,
+  /*   54 */  IREGISRC,
+  /*   55 */  RSCRATCH1REGI,
+  /*   56 */  RSCRATCH2REGI,
+  /*   57 */  RARG1REGI,
+  /*   58 */  RARG2REGI,
+  /*   59 */  RARG3REGI,
+  /*   60 */  RARG4REGI,
+  /*   61 */  RARG1REGL,
+  /*   62 */  RARG2REGL,
+  /*   63 */  RARG3REGL,
+  /*   64 */  RARG4REGL,
+  /*   65 */  IREGPDST,
+  /*   66 */  IREGPDSTNOSCRATCH,
+  /*   67 */  IREGPSRC,
+  /*   68 */  THREADREGP,
+  /*   69 */  RSCRATCH1REGP,
+  /*   70 */  RSCRATCH2REGP,
+  /*   71 */  RARG1REGP,
+  /*   72 */  RARG2REGP,
+  /*   73 */  RARG3REGP,
+  /*   74 */  RARG4REGP,
+  /*   75 */  IREGNSRC,
+  /*   76 */  IREGNDST,
+  /*   77 */  IREGLDST,
+  /*   78 */  IREGLSRC,
+  /*   79 */  IREGL2ISRC,
+  /*   80 */  RSCRATCH1REGL,
+  /*   81 */  RSCRATCH2REGL,
+  /*   82 */  FLAGSREG,
+  /*   83 */  FLAGSREGSRC,
+  /*   84 */  FLAGSREGCR0,
+  /*   85 */  FLAGSREGCR1,
+  /*   86 */  FLAGSREGCR6,
+  /*   87 */  REGCTR,
+  /*   88 */  REGD,
+  /*   89 */  REGF,
+  /*   90 */  INLINE_CACHE_REGP,
+  /*   91 */  IREGP2N,
+  /*   92 */  IREGN2P,
+  /*   93 */  IREGN2P_KLASS,
+  /*   94 */  INDIRECT,
+  /*   95 */  INDOFFSET16,
+  /*   96 */  INDOFFSET16ALG4,
+  /*   97 */  INDIRECTNARROW,
+  /*   98 */  INDIRECTNARROW_KLASS,
+  /*   99 */  INDOFFSET16NARROW,
+  /*  100 */  INDOFFSET16NARROW_KLASS,
+  /*  101 */  INDOFFSET16NARROWALG4,
+  /*  102 */  INDOFFSET16NARROWALG4_KLASS,
+  /*  103 */  STACKSLOTI,
+  /*  104 */  STACKSLOTL,
+  /*  105 */  STACKSLOTP,
+  /*  106 */  STACKSLOTF,
+  /*  107 */  STACKSLOTD,
+  /*  108 */  CMPOP,
   // last operand
-  /*  108 */  MEMORY,
-  /*  109 */  MEMORYALG4,
-  /*  110 */  INDIRECTMEMORY,
-  /*  111 */  IREGISRC_IREGL2ISRC,
-  /*  112 */  IREGN_P2N,
-  /*  113 */  IREGP_N2P,
+  /*  109 */  MEMORY,
+  /*  110 */  MEMORYALG4,
+  /*  111 */  INDIRECTMEMORY,
+  /*  112 */  IREGISRC_IREGL2ISRC,
+  /*  113 */  IREGN_P2N,
+  /*  114 */  IREGP_N2P,
   // last operand class
-  /*  114 */  _DECODEN_IREGNSRC_,
-  /*  115 */  _DECODENKLASS_IREGNSRC_,
-  /*  116 */  _LOADUB_MEMORY_,
-  /*  117 */  _LOADUS_MEMORY_,
-  /*  118 */  _LOADI_MEMORY_,
-  /*  119 */  _CONVI2L__LOADI_MEMORY__,
-  /*  120 */  _LOADI_MEMORYALG4_,
-  /*  121 */  _LOADN_MEMORY_,
-  /*  122 */  _LOADNKLASS_MEMORY_,
-  /*  123 */  _LOADP_MEMORYALG4_,
-  /*  124 */  _ADDP_INDIRECTMEMORY_IREGLSRC,
-  /*  125 */  _CONVL2I_IREGLSRC_,
-  /*  126 */  _BINARY_FLAGSREGSRC_IREGPSRC,
-  /*  127 */  _CASTP2X__DECODEN_IREGNSRC__,
-  /*  128 */  _BINARY_IREGLSRC_IREGPDST,
-  /*  129 */  _BINARY_IREGLSRC_IREGPSRC,
-  /*  130 */  _BINARY_IREGLSRC_IREGNSRC,
-  /*  131 */  _BINARY_CMPOP_FLAGSREGSRC,
-  /*  132 */  _BINARY_IREGIDST_IREGISRC,
-  /*  133 */  _BINARY_IREGIDST_IMMI16,
-  /*  134 */  _BINARY_IREGLDST_IREGLSRC,
-  /*  135 */  _BINARY_IREGLDST_IMML16,
-  /*  136 */  _BINARY_IREGNDST_IREGNSRC,
-  /*  137 */  _BINARY_IREGNDST_IMMN_0,
-  /*  138 */  _BINARY_IREGPDST_IREGPSRC,
-  /*  139 */  _BINARY_IREGPDST_IREGP_N2P,
-  /*  140 */  _BINARY_IREGPDST_IMMP_0,
-  /*  141 */  _BINARY_REGF_REGF,
-  /*  142 */  _BINARY_REGD_REGD,
-  /*  143 */  _BINARY_IREGLSRC_IREGLSRC,
-  /*  144 */  _BINARY_IREGPSRC_IREGPSRC,
-  /*  145 */  _BINARY_IREGISRC_IREGISRC,
-  /*  146 */  _BINARY_IREGISRC_RARG4REGI,
-  /*  147 */  _BINARY_IREGNSRC_IREGNSRC,
-  /*  148 */  _ADDI_IREGISRC_IREGISRC,
-  /*  149 */  _ADDI__ADDI_IREGISRC_IREGISRC_IREGISRC,
-  /*  150 */  _ADDI_IREGISRC__ADDI_IREGISRC_IREGISRC,
-  /*  151 */  _ADDL_IREGLSRC_IREGLSRC,
-  /*  152 */  _ADDL__ADDL_IREGLSRC_IREGLSRC_IREGLSRC,
-  /*  153 */  _ADDL_IREGLSRC__ADDL_IREGLSRC_IREGLSRC,
-  /*  154 */  _SUBL_IREGLSRC_IREGLSRC,
-  /*  155 */  _SUBL_IMML_0_IREGLSRC,
-  /*  156 */  _ANDI_IREGISRC_IMMINEGPOW2,
-  /*  157 */  _RSHIFTI_IREGISRC_UIMMI5,
-  /*  158 */  _ANDI__RSHIFTI_IREGISRC_UIMMI5_IMMINEGPOW2,
-  /*  159 */  _CONVI2L_IREGISRC_,
-  /*  160 */  _RSHIFTL_IREGLSRC_IMMI,
-  /*  161 */  _URSHIFTL_IREGLSRC_IMMI,
-  /*  162 */  _CASTP2X_IREGP_N2P_,
-  /*  163 */  _URSHIFTI_IREGISRC_IMMI,
-  /*  164 */  _LSHIFTI_IREGISRC_IMMI8,
-  /*  165 */  _URSHIFTI_IREGISRC_IMMI8,
-  /*  166 */  _ABSF_REGF_,
-  /*  167 */  _ABSD_REGD_,
-  /*  168 */  _CONVF2D_REGF_,
-  /*  169 */  _SQRTD__CONVF2D_REGF__,
-  /*  170 */  _NEGF_REGF_,
-  /*  171 */  _BINARY__NEGF_REGF__REGF,
-  /*  172 */  _BINARY_REGF__NEGF_REGF_,
-  /*  173 */  _NEGD_REGD_,
-  /*  174 */  _BINARY__NEGD_REGD__REGD,
-  /*  175 */  _BINARY_REGD__NEGD_REGD_,
-  /*  176 */  _ANDL_IREGLSRC_IMMLPOW2MINUS1,
-  /*  177 */  _ORI_IREGISRC_IREGISRC,
-  /*  178 */  _ORI__ORI_IREGISRC_IREGISRC_IREGISRC,
-  /*  179 */  _ORI_IREGISRC__ORI_IREGISRC_IREGISRC,
-  /*  180 */  _ORL_IREGLSRC_IREGLSRC,
-  /*  181 */  _XORI_IREGISRC_IREGISRC,
-  /*  182 */  _XORI__XORI_IREGISRC_IREGISRC_IREGISRC,
-  /*  183 */  _XORI_IREGISRC__XORI_IREGISRC_IREGISRC,
-  /*  184 */  _XORL_IREGLSRC_IREGLSRC,
-  /*  185 */  _XORI_IREGISRC_IMMI_MINUS1,
-  /*  186 */  _CONV2B_IREGISRC_,
-  /*  187 */  _ANDI_IREGISRC_IMMIPOWEROF2,
-  /*  188 */  _CONV2B_IREGP_N2P_,
-  /*  189 */  _LSHIFTI_IREGISRC_IMMI_24,
-  /*  190 */  _LSHIFTI_IREGISRC_IMMI_16,
-  /*  191 */  _ANDI_IREGISRC_UIMMI16,
-  /*  192 */  _ANDL_IREGLSRC_IREGLSRC,
-  /*  193 */  _ANDL_IREGLSRC_UIMML16,
-  /*  194 */  _CMPU_IREGISRC_UIMMI15,
-  /*  195 */  _CMPU_IREGISRC_IREGISRC,
-  /*  196 */  _CMPN_IREGNSRC_IMMN_0,
-  /*  197 */  _CMPP_IREGP_N2P_IMMP_0,
-  /*  198 */  _CASTP2X_IREGPSRC_,
-  /*  199 */  _ANDL__CASTP2X_IREGPSRC__IMMLNEGPOW2,
-  /*  200 */  _BINARY_RARG1REGP_RARG3REGI,
-  /*  201 */  _BINARY_RARG2REGP_RARG4REGI,
-  /*  202 */  _BINARY_RARG1REGP_RARG2REGP,
-  /*  203 */  _BINARY_IREGPSRC_IREGISRC,
-  /*  204 */  _ADDP_IMMP_IMML,
-  /*  205 */  _BINARY__ADDP_IMMP_IMML_IMMI_1,
-  /*  206 */  _BINARY_RSCRATCH2REGP_IMMI_1,
-  /*  207 */  _BINARY_IREGPSRC_RSCRATCH1REGI,
-  /*  208 */  _BINARY_IREGPSRC_UIMMI15,
-  /*  209 */  _BINARY_IREGPSRC_RSCRATCH2REGI,
-  /*  210 */  _BINARY_RARG2REGP_IREGISRC,
-  /*  211 */  _LOADI_INDIRECT_,
-  /*  212 */  _LOADL_INDIRECT_,
-  /*  213 */  _LOADUS_INDIRECT_,
-  /*  214 */  _LOADS_INDIRECT_,
-  /*  215 */  _REVERSEBYTESI_IREGISRC_,
-  /*  216 */  _REVERSEBYTESL_IREGLSRC_,
-  /*  217 */  _REVERSEBYTESUS_IREGISRC_,
-  /*  218 */  _REVERSEBYTESS_IREGISRC_,
+  /*  115 */  _DECODEN_IREGNSRC_,
+  /*  116 */  _DECODENKLASS_IREGNSRC_,
+  /*  117 */  _LOADUB_MEMORY_,
+  /*  118 */  _LOADUS_MEMORY_,
+  /*  119 */  _LOADI_MEMORY_,
+  /*  120 */  _CONVI2L__LOADI_MEMORY__,
+  /*  121 */  _LOADI_MEMORYALG4_,
+  /*  122 */  _LOADN_MEMORY_,
+  /*  123 */  _LOADNKLASS_MEMORY_,
+  /*  124 */  _LOADP_MEMORYALG4_,
+  /*  125 */  _ADDP_INDIRECTMEMORY_IREGLSRC,
+  /*  126 */  _CONVL2I_IREGLSRC_,
+  /*  127 */  _BINARY_FLAGSREGSRC_IREGPSRC,
+  /*  128 */  _CASTP2X__DECODEN_IREGNSRC__,
+  /*  129 */  _BINARY_IREGLSRC_IREGPDST,
+  /*  130 */  _BINARY_IREGLSRC_IREGPSRC,
+  /*  131 */  _BINARY_IREGLSRC_IREGNSRC,
+  /*  132 */  _BINARY_CMPOP_FLAGSREGSRC,
+  /*  133 */  _BINARY_IREGIDST_IREGISRC,
+  /*  134 */  _BINARY_IREGIDST_IMMI16,
+  /*  135 */  _BINARY_IREGLDST_IREGLSRC,
+  /*  136 */  _BINARY_IREGLDST_IMML16,
+  /*  137 */  _BINARY_IREGNDST_IREGNSRC,
+  /*  138 */  _BINARY_IREGNDST_IMMN_0,
+  /*  139 */  _BINARY_IREGPDST_IREGPSRC,
+  /*  140 */  _BINARY_IREGPDST_IREGP_N2P,
+  /*  141 */  _BINARY_IREGPDST_IMMP_0,
+  /*  142 */  _BINARY_REGF_REGF,
+  /*  143 */  _BINARY_REGD_REGD,
+  /*  144 */  _BINARY_IREGISRC_IREGISRC,
+  /*  145 */  _BINARY_IREGISRC_RARG4REGI,
+  /*  146 */  _BINARY_IREGNSRC_IREGNSRC,
+  /*  147 */  _BINARY_IREGLSRC_IREGLSRC,
+  /*  148 */  _BINARY_IREGPSRC_IREGPSRC,
+  /*  149 */  _ADDI_IREGISRC_IREGISRC,
+  /*  150 */  _ADDI__ADDI_IREGISRC_IREGISRC_IREGISRC,
+  /*  151 */  _ADDI_IREGISRC__ADDI_IREGISRC_IREGISRC,
+  /*  152 */  _ADDL_IREGLSRC_IREGLSRC,
+  /*  153 */  _ADDL__ADDL_IREGLSRC_IREGLSRC_IREGLSRC,
+  /*  154 */  _ADDL_IREGLSRC__ADDL_IREGLSRC_IREGLSRC,
+  /*  155 */  _SUBL_IREGLSRC_IREGLSRC,
+  /*  156 */  _SUBL_IMML_0_IREGLSRC,
+  /*  157 */  _ANDI_IREGISRC_IMMINEGPOW2,
+  /*  158 */  _RSHIFTI_IREGISRC_UIMMI5,
+  /*  159 */  _ANDI__RSHIFTI_IREGISRC_UIMMI5_IMMINEGPOW2,
+  /*  160 */  _CONVI2L_IREGISRC_,
+  /*  161 */  _RSHIFTL_IREGLSRC_IMMI,
+  /*  162 */  _URSHIFTL_IREGLSRC_IMMI,
+  /*  163 */  _CASTP2X_IREGP_N2P_,
+  /*  164 */  _URSHIFTI_IREGISRC_IMMI,
+  /*  165 */  _LSHIFTI_IREGISRC_IMMI8,
+  /*  166 */  _URSHIFTI_IREGISRC_IMMI8,
+  /*  167 */  _ABSF_REGF_,
+  /*  168 */  _ABSD_REGD_,
+  /*  169 */  _NEGF_REGF_,
+  /*  170 */  _BINARY__NEGF_REGF__REGF,
+  /*  171 */  _BINARY_REGF__NEGF_REGF_,
+  /*  172 */  _NEGD_REGD_,
+  /*  173 */  _BINARY__NEGD_REGD__REGD,
+  /*  174 */  _BINARY_REGD__NEGD_REGD_,
+  /*  175 */  _ANDL_IREGLSRC_IMMLPOW2MINUS1,
+  /*  176 */  _ORI_IREGISRC_IREGISRC,
+  /*  177 */  _ORI__ORI_IREGISRC_IREGISRC_IREGISRC,
+  /*  178 */  _ORI_IREGISRC__ORI_IREGISRC_IREGISRC,
+  /*  179 */  _ORL_IREGLSRC_IREGLSRC,
+  /*  180 */  _XORI_IREGISRC_IREGISRC,
+  /*  181 */  _XORI__XORI_IREGISRC_IREGISRC_IREGISRC,
+  /*  182 */  _XORI_IREGISRC__XORI_IREGISRC_IREGISRC,
+  /*  183 */  _XORL_IREGLSRC_IREGLSRC,
+  /*  184 */  _XORI_IREGISRC_IMMI_MINUS1,
+  /*  185 */  _CONV2B_IREGISRC_,
+  /*  186 */  _ANDI_IREGISRC_IMMIPOWEROF2,
+  /*  187 */  _CONV2B_IREGP_N2P_,
+  /*  188 */  _LSHIFTI_IREGISRC_IMMI_24,
+  /*  189 */  _LSHIFTI_IREGISRC_IMMI_16,
+  /*  190 */  _ANDI_IREGISRC_UIMMI16,
+  /*  191 */  _ANDL_IREGLSRC_IREGLSRC,
+  /*  192 */  _ANDL_IREGLSRC_UIMML16,
+  /*  193 */  _CMPU_IREGISRC_UIMMI15,
+  /*  194 */  _CMPU_IREGISRC_IREGISRC,
+  /*  195 */  _CMPN_IREGNSRC_IMMN_0,
+  /*  196 */  _CMPP_IREGP_N2P_IMMP_0,
+  /*  197 */  _CASTP2X_IREGPSRC_,
+  /*  198 */  _ANDL__CASTP2X_IREGPSRC__IMMLNEGPOW2,
+  /*  199 */  _BINARY_RARG1REGP_RARG3REGI,
+  /*  200 */  _BINARY_RARG2REGP_RARG4REGI,
+  /*  201 */  _BINARY_RARG1REGP_RARG2REGP,
+  /*  202 */  _BINARY_IREGPSRC_IREGISRC,
+  /*  203 */  _ADDP_IMMP_IMML,
+  /*  204 */  _BINARY__ADDP_IMMP_IMML_IMMI_1,
+  /*  205 */  _BINARY_RSCRATCH2REGP_IMMI_1,
+  /*  206 */  _BINARY_IREGPSRC_RSCRATCH1REGI,
+  /*  207 */  _BINARY_IREGPSRC_UIMMI15,
+  /*  208 */  _BINARY_IREGPSRC_RSCRATCH2REGI,
+  /*  209 */  _BINARY_RARG2REGP_IREGISRC,
+  /*  210 */  _LOADI_INDIRECT_,
+  /*  211 */  _LOADL_INDIRECT_,
+  /*  212 */  _LOADUS_INDIRECT_,
+  /*  213 */  _LOADS_INDIRECT_,
+  /*  214 */  _REVERSEBYTESI_IREGISRC_,
+  /*  215 */  _REVERSEBYTESL_IREGLSRC_,
+  /*  216 */  _REVERSEBYTESUS_IREGISRC_,
+  /*  217 */  _REVERSEBYTESS_IREGISRC_,
+  /*  218 */  _BINARY_VECX_VECX,
+  /*  219 */  _NEGVF_VECX_,
+  /*  220 */  _BINARY__NEGVF_VECX__VECX,
+  /*  221 */  _BINARY_VECX__NEGVF_VECX_,
+  /*  222 */  _NEGVD_VECX_,
+  /*  223 */  _BINARY__NEGVD_VECX__VECX,
+  /*  224 */  _BINARY_VECX__NEGVD_VECX_,
   // last internally defined operand
   _LAST_MACH_OPER
 };
@@ -293,813 +301,906 @@ enum MachOpcodes {
   /*   10 */  immI8_rule,
   /*   11 */  immI16_rule,
   /*   12 */  immIhi16_rule,
-  /*   13 */  immInegpow2_rule,
-  /*   14 */  immIpow2minus1_rule,
-  /*   15 */  immIpowerOf2_rule,
-  /*   16 */  uimmI5_rule,
-  /*   17 */  uimmI6_rule,
-  /*   18 */  uimmI6_ge32_rule,
-  /*   19 */  uimmI15_rule,
-  /*   20 */  uimmI16_rule,
-  /*   21 */  immI_0_rule,
-  /*   22 */  immI_1_rule,
-  /*   23 */  immI_minus1_rule,
-  /*   24 */  immI_16_rule,
-  /*   25 */  immI_24_rule,
-  /*   26 */  immN_rule,
-  /*   27 */  immN_0_rule,
-  /*   28 */  immNKlass_rule,
-  /*   29 */  immNKlass_NM_rule,
-  /*   30 */  immP_rule,
-  /*   31 */  immP_NM_rule,
-  /*   32 */  immP_0_rule,
-  /*   33 */  immP_0or1_rule,
-  /*   34 */  immL_rule,
-  /*   35 */  immLmax30_rule,
-  /*   36 */  immL16_rule,
-  /*   37 */  immL16Alg4_rule,
-  /*   38 */  immL32hi16_rule,
-  /*   39 */  immL32_rule,
-  /*   40 */  immLhighest16_rule,
-  /*   41 */  immLnegpow2_rule,
-  /*   42 */  immLpow2minus1_rule,
-  /*   43 */  immL_0_rule,
-  /*   44 */  immL_minus1_rule,
-  /*   45 */  immL_32bits_rule,
-  /*   46 */  uimmL16_rule,
-  /*   47 */  immF_rule,
-  /*   48 */  immF_0_rule,
-  /*   49 */  immD_rule,
-  /*   50 */  iRegIdst_rule,
-  /*   51 */  iRegIsrc_rule,
-  /*   52 */  rscratch1RegI_rule,
-  /*   53 */  rscratch2RegI_rule,
-  /*   54 */  rarg1RegI_rule,
-  /*   55 */  rarg2RegI_rule,
-  /*   56 */  rarg3RegI_rule,
-  /*   57 */  rarg4RegI_rule,
-  /*   58 */  rarg1RegL_rule,
-  /*   59 */  rarg2RegL_rule,
-  /*   60 */  rarg3RegL_rule,
-  /*   61 */  rarg4RegL_rule,
-  /*   62 */  iRegPdst_rule,
-  /*   63 */  iRegPdstNoScratch_rule,
-  /*   64 */  iRegPsrc_rule,
-  /*   65 */  threadRegP_rule,
-  /*   66 */  rscratch1RegP_rule,
-  /*   67 */  rscratch2RegP_rule,
-  /*   68 */  rarg1RegP_rule,
-  /*   69 */  rarg2RegP_rule,
-  /*   70 */  rarg3RegP_rule,
-  /*   71 */  rarg4RegP_rule,
-  /*   72 */  iRegNsrc_rule,
-  /*   73 */  iRegNdst_rule,
-  /*   74 */  iRegLdst_rule,
-  /*   75 */  iRegLsrc_rule,
-  /*   76 */  iRegL2Isrc_rule,
-  /*   77 */  rscratch1RegL_rule,
-  /*   78 */  rscratch2RegL_rule,
-  /*   79 */  flagsReg_rule,
-  /*   80 */  flagsRegSrc_rule,
-  /*   81 */  flagsRegCR0_rule,
-  /*   82 */  flagsRegCR1_rule,
-  /*   83 */  flagsRegCR6_rule,
-  /*   84 */  regCTR_rule,
-  /*   85 */  regD_rule,
-  /*   86 */  regF_rule,
-  /*   87 */  inline_cache_regP_rule,
-  /*   88 */  compiler_method_oop_regP_rule,
-  /*   89 */  interpreter_method_oop_regP_rule,
-  /*   90 */  iRegP2N_rule,
-  /*   91 */  iRegN2P_rule,
-  /*   92 */  iRegN2P_klass_rule,
-  /*   93 */  indirect_rule,
-  /*   94 */  indOffset16_rule,
-  /*   95 */  indOffset16Alg4_rule,
-  /*   96 */  indirectNarrow_rule,
-  /*   97 */  indirectNarrow_klass_rule,
-  /*   98 */  indOffset16Narrow_rule,
-  /*   99 */  indOffset16Narrow_klass_rule,
-  /*  100 */  indOffset16NarrowAlg4_rule,
-  /*  101 */  indOffset16NarrowAlg4_klass_rule,
-  /*  102 */  stackSlotI_rule,
-  /*  103 */  stackSlotL_rule,
-  /*  104 */  stackSlotP_rule,
-  /*  105 */  stackSlotF_rule,
-  /*  106 */  stackSlotD_rule,
-  /*  107 */  cmpOp_rule,
+  /*   13 */  immI32_rule,
+  /*   14 */  immInegpow2_rule,
+  /*   15 */  immIpow2minus1_rule,
+  /*   16 */  immIpowerOf2_rule,
+  /*   17 */  uimmI5_rule,
+  /*   18 */  uimmI6_rule,
+  /*   19 */  uimmI6_ge32_rule,
+  /*   20 */  uimmI15_rule,
+  /*   21 */  uimmI16_rule,
+  /*   22 */  immI_0_rule,
+  /*   23 */  immI_1_rule,
+  /*   24 */  immI_minus1_rule,
+  /*   25 */  immI_16_rule,
+  /*   26 */  immI_24_rule,
+  /*   27 */  immN_rule,
+  /*   28 */  immN_0_rule,
+  /*   29 */  immNKlass_rule,
+  /*   30 */  immNKlass_NM_rule,
+  /*   31 */  immP_rule,
+  /*   32 */  immP_NM_rule,
+  /*   33 */  immP_0_rule,
+  /*   34 */  immP_0or1_rule,
+  /*   35 */  immL_rule,
+  /*   36 */  immLmax30_rule,
+  /*   37 */  immL16_rule,
+  /*   38 */  immL16Alg4_rule,
+  /*   39 */  immL32hi16_rule,
+  /*   40 */  immL32_rule,
+  /*   41 */  immL34_rule,
+  /*   42 */  immLhighest16_rule,
+  /*   43 */  immLnegpow2_rule,
+  /*   44 */  immLpow2minus1_rule,
+  /*   45 */  immL_0_rule,
+  /*   46 */  immL_minus1_rule,
+  /*   47 */  immL_32bits_rule,
+  /*   48 */  uimmL16_rule,
+  /*   49 */  immF_rule,
+  /*   50 */  immF_0_rule,
+  /*   51 */  immD_rule,
+  /*   52 */  immD_0_rule,
+  /*   53 */  iRegIdst_rule,
+  /*   54 */  iRegIsrc_rule,
+  /*   55 */  rscratch1RegI_rule,
+  /*   56 */  rscratch2RegI_rule,
+  /*   57 */  rarg1RegI_rule,
+  /*   58 */  rarg2RegI_rule,
+  /*   59 */  rarg3RegI_rule,
+  /*   60 */  rarg4RegI_rule,
+  /*   61 */  rarg1RegL_rule,
+  /*   62 */  rarg2RegL_rule,
+  /*   63 */  rarg3RegL_rule,
+  /*   64 */  rarg4RegL_rule,
+  /*   65 */  iRegPdst_rule,
+  /*   66 */  iRegPdstNoScratch_rule,
+  /*   67 */  iRegPsrc_rule,
+  /*   68 */  threadRegP_rule,
+  /*   69 */  rscratch1RegP_rule,
+  /*   70 */  rscratch2RegP_rule,
+  /*   71 */  rarg1RegP_rule,
+  /*   72 */  rarg2RegP_rule,
+  /*   73 */  rarg3RegP_rule,
+  /*   74 */  rarg4RegP_rule,
+  /*   75 */  iRegNsrc_rule,
+  /*   76 */  iRegNdst_rule,
+  /*   77 */  iRegLdst_rule,
+  /*   78 */  iRegLsrc_rule,
+  /*   79 */  iRegL2Isrc_rule,
+  /*   80 */  rscratch1RegL_rule,
+  /*   81 */  rscratch2RegL_rule,
+  /*   82 */  flagsReg_rule,
+  /*   83 */  flagsRegSrc_rule,
+  /*   84 */  flagsRegCR0_rule,
+  /*   85 */  flagsRegCR1_rule,
+  /*   86 */  flagsRegCR6_rule,
+  /*   87 */  regCTR_rule,
+  /*   88 */  regD_rule,
+  /*   89 */  regF_rule,
+  /*   90 */  inline_cache_regP_rule,
+  /*   91 */  iRegP2N_rule,
+  /*   92 */  iRegN2P_rule,
+  /*   93 */  iRegN2P_klass_rule,
+  /*   94 */  indirect_rule,
+  /*   95 */  indOffset16_rule,
+  /*   96 */  indOffset16Alg4_rule,
+  /*   97 */  indirectNarrow_rule,
+  /*   98 */  indirectNarrow_klass_rule,
+  /*   99 */  indOffset16Narrow_rule,
+  /*  100 */  indOffset16Narrow_klass_rule,
+  /*  101 */  indOffset16NarrowAlg4_rule,
+  /*  102 */  indOffset16NarrowAlg4_klass_rule,
+  /*  103 */  stackSlotI_rule,
+  /*  104 */  stackSlotL_rule,
+  /*  105 */  stackSlotP_rule,
+  /*  106 */  stackSlotF_rule,
+  /*  107 */  stackSlotD_rule,
+  /*  108 */  cmpOp_rule,
   // last operand
-  /*  108 */  memory_rule,
-  /*  109 */  memoryAlg4_rule,
-  /*  110 */  indirectMemory_rule,
-  /*  111 */  iRegIsrc_iRegL2Isrc_rule,
-  /*  112 */  iRegN_P2N_rule,
-  /*  113 */  iRegP_N2P_rule,
+  /*  109 */  memory_rule,
+  /*  110 */  memoryAlg4_rule,
+  /*  111 */  indirectMemory_rule,
+  /*  112 */  iRegIsrc_iRegL2Isrc_rule,
+  /*  113 */  iRegN_P2N_rule,
+  /*  114 */  iRegP_N2P_rule,
   // last operand class
-  /*  114 */  _DecodeN_iRegNsrc__rule,
-  /*  115 */  _DecodeNKlass_iRegNsrc__rule,
-  /*  116 */  _LoadUB_memory__rule,
-  /*  117 */  _LoadUS_memory__rule,
-  /*  118 */  _LoadI_memory__rule,
-  /*  119 */  _ConvI2L__LoadI_memory___rule,
-  /*  120 */  _LoadI_memoryAlg4__rule,
-  /*  121 */  _LoadN_memory__rule,
-  /*  122 */  _LoadNKlass_memory__rule,
-  /*  123 */  _LoadP_memoryAlg4__rule,
-  /*  124 */  _AddP_indirectMemory_iRegLsrc_rule,
-  /*  125 */  _ConvL2I_iRegLsrc__rule,
-  /*  126 */  _Binary_flagsRegSrc_iRegPsrc_rule,
-  /*  127 */  _CastP2X__DecodeN_iRegNsrc___rule,
-  /*  128 */  _Binary_iRegLsrc_iRegPdst_rule,
-  /*  129 */  _Binary_iRegLsrc_iRegPsrc_rule,
-  /*  130 */  _Binary_iRegLsrc_iRegNsrc_rule,
-  /*  131 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  132 */  _Binary_iRegIdst_iRegIsrc_rule,
-  /*  133 */  _Binary_iRegIdst_immI16_rule,
-  /*  134 */  _Binary_iRegLdst_iRegLsrc_rule,
-  /*  135 */  _Binary_iRegLdst_immL16_rule,
-  /*  136 */  _Binary_iRegNdst_iRegNsrc_rule,
-  /*  137 */  _Binary_iRegNdst_immN_0_rule,
-  /*  138 */  _Binary_iRegPdst_iRegPsrc_rule,
-  /*  139 */  _Binary_iRegPdst_iRegP_N2P_rule,
-  /*  140 */  _Binary_iRegPdst_immP_0_rule,
-  /*  141 */  _Binary_regF_regF_rule,
-  /*  142 */  _Binary_regD_regD_rule,
-  /*  143 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  144 */  _Binary_iRegPsrc_iRegPsrc_rule,
-  /*  145 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  146 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  147 */  _Binary_iRegNsrc_iRegNsrc_rule,
-  /*  148 */  _AddI_iRegIsrc_iRegIsrc_rule,
-  /*  149 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  150 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
-  /*  151 */  _AddL_iRegLsrc_iRegLsrc_rule,
-  /*  152 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
-  /*  153 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
-  /*  154 */  _SubL_iRegLsrc_iRegLsrc_rule,
-  /*  155 */  _SubL_immL_0_iRegLsrc_rule,
-  /*  156 */  _AndI_iRegIsrc_immInegpow2_rule,
-  /*  157 */  _RShiftI_iRegIsrc_uimmI5_rule,
-  /*  158 */  _AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2_rule,
-  /*  159 */  _ConvI2L_iRegIsrc__rule,
-  /*  160 */  _RShiftL_iRegLsrc_immI_rule,
-  /*  161 */  _URShiftL_iRegLsrc_immI_rule,
-  /*  162 */  _CastP2X_iRegP_N2P__rule,
-  /*  163 */  _URShiftI_iRegIsrc_immI_rule,
-  /*  164 */  _LShiftI_iRegIsrc_immI8_rule,
-  /*  165 */  _URShiftI_iRegIsrc_immI8_rule,
-  /*  166 */  _AbsF_regF__rule,
-  /*  167 */  _AbsD_regD__rule,
-  /*  168 */  _ConvF2D_regF__rule,
-  /*  169 */  _SqrtD__ConvF2D_regF___rule,
-  /*  170 */  _NegF_regF__rule,
-  /*  171 */  _Binary__NegF_regF__regF_rule,
-  /*  172 */  _Binary_regF__NegF_regF__rule,
-  /*  173 */  _NegD_regD__rule,
-  /*  174 */  _Binary__NegD_regD__regD_rule,
-  /*  175 */  _Binary_regD__NegD_regD__rule,
-  /*  176 */  _AndL_iRegLsrc_immLpow2minus1_rule,
-  /*  177 */  _OrI_iRegIsrc_iRegIsrc_rule,
-  /*  178 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  179 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
-  /*  180 */  _OrL_iRegLsrc_iRegLsrc_rule,
-  /*  181 */  _XorI_iRegIsrc_iRegIsrc_rule,
-  /*  182 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  183 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
-  /*  184 */  _XorL_iRegLsrc_iRegLsrc_rule,
-  /*  185 */  _XorI_iRegIsrc_immI_minus1_rule,
-  /*  186 */  _Conv2B_iRegIsrc__rule,
-  /*  187 */  _AndI_iRegIsrc_immIpowerOf2_rule,
-  /*  188 */  _Conv2B_iRegP_N2P__rule,
-  /*  189 */  _LShiftI_iRegIsrc_immI_24_rule,
-  /*  190 */  _LShiftI_iRegIsrc_immI_16_rule,
-  /*  191 */  _AndI_iRegIsrc_uimmI16_rule,
-  /*  192 */  _AndL_iRegLsrc_iRegLsrc_rule,
-  /*  193 */  _AndL_iRegLsrc_uimmL16_rule,
-  /*  194 */  _CmpU_iRegIsrc_uimmI15_rule,
-  /*  195 */  _CmpU_iRegIsrc_iRegIsrc_rule,
-  /*  196 */  _CmpN_iRegNsrc_immN_0_rule,
-  /*  197 */  _CmpP_iRegP_N2P_immP_0_rule,
-  /*  198 */  _CastP2X_iRegPsrc__rule,
-  /*  199 */  _AndL__CastP2X_iRegPsrc__immLnegpow2_rule,
-  /*  200 */  _Binary_rarg1RegP_rarg3RegI_rule,
-  /*  201 */  _Binary_rarg2RegP_rarg4RegI_rule,
-  /*  202 */  _Binary_rarg1RegP_rarg2RegP_rule,
-  /*  203 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  204 */  _AddP_immP_immL_rule,
-  /*  205 */  _Binary__AddP_immP_immL_immI_1_rule,
-  /*  206 */  _Binary_rscratch2RegP_immI_1_rule,
-  /*  207 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  208 */  _Binary_iRegPsrc_uimmI15_rule,
-  /*  209 */  _Binary_iRegPsrc_rscratch2RegI_rule,
-  /*  210 */  _Binary_rarg2RegP_iRegIsrc_rule,
-  /*  211 */  _LoadI_indirect__rule,
-  /*  212 */  _LoadL_indirect__rule,
-  /*  213 */  _LoadUS_indirect__rule,
-  /*  214 */  _LoadS_indirect__rule,
-  /*  215 */  _ReverseBytesI_iRegIsrc__rule,
-  /*  216 */  _ReverseBytesL_iRegLsrc__rule,
-  /*  217 */  _ReverseBytesUS_iRegIsrc__rule,
-  /*  218 */  _ReverseBytesS_iRegIsrc__rule,
+  /*  115 */  _DecodeN_iRegNsrc__rule,
+  /*  116 */  _DecodeNKlass_iRegNsrc__rule,
+  /*  117 */  _LoadUB_memory__rule,
+  /*  118 */  _LoadUS_memory__rule,
+  /*  119 */  _LoadI_memory__rule,
+  /*  120 */  _ConvI2L__LoadI_memory___rule,
+  /*  121 */  _LoadI_memoryAlg4__rule,
+  /*  122 */  _LoadN_memory__rule,
+  /*  123 */  _LoadNKlass_memory__rule,
+  /*  124 */  _LoadP_memoryAlg4__rule,
+  /*  125 */  _AddP_indirectMemory_iRegLsrc_rule,
+  /*  126 */  _ConvL2I_iRegLsrc__rule,
+  /*  127 */  _Binary_flagsRegSrc_iRegPsrc_rule,
+  /*  128 */  _CastP2X__DecodeN_iRegNsrc___rule,
+  /*  129 */  _Binary_iRegLsrc_iRegPdst_rule,
+  /*  130 */  _Binary_iRegLsrc_iRegPsrc_rule,
+  /*  131 */  _Binary_iRegLsrc_iRegNsrc_rule,
+  /*  132 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  133 */  _Binary_iRegIdst_iRegIsrc_rule,
+  /*  134 */  _Binary_iRegIdst_immI16_rule,
+  /*  135 */  _Binary_iRegLdst_iRegLsrc_rule,
+  /*  136 */  _Binary_iRegLdst_immL16_rule,
+  /*  137 */  _Binary_iRegNdst_iRegNsrc_rule,
+  /*  138 */  _Binary_iRegNdst_immN_0_rule,
+  /*  139 */  _Binary_iRegPdst_iRegPsrc_rule,
+  /*  140 */  _Binary_iRegPdst_iRegP_N2P_rule,
+  /*  141 */  _Binary_iRegPdst_immP_0_rule,
+  /*  142 */  _Binary_regF_regF_rule,
+  /*  143 */  _Binary_regD_regD_rule,
+  /*  144 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  145 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  146 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  147 */  _Binary_iRegLsrc_iRegLsrc_rule,
+  /*  148 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  149 */  _AddI_iRegIsrc_iRegIsrc_rule,
+  /*  150 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  151 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
+  /*  152 */  _AddL_iRegLsrc_iRegLsrc_rule,
+  /*  153 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
+  /*  154 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
+  /*  155 */  _SubL_iRegLsrc_iRegLsrc_rule,
+  /*  156 */  _SubL_immL_0_iRegLsrc_rule,
+  /*  157 */  _AndI_iRegIsrc_immInegpow2_rule,
+  /*  158 */  _RShiftI_iRegIsrc_uimmI5_rule,
+  /*  159 */  _AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2_rule,
+  /*  160 */  _ConvI2L_iRegIsrc__rule,
+  /*  161 */  _RShiftL_iRegLsrc_immI_rule,
+  /*  162 */  _URShiftL_iRegLsrc_immI_rule,
+  /*  163 */  _CastP2X_iRegP_N2P__rule,
+  /*  164 */  _URShiftI_iRegIsrc_immI_rule,
+  /*  165 */  _LShiftI_iRegIsrc_immI8_rule,
+  /*  166 */  _URShiftI_iRegIsrc_immI8_rule,
+  /*  167 */  _AbsF_regF__rule,
+  /*  168 */  _AbsD_regD__rule,
+  /*  169 */  _NegF_regF__rule,
+  /*  170 */  _Binary__NegF_regF__regF_rule,
+  /*  171 */  _Binary_regF__NegF_regF__rule,
+  /*  172 */  _NegD_regD__rule,
+  /*  173 */  _Binary__NegD_regD__regD_rule,
+  /*  174 */  _Binary_regD__NegD_regD__rule,
+  /*  175 */  _AndL_iRegLsrc_immLpow2minus1_rule,
+  /*  176 */  _OrI_iRegIsrc_iRegIsrc_rule,
+  /*  177 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  178 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
+  /*  179 */  _OrL_iRegLsrc_iRegLsrc_rule,
+  /*  180 */  _XorI_iRegIsrc_iRegIsrc_rule,
+  /*  181 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  182 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
+  /*  183 */  _XorL_iRegLsrc_iRegLsrc_rule,
+  /*  184 */  _XorI_iRegIsrc_immI_minus1_rule,
+  /*  185 */  _Conv2B_iRegIsrc__rule,
+  /*  186 */  _AndI_iRegIsrc_immIpowerOf2_rule,
+  /*  187 */  _Conv2B_iRegP_N2P__rule,
+  /*  188 */  _LShiftI_iRegIsrc_immI_24_rule,
+  /*  189 */  _LShiftI_iRegIsrc_immI_16_rule,
+  /*  190 */  _AndI_iRegIsrc_uimmI16_rule,
+  /*  191 */  _AndL_iRegLsrc_iRegLsrc_rule,
+  /*  192 */  _AndL_iRegLsrc_uimmL16_rule,
+  /*  193 */  _CmpU_iRegIsrc_uimmI15_rule,
+  /*  194 */  _CmpU_iRegIsrc_iRegIsrc_rule,
+  /*  195 */  _CmpN_iRegNsrc_immN_0_rule,
+  /*  196 */  _CmpP_iRegP_N2P_immP_0_rule,
+  /*  197 */  _CastP2X_iRegPsrc__rule,
+  /*  198 */  _AndL__CastP2X_iRegPsrc__immLnegpow2_rule,
+  /*  199 */  _Binary_rarg1RegP_rarg3RegI_rule,
+  /*  200 */  _Binary_rarg2RegP_rarg4RegI_rule,
+  /*  201 */  _Binary_rarg1RegP_rarg2RegP_rule,
+  /*  202 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  203 */  _AddP_immP_immL_rule,
+  /*  204 */  _Binary__AddP_immP_immL_immI_1_rule,
+  /*  205 */  _Binary_rscratch2RegP_immI_1_rule,
+  /*  206 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  207 */  _Binary_iRegPsrc_uimmI15_rule,
+  /*  208 */  _Binary_iRegPsrc_rscratch2RegI_rule,
+  /*  209 */  _Binary_rarg2RegP_iRegIsrc_rule,
+  /*  210 */  _LoadI_indirect__rule,
+  /*  211 */  _LoadL_indirect__rule,
+  /*  212 */  _LoadUS_indirect__rule,
+  /*  213 */  _LoadS_indirect__rule,
+  /*  214 */  _ReverseBytesI_iRegIsrc__rule,
+  /*  215 */  _ReverseBytesL_iRegLsrc__rule,
+  /*  216 */  _ReverseBytesUS_iRegIsrc__rule,
+  /*  217 */  _ReverseBytesS_iRegIsrc__rule,
+  /*  218 */  _Binary_vecX_vecX_rule,
+  /*  219 */  _NegVF_vecX__rule,
+  /*  220 */  _Binary__NegVF_vecX__vecX_rule,
+  /*  221 */  _Binary_vecX__NegVF_vecX__rule,
+  /*  222 */  _NegVD_vecX__rule,
+  /*  223 */  _Binary__NegVD_vecX__vecX_rule,
+  /*  224 */  _Binary_vecX__NegVD_vecX__rule,
   // last internally defined operand
-  /*  219 */  regI_to_stkI_rule,
-  /*  220 */  regL_to_stkL_rule,
-  /*  221 */  loadConI16_rule,
-  /*  222 */  loadConIhi16_rule,
-  /*  223 */  loadConI_Ex_rule,
-  /*  224 */  loadConL16_rule,
-  /*  225 */  loadConL32hi16_rule,
-  /*  226 */  loadConL32_Ex_rule,
-  /*  227 */  loadConLhighest16_Ex_rule,
-  /*  228 */  loadConL_Ex_rule,
-  /*  229 */  loadConN0_rule,
-  /*  230 */  loadConN_Ex_rule,
-  /*  231 */  loadConNKlass_hi_rule,
-  /*  232 */  loadConNKlass_mask_rule,
-  /*  233 */  loadConNKlass_lo_rule,
-  /*  234 */  loadConNKlass_Ex_rule,
-  /*  235 */  loadConP0or1_rule,
-  /*  236 */  loadConP_rule,
-  /*  237 */  loadConP_lo_rule,
-  /*  238 */  loadConP_Ex_rule,
-  /*  239 */  loadConF_Ex_rule,
-  /*  240 */  loadConD_Ex_rule,
-  /*  241 */  stkI_to_regI_rule,
-  /*  242 */  stkL_to_regL_rule,
-  /*  243 */  convB2I_reg_2_rule,
-  /*  244 */  loadP2X_rule,
-  /*  245 */  loadToc_lo_rule,
-  /*  246 */  loadConN_hi_rule,
-  /*  247 */  clearMs32b_rule,
-  /*  248 */  storeLConditional_regP_regL_regL_rule,
-  /*  249 */  storePConditional_regP_regP_regP_rule,
-  /*  250 */  signmask32I_regI_rule,
-  /*  251 */  absI_reg_Ex_rule,
-  /*  252 */  signmask64I_regL_rule,
-  /*  253 */  signmask64L_regL_rule,
-  /*  254 */  absF_reg_rule,
-  /*  255 */  absD_reg_rule,
-  /*  256 */  negF_reg_rule,
-  /*  257 */  negD_reg_rule,
-  /*  258 */  negF_absF_reg_rule,
-  /*  259 */  negD_absD_reg_rule,
-  /*  260 */  roundDouble_nop_rule,
-  /*  261 */  roundFloat_nop_rule,
-  /*  262 */  moveL2D_reg_rule,
-  /*  263 */  moveI2D_reg_rule,
-  /*  264 */  moveF2I_stack_reg_rule,
-  /*  265 */  moveI2F_stack_reg_rule,
-  /*  266 */  moveD2L_stack_reg_rule,
-  /*  267 */  moveL2D_stack_reg_rule,
-  /*  268 */  moveReg_rule,
-  /*  269 */  castX2P_rule,
-  /*  270 */  castP2X_rule,
-  /*  271 */  castPP_rule,
-  /*  272 */  castII_rule,
-  /*  273 */  checkCastPP_rule,
-  /*  274 */  convI2Bool_reg__cntlz_Ex_rule,
-  /*  275 */  convP2Bool_reg__cntlz_Ex_rule,
-  /*  276 */  extsh_rule,
-  /*  277 */  convD2IRaw_regD_rule,
-  /*  278 */  convF2IRaw_regF_rule,
-  /*  279 */  convF2LRaw_regF_rule,
-  /*  280 */  convD2LRaw_regD_rule,
-  /*  281 */  convL2DRaw_regD_rule,
-  /*  282 */  convL2FRaw_regF_rule,
-  /*  283 */  cmpI_reg_reg_rule,
-  /*  284 */  cmpI_reg_imm16_rule,
-  /*  285 */  testI_reg_imm_rule,
-  /*  286 */  cmpL_reg_reg_rule,
-  /*  287 */  cmpL_reg_imm16_rule,
-  /*  288 */  cmpUL_reg_reg_rule,
-  /*  289 */  cmpUL_reg_imm16_rule,
-  /*  290 */  testL_reg_reg_rule,
-  /*  291 */  testL_reg_imm_rule,
-  /*  292 */  cmovI_conIvalueMinus1_conIvalue1_rule,
-  /*  293 */  cmovI_conIvalueMinus1_conIvalue0_conIvalue1_Ex_rule,
-  /*  294 */  compU_reg_reg_rule,
-  /*  295 */  compU_reg_uimm16_rule,
-  /*  296 */  cmpN_reg_reg_rule,
-  /*  297 */  cmpN_reg_imm0_rule,
-  /*  298 */  cmpP_reg_reg_rule,
-  /*  299 */  cmpP_reg_null_rule,
-  /*  300 */  cmpP_reg_imm16_rule,
-  /*  301 */  cmpFUnordered_reg_reg_rule,
-  /*  302 */  cmov_bns_less_rule,
-  /*  303 */  cmpF_reg_reg_Ex_rule,
-  /*  304 */  cmpDUnordered_reg_reg_rule,
-  /*  305 */  cmpD_reg_reg_Ex_rule,
-  /*  306 */  cmpFastLock_rule,
-  /*  307 */  cmpFastLock_tm_rule,
-  /*  308 */  cmpFastUnlock_rule,
-  /*  309 */  cmpFastUnlock_tm_rule,
-  /*  310 */  popCountI_rule,
-  /*  311 */  popCountL_rule,
-  /*  312 */  countLeadingZerosI_rule,
-  /*  313 */  countLeadingZerosL_rule,
-  /*  314 */  countLeadingZerosP_rule,
-  /*  315 */  countTrailingZerosI_Ex_rule,
-  /*  316 */  countTrailingZerosL_Ex_rule,
-  /*  317 */  mtvsrwz_rule,
-  /*  318 */  repl32_rule,
-  /*  319 */  repl48_rule,
-  /*  320 */  repl56_rule,
-  /*  321 */  overflowAddL_reg_reg_rule,
-  /*  322 */  overflowSubL_reg_reg_rule,
-  /*  323 */  overflowNegL_reg_rule,
-  /*  324 */  overflowMulL_reg_reg_rule,
-  /*  325 */  mtvsrd_rule,
-  /*  326 */  CallLeafDirect_mtctr_rule,
-  /*  327 */  tlsLoadP_rule,
-  /*  328 */  loadUB_indirect_rule,
-  /*  329 */  loadUB_indirect_ac_rule,
-  /*  330 */  loadB_indirect_Ex_rule,
-  /*  331 */  loadB_indirect_ac_Ex_rule,
-  /*  332 */  loadUB_indOffset16_rule,
-  /*  333 */  loadUB_indOffset16_ac_rule,
-  /*  334 */  loadB_indOffset16_Ex_rule,
-  /*  335 */  loadB_indOffset16_ac_Ex_rule,
-  /*  336 */  loadUB_rule,
-  /*  337 */  loadUB_ac_rule,
-  /*  338 */  loadUB2L_rule,
-  /*  339 */  loadUB2L_ac_rule,
-  /*  340 */  loadS_rule,
-  /*  341 */  loadS_ac_rule,
-  /*  342 */  loadUS_rule,
-  /*  343 */  loadUS_ac_rule,
-  /*  344 */  loadUS2L_rule,
-  /*  345 */  loadUS2L_ac_rule,
-  /*  346 */  loadI_rule,
-  /*  347 */  loadI_ac_rule,
-  /*  348 */  loadUI2L_rule,
-  /*  349 */  loadI2L_rule,
-  /*  350 */  loadI2L_ac_rule,
-  /*  351 */  loadL_rule,
-  /*  352 */  loadL_ac_rule,
-  /*  353 */  loadL_unaligned_rule,
-  /*  354 */  loadV8_rule,
-  /*  355 */  loadV16_rule,
-  /*  356 */  loadRange_rule,
-  /*  357 */  loadN_rule,
-  /*  358 */  loadN_ac_rule,
-  /*  359 */  loadN2P_unscaled_rule,
-  /*  360 */  loadN2P_klass_unscaled_rule,
-  /*  361 */  loadP_rule,
-  /*  362 */  loadP_ac_rule,
-  /*  363 */  loadNKlass_rule,
-  /*  364 */  loadKlass_rule,
-  /*  365 */  loadF_rule,
-  /*  366 */  loadF_ac_rule,
-  /*  367 */  loadD_rule,
-  /*  368 */  loadD_ac_rule,
-  /*  369 */  loadD_unaligned_rule,
-  /*  370 */  loadToc_hi_rule,
-  /*  371 */  loadConI32_lo16_rule,
-  /*  372 */  loadConL32_lo16_rule,
-  /*  373 */  loadConL_rule,
-  /*  374 */  loadConL_hi_rule,
-  /*  375 */  loadConL_lo_rule,
-  /*  376 */  loadConN_lo_rule,
-  /*  377 */  rldicl_rule,
-  /*  378 */  loadBase_rule,
-  /*  379 */  loadConP_hi_rule,
-  /*  380 */  loadConF_rule,
-  /*  381 */  loadConFComp_rule,
-  /*  382 */  loadConD_rule,
-  /*  383 */  loadConDComp_rule,
-  /*  384 */  prefetch_alloc_zero_rule,
-  /*  385 */  prefetch_alloc_zero_no_offset_rule,
-  /*  386 */  prefetch_alloc_rule,
-  /*  387 */  prefetch_alloc_no_offset_rule,
-  /*  388 */  storeB_rule,
-  /*  389 */  storeC_rule,
-  /*  390 */  storeI_rule,
-  /*  391 */  storeI_convL2I_rule,
-  /*  392 */  storeL_rule,
-  /*  393 */  storeA8B_rule,
-  /*  394 */  storeV16_rule,
-  /*  395 */  storeN_rule,
-  /*  396 */  storeNKlass_rule,
-  /*  397 */  storeP_rule,
-  /*  398 */  storeF_rule,
-  /*  399 */  storeD_rule,
-  /*  400 */  storeCM_CMS_rule,
-  /*  401 */  storeCM_CMS_ExEx_rule,
-  /*  402 */  storeCM_G1_rule,
-  /*  403 */  encodeP_shift_rule,
-  /*  404 */  encodeP_sub_rule,
-  /*  405 */  cond_sub_base_rule,
-  /*  406 */  cond_set_0_oop_rule,
-  /*  407 */  encodeP_Disjoint_rule,
-  /*  408 */  encodeP_Ex_rule,
-  /*  409 */  encodeP_not_null_Ex_rule,
-  /*  410 */  encodeP_not_null_base_null_rule,
-  /*  411 */  encodeP_narrow_oop_shift_0_rule,
-  /*  412 */  decodeN_shift_rule,
-  /*  413 */  decodeN_add_rule,
-  /*  414 */  cond_add_base_rule,
-  /*  415 */  cond_set_0_ptr_rule,
-  /*  416 */  decodeN_Ex_rule,
-  /*  417 */  decodeN_nullBase_rule,
-  /*  418 */  decodeN_mergeDisjoint_rule,
-  /*  419 */  decodeN_Disjoint_notNull_Ex_rule,
-  /*  420 */  decodeN_Disjoint_isel_Ex_rule,
-  /*  421 */  decodeN_notNull_addBase_Ex_rule,
-  /*  422 */  decodeN_unscaled_rule,
-  /*  423 */  decodeN2I_unscaled_rule,
-  /*  424 */  encodePKlass_shift_rule,
-  /*  425 */  encodePKlass_sub_base_rule,
-  /*  426 */  encodePKlass_Disjoint_rule,
-  /*  427 */  encodePKlass_not_null_Ex_rule,
-  /*  428 */  encodePKlass_not_null_ExEx_rule,
-  /*  429 */  decodeNKlass_shift_rule,
-  /*  430 */  decodeNKlass_add_base_rule,
-  /*  431 */  decodeNKlass_notNull_addBase_Ex_rule,
-  /*  432 */  decodeNKlass_notNull_addBase_ExEx_rule,
-  /*  433 */  membar_acquire_rule,
-  /*  434 */  unnecessary_membar_acquire_rule,
-  /*  435 */  membar_acquire_lock_rule,
-  /*  436 */  membar_release_rule,
-  /*  437 */  membar_release_0_rule,
-  /*  438 */  membar_storestore_rule,
-  /*  439 */  membar_release_lock_rule,
-  /*  440 */  membar_volatile_rule,
-  /*  441 */  membar_CPUOrder_rule,
-  /*  442 */  cmovI_reg_isel_rule,
-  /*  443 */  cmovI_reg_rule,
-  /*  444 */  cmovI_imm_rule,
-  /*  445 */  cmovL_reg_isel_rule,
-  /*  446 */  cmovL_reg_rule,
-  /*  447 */  cmovL_imm_rule,
-  /*  448 */  cmovN_reg_isel_rule,
-  /*  449 */  cmovN_reg_rule,
-  /*  450 */  cmovN_imm_rule,
-  /*  451 */  cmovP_reg_isel_rule,
-  /*  452 */  cmovP_reg_rule,
-  /*  453 */  cmovP_imm_rule,
-  /*  454 */  cmovF_reg_rule,
-  /*  455 */  cmovD_reg_rule,
-  /*  456 */  loadPLocked_rule,
-  /*  457 */  compareAndSwapB_regP_regI_regI_rule,
-  /*  458 */  compareAndSwapB4_regP_regI_regI_rule,
-  /*  459 */  compareAndSwapS_regP_regI_regI_rule,
-  /*  460 */  compareAndSwapS4_regP_regI_regI_rule,
-  /*  461 */  compareAndSwapI_regP_regI_regI_rule,
-  /*  462 */  compareAndSwapN_regP_regN_regN_rule,
-  /*  463 */  compareAndSwapL_regP_regL_regL_rule,
-  /*  464 */  compareAndSwapP_regP_regP_regP_rule,
-  /*  465 */  weakCompareAndSwapB_regP_regI_regI_rule,
-  /*  466 */  weakCompareAndSwapB4_regP_regI_regI_rule,
-  /*  467 */  weakCompareAndSwapB_acq_regP_regI_regI_rule,
-  /*  468 */  weakCompareAndSwapB4_acq_regP_regI_regI_rule,
-  /*  469 */  weakCompareAndSwapS_regP_regI_regI_rule,
-  /*  470 */  weakCompareAndSwapS4_regP_regI_regI_rule,
-  /*  471 */  weakCompareAndSwapS_acq_regP_regI_regI_rule,
-  /*  472 */  weakCompareAndSwapS4_acq_regP_regI_regI_rule,
-  /*  473 */  weakCompareAndSwapI_regP_regI_regI_rule,
-  /*  474 */  weakCompareAndSwapI_acq_regP_regI_regI_rule,
-  /*  475 */  weakCompareAndSwapN_regP_regN_regN_rule,
-  /*  476 */  weakCompareAndSwapN_acq_regP_regN_regN_rule,
-  /*  477 */  weakCompareAndSwapL_regP_regL_regL_rule,
-  /*  478 */  weakCompareAndSwapL_acq_regP_regL_regL_rule,
-  /*  479 */  weakCompareAndSwapP_regP_regP_regP_rule,
-  /*  480 */  weakCompareAndSwapP_acq_regP_regP_regP_rule,
-  /*  481 */  compareAndExchangeB_regP_regI_regI_rule,
-  /*  482 */  compareAndExchangeB4_regP_regI_regI_rule,
-  /*  483 */  compareAndExchangeB_acq_regP_regI_regI_rule,
-  /*  484 */  compareAndExchangeB4_acq_regP_regI_regI_rule,
-  /*  485 */  compareAndExchangeS_regP_regI_regI_rule,
-  /*  486 */  compareAndExchangeS4_regP_regI_regI_rule,
-  /*  487 */  compareAndExchangeS_acq_regP_regI_regI_rule,
-  /*  488 */  compareAndExchangeS4_acq_regP_regI_regI_rule,
-  /*  489 */  compareAndExchangeI_regP_regI_regI_rule,
-  /*  490 */  compareAndExchangeI_acq_regP_regI_regI_rule,
-  /*  491 */  compareAndExchangeN_regP_regN_regN_rule,
-  /*  492 */  compareAndExchangeN_acq_regP_regN_regN_rule,
-  /*  493 */  compareAndExchangeL_regP_regL_regL_rule,
-  /*  494 */  compareAndExchangeL_acq_regP_regL_regL_rule,
-  /*  495 */  compareAndExchangeP_regP_regP_regP_rule,
-  /*  496 */  compareAndExchangeP_acq_regP_regP_regP_rule,
-  /*  497 */  getAndAddB_rule,
-  /*  498 */  getAndAddB4_rule,
-  /*  499 */  getAndAddS_rule,
-  /*  500 */  getAndAddS4_rule,
-  /*  501 */  getAndAddI_rule,
-  /*  502 */  getAndAddL_rule,
-  /*  503 */  getAndSetB_rule,
-  /*  504 */  getAndSetB4_rule,
-  /*  505 */  getAndSetS_rule,
-  /*  506 */  getAndSetS4_rule,
-  /*  507 */  getAndSetI_rule,
-  /*  508 */  getAndSetL_rule,
-  /*  509 */  getAndSetP_rule,
-  /*  510 */  getAndSetN_rule,
-  /*  511 */  addI_reg_reg_rule,
-  /*  512 */  addI_reg_reg_2_rule,
-  /*  513 */  tree_addI_addI_addI_reg_reg_Ex_rule,
-  /*  514 */  tree_addI_addI_addI_reg_reg_Ex_1_rule,
-  /*  515 */  tree_addI_addI_addI_reg_reg_Ex_0_rule,
-  /*  516 */  tree_addI_addI_addI_reg_reg_Ex_2_rule,
-  /*  517 */  addI_reg_imm16_rule,
-  /*  518 */  addI_reg_immhi16_rule,
-  /*  519 */  addL_reg_reg_rule,
-  /*  520 */  addL_reg_reg_2_rule,
-  /*  521 */  tree_addL_addL_addL_reg_reg_Ex_rule,
-  /*  522 */  tree_addL_addL_addL_reg_reg_Ex_1_rule,
-  /*  523 */  tree_addL_addL_addL_reg_reg_Ex_0_rule,
-  /*  524 */  tree_addL_addL_addL_reg_reg_Ex_2_rule,
-  /*  525 */  addI_regL_regL_rule,
-  /*  526 */  addL_reg_imm16_rule,
-  /*  527 */  addL_reg_immhi16_rule,
-  /*  528 */  addP_reg_reg_rule,
-  /*  529 */  addP_reg_imm16_rule,
-  /*  530 */  addP_reg_immhi16_rule,
-  /*  531 */  subI_reg_reg_rule,
-  /*  532 */  subI_imm16_reg_rule,
-  /*  533 */  negI_regI_rule,
-  /*  534 */  subL_reg_reg_rule,
-  /*  535 */  subI_regL_regL_rule,
-  /*  536 */  negL_reg_reg_rule,
-  /*  537 */  negI_con0_regL_rule,
-  /*  538 */  mulI_reg_reg_rule,
-  /*  539 */  mulI_reg_imm16_rule,
-  /*  540 */  mulL_reg_reg_rule,
-  /*  541 */  mulHighL_reg_reg_rule,
-  /*  542 */  mulL_reg_imm16_rule,
-  /*  543 */  divI_reg_immIvalueMinus1_rule,
-  /*  544 */  divI_reg_regnotMinus1_rule,
-  /*  545 */  cmovI_bne_negI_reg_rule,
-  /*  546 */  divI_reg_reg_Ex_rule,
-  /*  547 */  divL_reg_immLvalueMinus1_rule,
-  /*  548 */  divL_reg_regnotMinus1_rule,
-  /*  549 */  cmovL_bne_negL_reg_rule,
-  /*  550 */  divL_reg_reg_Ex_rule,
-  /*  551 */  modI_reg_reg_Ex_rule,
-  /*  552 */  modL_reg_reg_Ex_rule,
-  /*  553 */  maskI_reg_imm_rule,
-  /*  554 */  lShiftI_reg_reg_rule,
-  /*  555 */  lShiftI_reg_reg_Ex_rule,
-  /*  556 */  lShiftI_reg_imm_rule,
-  /*  557 */  lShiftI_andI_immInegpow2_imm5_rule,
-  /*  558 */  lShiftI_andI_immInegpow2_rShiftI_imm5_rule,
-  /*  559 */  lShiftL_regL_regI_rule,
-  /*  560 */  lShiftL_regL_regI_Ex_rule,
-  /*  561 */  lshiftL_regL_immI_rule,
-  /*  562 */  lShiftL_regI_immGE32_rule,
-  /*  563 */  scaledPositiveI2L_lShiftL_convI2L_reg_imm6_rule,
-  /*  564 */  arShiftI_reg_reg_rule,
-  /*  565 */  arShiftI_reg_reg_Ex_rule,
-  /*  566 */  arShiftI_reg_imm_rule,
-  /*  567 */  arShiftL_regL_regI_rule,
-  /*  568 */  arShiftL_regL_regI_Ex_rule,
-  /*  569 */  arShiftL_regL_immI_rule,
-  /*  570 */  convL2I_arShiftL_regL_immI_rule,
-  /*  571 */  urShiftI_reg_reg_rule,
-  /*  572 */  urShiftI_reg_reg_Ex_rule,
-  /*  573 */  urShiftI_reg_imm_rule,
-  /*  574 */  urShiftL_regL_regI_rule,
-  /*  575 */  urShiftL_regL_regI_Ex_rule,
-  /*  576 */  urShiftL_regL_immI_rule,
-  /*  577 */  convL2I_urShiftL_regL_immI_rule,
-  /*  578 */  shrP_convP2X_reg_imm6_rule,
-  /*  579 */  andI_urShiftI_regI_immI_immIpow2minus1_rule,
-  /*  580 */  andL_urShiftL_regL_immI_immLpow2minus1_rule,
-  /*  581 */  sxtI_reg_rule,
-  /*  582 */  rotlI_reg_immi8_rule,
-  /*  583 */  rotlI_reg_immi8_0_rule,
-  /*  584 */  rotrI_reg_immi8_rule,
-  /*  585 */  rotrI_reg_immi8_0_rule,
-  /*  586 */  addF_reg_reg_rule,
-  /*  587 */  addD_reg_reg_rule,
-  /*  588 */  subF_reg_reg_rule,
-  /*  589 */  subD_reg_reg_rule,
-  /*  590 */  mulF_reg_reg_rule,
-  /*  591 */  mulD_reg_reg_rule,
-  /*  592 */  divF_reg_reg_rule,
-  /*  593 */  divD_reg_reg_rule,
-  /*  594 */  sqrtD_reg_rule,
-  /*  595 */  sqrtF_reg_rule,
-  /*  596 */  maddF_reg_reg_rule,
-  /*  597 */  maddD_reg_reg_rule,
-  /*  598 */  mnsubF_reg_reg_rule,
-  /*  599 */  mnsubF_reg_reg_0_rule,
-  /*  600 */  mnsubD_reg_reg_rule,
-  /*  601 */  mnsubD_reg_reg_0_rule,
-  /*  602 */  mnaddF_reg_reg_rule,
-  /*  603 */  mnaddF_reg_reg_0_rule,
-  /*  604 */  mnaddD_reg_reg_rule,
-  /*  605 */  mnaddD_reg_reg_0_rule,
-  /*  606 */  msubF_reg_reg_rule,
-  /*  607 */  msubD_reg_reg_rule,
-  /*  608 */  andI_reg_reg_rule,
-  /*  609 */  andI_reg_immIhi16_rule,
-  /*  610 */  andI_reg_uimm16_rule,
-  /*  611 */  andI_reg_immInegpow2_rule,
-  /*  612 */  andI_reg_immIpow2minus1_rule,
-  /*  613 */  andI_reg_immIpowerOf2_rule,
-  /*  614 */  andL_reg_reg_rule,
-  /*  615 */  andL_reg_uimm16_rule,
-  /*  616 */  andL_reg_immLnegpow2_rule,
-  /*  617 */  andL_reg_immLpow2minus1_rule,
-  /*  618 */  convL2I_andL_reg_immLpow2minus1_rule,
-  /*  619 */  orI_reg_reg_rule,
-  /*  620 */  orI_reg_reg_2_rule,
-  /*  621 */  tree_orI_orI_orI_reg_reg_Ex_rule,
-  /*  622 */  tree_orI_orI_orI_reg_reg_Ex_1_rule,
-  /*  623 */  tree_orI_orI_orI_reg_reg_Ex_0_rule,
-  /*  624 */  tree_orI_orI_orI_reg_reg_Ex_2_rule,
-  /*  625 */  orI_reg_uimm16_rule,
-  /*  626 */  orL_reg_reg_rule,
-  /*  627 */  orI_regL_regL_rule,
-  /*  628 */  orL_reg_uimm16_rule,
-  /*  629 */  xorI_reg_reg_rule,
-  /*  630 */  xorI_reg_reg_2_rule,
-  /*  631 */  tree_xorI_xorI_xorI_reg_reg_Ex_rule,
-  /*  632 */  tree_xorI_xorI_xorI_reg_reg_Ex_1_rule,
-  /*  633 */  tree_xorI_xorI_xorI_reg_reg_Ex_0_rule,
-  /*  634 */  tree_xorI_xorI_xorI_reg_reg_Ex_2_rule,
-  /*  635 */  xorI_reg_uimm16_rule,
-  /*  636 */  xorL_reg_reg_rule,
-  /*  637 */  xorI_regL_regL_rule,
-  /*  638 */  xorL_reg_uimm16_rule,
-  /*  639 */  notI_reg_rule,
-  /*  640 */  notL_reg_rule,
-  /*  641 */  andcI_reg_reg_rule,
-  /*  642 */  andcI_reg_reg_0_rule,
-  /*  643 */  andcL_reg_reg_rule,
-  /*  644 */  moveF2I_reg_stack_rule,
-  /*  645 */  moveI2F_reg_stack_rule,
-  /*  646 */  moveF2L_reg_stack_rule,
-  /*  647 */  moveD2L_reg_stack_rule,
-  /*  648 */  moveL2D_reg_stack_rule,
-  /*  649 */  convI2Bool_reg__cmove_rule,
-  /*  650 */  xorI_convI2Bool_reg_immIvalue1__cntlz_Ex_rule,
-  /*  651 */  xorI_convI2Bool_reg_immIvalue1__cmove_rule,
-  /*  652 */  convI2Bool_andI_reg_immIpowerOf2_rule,
-  /*  653 */  convP2Bool_reg__cmove_rule,
-  /*  654 */  xorI_convP2Bool_reg__cntlz_Ex_rule,
-  /*  655 */  xorI_convP2Bool_reg_immIvalue1__cmove_rule,
-  /*  656 */  cmpLTMask_reg_reg_Ex_rule,
-  /*  657 */  cmpLTMask_reg_immI0_rule,
-  /*  658 */  convB2I_reg_rule,
-  /*  659 */  convS2I_reg_rule,
-  /*  660 */  sxtI_L2L_reg_rule,
-  /*  661 */  convL2I_reg_rule,
-  /*  662 */  cmovI_bso_stackSlotL_rule,
-  /*  663 */  cmovI_bso_reg_rule,
-  /*  664 */  cmovI_bso_stackSlotL_conLvalue0_Ex_rule,
-  /*  665 */  cmovI_bso_reg_conLvalue0_Ex_rule,
-  /*  666 */  convD2I_reg_ExEx_rule,
-  /*  667 */  convD2I_reg_mffprd_ExEx_rule,
-  /*  668 */  convF2I_regF_ExEx_rule,
-  /*  669 */  convF2I_regF_mffprd_ExEx_rule,
-  /*  670 */  convI2L_reg_rule,
-  /*  671 */  zeroExtendL_regI_rule,
-  /*  672 */  zeroExtendL_regL_rule,
-  /*  673 */  cmovL_bso_stackSlotL_rule,
-  /*  674 */  cmovL_bso_reg_rule,
-  /*  675 */  cmovL_bso_stackSlotL_conLvalue0_Ex_rule,
-  /*  676 */  cmovL_bso_reg_conLvalue0_Ex_rule,
-  /*  677 */  convF2L_reg_ExEx_rule,
-  /*  678 */  convF2L_reg_mffprd_ExEx_rule,
-  /*  679 */  convD2L_reg_ExEx_rule,
-  /*  680 */  convD2L_reg_mffprd_ExEx_rule,
-  /*  681 */  convD2F_reg_rule,
-  /*  682 */  convI2F_ireg_Ex_rule,
-  /*  683 */  convI2F_ireg_fcfids_Ex_rule,
-  /*  684 */  convI2F_ireg_mtfprd_Ex_rule,
-  /*  685 */  convL2F_ireg_fcfids_Ex_rule,
-  /*  686 */  convL2F_ireg_mtfprd_Ex_rule,
-  /*  687 */  convI2D_reg_Ex_rule,
-  /*  688 */  convI2D_reg_mtfprd_Ex_rule,
-  /*  689 */  convL2D_reg_Ex_rule,
-  /*  690 */  convL2D_reg_mtfprd_Ex_rule,
-  /*  691 */  convF2D_reg_rule,
-  /*  692 */  cmpL3_reg_reg_ExEx_rule,
-  /*  693 */  rangeCheck_iReg_uimm15_rule,
-  /*  694 */  rangeCheck_iReg_iReg_rule,
-  /*  695 */  rangeCheck_uimm15_iReg_rule,
-  /*  696 */  zeroCheckN_iReg_imm0_rule,
-  /*  697 */  zeroCheckP_reg_imm0_rule,
-  /*  698 */  cmpF3_reg_reg_ExEx_rule,
-  /*  699 */  cmpD3_reg_reg_ExEx_rule,
-  /*  700 */  branch_rule,
-  /*  701 */  branchCon_rule,
-  /*  702 */  branchConFar_rule,
-  /*  703 */  branchConSched_rule,
-  /*  704 */  branchLoopEnd_rule,
-  /*  705 */  branchLoopEndFar_rule,
-  /*  706 */  branchLoopEndSched_rule,
-  /*  707 */  partialSubtypeCheck_rule,
-  /*  708 */  align_addr_rule,
-  /*  709 */  array_size_rule,
-  /*  710 */  inlineCallClearArrayShort_rule,
-  /*  711 */  inlineCallClearArrayLarge_rule,
-  /*  712 */  inlineCallClearArray_rule,
-  /*  713 */  string_compareL_rule,
-  /*  714 */  string_compareU_rule,
-  /*  715 */  string_compareLU_rule,
-  /*  716 */  string_compareUL_rule,
-  /*  717 */  string_equalsL_rule,
-  /*  718 */  string_equalsU_rule,
-  /*  719 */  array_equalsB_rule,
-  /*  720 */  array_equalsC_rule,
-  /*  721 */  indexOf_imm1_char_U_rule,
-  /*  722 */  indexOf_imm1_char_L_rule,
-  /*  723 */  indexOf_imm1_char_UL_rule,
-  /*  724 */  indexOf_imm1_U_rule,
-  /*  725 */  indexOf_imm1_L_rule,
-  /*  726 */  indexOf_imm1_UL_rule,
-  /*  727 */  indexOfChar_U_rule,
-  /*  728 */  indexOf_imm_U_rule,
-  /*  729 */  indexOf_imm_L_rule,
-  /*  730 */  indexOf_imm_UL_rule,
-  /*  731 */  indexOf_U_rule,
-  /*  732 */  indexOf_L_rule,
-  /*  733 */  indexOf_UL_rule,
-  /*  734 */  string_compress_rule,
-  /*  735 */  string_inflate_rule,
-  /*  736 */  has_negatives_rule,
-  /*  737 */  encode_iso_array_rule,
-  /*  738 */  minI_reg_reg_Ex_rule,
-  /*  739 */  minI_reg_reg_isel_rule,
-  /*  740 */  maxI_reg_reg_Ex_rule,
-  /*  741 */  maxI_reg_reg_isel_rule,
-  /*  742 */  insrwi_a_rule,
-  /*  743 */  insrwi_rule,
-  /*  744 */  bytes_reverse_int_Ex_rule,
-  /*  745 */  bytes_reverse_long_Ex_rule,
-  /*  746 */  bytes_reverse_ushort_Ex_rule,
-  /*  747 */  bytes_reverse_short_Ex_rule,
-  /*  748 */  loadI_reversed_rule,
-  /*  749 */  loadL_reversed_rule,
-  /*  750 */  loadUS_reversed_rule,
-  /*  751 */  loadS_reversed_rule,
-  /*  752 */  storeI_reversed_rule,
-  /*  753 */  storeL_reversed_rule,
-  /*  754 */  storeUS_reversed_rule,
-  /*  755 */  storeS_reversed_rule,
-  /*  756 */  xxspltw_rule,
-  /*  757 */  repl8B_reg_Ex_rule,
-  /*  758 */  repl8B_immI0_rule,
-  /*  759 */  repl8B_immIminus1_rule,
-  /*  760 */  repl16B_reg_Ex_rule,
-  /*  761 */  repl16B_immI0_rule,
-  /*  762 */  repl16B_immIminus1_rule,
-  /*  763 */  repl4S_reg_Ex_rule,
-  /*  764 */  repl4S_immI0_rule,
-  /*  765 */  repl4S_immIminus1_rule,
-  /*  766 */  repl8S_reg_Ex_rule,
-  /*  767 */  repl8S_immI0_rule,
-  /*  768 */  repl8S_immIminus1_rule,
-  /*  769 */  repl2I_reg_Ex_rule,
-  /*  770 */  repl2I_immI0_rule,
-  /*  771 */  repl2I_immIminus1_rule,
-  /*  772 */  repl4I_reg_Ex_rule,
-  /*  773 */  repl4I_immI0_rule,
-  /*  774 */  repl4I_immIminus1_rule,
-  /*  775 */  repl2F_reg_Ex_rule,
-  /*  776 */  repl2F_immF_Ex_rule,
-  /*  777 */  repl2F_immF0_rule,
-  /*  778 */  repl4F_reg_Ex_rule,
-  /*  779 */  repl4F_immF_Ex_rule,
-  /*  780 */  repl4F_immF0_rule,
-  /*  781 */  repl2D_reg_Ex_rule,
-  /*  782 */  repl2D_immI0_rule,
-  /*  783 */  repl2D_immIminus1_rule,
-  /*  784 */  xxspltd_rule,
-  /*  785 */  xxpermdi_rule,
-  /*  786 */  repl2L_reg_Ex_rule,
-  /*  787 */  repl2L_immI0_rule,
-  /*  788 */  repl2L_immIminus1_rule,
-  /*  789 */  safePoint_poll_rule,
-  /*  790 */  CallStaticJavaDirect_rule,
-  /*  791 */  CallDynamicJavaDirectSched_rule,
-  /*  792 */  CallDynamicJavaDirectSched_Ex_rule,
-  /*  793 */  CallDynamicJavaDirect_rule,
-  /*  794 */  CallRuntimeDirect_rule,
-  /*  795 */  CallLeafDirect_rule,
-  /*  796 */  CallLeafDirect_Ex_rule,
-  /*  797 */  CallLeafNoFPDirect_Ex_rule,
-  /*  798 */  TailCalljmpInd_rule,
-  /*  799 */  Ret_rule,
-  /*  800 */  tailjmpInd_rule,
-  /*  801 */  CreateException_rule,
-  /*  802 */  RethrowException_rule,
-  /*  803 */  ShouldNotReachHere_rule,
-  /*  804 */  endGroup_rule,
-  /*  805 */  fxNop_rule,
-  /*  806 */  fpNop0_rule,
-  /*  807 */  fpNop1_rule,
-  /*  808 */  brNop0_rule,
-  /*  809 */  brNop1_rule,
-  /*  810 */  brNop2_rule,
+  /*  225 */  regI_to_stkI_rule,
+  /*  226 */  regL_to_stkL_rule,
+  /*  227 */  loadConI16_rule,
+  /*  228 */  loadConIhi16_rule,
+  /*  229 */  loadConI32_rule,
+  /*  230 */  loadConI_Ex_rule,
+  /*  231 */  loadConL16_rule,
+  /*  232 */  loadConL32hi16_rule,
+  /*  233 */  loadConL32_Ex_rule,
+  /*  234 */  loadConL34_rule,
+  /*  235 */  loadConLhighest16_Ex_rule,
+  /*  236 */  loadConL_Ex_rule,
+  /*  237 */  loadConN0_rule,
+  /*  238 */  loadConN_Ex_rule,
+  /*  239 */  loadConNKlass_hi_rule,
+  /*  240 */  loadConNKlass_mask_rule,
+  /*  241 */  loadConNKlass_lo_rule,
+  /*  242 */  loadConNKlass_Ex_rule,
+  /*  243 */  loadConP0or1_rule,
+  /*  244 */  loadConP_rule,
+  /*  245 */  loadConP_lo_rule,
+  /*  246 */  loadConP_Ex_rule,
+  /*  247 */  loadConF_Ex_rule,
+  /*  248 */  loadConD_Ex_rule,
+  /*  249 */  stkI_to_regI_rule,
+  /*  250 */  stkL_to_regL_rule,
+  /*  251 */  convB2I_reg_2_rule,
+  /*  252 */  loadP2X_rule,
+  /*  253 */  loadToc_lo_rule,
+  /*  254 */  loadConN_hi_rule,
+  /*  255 */  clearMs32b_rule,
+  /*  256 */  reinterpretL_rule,
+  /*  257 */  reinterpretX_rule,
+  /*  258 */  signmask32I_regI_rule,
+  /*  259 */  absI_reg_Ex_rule,
+  /*  260 */  signmask64I_regL_rule,
+  /*  261 */  signmask64L_regL_rule,
+  /*  262 */  absL_reg_Ex_rule,
+  /*  263 */  absF_reg_rule,
+  /*  264 */  absD_reg_rule,
+  /*  265 */  negF_reg_rule,
+  /*  266 */  negD_reg_rule,
+  /*  267 */  negF_absF_reg_rule,
+  /*  268 */  negD_absD_reg_rule,
+  /*  269 */  roundDouble_nop_rule,
+  /*  270 */  roundFloat_nop_rule,
+  /*  271 */  moveL2D_reg_rule,
+  /*  272 */  moveI2D_reg_rule,
+  /*  273 */  moveF2I_stack_reg_rule,
+  /*  274 */  moveI2F_stack_reg_rule,
+  /*  275 */  moveD2L_stack_reg_rule,
+  /*  276 */  moveL2D_stack_reg_rule,
+  /*  277 */  moveReg_rule,
+  /*  278 */  castX2P_rule,
+  /*  279 */  castP2X_rule,
+  /*  280 */  castPP_rule,
+  /*  281 */  castII_rule,
+  /*  282 */  castLL_rule,
+  /*  283 */  castFF_rule,
+  /*  284 */  castDD_rule,
+  /*  285 */  castVV8_rule,
+  /*  286 */  castVV16_rule,
+  /*  287 */  checkCastPP_rule,
+  /*  288 */  convI2Bool_reg__cntlz_Ex_rule,
+  /*  289 */  convP2Bool_reg__cntlz_Ex_rule,
+  /*  290 */  extsh_rule,
+  /*  291 */  convD2IRaw_regD_rule,
+  /*  292 */  convF2IRaw_regF_rule,
+  /*  293 */  convF2LRaw_regF_rule,
+  /*  294 */  convD2LRaw_regD_rule,
+  /*  295 */  convL2DRaw_regD_rule,
+  /*  296 */  convL2FRaw_regF_rule,
+  /*  297 */  cmpI_reg_reg_rule,
+  /*  298 */  cmpI_reg_imm16_rule,
+  /*  299 */  testI_reg_imm_rule,
+  /*  300 */  cmpL_reg_reg_rule,
+  /*  301 */  cmpL_reg_imm16_rule,
+  /*  302 */  cmpUL_reg_reg_rule,
+  /*  303 */  cmpUL_reg_imm16_rule,
+  /*  304 */  testL_reg_reg_rule,
+  /*  305 */  testL_reg_imm_rule,
+  /*  306 */  compU_reg_reg_rule,
+  /*  307 */  compU_reg_uimm16_rule,
+  /*  308 */  cmpN_reg_reg_rule,
+  /*  309 */  cmpN_reg_imm0_rule,
+  /*  310 */  cmpP_reg_reg_rule,
+  /*  311 */  cmpP_reg_null_rule,
+  /*  312 */  cmpP_reg_imm16_rule,
+  /*  313 */  cmpFUnordered_reg_reg_rule,
+  /*  314 */  cmov_bns_less_rule,
+  /*  315 */  cmpF_reg_reg_Ex_rule,
+  /*  316 */  cmpDUnordered_reg_reg_rule,
+  /*  317 */  cmpD_reg_reg_Ex_rule,
+  /*  318 */  cmpFastLock_rule,
+  /*  319 */  cmpFastLock_tm_rule,
+  /*  320 */  cmpFastUnlock_rule,
+  /*  321 */  cmpFastUnlock_tm_rule,
+  /*  322 */  popCountI_rule,
+  /*  323 */  popCountL_rule,
+  /*  324 */  countLeadingZerosI_rule,
+  /*  325 */  countLeadingZerosL_rule,
+  /*  326 */  countLeadingZerosP_rule,
+  /*  327 */  countTrailingZerosI_Ex_rule,
+  /*  328 */  countTrailingZerosI_cnttzw_rule,
+  /*  329 */  countTrailingZerosL_Ex_rule,
+  /*  330 */  countTrailingZerosL_cnttzd_rule,
+  /*  331 */  mtvsrwz_rule,
+  /*  332 */  xscvdpspn_regF_rule,
+  /*  333 */  repl32_rule,
+  /*  334 */  repl48_rule,
+  /*  335 */  repl56_rule,
+  /*  336 */  repl8B_reg_Ex_rule,
+  /*  337 */  repl8B_immI0_rule,
+  /*  338 */  repl8B_immIminus1_rule,
+  /*  339 */  repl16B_reg_Ex_rule,
+  /*  340 */  repl16B_immI0_rule,
+  /*  341 */  repl16B_immIminus1_rule,
+  /*  342 */  repl4S_reg_Ex_rule,
+  /*  343 */  repl4S_immI0_rule,
+  /*  344 */  repl4S_immIminus1_rule,
+  /*  345 */  repl8S_reg_Ex_rule,
+  /*  346 */  repl8S_immI0_rule,
+  /*  347 */  repl8S_immIminus1_rule,
+  /*  348 */  repl2I_reg_Ex_rule,
+  /*  349 */  repl2I_immI0_rule,
+  /*  350 */  repl2I_immIminus1_rule,
+  /*  351 */  repl4I_reg_Ex_rule,
+  /*  352 */  repl4I_immI0_rule,
+  /*  353 */  repl4I_immIminus1_rule,
+  /*  354 */  repl2F_reg_Ex_rule,
+  /*  355 */  repl2F_immF_Ex_rule,
+  /*  356 */  repl2F_immF0_rule,
+  /*  357 */  vabs4F_reg_rule,
+  /*  358 */  vabs2D_reg_rule,
+  /*  359 */  vneg4F_reg_rule,
+  /*  360 */  vneg2D_reg_rule,
+  /*  361 */  vsqrt4F_reg_rule,
+  /*  362 */  vsqrt2D_reg_rule,
+  /*  363 */  vpopcnt_reg_rule,
+  /*  364 */  overflowAddL_reg_reg_rule,
+  /*  365 */  overflowSubL_reg_reg_rule,
+  /*  366 */  overflowNegL_reg_rule,
+  /*  367 */  overflowMulL_reg_reg_rule,
+  /*  368 */  repl4F_reg_Ex_rule,
+  /*  369 */  repl4F_immF0_rule,
+  /*  370 */  repl2D_reg_Ex_rule,
+  /*  371 */  repl2D_immD0_rule,
+  /*  372 */  mtvsrd_rule,
+  /*  373 */  repl2L_reg_Ex_rule,
+  /*  374 */  repl2L_immI0_rule,
+  /*  375 */  repl2L_immIminus1_rule,
+  /*  376 */  CallLeafDirect_mtctr_rule,
+  /*  377 */  tlsLoadP_rule,
+  /*  378 */  loadUB_indirect_rule,
+  /*  379 */  loadUB_indirect_ac_rule,
+  /*  380 */  loadB_indirect_Ex_rule,
+  /*  381 */  loadB_indirect_ac_Ex_rule,
+  /*  382 */  loadUB_indOffset16_rule,
+  /*  383 */  loadUB_indOffset16_ac_rule,
+  /*  384 */  loadB_indOffset16_Ex_rule,
+  /*  385 */  loadB_indOffset16_ac_Ex_rule,
+  /*  386 */  loadUB_rule,
+  /*  387 */  loadUB_ac_rule,
+  /*  388 */  loadUB2L_rule,
+  /*  389 */  loadUB2L_ac_rule,
+  /*  390 */  loadS_rule,
+  /*  391 */  loadS_ac_rule,
+  /*  392 */  loadUS_rule,
+  /*  393 */  loadUS_ac_rule,
+  /*  394 */  loadUS2L_rule,
+  /*  395 */  loadUS2L_ac_rule,
+  /*  396 */  loadI_rule,
+  /*  397 */  loadI_ac_rule,
+  /*  398 */  loadUI2L_rule,
+  /*  399 */  loadI2L_rule,
+  /*  400 */  loadI2L_ac_rule,
+  /*  401 */  loadL_rule,
+  /*  402 */  loadL_ac_rule,
+  /*  403 */  loadL_unaligned_rule,
+  /*  404 */  loadV8_rule,
+  /*  405 */  loadV16_rule,
+  /*  406 */  loadRange_rule,
+  /*  407 */  loadN_rule,
+  /*  408 */  loadN_ac_rule,
+  /*  409 */  loadN2P_unscaled_rule,
+  /*  410 */  loadN2P_klass_unscaled_rule,
+  /*  411 */  loadP_rule,
+  /*  412 */  loadP_ac_rule,
+  /*  413 */  loadNKlass_rule,
+  /*  414 */  loadKlass_rule,
+  /*  415 */  loadF_rule,
+  /*  416 */  loadF_ac_rule,
+  /*  417 */  loadD_rule,
+  /*  418 */  loadD_ac_rule,
+  /*  419 */  loadD_unaligned_rule,
+  /*  420 */  loadToc_hi_rule,
+  /*  421 */  loadConI32_lo16_rule,
+  /*  422 */  loadConL32_lo16_rule,
+  /*  423 */  loadConL_rule,
+  /*  424 */  loadConL_hi_rule,
+  /*  425 */  loadConL_lo_rule,
+  /*  426 */  loadConN_lo_rule,
+  /*  427 */  rldicl_rule,
+  /*  428 */  loadBase_rule,
+  /*  429 */  loadConP_hi_rule,
+  /*  430 */  loadConF_rule,
+  /*  431 */  loadConFComp_rule,
+  /*  432 */  loadConD_rule,
+  /*  433 */  loadConDComp_rule,
+  /*  434 */  prefetch_alloc_zero_rule,
+  /*  435 */  prefetch_alloc_zero_no_offset_rule,
+  /*  436 */  prefetch_alloc_rule,
+  /*  437 */  prefetch_alloc_no_offset_rule,
+  /*  438 */  storeB_rule,
+  /*  439 */  storeC_rule,
+  /*  440 */  storeI_rule,
+  /*  441 */  storeI_convL2I_rule,
+  /*  442 */  storeL_rule,
+  /*  443 */  storeA8B_rule,
+  /*  444 */  storeV16_rule,
+  /*  445 */  storeN_rule,
+  /*  446 */  storeNKlass_rule,
+  /*  447 */  storeP_rule,
+  /*  448 */  storeF_rule,
+  /*  449 */  storeD_rule,
+  /*  450 */  storeCM_rule,
+  /*  451 */  encodeP_shift_rule,
+  /*  452 */  encodeP_sub_rule,
+  /*  453 */  cond_sub_base_rule,
+  /*  454 */  cond_set_0_oop_rule,
+  /*  455 */  encodeP_Disjoint_rule,
+  /*  456 */  encodeP_Ex_rule,
+  /*  457 */  encodeP_not_null_Ex_rule,
+  /*  458 */  encodeP_not_null_base_null_rule,
+  /*  459 */  encodeP_narrow_oop_shift_0_rule,
+  /*  460 */  decodeN_shift_rule,
+  /*  461 */  decodeN_add_rule,
+  /*  462 */  cond_add_base_rule,
+  /*  463 */  cond_set_0_ptr_rule,
+  /*  464 */  decodeN_Ex_rule,
+  /*  465 */  decodeN_nullBase_rule,
+  /*  466 */  decodeN_mergeDisjoint_rule,
+  /*  467 */  decodeN_Disjoint_notNull_Ex_rule,
+  /*  468 */  decodeN_Disjoint_isel_Ex_rule,
+  /*  469 */  decodeN_notNull_addBase_Ex_rule,
+  /*  470 */  decodeN_unscaled_rule,
+  /*  471 */  decodeN2I_unscaled_rule,
+  /*  472 */  encodePKlass_shift_rule,
+  /*  473 */  encodePKlass_sub_base_rule,
+  /*  474 */  encodePKlass_Disjoint_rule,
+  /*  475 */  encodePKlass_not_null_Ex_rule,
+  /*  476 */  encodePKlass_not_null_ExEx_rule,
+  /*  477 */  decodeNKlass_shift_rule,
+  /*  478 */  decodeNKlass_add_base_rule,
+  /*  479 */  decodeNKlass_notNull_addBase_Ex_rule,
+  /*  480 */  decodeNKlass_notNull_addBase_ExEx_rule,
+  /*  481 */  membar_acquire_rule,
+  /*  482 */  unnecessary_membar_acquire_rule,
+  /*  483 */  membar_acquire_lock_rule,
+  /*  484 */  membar_release_rule,
+  /*  485 */  membar_release_0_rule,
+  /*  486 */  membar_storestore_rule,
+  /*  487 */  membar_storestore_0_rule,
+  /*  488 */  membar_release_lock_rule,
+  /*  489 */  membar_volatile_rule,
+  /*  490 */  membar_CPUOrder_rule,
+  /*  491 */  cmovI_reg_isel_rule,
+  /*  492 */  cmovI_reg_rule,
+  /*  493 */  cmovI_imm_rule,
+  /*  494 */  cmovL_reg_isel_rule,
+  /*  495 */  cmovL_reg_rule,
+  /*  496 */  cmovL_imm_rule,
+  /*  497 */  cmovN_reg_isel_rule,
+  /*  498 */  cmovN_reg_rule,
+  /*  499 */  cmovN_imm_rule,
+  /*  500 */  cmovP_reg_isel_rule,
+  /*  501 */  cmovP_reg_rule,
+  /*  502 */  cmovP_imm_rule,
+  /*  503 */  cmovF_reg_rule,
+  /*  504 */  cmovD_reg_rule,
+  /*  505 */  compareAndSwapB_regP_regI_regI_rule,
+  /*  506 */  compareAndSwapB4_regP_regI_regI_rule,
+  /*  507 */  compareAndSwapS_regP_regI_regI_rule,
+  /*  508 */  compareAndSwapS4_regP_regI_regI_rule,
+  /*  509 */  compareAndSwapI_regP_regI_regI_rule,
+  /*  510 */  compareAndSwapN_regP_regN_regN_rule,
+  /*  511 */  compareAndSwapL_regP_regL_regL_rule,
+  /*  512 */  compareAndSwapP_regP_regP_regP_rule,
+  /*  513 */  weakCompareAndSwapB_regP_regI_regI_rule,
+  /*  514 */  weakCompareAndSwapB4_regP_regI_regI_rule,
+  /*  515 */  weakCompareAndSwapB_acq_regP_regI_regI_rule,
+  /*  516 */  weakCompareAndSwapB4_acq_regP_regI_regI_rule,
+  /*  517 */  weakCompareAndSwapS_regP_regI_regI_rule,
+  /*  518 */  weakCompareAndSwapS4_regP_regI_regI_rule,
+  /*  519 */  weakCompareAndSwapS_acq_regP_regI_regI_rule,
+  /*  520 */  weakCompareAndSwapS4_acq_regP_regI_regI_rule,
+  /*  521 */  weakCompareAndSwapI_regP_regI_regI_rule,
+  /*  522 */  weakCompareAndSwapI_acq_regP_regI_regI_rule,
+  /*  523 */  weakCompareAndSwapN_regP_regN_regN_rule,
+  /*  524 */  weakCompareAndSwapN_acq_regP_regN_regN_rule,
+  /*  525 */  weakCompareAndSwapL_regP_regL_regL_rule,
+  /*  526 */  weakCompareAndSwapL_acq_regP_regL_regL_rule,
+  /*  527 */  weakCompareAndSwapP_regP_regP_regP_rule,
+  /*  528 */  weakCompareAndSwapP_acq_regP_regP_regP_rule,
+  /*  529 */  compareAndExchangeB_regP_regI_regI_rule,
+  /*  530 */  compareAndExchangeB4_regP_regI_regI_rule,
+  /*  531 */  compareAndExchangeB_acq_regP_regI_regI_rule,
+  /*  532 */  compareAndExchangeB4_acq_regP_regI_regI_rule,
+  /*  533 */  compareAndExchangeS_regP_regI_regI_rule,
+  /*  534 */  compareAndExchangeS4_regP_regI_regI_rule,
+  /*  535 */  compareAndExchangeS_acq_regP_regI_regI_rule,
+  /*  536 */  compareAndExchangeS4_acq_regP_regI_regI_rule,
+  /*  537 */  compareAndExchangeI_regP_regI_regI_rule,
+  /*  538 */  compareAndExchangeI_acq_regP_regI_regI_rule,
+  /*  539 */  compareAndExchangeN_regP_regN_regN_rule,
+  /*  540 */  compareAndExchangeN_acq_regP_regN_regN_rule,
+  /*  541 */  compareAndExchangeL_regP_regL_regL_rule,
+  /*  542 */  compareAndExchangeL_acq_regP_regL_regL_rule,
+  /*  543 */  compareAndExchangeP_regP_regP_regP_rule,
+  /*  544 */  compareAndExchangeP_acq_regP_regP_regP_rule,
+  /*  545 */  getAndAddB_rule,
+  /*  546 */  getAndAddB4_rule,
+  /*  547 */  getAndAddS_rule,
+  /*  548 */  getAndAddS4_rule,
+  /*  549 */  getAndAddI_rule,
+  /*  550 */  getAndAddL_rule,
+  /*  551 */  getAndSetB_rule,
+  /*  552 */  getAndSetB4_rule,
+  /*  553 */  getAndSetS_rule,
+  /*  554 */  getAndSetS4_rule,
+  /*  555 */  getAndSetI_rule,
+  /*  556 */  getAndSetL_rule,
+  /*  557 */  getAndSetP_rule,
+  /*  558 */  getAndSetN_rule,
+  /*  559 */  addI_reg_reg_rule,
+  /*  560 */  addI_reg_reg_2_rule,
+  /*  561 */  tree_addI_addI_addI_reg_reg_Ex_rule,
+  /*  562 */  tree_addI_addI_addI_reg_reg_Ex_1_rule,
+  /*  563 */  tree_addI_addI_addI_reg_reg_Ex_0_rule,
+  /*  564 */  tree_addI_addI_addI_reg_reg_Ex_2_rule,
+  /*  565 */  addI_reg_imm16_rule,
+  /*  566 */  addI_reg_immhi16_rule,
+  /*  567 */  addI_reg_imm32_rule,
+  /*  568 */  addL_reg_reg_rule,
+  /*  569 */  addL_reg_reg_2_rule,
+  /*  570 */  tree_addL_addL_addL_reg_reg_Ex_rule,
+  /*  571 */  tree_addL_addL_addL_reg_reg_Ex_1_rule,
+  /*  572 */  tree_addL_addL_addL_reg_reg_Ex_0_rule,
+  /*  573 */  tree_addL_addL_addL_reg_reg_Ex_2_rule,
+  /*  574 */  addI_regL_regL_rule,
+  /*  575 */  addL_reg_imm16_rule,
+  /*  576 */  addL_reg_immhi16_rule,
+  /*  577 */  addL_reg_imm34_rule,
+  /*  578 */  addP_reg_reg_rule,
+  /*  579 */  addP_reg_imm16_rule,
+  /*  580 */  addP_reg_immhi16_rule,
+  /*  581 */  addP_reg_imm34_rule,
+  /*  582 */  subI_reg_reg_rule,
+  /*  583 */  subI_imm16_reg_rule,
+  /*  584 */  negI_regI_rule,
+  /*  585 */  subL_reg_reg_rule,
+  /*  586 */  subI_regL_regL_rule,
+  /*  587 */  negL_reg_reg_rule,
+  /*  588 */  negI_con0_regL_rule,
+  /*  589 */  mulI_reg_reg_rule,
+  /*  590 */  mulI_reg_imm16_rule,
+  /*  591 */  mulL_reg_reg_rule,
+  /*  592 */  mulHighL_reg_reg_rule,
+  /*  593 */  mulL_reg_imm16_rule,
+  /*  594 */  divI_reg_immIvalueMinus1_rule,
+  /*  595 */  divI_reg_regnotMinus1_rule,
+  /*  596 */  cmovI_bne_negI_reg_rule,
+  /*  597 */  divI_reg_reg_Ex_rule,
+  /*  598 */  divL_reg_immLvalueMinus1_rule,
+  /*  599 */  divL_reg_regnotMinus1_rule,
+  /*  600 */  cmovL_bne_negL_reg_rule,
+  /*  601 */  divL_reg_reg_Ex_rule,
+  /*  602 */  modI_reg_reg_Ex_rule,
+  /*  603 */  modL_reg_reg_Ex_rule,
+  /*  604 */  udivI_reg_reg_rule,
+  /*  605 */  umodI_reg_reg_rule,
+  /*  606 */  udivL_reg_reg_rule,
+  /*  607 */  umodL_reg_reg_rule,
+  /*  608 */  maskI_reg_imm_rule,
+  /*  609 */  lShiftI_reg_reg_rule,
+  /*  610 */  lShiftI_reg_reg_Ex_rule,
+  /*  611 */  lShiftI_reg_imm_rule,
+  /*  612 */  lShiftI_andI_immInegpow2_imm5_rule,
+  /*  613 */  lShiftI_andI_immInegpow2_rShiftI_imm5_rule,
+  /*  614 */  lShiftL_regL_regI_rule,
+  /*  615 */  lShiftL_regL_regI_Ex_rule,
+  /*  616 */  lshiftL_regL_immI_rule,
+  /*  617 */  lShiftL_regI_immGE32_rule,
+  /*  618 */  scaledPositiveI2L_lShiftL_convI2L_reg_imm6_rule,
+  /*  619 */  arShiftI_reg_reg_rule,
+  /*  620 */  arShiftI_reg_reg_Ex_rule,
+  /*  621 */  arShiftI_reg_imm_rule,
+  /*  622 */  arShiftL_regL_regI_rule,
+  /*  623 */  arShiftL_regL_regI_Ex_rule,
+  /*  624 */  arShiftL_regL_immI_rule,
+  /*  625 */  convL2I_arShiftL_regL_immI_rule,
+  /*  626 */  urShiftI_reg_reg_rule,
+  /*  627 */  urShiftI_reg_reg_Ex_rule,
+  /*  628 */  urShiftI_reg_imm_rule,
+  /*  629 */  urShiftL_regL_regI_rule,
+  /*  630 */  urShiftL_regL_regI_Ex_rule,
+  /*  631 */  urShiftL_regL_immI_rule,
+  /*  632 */  convL2I_urShiftL_regL_immI_rule,
+  /*  633 */  shrP_convP2X_reg_imm6_rule,
+  /*  634 */  andI_urShiftI_regI_immI_immIpow2minus1_rule,
+  /*  635 */  andL_urShiftL_regL_immI_immLpow2minus1_rule,
+  /*  636 */  sxtI_reg_rule,
+  /*  637 */  rotlI_reg_immi8_rule,
+  /*  638 */  rotlI_reg_immi8_0_rule,
+  /*  639 */  rotrI_reg_immi8_rule,
+  /*  640 */  rotrI_reg_immi8_0_rule,
+  /*  641 */  addF_reg_reg_rule,
+  /*  642 */  addD_reg_reg_rule,
+  /*  643 */  subF_reg_reg_rule,
+  /*  644 */  subD_reg_reg_rule,
+  /*  645 */  mulF_reg_reg_rule,
+  /*  646 */  mulD_reg_reg_rule,
+  /*  647 */  divF_reg_reg_rule,
+  /*  648 */  divD_reg_reg_rule,
+  /*  649 */  sqrtD_reg_rule,
+  /*  650 */  sqrtF_reg_rule,
+  /*  651 */  maddF_reg_reg_rule,
+  /*  652 */  maddD_reg_reg_rule,
+  /*  653 */  mnsubF_reg_reg_rule,
+  /*  654 */  mnsubF_reg_reg_0_rule,
+  /*  655 */  mnsubD_reg_reg_rule,
+  /*  656 */  mnsubD_reg_reg_0_rule,
+  /*  657 */  mnaddF_reg_reg_rule,
+  /*  658 */  mnaddF_reg_reg_0_rule,
+  /*  659 */  mnaddD_reg_reg_rule,
+  /*  660 */  mnaddD_reg_reg_0_rule,
+  /*  661 */  msubF_reg_reg_rule,
+  /*  662 */  msubD_reg_reg_rule,
+  /*  663 */  andI_reg_reg_rule,
+  /*  664 */  andI_reg_immIhi16_rule,
+  /*  665 */  andI_reg_uimm16_rule,
+  /*  666 */  andI_reg_immInegpow2_rule,
+  /*  667 */  andI_reg_immIpow2minus1_rule,
+  /*  668 */  andI_reg_immIpowerOf2_rule,
+  /*  669 */  andL_reg_reg_rule,
+  /*  670 */  andL_reg_uimm16_rule,
+  /*  671 */  andL_reg_immLnegpow2_rule,
+  /*  672 */  andL_reg_immLpow2minus1_rule,
+  /*  673 */  convL2I_andL_reg_immLpow2minus1_rule,
+  /*  674 */  orI_reg_reg_rule,
+  /*  675 */  orI_reg_reg_2_rule,
+  /*  676 */  tree_orI_orI_orI_reg_reg_Ex_rule,
+  /*  677 */  tree_orI_orI_orI_reg_reg_Ex_1_rule,
+  /*  678 */  tree_orI_orI_orI_reg_reg_Ex_0_rule,
+  /*  679 */  tree_orI_orI_orI_reg_reg_Ex_2_rule,
+  /*  680 */  orI_reg_uimm16_rule,
+  /*  681 */  orL_reg_reg_rule,
+  /*  682 */  orI_regL_regL_rule,
+  /*  683 */  orL_reg_uimm16_rule,
+  /*  684 */  xorI_reg_reg_rule,
+  /*  685 */  xorI_reg_reg_2_rule,
+  /*  686 */  tree_xorI_xorI_xorI_reg_reg_Ex_rule,
+  /*  687 */  tree_xorI_xorI_xorI_reg_reg_Ex_1_rule,
+  /*  688 */  tree_xorI_xorI_xorI_reg_reg_Ex_0_rule,
+  /*  689 */  tree_xorI_xorI_xorI_reg_reg_Ex_2_rule,
+  /*  690 */  xorI_reg_uimm16_rule,
+  /*  691 */  xorL_reg_reg_rule,
+  /*  692 */  xorI_regL_regL_rule,
+  /*  693 */  xorL_reg_uimm16_rule,
+  /*  694 */  notI_reg_rule,
+  /*  695 */  notL_reg_rule,
+  /*  696 */  andcI_reg_reg_rule,
+  /*  697 */  andcI_reg_reg_0_rule,
+  /*  698 */  andcL_reg_reg_rule,
+  /*  699 */  moveF2I_reg_stack_rule,
+  /*  700 */  moveI2F_reg_stack_rule,
+  /*  701 */  moveF2L_reg_stack_rule,
+  /*  702 */  moveD2L_reg_stack_rule,
+  /*  703 */  moveL2D_reg_stack_rule,
+  /*  704 */  convI2Bool_reg__cmove_rule,
+  /*  705 */  xorI_convI2Bool_reg_immIvalue1__cntlz_Ex_rule,
+  /*  706 */  xorI_convI2Bool_reg_immIvalue1__cmove_rule,
+  /*  707 */  convI2Bool_andI_reg_immIpowerOf2_rule,
+  /*  708 */  convP2Bool_reg__cmove_rule,
+  /*  709 */  xorI_convP2Bool_reg__cntlz_Ex_rule,
+  /*  710 */  xorI_convP2Bool_reg_immIvalue1__cmove_rule,
+  /*  711 */  cmpLTMask_reg_reg_Ex_rule,
+  /*  712 */  cmpLTMask_reg_immI0_rule,
+  /*  713 */  convB2I_reg_rule,
+  /*  714 */  convS2I_reg_rule,
+  /*  715 */  sxtI_L2L_reg_rule,
+  /*  716 */  convL2I_reg_rule,
+  /*  717 */  cmovI_bso_stackSlotL_rule,
+  /*  718 */  cmovI_bso_reg_rule,
+  /*  719 */  cmovI_bso_stackSlotL_conLvalue0_Ex_rule,
+  /*  720 */  cmovI_bso_reg_conLvalue0_Ex_rule,
+  /*  721 */  convD2I_reg_ExEx_rule,
+  /*  722 */  convD2I_reg_mffprd_ExEx_rule,
+  /*  723 */  convF2I_regF_ExEx_rule,
+  /*  724 */  convF2I_regF_mffprd_ExEx_rule,
+  /*  725 */  convI2L_reg_rule,
+  /*  726 */  zeroExtendL_regI_rule,
+  /*  727 */  zeroExtendL_regL_rule,
+  /*  728 */  cmovL_bso_stackSlotL_rule,
+  /*  729 */  cmovL_bso_reg_rule,
+  /*  730 */  cmovL_bso_stackSlotL_conLvalue0_Ex_rule,
+  /*  731 */  cmovL_bso_reg_conLvalue0_Ex_rule,
+  /*  732 */  convF2L_reg_ExEx_rule,
+  /*  733 */  convF2L_reg_mffprd_ExEx_rule,
+  /*  734 */  convD2L_reg_ExEx_rule,
+  /*  735 */  convD2L_reg_mffprd_ExEx_rule,
+  /*  736 */  convD2F_reg_rule,
+  /*  737 */  convI2F_ireg_Ex_rule,
+  /*  738 */  convI2F_ireg_fcfids_Ex_rule,
+  /*  739 */  convI2F_ireg_mtfprd_Ex_rule,
+  /*  740 */  convL2F_ireg_fcfids_Ex_rule,
+  /*  741 */  convL2F_ireg_mtfprd_Ex_rule,
+  /*  742 */  convI2D_reg_Ex_rule,
+  /*  743 */  convI2D_reg_mtfprd_Ex_rule,
+  /*  744 */  convL2D_reg_Ex_rule,
+  /*  745 */  convL2D_reg_mtfprd_Ex_rule,
+  /*  746 */  convF2D_reg_rule,
+  /*  747 */  cmpL3_reg_reg_rule,
+  /*  748 */  rangeCheck_iReg_uimm15_rule,
+  /*  749 */  rangeCheck_iReg_iReg_rule,
+  /*  750 */  rangeCheck_uimm15_iReg_rule,
+  /*  751 */  zeroCheckN_iReg_imm0_rule,
+  /*  752 */  zeroCheckP_reg_imm0_rule,
+  /*  753 */  cmpF3_reg_reg_rule,
+  /*  754 */  cmpD3_reg_reg_rule,
+  /*  755 */  cmprb_Digit_reg_reg_rule,
+  /*  756 */  cmprb_LowerCase_reg_reg_rule,
+  /*  757 */  cmprb_UpperCase_reg_reg_rule,
+  /*  758 */  cmprb_Whitespace_reg_reg_rule,
+  /*  759 */  cmprb_Whitespace_reg_reg_prefixed_rule,
+  /*  760 */  branch_rule,
+  /*  761 */  branchCon_rule,
+  /*  762 */  branchConFar_rule,
+  /*  763 */  branchLoopEnd_rule,
+  /*  764 */  branchLoopEndFar_rule,
+  /*  765 */  partialSubtypeCheck_rule,
+  /*  766 */  align_addr_rule,
+  /*  767 */  array_size_rule,
+  /*  768 */  inlineCallClearArrayShort_rule,
+  /*  769 */  inlineCallClearArrayLarge_rule,
+  /*  770 */  inlineCallClearArray_rule,
+  /*  771 */  string_compareL_rule,
+  /*  772 */  string_compareU_rule,
+  /*  773 */  string_compareLU_rule,
+  /*  774 */  string_compareUL_rule,
+  /*  775 */  string_equalsL_rule,
+  /*  776 */  string_equalsU_rule,
+  /*  777 */  array_equalsB_rule,
+  /*  778 */  array_equalsC_rule,
+  /*  779 */  indexOf_imm1_char_U_rule,
+  /*  780 */  indexOf_imm1_char_L_rule,
+  /*  781 */  indexOf_imm1_char_UL_rule,
+  /*  782 */  indexOf_imm1_U_rule,
+  /*  783 */  indexOf_imm1_L_rule,
+  /*  784 */  indexOf_imm1_UL_rule,
+  /*  785 */  indexOfChar_U_rule,
+  /*  786 */  indexOfChar_L_rule,
+  /*  787 */  indexOf_imm_U_rule,
+  /*  788 */  indexOf_imm_L_rule,
+  /*  789 */  indexOf_imm_UL_rule,
+  /*  790 */  indexOf_U_rule,
+  /*  791 */  indexOf_L_rule,
+  /*  792 */  indexOf_UL_rule,
+  /*  793 */  string_compress_rule,
+  /*  794 */  string_inflate_rule,
+  /*  795 */  count_positives_rule,
+  /*  796 */  encode_iso_array_rule,
+  /*  797 */  encode_ascii_array_rule,
+  /*  798 */  minI_reg_reg_Ex_rule,
+  /*  799 */  minI_reg_reg_isel_rule,
+  /*  800 */  maxI_reg_reg_Ex_rule,
+  /*  801 */  maxI_reg_reg_isel_rule,
+  /*  802 */  insrwi_a_rule,
+  /*  803 */  insrwi_rule,
+  /*  804 */  bytes_reverse_int_Ex_rule,
+  /*  805 */  bytes_reverse_int_vec_rule,
+  /*  806 */  bytes_reverse_int_rule,
+  /*  807 */  bytes_reverse_long_Ex_rule,
+  /*  808 */  bytes_reverse_long_vec_rule,
+  /*  809 */  bytes_reverse_long_rule,
+  /*  810 */  bytes_reverse_ushort_Ex_rule,
+  /*  811 */  bytes_reverse_ushort_rule,
+  /*  812 */  bytes_reverse_short_Ex_rule,
+  /*  813 */  bytes_reverse_short_rule,
+  /*  814 */  loadI_reversed_rule,
+  /*  815 */  loadI_reversed_acquire_rule,
+  /*  816 */  loadL_reversed_rule,
+  /*  817 */  loadL_reversed_acquire_rule,
+  /*  818 */  loadUS_reversed_rule,
+  /*  819 */  loadUS_reversed_acquire_rule,
+  /*  820 */  loadS_reversed_rule,
+  /*  821 */  loadS_reversed_acquire_rule,
+  /*  822 */  storeI_reversed_rule,
+  /*  823 */  storeL_reversed_rule,
+  /*  824 */  storeUS_reversed_rule,
+  /*  825 */  storeS_reversed_rule,
+  /*  826 */  xxspltw_rule,
+  /*  827 */  vadd16B_reg_rule,
+  /*  828 */  vadd8S_reg_rule,
+  /*  829 */  vadd4I_reg_rule,
+  /*  830 */  vadd4F_reg_rule,
+  /*  831 */  vadd2L_reg_rule,
+  /*  832 */  vadd2D_reg_rule,
+  /*  833 */  vsub16B_reg_rule,
+  /*  834 */  vsub8S_reg_rule,
+  /*  835 */  vsub4I_reg_rule,
+  /*  836 */  vsub4F_reg_rule,
+  /*  837 */  vsub2L_reg_rule,
+  /*  838 */  vsub2D_reg_rule,
+  /*  839 */  vmul8S_reg_rule,
+  /*  840 */  vmul4I_reg_rule,
+  /*  841 */  vmul4F_reg_rule,
+  /*  842 */  vmul2D_reg_rule,
+  /*  843 */  vdiv4F_reg_rule,
+  /*  844 */  vdiv2D_reg_rule,
+  /*  845 */  roundD_reg_rule,
+  /*  846 */  vround2D_reg_rule,
+  /*  847 */  vfma4F_rule,
+  /*  848 */  vfma4F_neg1_rule,
+  /*  849 */  vfma4F_neg1_0_rule,
+  /*  850 */  vfma4F_neg2_rule,
+  /*  851 */  vfma2D_rule,
+  /*  852 */  vfma2D_neg1_rule,
+  /*  853 */  vfma2D_neg1_0_rule,
+  /*  854 */  vfma2D_neg2_rule,
+  /*  855 */  repl4F_immF_Ex_rule,
+  /*  856 */  xxspltd_rule,
+  /*  857 */  xxpermdi_rule,
+  /*  858 */  safePoint_poll_rule,
+  /*  859 */  CallStaticJavaDirect_rule,
+  /*  860 */  CallDynamicJavaDirectSched_rule,
+  /*  861 */  CallDynamicJavaDirectSched_Ex_rule,
+  /*  862 */  CallDynamicJavaDirect_rule,
+  /*  863 */  CallRuntimeDirect_rule,
+  /*  864 */  CallLeafDirect_rule,
+  /*  865 */  CallLeafDirect_Ex_rule,
+  /*  866 */  CallLeafNoFPDirect_Ex_rule,
+  /*  867 */  TailCalljmpInd_rule,
+  /*  868 */  Ret_rule,
+  /*  869 */  tailjmpInd_rule,
+  /*  870 */  CreateException_rule,
+  /*  871 */  RethrowException_rule,
+  /*  872 */  ShouldNotReachHere_rule,
+  /*  873 */  endGroup_rule,
+  /*  874 */  fxNop_rule,
+  /*  875 */  fpNop0_rule,
+  /*  876 */  fpNop1_rule,
+  /*  877 */  brNop0_rule,
+  /*  878 */  brNop1_rule,
+  /*  879 */  brNop2_rule,
+  /*  880 */  cacheWB_rule,
+  /*  881 */  cacheWBPreSync_rule,
+  /*  882 */  cacheWBPostSync_rule,
+  /*  883 */  compareAndSwapP_shenandoah_rule,
+  /*  884 */  compareAndSwapP_shenandoah_0_rule,
+  /*  885 */  compareAndSwapN_shenandoah_rule,
+  /*  886 */  compareAndSwapN_shenandoah_0_rule,
+  /*  887 */  compareAndSwapP_acq_shenandoah_rule,
+  /*  888 */  compareAndSwapP_acq_shenandoah_0_rule,
+  /*  889 */  compareAndSwapN_acq_shenandoah_rule,
+  /*  890 */  compareAndSwapN_acq_shenandoah_0_rule,
+  /*  891 */  compareAndExchangeP_shenandoah_rule,
+  /*  892 */  compareAndExchangeN_shenandoah_rule,
+  /*  893 */  compareAndExchangePAcq_shenandoah_rule,
+  /*  894 */  compareAndExchangeNAcq_shenandoah_rule,
+  /*  895 */  zLoadP_rule,
+  /*  896 */  zLoadP_acq_rule,
+  /*  897 */  zCompareAndSwapP_rule,
+  /*  898 */  zCompareAndSwapP_acq_rule,
+  /*  899 */  zCompareAndSwapPWeak_rule,
+  /*  900 */  zCompareAndSwapPWeak_acq_rule,
+  /*  901 */  zCompareAndExchangeP_rule,
+  /*  902 */  zCompareAndExchangeP_acq_rule,
+  /*  903 */  zGetAndSetP_rule,
   // last instruction
-  _BEGIN_INST_CHAIN_RULE = 219,
-  _END_INST_CHAIN_RULE  = 243,
-  _BEGIN_REMATERIALIZE   = 221,
-  _END_REMATERIALIZE    = 328,
-  _last_Mach_Node  = 811 
+  _BEGIN_INST_CHAIN_RULE = 225,
+  _END_INST_CHAIN_RULE  = 251,
+  _BEGIN_REMATERIALIZE   = 227,
+  _END_REMATERIALIZE    = 378,
+  _last_Mach_Node  = 904 
 };
 
 // Enumerate machine registers starting after reserved regs.
@@ -1367,15 +1468,9 @@ enum machPipelineResources {
 
 // MACROS to inline and constant fold State::valid(index)...
 // when given a constant 'index' in dfa_<arch>.cpp
-//   uint word   = index >> 5;       // Shift out bit position
-//   uint bitpos = index & 0x0001F;  // Mask off word bits
-#define STATE__VALID(index)     (_valid[((uint)index) >> 5] &  (0x1 << (((uint)index) & 0x0001F)))
+#define STATE__NOT_YET_VALID(index)   ( (_rule[index] & 0x1) == 0 )
 
-#define STATE__NOT_YET_VALID(index)   ( (_valid[((uint)index) >> 5] &  (0x1 << (((uint)index) & 0x0001F))) == 0 )
-
-#define STATE__VALID_CHILD(state,index)   ( state && (state->_valid[((uint)index) >> 5] &  (0x1 << (((uint)index) & 0x0001F))) )
-
-#define STATE__SET_VALID(index)   (_valid[((uint)index) >> 5] |= (0x1 << (((uint)index) & 0x0001F)))
+#define STATE__VALID_CHILD(state,index)   ( state && (state->_rule[index] & 0x1) )
 
 //---------------------------State-------------------------------------------
 // State contains an integral cost vector, indexed by machine operand opcodes,
@@ -1383,17 +1478,18 @@ enum machPipelineResources {
 // indexed by machine operand opcodes, pointers to the children in the label
 // tree generated by the Label routines in ideal nodes (currently limited to
 // two for convenience, but this could change).
-class State : public ResourceObj {
+class State : public ArenaObj {
+private:
+  unsigned int _cost[_LAST_MACH_OPER];  // Costs, indexed by operand opcodes
+  uint16_t     _rule[_LAST_MACH_OPER];  // Rule and validity, indexed by operand opcodes
+                                        // Lowest bit encodes validity
 public:
-  int    _id;         // State identifier
-  Node  *_leaf;       // Ideal (non-machine-node) leaf of match tree
-  State *_kids[2];       // Children of state node in label tree
-  unsigned int _cost[_LAST_MACH_OPER];  // Cost vector, indexed by operand opcodes
-  unsigned int _rule[_LAST_MACH_OPER];  // Rule vector, indexed by operand opcodes
-  unsigned int _valid[(_LAST_MACH_OPER/32)+1]; // Bit Map of valid Cost/Rule entries
+  int    _id;                           // State identifier
+  Node  *_leaf;                         // Ideal (non-machine-node) leaf of match tree
+  State *_kids[2];                      // Children of state node in label tree
 
-  State(void);                      // Constructor
-  DEBUG_ONLY( ~State(void); )       // Destructor
+  State(void);
+  DEBUG_ONLY( ~State(void); )
 
   // Methods created by ADLC and invoked by Reduce
   MachOper *MachOperGenerator(int opcode);
@@ -1402,14 +1498,14 @@ public:
   // Assign a state to a node, definition of method produced by ADLC
   bool DFA( int opcode, const Node *ideal );
 
-  // Access function for _valid bit vector
   bool valid(uint index) {
-    return( STATE__VALID(index) != 0 );
+    return _rule[index] & 0x1;
   }
-
-  // Set function for _valid bit vector
-  void set_valid(uint index) {
-    STATE__SET_VALID(index);
+  unsigned int rule(uint index) {
+    return _rule[index] >> 1;
+  }
+  unsigned int cost(uint index) {
+    return _cost[index];
   }
 
 #ifndef PRODUCT
@@ -1422,11 +1518,12 @@ public:
   void  _sub_Op_RegF(const Node *n);
   void  _sub_Op_RegD(const Node *n);
   void  _sub_Op_RegL(const Node *n);
-  void  _sub_Op_RegFlags(const Node *n);
   void  _sub_Op_VecX(const Node *n);
+  void  _sub_Op_RegFlags(const Node *n);
   void  _sub_Op_AbsD(const Node *n);
   void  _sub_Op_AbsF(const Node *n);
   void  _sub_Op_AbsI(const Node *n);
+  void  _sub_Op_AbsL(const Node *n);
   void  _sub_Op_AddD(const Node *n);
   void  _sub_Op_AddF(const Node *n);
   void  _sub_Op_AddI(const Node *n);
@@ -1441,12 +1538,19 @@ public:
   void  _sub_Op_ReverseBytesL(const Node *n);
   void  _sub_Op_ReverseBytesUS(const Node *n);
   void  _sub_Op_ReverseBytesS(const Node *n);
+  void  _sub_Op_CacheWB(const Node *n);
+  void  _sub_Op_CacheWBPreSync(const Node *n);
+  void  _sub_Op_CacheWBPostSync(const Node *n);
   void  _sub_Op_CallDynamicJava(const Node *n);
   void  _sub_Op_CallLeaf(const Node *n);
   void  _sub_Op_CallLeafNoFP(const Node *n);
   void  _sub_Op_CallRuntime(const Node *n);
   void  _sub_Op_CallStaticJava(const Node *n);
+  void  _sub_Op_CastDD(const Node *n);
+  void  _sub_Op_CastFF(const Node *n);
   void  _sub_Op_CastII(const Node *n);
+  void  _sub_Op_CastLL(const Node *n);
+  void  _sub_Op_CastVV(const Node *n);
   void  _sub_Op_CastX2P(const Node *n);
   void  _sub_Op_CastP2X(const Node *n);
   void  _sub_Op_CastPP(const Node *n);
@@ -1530,6 +1634,8 @@ public:
   void  _sub_Op_DivF(const Node *n);
   void  _sub_Op_DivI(const Node *n);
   void  _sub_Op_DivL(const Node *n);
+  void  _sub_Op_UDivI(const Node *n);
+  void  _sub_Op_UDivL(const Node *n);
   void  _sub_Op_EncodeISOArray(const Node *n);
   void  _sub_Op_EncodeP(const Node *n);
   void  _sub_Op_EncodePKlass(const Node *n);
@@ -1539,7 +1645,7 @@ public:
   void  _sub_Op_FmaF(const Node *n);
   void  _sub_Op_Goto(const Node *n);
   void  _sub_Op_Halt(const Node *n);
-  void  _sub_Op_HasNegatives(const Node *n);
+  void  _sub_Op_CountPositives(const Node *n);
   void  _sub_Op_If(const Node *n);
   void  _sub_Op_LShiftI(const Node *n);
   void  _sub_Op_LShiftL(const Node *n);
@@ -1554,7 +1660,6 @@ public:
   void  _sub_Op_LoadNKlass(const Node *n);
   void  _sub_Op_LoadL(const Node *n);
   void  _sub_Op_LoadL_unaligned(const Node *n);
-  void  _sub_Op_LoadPLocked(const Node *n);
   void  _sub_Op_LoadP(const Node *n);
   void  _sub_Op_LoadN(const Node *n);
   void  _sub_Op_LoadRange(const Node *n);
@@ -1566,12 +1671,15 @@ public:
   void  _sub_Op_MemBarCPUOrder(const Node *n);
   void  _sub_Op_MemBarRelease(const Node *n);
   void  _sub_Op_StoreFence(const Node *n);
+  void  _sub_Op_StoreStoreFence(const Node *n);
   void  _sub_Op_MemBarReleaseLock(const Node *n);
   void  _sub_Op_MemBarVolatile(const Node *n);
   void  _sub_Op_MemBarStoreStore(const Node *n);
   void  _sub_Op_MinI(const Node *n);
   void  _sub_Op_ModI(const Node *n);
   void  _sub_Op_ModL(const Node *n);
+  void  _sub_Op_UModI(const Node *n);
+  void  _sub_Op_UModL(const Node *n);
   void  _sub_Op_MoveI2F(const Node *n);
   void  _sub_Op_MoveF2I(const Node *n);
   void  _sub_Op_MoveL2D(const Node *n);
@@ -1591,20 +1699,28 @@ public:
   void  _sub_Op_PartialSubtypeCheck(const Node *n);
   void  _sub_Op_PopCountI(const Node *n);
   void  _sub_Op_PopCountL(const Node *n);
+  void  _sub_Op_PopCountVI(const Node *n);
   void  _sub_Op_PrefetchAllocation(const Node *n);
   void  _sub_Op_RShiftI(const Node *n);
   void  _sub_Op_RShiftL(const Node *n);
   void  _sub_Op_Rethrow(const Node *n);
   void  _sub_Op_Return(const Node *n);
   void  _sub_Op_RoundDouble(const Node *n);
+  void  _sub_Op_RoundDoubleMode(const Node *n);
+  void  _sub_Op_RoundDoubleModeV(const Node *n);
   void  _sub_Op_RoundFloat(const Node *n);
   void  _sub_Op_SafePoint(const Node *n);
+  void  _sub_Op_ShenandoahCompareAndExchangeP(const Node *n);
+  void  _sub_Op_ShenandoahCompareAndExchangeN(const Node *n);
+  void  _sub_Op_ShenandoahCompareAndSwapN(const Node *n);
+  void  _sub_Op_ShenandoahCompareAndSwapP(const Node *n);
+  void  _sub_Op_ShenandoahWeakCompareAndSwapN(const Node *n);
+  void  _sub_Op_ShenandoahWeakCompareAndSwapP(const Node *n);
   void  _sub_Op_SqrtD(const Node *n);
+  void  _sub_Op_SqrtF(const Node *n);
   void  _sub_Op_StoreB(const Node *n);
   void  _sub_Op_StoreC(const Node *n);
   void  _sub_Op_StoreCM(const Node *n);
-  void  _sub_Op_StorePConditional(const Node *n);
-  void  _sub_Op_StoreLConditional(const Node *n);
   void  _sub_Op_StoreD(const Node *n);
   void  _sub_Op_StoreF(const Node *n);
   void  _sub_Op_StoreI(const Node *n);
@@ -1629,6 +1745,32 @@ public:
   void  _sub_Op_URShiftL(const Node *n);
   void  _sub_Op_XorI(const Node *n);
   void  _sub_Op_XorL(const Node *n);
+  void  _sub_Op_AddVB(const Node *n);
+  void  _sub_Op_AddVS(const Node *n);
+  void  _sub_Op_AddVI(const Node *n);
+  void  _sub_Op_AddVL(const Node *n);
+  void  _sub_Op_AddVF(const Node *n);
+  void  _sub_Op_AddVD(const Node *n);
+  void  _sub_Op_SubVB(const Node *n);
+  void  _sub_Op_SubVS(const Node *n);
+  void  _sub_Op_SubVI(const Node *n);
+  void  _sub_Op_SubVL(const Node *n);
+  void  _sub_Op_SubVF(const Node *n);
+  void  _sub_Op_SubVD(const Node *n);
+  void  _sub_Op_MulVS(const Node *n);
+  void  _sub_Op_MulVI(const Node *n);
+  void  _sub_Op_MulVF(const Node *n);
+  void  _sub_Op_MulVD(const Node *n);
+  void  _sub_Op_FmaVD(const Node *n);
+  void  _sub_Op_FmaVF(const Node *n);
+  void  _sub_Op_DivVF(const Node *n);
+  void  _sub_Op_DivVD(const Node *n);
+  void  _sub_Op_AbsVF(const Node *n);
+  void  _sub_Op_AbsVD(const Node *n);
+  void  _sub_Op_NegVF(const Node *n);
+  void  _sub_Op_NegVD(const Node *n);
+  void  _sub_Op_SqrtVD(const Node *n);
+  void  _sub_Op_SqrtVF(const Node *n);
   void  _sub_Op_LoadVector(const Node *n);
   void  _sub_Op_StoreVector(const Node *n);
   void  _sub_Op_ReplicateB(const Node *n);
@@ -1637,16 +1779,21 @@ public:
   void  _sub_Op_ReplicateL(const Node *n);
   void  _sub_Op_ReplicateF(const Node *n);
   void  _sub_Op_ReplicateD(const Node *n);
+  void  _sub_Op_Digit(const Node *n);
+  void  _sub_Op_LowerCase(const Node *n);
+  void  _sub_Op_UpperCase(const Node *n);
+  void  _sub_Op_Whitespace(const Node *n);
+  void  _sub_Op_VectorReinterpret(const Node *n);
 };
 
 
 
 // Total number of operands defined in architecture definition
-#define FIRST_OPERAND_CLASS   108
-#define NUM_OPERANDS          114
+#define FIRST_OPERAND_CLASS   109
+#define NUM_OPERANDS          115
 
 // Total number of instructions defined in architecture definition
-#define NUM_INSTRUCTIONS   517
+#define NUM_INSTRUCTIONS   605
 
 //----------------------------Declare classes derived from MachOper----------
 
@@ -1880,6 +2027,30 @@ public:
    st->print("/0x%08x", _c0);
   }
   virtual const char    *Name() const { return "immIhi16";}
+#endif
+};
+
+class immI32Oper : public MachOper { 
+private:
+  virtual uint           num_edges() const { return 0; }
+  int32_t        _c0;
+public:
+  immI32Oper(int32_t c0)  : _c0(c0) {}
+  virtual MachOper      *clone() const;
+  virtual void set_con( jint c0 ) { _c0 = c0; }
+  virtual uint           opcode() const { return IMMI32; }
+  virtual const Type    *type() const { return TypeInt::INT; }
+
+  virtual intptr_t       constant() const { return (intptr_t)_c0;  }
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual void           dump_spec(outputStream *st) const {
+   st->print("#%d", _c0);
+   st->print("/0x%08x", _c0);
+  }
+  virtual const char    *Name() const { return "immI32";}
 #endif
 };
 
@@ -2398,7 +2569,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL";}
 #endif
@@ -2423,7 +2594,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immLmax30";}
 #endif
@@ -2448,7 +2619,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL16";}
 #endif
@@ -2473,7 +2644,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL16Alg4";}
 #endif
@@ -2498,7 +2669,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL32hi16";}
 #endif
@@ -2523,9 +2694,34 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL32";}
+#endif
+};
+
+class immL34Oper : public MachOper { 
+private:
+  virtual uint           num_edges() const { return 0; }
+  jlong          _c0;
+public:
+  immL34Oper(jlong c0)  : _c0(c0) {}
+  virtual MachOper      *clone() const;
+  virtual void set_con( jint c0 ) { _c0 = c0; }
+  virtual uint           opcode() const { return IMML34; }
+  virtual const Type    *type() const { return TypeLong::LONG; }
+
+  virtual intptr_t       constant() const {  return (intptr_t)_c0; }
+  virtual jlong          constantL() const { return _c0; }
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual void           dump_spec(outputStream *st) const {
+    st->print("#" INT64_FORMAT, (int64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
+  }
+  virtual const char    *Name() const { return "immL34";}
 #endif
 };
 
@@ -2548,7 +2744,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immLhighest16";}
 #endif
@@ -2573,7 +2769,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immLnegpow2";}
 #endif
@@ -2598,7 +2794,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immLpow2minus1";}
 #endif
@@ -2623,7 +2819,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL_0";}
 #endif
@@ -2648,7 +2844,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL_minus1";}
 #endif
@@ -2673,7 +2869,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "immL_32bits";}
 #endif
@@ -2698,7 +2894,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "uimmL16";}
 #endif
@@ -2773,9 +2969,34 @@ public:
   virtual void           dump_spec(outputStream *st) const {
     st->print("#%f", _c0);
     jlong _c0l = JavaValue(_c0).get_jlong();
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0l);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0l);
   }
   virtual const char    *Name() const { return "immD";}
+#endif
+};
+
+class immD_0Oper : public MachOper { 
+private:
+  virtual uint           num_edges() const { return 0; }
+  jdouble        _c0;
+public:
+  immD_0Oper(jdouble c0)  : _c0(c0) {}
+  virtual MachOper      *clone() const;
+  virtual uint           opcode() const { return IMMD_0; }
+  virtual const Type    *type() const { return Type::DOUBLE; }
+
+  virtual intptr_t       constant() const { ShouldNotReachHere(); return 0;  }
+  virtual jdouble        constantD() const { return _c0; }
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual void           dump_spec(outputStream *st) const {
+    st->print("#%f", _c0);
+    jlong _c0l = JavaValue(_c0).get_jlong();
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0l);
+  }
+  virtual const char    *Name() const { return "immD_0";}
 #endif
 };
 
@@ -3423,40 +3644,6 @@ public:
 #endif
 };
 
-class compiler_method_oop_regPOper : public MachOper { 
-private:
-  virtual const RegMask *in_RegMask(int index) const;
-public:
-  compiler_method_oop_regPOper() {}
-  virtual MachOper      *clone() const;
-  virtual uint           opcode() const { return COMPILER_METHOD_OOP_REGP; }
-  virtual const Type    *type() const { return TypePtr::BOTTOM; }
-
-
-#ifndef PRODUCT
-  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
-  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
-  virtual const char    *Name() const { return "compiler_method_oop_regP";}
-#endif
-};
-
-class interpreter_method_oop_regPOper : public MachOper { 
-private:
-  virtual const RegMask *in_RegMask(int index) const;
-public:
-  interpreter_method_oop_regPOper() {}
-  virtual MachOper      *clone() const;
-  virtual uint           opcode() const { return INTERPRETER_METHOD_OOP_REGP; }
-  virtual const Type    *type() const { return TypePtr::BOTTOM; }
-
-
-#ifndef PRODUCT
-  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
-  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
-  virtual const char    *Name() const { return "interpreter_method_oop_regP";}
-#endif
-};
-
 class iRegP2NOper : public MachOper { 
 private:
   virtual const RegMask *in_RegMask(int index) const;
@@ -3571,7 +3758,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "indOffset16";}
 #endif
@@ -3612,7 +3799,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "indOffset16Alg4";}
 #endif
@@ -3719,7 +3906,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "indOffset16Narrow";}
 #endif
@@ -3760,7 +3947,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "indOffset16Narrow_klass";}
 #endif
@@ -3801,7 +3988,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "indOffset16NarrowAlg4";}
 #endif
@@ -3842,7 +4029,7 @@ public:
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual void           dump_spec(outputStream *st) const {
     st->print("#" INT64_FORMAT, (int64_t)_c0);
-    st->print("/" PTR64_FORMAT, (uint64_t)_c0);
+    st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c0);
   }
   virtual const char    *Name() const { return "indOffset16NarrowAlg4_klass";}
 #endif
@@ -4105,11 +4292,6 @@ public:
 
   Pipeline_Use_Cycle_Mask(uint mask) : _mask(mask) {}
 
-  Pipeline_Use_Cycle_Mask& operator=(const Pipeline_Use_Cycle_Mask &in) {
-    _mask = in._mask;
-    return *this;
-  }
-
   bool overlaps(const Pipeline_Use_Cycle_Mask &in2) const {
     return ((_mask & in2._mask) != 0);
   }
@@ -4283,19 +4465,19 @@ public:
            enum machPipelineStages * const stage,
            uint                    * const cycles,
            Pipeline_Use                    resource_use)
-  : _write_stage(write_stage)
-  , _read_stage_count(count)
-  , _has_fixed_latency(has_fixed_latency)
+  : _read_stage_count(count)
+  , _write_stage(write_stage)
   , _fixed_latency(fixed_latency)
-  , _read_stages(dst)
-  , _resource_stage(stage)
-  , _resource_cycles(cycles)
-  , _resource_use(resource_use)
   , _instruction_count(instruction_count)
+  , _has_fixed_latency(has_fixed_latency)
   , _has_branch_delay(has_branch_delay)
   , _has_multiple_bundles(has_multiple_bundles)
   , _force_serialization(force_serialization)
   , _may_have_no_code(may_have_no_code)
+  , _read_stages(dst)
+  , _resource_stage(stage)
+  , _resource_cycles(cycles)
+  , _resource_use(resource_use)
   {};
 
   uint writeStage() const {
@@ -4430,9 +4612,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convB2I_reg_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convB2I_reg_2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -4460,9 +4642,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB_indirect_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB_indirect_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadB; }
@@ -4492,9 +4674,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB_indirect_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB_indirect_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadB; }
@@ -4524,9 +4706,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadB_indirect_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadB_indirect_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_LoadB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -4553,9 +4735,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadB_indirect_ac_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadB_indirect_ac_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_LoadB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -4582,9 +4764,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB_indOffset16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB_indOffset16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadB; }
@@ -4613,9 +4795,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB_indOffset16_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB_indOffset16_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadB; }
@@ -4644,9 +4826,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadB_indOffset16_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadB_indOffset16_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_LoadB; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -4672,9 +4854,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadB_indOffset16_ac_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadB_indOffset16_ac_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_LoadB; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -4700,9 +4882,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadUB; }
@@ -4732,9 +4914,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadUB; }
@@ -4764,9 +4946,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB2L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -4796,9 +4978,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUB2L_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUB2L_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -4828,9 +5010,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadS_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadS; }
@@ -4860,9 +5042,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadS_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadS_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadS; }
@@ -4892,9 +5074,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUS_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadUS; }
@@ -4924,9 +5106,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUS_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUS_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadUS; }
@@ -4956,9 +5138,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUS2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUS2L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -4988,9 +5170,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUS2L_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUS2L_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -5020,13 +5202,13 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadI; }
-  virtual MachNode      *peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted);
+  virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -5053,9 +5235,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadI_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadI_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadI; }
@@ -5085,9 +5267,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUI2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUI2L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -5117,9 +5299,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadI2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadI2L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -5149,9 +5331,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadI2L_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadI2L_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -5181,13 +5363,13 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadL; }
-  virtual MachNode      *peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted);
+  virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -5214,9 +5396,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadL_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadL_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadL; }
@@ -5246,9 +5428,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadL_unaligned_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadL_unaligned_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadL_unaligned; }
@@ -5278,9 +5460,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadV8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadV8_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVector; }
@@ -5310,9 +5492,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadV16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadV16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVector; }
@@ -5341,9 +5523,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadRange_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadRange_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadRange; }
@@ -5373,9 +5555,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadN; }
@@ -5405,9 +5587,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadN_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadN_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadN; }
@@ -5437,9 +5619,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadN2P_unscaled_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadN2P_unscaled_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -5469,9 +5651,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadN2P_klass_unscaled_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadN2P_klass_unscaled_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeNKlass; }
@@ -5501,13 +5683,13 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadP; }
-  virtual MachNode      *peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted);
+  virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -5534,9 +5716,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadP_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadP_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadP; }
@@ -5566,9 +5748,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadP2X_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadP2X_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastP2X; }
@@ -5599,9 +5781,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadNKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadNKlass_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadNKlass; }
@@ -5631,9 +5813,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadKlass_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadKlass; }
@@ -5663,9 +5845,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadF_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadF; }
@@ -5695,9 +5877,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadF_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadF_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadF; }
@@ -5729,9 +5911,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadD_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadD; }
@@ -5761,9 +5943,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadD_ac_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadD_ac_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadD; }
@@ -5795,9 +5977,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadD_unaligned_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadD_unaligned_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadD_unaligned; }
@@ -5827,9 +6009,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadToc_hi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadToc_hi_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -5856,9 +6038,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadToc_lo_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadToc_lo_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -5886,9 +6068,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConI16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConI16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConI; }
@@ -5920,9 +6102,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConIhi16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConIhi16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConI; }
@@ -5954,9 +6136,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConI32_lo16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConI32_lo16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -5968,6 +6150,43 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "loadConI32_lo16";}
+#endif
+};
+
+class loadConI32Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadConI32_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ins_alignment() const { return 2; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConI; }
+  virtual int            alignment_required() const { return 2; }
+  virtual int            compute_padding(int current_offset) const;
+public:
+  loadConI32Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
+  virtual uint           size_of() const { return sizeof(loadConI32Node); }
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  // Rematerialize loadConI32
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const class Type *bottom_type() const {
+    return  TypeInt::make(opnd_array(1)->constant());
+  };
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadConI32";}
 #endif
 };
 
@@ -5983,9 +6202,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConI_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConI_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConI; }
 public:
   loadConI_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -6014,9 +6233,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConL; }
@@ -6048,9 +6267,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL32hi16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL32hi16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConL; }
@@ -6082,9 +6301,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL32_lo16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL32_lo16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -6111,9 +6330,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL32_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL32_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConL; }
 public:
   loadConL32_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -6130,6 +6349,43 @@ public:
 #endif
 };
 
+class loadConL34Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadConL34_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ins_alignment() const { return 2; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConL; }
+  virtual int            alignment_required() const { return 2; }
+  virtual int            compute_padding(int current_offset) const;
+public:
+  loadConL34Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
+  virtual uint           size_of() const { return sizeof(loadConL34Node); }
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  // Rematerialize loadConL34
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const class Type *bottom_type() const {
+    return  TypeLong::make(opnd_array(1)->constantL());
+  };
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadConL34";}
+#endif
+};
+
 class loadConLhighest16_ExNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -6142,9 +6398,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConLhighest16_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConLhighest16_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConL; }
 public:
   loadConLhighest16_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -6174,9 +6430,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6206,9 +6462,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL_hi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL_hi_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6237,9 +6493,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL_lo_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL_lo_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -6266,9 +6522,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConL_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConL_Ex_rule; }
   virtual void           eval_constant(Compile* C);
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
@@ -6301,9 +6557,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConN0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConN0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConN; }
@@ -6335,9 +6591,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConN_hi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConN_hi_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -6365,9 +6621,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConN_lo_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConN_lo_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -6394,9 +6650,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rldicl_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rldicl_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -6423,9 +6679,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return clearMs32b_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return clearMs32b_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -6453,9 +6709,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadBase_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadBase_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
 public:
   loadBaseNode() {  _num_opnds = 1; _opnds = _opnd_array; }
@@ -6481,9 +6737,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConN_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConN_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_ConN; }
@@ -6513,9 +6769,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConNKlass_hi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConNKlass_hi_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConNKlass; }
@@ -6547,9 +6803,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConNKlass_mask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConNKlass_mask_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConNKlass; }
@@ -6582,9 +6838,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConNKlass_lo_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConNKlass_lo_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConNKlass; }
@@ -6617,9 +6873,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConNKlass_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConNKlass_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_ConNKlass; }
@@ -6649,9 +6905,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConP0or1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConP0or1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConP; }
@@ -6684,9 +6940,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConP_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6722,9 +6978,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConP_hi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConP_hi_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6753,9 +7009,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConP_lo_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConP_lo_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConP; }
@@ -6789,9 +7045,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConP_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConP_Ex_rule; }
   virtual int            ins_cannot_rematerialize() const { return true; }
   virtual void           eval_constant(Compile* C);
   virtual bool           requires_postalloc_expand() const { return true; }
@@ -6826,9 +7082,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConF_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6857,9 +7113,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConFComp_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConFComp_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6888,9 +7144,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConF_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConF_Ex_rule; }
   virtual int            ins_cannot_rematerialize() const { return true; }
   virtual void           eval_constant(Compile* C);
   virtual bool           requires_postalloc_expand() const { return true; }
@@ -6925,9 +7181,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConD_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6956,9 +7212,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConDComp_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConDComp_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -6987,9 +7243,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadConD_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadConD_Ex_rule; }
   virtual int            ins_cannot_rematerialize() const { return true; }
   virtual void           eval_constant(Compile* C);
   virtual bool           requires_postalloc_expand() const { return true; }
@@ -7024,9 +7280,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return prefetch_alloc_zero_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return prefetch_alloc_zero_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
@@ -7056,9 +7312,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return prefetch_alloc_zero_no_offset_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return prefetch_alloc_zero_no_offset_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
@@ -7088,9 +7344,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return prefetch_alloc_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return prefetch_alloc_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
@@ -7120,9 +7376,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return prefetch_alloc_no_offset_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return prefetch_alloc_no_offset_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
@@ -7152,9 +7408,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeB_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
@@ -7184,9 +7440,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeC_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeC_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreC; }
@@ -7216,9 +7472,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
@@ -7248,9 +7504,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeI_convL2I_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeI_convL2I_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
@@ -7280,9 +7536,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
@@ -7312,9 +7568,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeA8B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeA8B_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVector; }
@@ -7344,9 +7600,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeV16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeV16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVector; }
@@ -7363,6 +7619,68 @@ public:
 #endif
 };
 
+class reinterpretLNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return reinterpretL_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  reinterpretLNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(reinterpretLNode); }
+  // Rematerialize reinterpretL
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "reinterpretL";}
+#endif
+};
+
+class reinterpretXNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return reinterpretX_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  reinterpretXNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(reinterpretXNode); }
+  // Rematerialize reinterpretX
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "reinterpretX";}
+#endif
+};
+
 class storeNNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[3];
@@ -7375,9 +7693,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreN; }
@@ -7407,9 +7725,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeNKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeNKlass_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreNKlass; }
@@ -7439,9 +7757,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreP; }
@@ -7471,9 +7789,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeF_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreF; }
@@ -7503,9 +7821,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeD_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreD; }
@@ -7523,41 +7841,7 @@ public:
 #endif
 };
 
-class storeCM_CMSNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeCM_CMS_rule; }
-  virtual int            ins_cannot_rematerialize() const { return true; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_StoreCM; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  storeCM_CMSNode() {  _num_opnds = 4; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(storeCM_CMSNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "storeCM_CMS";}
-#endif
-};
-
-class storeCM_CMS_ExExNode : public MachTypeNode { 
+class storeCMNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -7569,53 +7853,23 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeCM_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeCM_CMS_ExEx_rule; }
-  virtual int            ideal_Opcode() const { return Op_StoreCM; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  storeCM_CMS_ExExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(storeCM_CMS_ExExNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "storeCM_CMS_ExEx";}
-#endif
-};
-
-class storeCM_G1Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeCM_G1_rule; }
-  virtual int            ins_cannot_rematerialize() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreCM; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  storeCM_G1Node() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(storeCM_G1Node); }
+  storeCMNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(storeCMNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "storeCM_G1";}
+  virtual const char    *Name() const { return "storeCM";}
 #endif
 };
 
@@ -7631,9 +7885,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodeP_shift_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodeP_shift_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
@@ -7661,9 +7915,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodeP_sub_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodeP_sub_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
   virtual uint           oper_input_base() const { return 1; }
@@ -7690,9 +7944,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cond_sub_base_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cond_sub_base_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
   virtual uint           oper_input_base() const { return 1; }
@@ -7719,9 +7973,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cond_set_0_oop_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cond_set_0_oop_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
@@ -7749,9 +8003,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodeP_Disjoint_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodeP_Disjoint_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
@@ -7779,9 +8033,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodeP_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodeP_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
@@ -7809,9 +8063,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodeP_not_null_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodeP_not_null_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
@@ -7837,9 +8091,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodeP_not_null_base_null_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodeP_not_null_base_null_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
@@ -7867,9 +8121,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodeP_narrow_oop_shift_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodeP_narrow_oop_shift_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
   virtual uint           oper_input_base() const { return 1; }
@@ -7896,9 +8150,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_shift_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_shift_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -7926,9 +8180,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_add_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_add_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
   virtual uint           oper_input_base() const { return 1; }
@@ -7955,9 +8209,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cond_add_base_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cond_add_base_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
   virtual uint           oper_input_base() const { return 1; }
@@ -7984,9 +8238,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cond_set_0_ptr_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cond_set_0_ptr_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -8014,9 +8268,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -8044,9 +8298,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_nullBase_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_nullBase_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -8074,9 +8328,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_mergeDisjoint_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_mergeDisjoint_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -8106,9 +8360,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_Disjoint_notNull_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_Disjoint_notNull_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -8137,9 +8391,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_Disjoint_isel_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_Disjoint_isel_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -8168,9 +8422,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_notNull_addBase_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_notNull_addBase_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
@@ -8196,9 +8450,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN_unscaled_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN_unscaled_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
   virtual uint           oper_input_base() const { return 1; }
@@ -8225,9 +8479,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeN2I_unscaled_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeN2I_unscaled_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
 public:
@@ -8253,9 +8507,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodePKlass_shift_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodePKlass_shift_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodePKlass; }
@@ -8283,9 +8537,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodePKlass_sub_base_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodePKlass_sub_base_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodePKlass; }
@@ -8313,9 +8567,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodePKlass_Disjoint_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodePKlass_Disjoint_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodePKlass; }
@@ -8343,9 +8597,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodePKlass_not_null_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodePKlass_not_null_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_EncodePKlass; }
@@ -8371,9 +8625,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encodePKlass_not_null_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encodePKlass_not_null_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_EncodePKlass; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -8398,9 +8652,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeNKlass_shift_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeNKlass_shift_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeNKlass; }
@@ -8428,9 +8682,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeNKlass_add_base_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeNKlass_add_base_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeNKlass; }
@@ -8458,9 +8712,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeNKlass_notNull_addBase_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeNKlass_notNull_addBase_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_DecodeNKlass; }
@@ -8486,9 +8740,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return decodeNKlass_notNull_addBase_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return decodeNKlass_notNull_addBase_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_DecodeNKlass; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -8501,7 +8755,7 @@ public:
 #endif
 };
 
-class membar_acquireNode : public MachNode { 
+class membar_acquireNode : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8513,27 +8767,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_acquire_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return membar_acquire_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadFence; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_acquireNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_acquireNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "membar_acquire";}
 #endif
 };
 
-class unnecessary_membar_acquireNode : public MachNode { 
+class unnecessary_membar_acquireNode : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8545,27 +8798,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return unnecessary_membar_acquire_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return unnecessary_membar_acquire_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarAcquire; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   unnecessary_membar_acquireNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(unnecessary_membar_acquireNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "unnecessary_membar_acquire";}
 #endif
 };
 
-class membar_acquire_lockNode : public MachNode { 
+class membar_acquire_lockNode : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8577,27 +8829,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_acquire_lock_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return membar_acquire_lock_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarAcquireLock; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_acquire_lockNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_acquire_lockNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "membar_acquire_lock";}
 #endif
 };
 
-class membar_releaseNode : public MachNode { 
+class membar_releaseNode : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8609,27 +8860,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_release_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return membar_release_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarRelease; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_releaseNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_releaseNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "membar_release";}
 #endif
 };
 
-class membar_release_0Node : public MachNode { 
+class membar_release_0Node : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8641,27 +8891,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_release_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return membar_release_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreFence; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_release_0Node() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_release_0Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "membar_release_0";}
 #endif
 };
 
-class membar_storestoreNode : public MachNode { 
+class membar_storestoreNode : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8673,27 +8922,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_storestore_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return membar_storestore_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarStoreStore; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_storestoreNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_storestoreNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "membar_storestore";}
 #endif
 };
 
-class membar_release_lockNode : public MachNode { 
+class membar_storestore_0Node : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8705,27 +8953,57 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_storestore_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StoreStoreFence; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  membar_storestore_0Node() {  _num_opnds = 1; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(membar_storestore_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "membar_storestore_0";}
+#endif
+};
+
+class membar_release_lockNode : public MachMemBarNode { 
+private:
+  MachOper *_opnd_array[1];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
   virtual uint           rule() const { return membar_release_lock_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarReleaseLock; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_release_lockNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_release_lockNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "membar_release_lock";}
 #endif
 };
 
-class membar_volatileNode : public MachNode { 
+class membar_volatileNode : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8737,27 +9015,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_volatile_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return membar_volatile_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarVolatile; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_volatileNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_volatileNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
   const Type            *bottom_type() const { return TypeTuple::MEMBAR; } // matched MemBar
-  virtual const TypePtr *adr_type() const;
-  virtual const MachOper *memory_operand() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "membar_volatile";}
 #endif
 };
 
-class membar_CPUOrderNode : public MachNode { 
+class membar_CPUOrderNode : public MachMemBarNode { 
 private:
   MachOper *_opnd_array[1];
 public:
@@ -8769,12 +9046,13 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return membar_CPUOrder_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return membar_CPUOrder_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarCPUOrder; }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   membar_CPUOrderNode() {  _num_opnds = 1; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(membar_CPUOrderNode); }
@@ -8799,9 +9077,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_reg_isel_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_reg_isel_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
@@ -8829,9 +9107,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -8860,9 +9138,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_imm_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -8891,9 +9169,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_reg_isel_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_reg_isel_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
@@ -8921,9 +9199,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -8952,9 +9230,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_imm_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -8983,9 +9261,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovN_reg_isel_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovN_reg_isel_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveN; }
@@ -9014,9 +9292,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovN_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovN_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -9046,9 +9324,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovN_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovN_imm_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -9078,9 +9356,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovP_reg_isel_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovP_reg_isel_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveP; }
@@ -9109,9 +9387,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovP_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovP_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -9142,9 +9420,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovP_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovP_imm_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -9175,9 +9453,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovF_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -9206,9 +9484,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovD_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -9225,102 +9503,6 @@ public:
 #endif
 };
 
-class storeLConditional_regP_regL_regLNode : public MachNode { 
-private:
-  MachOper *_opnd_array[5];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeLConditional_regP_regL_regL_rule; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_StoreLConditional; }
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  storeLConditional_regP_regL_regLNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(storeLConditional_regP_regL_regLNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  // Rematerialize storeLConditional_regP_regL_regL
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "storeLConditional_regP_regL_regL";}
-#endif
-};
-
-class storePConditional_regP_regP_regPNode : public MachNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storePConditional_regP_regP_regP_rule; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_StorePConditional; }
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  storePConditional_regP_regP_regPNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(storePConditional_regP_regP_regPNode); }
-  // Rematerialize storePConditional_regP_regP_regP
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "storePConditional_regP_regP_regP";}
-#endif
-};
-
-class loadPLockedNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadPLocked_rule; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual uint           size(PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadPLocked; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  loadPLockedNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(loadPLockedNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "loadPLocked";}
-#endif
-};
-
 class compareAndSwapB_regP_regI_regINode : public MachNode { 
 private:
   MachOper *_opnd_array[6];
@@ -9333,9 +9515,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapB_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapB_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9365,9 +9547,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapB4_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapB4_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9397,9 +9579,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapS_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapS_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9429,9 +9611,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapS4_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapS4_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9461,9 +9643,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapI_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapI_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9493,9 +9675,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapN_regP_regN_regN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapN_regP_regN_regN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9525,9 +9707,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapL_regP_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapL_regP_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9557,9 +9739,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndSwapP_regP_regP_regP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndSwapP_regP_regP_regP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9589,9 +9771,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapB_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapB_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9621,9 +9803,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapB4_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapB4_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9653,9 +9835,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapB_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapB_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9685,9 +9867,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapB4_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapB4_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9717,9 +9899,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapS_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapS_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9749,9 +9931,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapS4_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapS4_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9781,9 +9963,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapS_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapS_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9813,9 +9995,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapS4_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapS4_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9845,9 +10027,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapI_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapI_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9877,9 +10059,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapI_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapI_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9909,9 +10091,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapN_regP_regN_regN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapN_regP_regN_regN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9941,9 +10123,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapN_acq_regP_regN_regN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapN_acq_regP_regN_regN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -9973,9 +10155,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapL_regP_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapL_regP_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10005,9 +10187,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapL_acq_regP_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapL_acq_regP_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10037,9 +10219,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapP_regP_regP_regP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapP_regP_regP_regP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10069,9 +10251,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return weakCompareAndSwapP_acq_regP_regP_regP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return weakCompareAndSwapP_acq_regP_regP_regP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10101,9 +10283,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeB_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeB_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10133,9 +10315,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeB4_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeB4_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10165,9 +10347,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeB_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeB_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10197,9 +10379,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeB4_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeB4_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10229,9 +10411,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeS_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeS_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10261,9 +10443,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeS4_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeS4_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10293,9 +10475,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeS_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeS_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10325,9 +10507,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeS4_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeS4_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10357,9 +10539,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeI_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeI_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10389,9 +10571,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeI_acq_regP_regI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeI_acq_regP_regI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10421,9 +10603,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeN_regP_regN_regN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeN_regP_regN_regN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10453,9 +10635,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeN_acq_regP_regN_regN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeN_acq_regP_regN_regN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10485,9 +10667,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeL_regP_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeL_regP_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10517,9 +10699,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeL_acq_regP_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeL_acq_regP_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10549,9 +10731,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeP_regP_regP_regP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeP_regP_regP_regP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10581,9 +10763,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compareAndExchangeP_acq_regP_regP_regP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compareAndExchangeP_acq_regP_regP_regP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -10613,9 +10795,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndAddB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndAddB_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10645,9 +10827,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndAddB4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndAddB4_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10677,9 +10859,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndAddS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndAddS_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10709,9 +10891,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndAddS4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndAddS4_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10741,9 +10923,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndAddI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndAddI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10773,9 +10955,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndAddL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndAddL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10805,9 +10987,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetB_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10837,9 +11019,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetB4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetB4_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10869,9 +11051,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetS_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10901,9 +11083,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetS4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetS4_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10933,9 +11115,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10965,9 +11147,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -10997,9 +11179,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -11029,9 +11211,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return getAndSetN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return getAndSetN_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -11061,9 +11243,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
@@ -11091,9 +11273,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addI_reg_reg_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addI_reg_reg_2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -11120,9 +11302,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   tree_addI_addI_addI_reg_reg_ExNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11146,9 +11328,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_1_rule; }
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   tree_addI_addI_addI_reg_reg_Ex_1Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11172,9 +11354,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_0_rule; }
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   tree_addI_addI_addI_reg_reg_Ex_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11198,9 +11380,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addI_addI_addI_reg_reg_Ex_2_rule; }
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   tree_addI_addI_addI_reg_reg_Ex_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11224,9 +11406,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addI_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addI_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
@@ -11253,9 +11435,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addI_reg_immhi16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addI_reg_immhi16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
@@ -11267,6 +11449,38 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "addI_reg_immhi16";}
+#endif
+};
+
+class addI_reg_imm32Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addI_reg_imm32_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ins_alignment() const { return 2; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            alignment_required() const { return 2; }
+  virtual int            compute_padding(int current_offset) const;
+public:
+  addI_reg_imm32Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(addI_reg_imm32Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addI_reg_imm32";}
 #endif
 };
 
@@ -11282,9 +11496,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
@@ -11311,9 +11525,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addL_reg_reg_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addL_reg_reg_2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -11340,9 +11554,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   tree_addL_addL_addL_reg_reg_ExNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11366,9 +11580,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_1_rule; }
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   tree_addL_addL_addL_reg_reg_Ex_1Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11392,9 +11606,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_0_rule; }
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   tree_addL_addL_addL_reg_reg_Ex_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11418,9 +11632,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_addL_addL_addL_reg_reg_Ex_2_rule; }
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   tree_addL_addL_addL_reg_reg_Ex_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -11444,9 +11658,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addI_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addI_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -11473,9 +11687,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addL_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addL_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
@@ -11502,9 +11716,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addL_reg_immhi16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addL_reg_immhi16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
@@ -11516,6 +11730,38 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "addL_reg_immhi16";}
+#endif
+};
+
+class addL_reg_imm34Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addL_reg_imm34_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ins_alignment() const { return 2; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            alignment_required() const { return 2; }
+  virtual int            compute_padding(int current_offset) const;
+public:
+  addL_reg_imm34Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(addL_reg_imm34Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addL_reg_imm34";}
 #endif
 };
 
@@ -11531,9 +11777,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addP_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addP_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
@@ -11562,9 +11808,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addP_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addP_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
@@ -11593,9 +11839,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addP_reg_immhi16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addP_reg_immhi16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
@@ -11612,6 +11858,40 @@ public:
 #endif
 };
 
+class addP_reg_imm34Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addP_reg_imm34_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ins_alignment() const { return 2; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddP; }
+  virtual int            reloc() const;
+  virtual int            alignment_required() const { return 2; }
+  virtual int            compute_padding(int current_offset) const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  addP_reg_imm34Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(addP_reg_imm34Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addP_reg_imm34";}
+#endif
+};
+
 class subI_reg_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -11624,9 +11904,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return subI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return subI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubI; }
@@ -11653,9 +11933,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return subI_imm16_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return subI_imm16_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubI; }
@@ -11682,9 +11962,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return signmask32I_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return signmask32I_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -11712,9 +11992,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return absI_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return absI_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_AbsI; }
 public:
   absI_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -11739,9 +12019,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return negI_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return negI_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubI; }
@@ -11768,9 +12048,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return subL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return subL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubL; }
@@ -11797,9 +12077,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return subI_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return subI_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -11826,9 +12106,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return signmask64I_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return signmask64I_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -11856,9 +12136,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return signmask64L_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return signmask64L_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -11874,6 +12154,33 @@ public:
 #endif
 };
 
+class absL_reg_ExNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return absL_reg_Ex_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ideal_Opcode() const { return Op_AbsL; }
+public:
+  absL_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(absL_reg_ExNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize absL_reg_Ex
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "absL_reg_Ex";}
+#endif
+};
+
 class negL_reg_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -11886,9 +12193,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return negL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return negL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubL; }
@@ -11915,9 +12222,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return negI_con0_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return negI_con0_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -11944,9 +12251,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mulI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mulI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulI; }
@@ -11973,9 +12280,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mulI_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mulI_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulI; }
@@ -12002,9 +12309,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mulL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mulL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulL; }
@@ -12031,9 +12338,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mulHighL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mulHighL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulHiL; }
@@ -12060,9 +12367,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mulL_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mulL_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulL; }
@@ -12089,9 +12396,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divI_reg_immIvalueMinus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divI_reg_immIvalueMinus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivI; }
@@ -12118,9 +12425,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divI_reg_regnotMinus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divI_reg_regnotMinus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivI; }
@@ -12147,9 +12454,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_bne_negI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_bne_negI_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -12178,9 +12485,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_DivI; }
 public:
   divI_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12204,9 +12511,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divL_reg_immLvalueMinus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divL_reg_immLvalueMinus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivL; }
@@ -12233,9 +12540,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divL_reg_regnotMinus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divL_reg_regnotMinus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivL; }
@@ -12262,9 +12569,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_bne_negL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_bne_negL_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -12293,9 +12600,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divL_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divL_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_DivL; }
 public:
   divL_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12319,9 +12626,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return modI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return modI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ModI; }
 public:
   modI_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12345,9 +12652,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return modL_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return modL_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ModL; }
 public:
   modL_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12356,6 +12663,116 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "modL_reg_reg_Ex";}
+#endif
+};
+
+class udivI_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return udivI_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UDivI; }
+public:
+  udivI_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(udivI_reg_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "udivI_reg_reg";}
+#endif
+};
+
+class umodI_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return umodI_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ideal_Opcode() const { return Op_UModI; }
+public:
+  umodI_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(umodI_reg_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "umodI_reg_reg";}
+#endif
+};
+
+class udivL_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return udivL_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UDivL; }
+public:
+  udivL_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(udivL_reg_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "udivL_reg_reg";}
+#endif
+};
+
+class umodL_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return umodL_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ideal_Opcode() const { return Op_UModL; }
+public:
+  umodL_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(umodL_reg_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "umodL_reg_reg";}
 #endif
 };
 
@@ -12371,9 +12788,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return maskI_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return maskI_reg_imm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -12400,9 +12817,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -12429,9 +12846,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
 public:
   lShiftI_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12455,9 +12872,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftI_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftI_reg_imm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
@@ -12484,9 +12901,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftI_andI_immInegpow2_imm5_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftI_andI_immInegpow2_imm5_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
@@ -12513,9 +12930,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftI_andI_immInegpow2_rShiftI_imm5_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftI_andI_immInegpow2_rShiftI_imm5_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
@@ -12543,9 +12960,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftL_regL_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftL_regL_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -12572,9 +12989,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftL_regL_regI_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftL_regL_regI_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
 public:
   lShiftL_regL_regI_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12598,9 +13015,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lshiftL_regL_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lshiftL_regL_immI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
@@ -12627,9 +13044,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return lShiftL_regI_immGE32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return lShiftL_regI_immGE32_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
@@ -12656,9 +13073,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return scaledPositiveI2L_lShiftL_convI2L_reg_imm6_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return scaledPositiveI2L_lShiftL_convI2L_reg_imm6_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
@@ -12685,9 +13102,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return arShiftI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return arShiftI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -12714,9 +13131,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return arShiftI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return arShiftI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
 public:
   arShiftI_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12740,9 +13157,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return arShiftI_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return arShiftI_reg_imm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
@@ -12769,9 +13186,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return arShiftL_regL_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return arShiftL_regL_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -12798,9 +13215,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return arShiftL_regL_regI_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return arShiftL_regL_regI_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_RShiftL; }
 public:
   arShiftL_regL_regI_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12824,9 +13241,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return arShiftL_regL_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return arShiftL_regL_immI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftL; }
@@ -12853,9 +13270,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2I_arShiftL_regL_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2I_arShiftL_regL_immI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -12882,9 +13299,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return urShiftI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return urShiftI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -12911,9 +13328,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return urShiftI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return urShiftI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_URShiftI; }
 public:
   urShiftI_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -12937,9 +13354,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return urShiftI_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return urShiftI_reg_imm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftI; }
@@ -12966,9 +13383,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return urShiftL_regL_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return urShiftL_regL_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -12995,9 +13412,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return urShiftL_regL_regI_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return urShiftL_regL_regI_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_URShiftL; }
 public:
   urShiftL_regL_regI_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -13021,9 +13438,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return urShiftL_regL_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return urShiftL_regL_immI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftL; }
@@ -13050,9 +13467,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2I_urShiftL_regL_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2I_urShiftL_regL_immI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -13079,9 +13496,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return shrP_convP2X_reg_imm6_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return shrP_convP2X_reg_imm6_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftL; }
@@ -13109,9 +13526,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andI_urShiftI_regI_immI_immIpow2minus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andI_urShiftI_regI_immI_immIpow2minus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -13138,9 +13555,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andL_urShiftL_regL_immI_immLpow2minus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andL_urShiftL_regL_immI_immLpow2minus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -13167,9 +13584,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return sxtI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return sxtI_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -13196,9 +13613,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rotlI_reg_immi8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rotlI_reg_immi8_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
@@ -13226,9 +13643,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rotlI_reg_immi8_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rotlI_reg_immi8_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
@@ -13256,9 +13673,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rotrI_reg_immi8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rotrI_reg_immi8_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
@@ -13286,9 +13703,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rotrI_reg_immi8_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rotrI_reg_immi8_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
@@ -13316,9 +13733,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
@@ -13345,9 +13762,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return addD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return addD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
@@ -13374,9 +13791,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return subF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return subF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubF; }
@@ -13403,9 +13820,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return subD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return subD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubD; }
@@ -13432,9 +13849,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mulF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mulF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
@@ -13461,9 +13878,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mulD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mulD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
@@ -13490,9 +13907,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivF; }
@@ -13519,9 +13936,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return divD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return divD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivD; }
@@ -13548,9 +13965,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return absF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return absF_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsF; }
@@ -13578,9 +13995,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return absD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return absD_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsD; }
@@ -13608,9 +14025,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return negF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return negF_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegF; }
@@ -13638,9 +14055,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return negD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return negD_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegD; }
@@ -13668,9 +14085,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return negF_absF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return negF_absF_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegF; }
@@ -13698,9 +14115,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return negD_absD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return negD_absD_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegD; }
@@ -13728,9 +14145,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return sqrtD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return sqrtD_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtD; }
@@ -13757,12 +14174,12 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return sqrtF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return sqrtF_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_ConvD2F; }
+  virtual int            ideal_Opcode() const { return Op_SqrtF; }
 public:
   sqrtF_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(sqrtF_regNode); }
@@ -13786,9 +14203,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return roundDouble_nop_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return roundDouble_nop_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundDouble; }
@@ -13817,9 +14234,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return roundFloat_nop_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return roundFloat_nop_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundFloat; }
@@ -13848,9 +14265,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return maddF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return maddF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaF; }
@@ -13877,9 +14294,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return maddD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return maddD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaD; }
@@ -13906,9 +14323,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnsubF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnsubF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaF; }
@@ -13935,9 +14352,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnsubF_reg_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnsubF_reg_reg_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaF; }
@@ -13964,9 +14381,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnsubD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnsubD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaD; }
@@ -13993,9 +14410,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnsubD_reg_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnsubD_reg_reg_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaD; }
@@ -14022,9 +14439,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnaddF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnaddF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaF; }
@@ -14051,9 +14468,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnaddF_reg_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnaddF_reg_reg_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaF; }
@@ -14080,9 +14497,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnaddD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnaddD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaD; }
@@ -14109,9 +14526,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mnaddD_reg_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mnaddD_reg_reg_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaD; }
@@ -14138,9 +14555,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return msubF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return msubF_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaF; }
@@ -14167,9 +14584,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return msubD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return msubD_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaD; }
@@ -14196,9 +14613,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -14225,9 +14642,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andI_reg_immIhi16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andI_reg_immIhi16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -14256,9 +14673,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andI_reg_uimm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andI_reg_uimm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -14287,9 +14704,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andI_reg_immInegpow2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andI_reg_immInegpow2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -14316,9 +14733,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andI_reg_immIpow2minus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andI_reg_immIpow2minus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -14345,9 +14762,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andI_reg_immIpowerOf2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andI_reg_immIpowerOf2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -14374,9 +14791,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -14403,9 +14820,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andL_reg_uimm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andL_reg_uimm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -14434,9 +14851,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andL_reg_immLnegpow2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andL_reg_immLnegpow2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -14463,9 +14880,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andL_reg_immLpow2minus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andL_reg_immLpow2minus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -14492,9 +14909,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2I_andL_reg_immLpow2minus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2I_andL_reg_immLpow2minus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -14521,9 +14938,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return orI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return orI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
@@ -14550,9 +14967,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return orI_reg_reg_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return orI_reg_reg_2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -14579,9 +14996,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_OrI; }
 public:
   tree_orI_orI_orI_reg_reg_ExNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14605,9 +15022,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_1_rule; }
   virtual int            ideal_Opcode() const { return Op_OrI; }
 public:
   tree_orI_orI_orI_reg_reg_Ex_1Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14631,9 +15048,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_0_rule; }
   virtual int            ideal_Opcode() const { return Op_OrI; }
 public:
   tree_orI_orI_orI_reg_reg_Ex_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14657,9 +15074,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_orI_orI_orI_reg_reg_Ex_2_rule; }
   virtual int            ideal_Opcode() const { return Op_OrI; }
 public:
   tree_orI_orI_orI_reg_reg_Ex_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14683,9 +15100,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return orI_reg_uimm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return orI_reg_uimm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
@@ -14712,9 +15129,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return orL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return orL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
@@ -14741,9 +15158,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return orI_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return orI_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -14770,9 +15187,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return orL_reg_uimm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return orL_reg_uimm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
@@ -14799,9 +15216,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
@@ -14828,9 +15245,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_reg_reg_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_reg_reg_2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -14857,9 +15274,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_XorI; }
 public:
   tree_xorI_xorI_xorI_reg_reg_ExNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14883,9 +15300,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_1_rule; }
   virtual int            ideal_Opcode() const { return Op_XorI; }
 public:
   tree_xorI_xorI_xorI_reg_reg_Ex_1Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14909,9 +15326,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_0_rule; }
   virtual int            ideal_Opcode() const { return Op_XorI; }
 public:
   tree_xorI_xorI_xorI_reg_reg_Ex_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14935,9 +15352,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tree_xorI_xorI_xorI_reg_reg_Ex_2_rule; }
   virtual int            ideal_Opcode() const { return Op_XorI; }
 public:
   tree_xorI_xorI_xorI_reg_reg_Ex_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14961,9 +15378,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_reg_uimm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_reg_uimm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
@@ -14990,9 +15407,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
@@ -15019,9 +15436,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_regL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_regL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
@@ -15048,9 +15465,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorL_reg_uimm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorL_reg_uimm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
@@ -15077,9 +15494,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return notI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return notI_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
@@ -15106,9 +15523,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return notL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return notL_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
@@ -15135,9 +15552,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andcI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andcI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -15164,9 +15581,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andcI_reg_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andcI_reg_reg_0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
@@ -15193,9 +15610,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return andcL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return andcL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -15222,9 +15639,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveL2D_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveL2D_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveL2D; }
@@ -15252,9 +15669,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveI2D_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveI2D_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -15282,9 +15699,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return stkI_to_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return stkI_to_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -15311,9 +15728,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return regI_to_stkI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return regI_to_stkI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegI; }
@@ -15340,9 +15757,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return stkL_to_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return stkL_to_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -15369,9 +15786,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return regL_to_stkL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return regL_to_stkL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegL; }
@@ -15398,9 +15815,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveF2I_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveF2I_stack_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveF2I; }
@@ -15428,9 +15845,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveF2I_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveF2I_reg_stack_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveF2I; }
@@ -15457,9 +15874,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveI2F_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveI2F_stack_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveI2F; }
@@ -15487,9 +15904,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveI2F_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveI2F_reg_stack_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveI2F; }
@@ -15516,9 +15933,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveF2L_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveF2L_reg_stack_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -15545,9 +15962,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveD2L_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveD2L_stack_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveD2L; }
@@ -15575,9 +15992,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveD2L_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveD2L_reg_stack_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveD2L; }
@@ -15604,9 +16021,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveL2D_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveL2D_stack_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveL2D; }
@@ -15634,9 +16051,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveL2D_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveL2D_reg_stack_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveL2D; }
@@ -15663,9 +16080,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return moveReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return moveReg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
 public:
   moveRegNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -15692,9 +16109,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return castX2P_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return castX2P_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastX2P; }
   virtual uint           oper_input_base() const { return 1; }
@@ -15722,9 +16139,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return castP2X_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return castP2X_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastP2X; }
   virtual int            reloc() const;
@@ -15752,9 +16169,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return castPP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return castPP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastPP; }
@@ -15772,7 +16189,7 @@ public:
 #endif
 };
 
-class castIINode : public MachNode { 
+class castIINode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[2];
 public:
@@ -15784,13 +16201,14 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return castII_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return castII_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastII; }
   virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
 public:
   castIINode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(castIINode); }
@@ -15800,6 +16218,166 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "castII";}
+#endif
+};
+
+class castLLNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castLL_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastLL; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castLLNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castLLNode); }
+  // Rematerialize castLL
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castLL";}
+#endif
+};
+
+class castFFNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castFF_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastFF; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castFFNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castFFNode); }
+  // Rematerialize castFF
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castFF";}
+#endif
+};
+
+class castDDNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castDD_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastDD; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castDDNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castDDNode); }
+  // Rematerialize castDD
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castDD";}
+#endif
+};
+
+class castVV8Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castVV8_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastVV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castVV8Node() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castVV8Node); }
+  // Rematerialize castVV8
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castVV8";}
+#endif
+};
+
+class castVV16Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castVV16_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastVV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castVV16Node() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castVV16Node); }
+  // Rematerialize castVV16
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castVV16";}
 #endif
 };
 
@@ -15815,9 +16393,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return checkCastPP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return checkCastPP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CheckCastPP; }
@@ -15847,9 +16425,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2Bool_reg__cntlz_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2Bool_reg__cntlz_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_Conv2B; }
 public:
   convI2Bool_reg__cntlz_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -15874,9 +16452,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2Bool_reg__cmove_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2Bool_reg__cmove_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Conv2B; }
@@ -15905,9 +16483,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_convI2Bool_reg_immIvalue1__cntlz_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_convI2Bool_reg_immIvalue1__cntlz_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_XorI; }
 public:
   xorI_convI2Bool_reg_immIvalue1__cntlz_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -15931,9 +16509,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_convI2Bool_reg_immIvalue1__cmove_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_convI2Bool_reg_immIvalue1__cmove_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
@@ -15962,9 +16540,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2Bool_andI_reg_immIpowerOf2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2Bool_andI_reg_immIpowerOf2_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Conv2B; }
@@ -15991,9 +16569,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convP2Bool_reg__cntlz_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convP2Bool_reg__cntlz_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_Conv2B; }
   virtual int            reloc() const;
 public:
@@ -16019,9 +16597,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convP2Bool_reg__cmove_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convP2Bool_reg__cmove_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Conv2B; }
@@ -16051,9 +16629,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_convP2Bool_reg__cntlz_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_convP2Bool_reg__cntlz_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual int            reloc() const;
 public:
@@ -16078,9 +16656,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xorI_convP2Bool_reg_immIvalue1__cmove_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xorI_convP2Bool_reg_immIvalue1__cmove_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
@@ -16110,9 +16688,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpLTMask_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpLTMask_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_CmpLTMask; }
 public:
   cmpLTMask_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16136,9 +16714,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpLTMask_reg_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpLTMask_reg_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpLTMask; }
@@ -16165,9 +16743,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convB2I_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convB2I_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
@@ -16195,9 +16773,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return extsh_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return extsh_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -16225,9 +16803,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convS2I_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convS2I_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
@@ -16255,9 +16833,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return sxtI_L2L_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return sxtI_L2L_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -16284,9 +16862,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2I_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2I_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
 public:
@@ -16312,9 +16890,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convD2IRaw_regD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convD2IRaw_regD_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -16342,9 +16920,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_bso_stackSlotL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_bso_stackSlotL_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -16372,9 +16950,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_bso_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_bso_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -16402,9 +16980,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_bso_stackSlotL_conLvalue0_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_bso_stackSlotL_conLvalue0_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
 public:
@@ -16429,9 +17007,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovI_bso_reg_conLvalue0_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_bso_reg_conLvalue0_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
 public:
@@ -16456,9 +17034,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convD2I_reg_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convD2I_reg_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvD2I; }
 public:
   convD2I_reg_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16482,9 +17060,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convD2I_reg_mffprd_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convD2I_reg_mffprd_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvD2I; }
 public:
   convD2I_reg_mffprd_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16508,9 +17086,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convF2IRaw_regF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convF2IRaw_regF_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -16538,9 +17116,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convF2I_regF_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convF2I_regF_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvF2I; }
 public:
   convF2I_regF_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16564,9 +17142,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convF2I_regF_mffprd_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convF2I_regF_mffprd_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvF2I; }
 public:
   convF2I_regF_mffprd_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16590,9 +17168,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2L_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2L_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
@@ -16619,9 +17197,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return zeroExtendL_regI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return zeroExtendL_regI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -16648,9 +17226,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return zeroExtendL_regL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return zeroExtendL_regL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
@@ -16677,9 +17255,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convF2LRaw_regF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convF2LRaw_regF_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -16707,9 +17285,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_bso_stackSlotL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_bso_stackSlotL_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -16737,9 +17315,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_bso_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_bso_reg_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -16767,9 +17345,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_bso_stackSlotL_conLvalue0_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_bso_stackSlotL_conLvalue0_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
 public:
@@ -16794,9 +17372,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmovL_bso_reg_conLvalue0_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovL_bso_reg_conLvalue0_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
 public:
@@ -16821,9 +17399,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convF2L_reg_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convF2L_reg_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvF2L; }
 public:
   convF2L_reg_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16847,9 +17425,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convF2L_reg_mffprd_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convF2L_reg_mffprd_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvF2L; }
 public:
   convF2L_reg_mffprd_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16873,9 +17451,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convD2LRaw_regD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convD2LRaw_regD_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -16903,9 +17481,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convD2L_reg_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convD2L_reg_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvD2L; }
 public:
   convD2L_reg_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16929,9 +17507,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convD2L_reg_mffprd_ExEx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convD2L_reg_mffprd_ExEx_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvD2L; }
 public:
   convD2L_reg_mffprd_ExExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -16955,9 +17533,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2DRaw_regD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2DRaw_regD_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -16985,9 +17563,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convD2F_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convD2F_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvD2F; }
@@ -17014,9 +17592,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2F_ireg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2F_ireg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvI2F; }
 public:
   convI2F_ireg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17040,9 +17618,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2FRaw_regF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2FRaw_regF_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -17070,9 +17648,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2F_ireg_fcfids_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2F_ireg_fcfids_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvI2F; }
 public:
   convI2F_ireg_fcfids_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17096,9 +17674,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2F_ireg_mtfprd_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2F_ireg_mtfprd_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvI2F; }
 public:
   convI2F_ireg_mtfprd_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17122,9 +17700,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2F_ireg_fcfids_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2F_ireg_fcfids_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvL2F; }
 public:
   convL2F_ireg_fcfids_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17148,9 +17726,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2F_ireg_mtfprd_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2F_ireg_mtfprd_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvL2F; }
 public:
   convL2F_ireg_mtfprd_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17174,9 +17752,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2D_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2D_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvI2D; }
 public:
   convI2D_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17200,9 +17778,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convI2D_reg_mtfprd_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convI2D_reg_mtfprd_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvI2D; }
 public:
   convI2D_reg_mtfprd_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17226,9 +17804,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2D_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2D_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvL2D; }
 public:
   convL2D_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
@@ -17252,9 +17830,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convL2D_reg_mtfprd_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convL2D_reg_mtfprd_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ConvL2D; }
 public:
   convL2D_reg_mtfprd_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -17278,9 +17856,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return convF2D_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return convF2D_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvF2D; }
 public:
@@ -17306,9 +17884,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpI_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpI_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
@@ -17336,9 +17914,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpI_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpI_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
@@ -17366,9 +17944,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return testI_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return testI_reg_imm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
@@ -17396,9 +17974,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
@@ -17426,9 +18004,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpL_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpL_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
@@ -17456,9 +18034,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpUL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpUL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpUL; }
@@ -17486,9 +18064,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpUL_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpUL_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpUL; }
@@ -17516,9 +18094,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return testL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return testL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
@@ -17546,9 +18124,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return testL_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return testL_reg_imm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
@@ -17564,66 +18142,7 @@ public:
 #endif
 };
 
-class cmovI_conIvalueMinus1_conIvalue1Node : public MachNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_conIvalueMinus1_conIvalue1_rule; }
-  virtual int            ins_variable_size_depending_on_alignment() const { return true; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual uint           size(PhaseRegAlloc *ra_) const;
-public:
-  cmovI_conIvalueMinus1_conIvalue1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmovI_conIvalueMinus1_conIvalue1Node); }
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  // Rematerialize cmovI_conIvalueMinus1_conIvalue1
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmovI_conIvalueMinus1_conIvalue1";}
-#endif
-};
-
-class cmovI_conIvalueMinus1_conIvalue0_conIvalue1_ExNode : public MachNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmovI_conIvalueMinus1_conIvalue0_conIvalue1_Ex_rule; }
-  virtual bool           requires_postalloc_expand() const { return true; }
-  virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
-public:
-  cmovI_conIvalueMinus1_conIvalue0_conIvalue1_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmovI_conIvalueMinus1_conIvalue0_conIvalue1_ExNode); }
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  // Rematerialize cmovI_conIvalueMinus1_conIvalue0_conIvalue1_Ex
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmovI_conIvalueMinus1_conIvalue0_conIvalue1_Ex";}
-#endif
-};
-
-class cmpL3_reg_reg_ExExNode : public MachNode { 
+class cmpL3_reg_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -17635,17 +18154,22 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpL3_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpL3_reg_reg_ExEx_rule; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL3; }
 public:
-  cmpL3_reg_reg_ExExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpL3_reg_reg_ExExNode); }
+  cmpL3_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpL3_reg_regNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpL3_reg_reg_ExEx";}
+  virtual const char    *Name() const { return "cmpL3_reg_reg";}
 #endif
 };
 
@@ -17661,9 +18185,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rangeCheck_iReg_uimm15_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rangeCheck_iReg_uimm15_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual bool           is_TrapBasedCheckNode() const { return true; }
@@ -17701,9 +18225,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rangeCheck_iReg_iReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rangeCheck_iReg_iReg_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual bool           is_TrapBasedCheckNode() const { return true; }
@@ -17741,9 +18265,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return rangeCheck_uimm15_iReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return rangeCheck_uimm15_iReg_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual bool           is_TrapBasedCheckNode() const { return true; }
@@ -17781,9 +18305,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compU_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compU_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpU; }
@@ -17811,9 +18335,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return compU_reg_uimm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return compU_reg_uimm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpU; }
@@ -17841,9 +18365,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return zeroCheckN_iReg_imm0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return zeroCheckN_iReg_imm0_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual bool           is_TrapBasedCheckNode() const { return true; }
@@ -17881,9 +18405,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpN_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpN_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
@@ -17911,9 +18435,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpN_reg_imm0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpN_reg_imm0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
@@ -17941,9 +18465,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return zeroCheckP_reg_imm0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return zeroCheckP_reg_imm0_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual bool           is_TrapBasedCheckNode() const { return true; }
@@ -17982,9 +18506,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpP_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpP_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
@@ -18013,9 +18537,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpP_reg_null_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpP_reg_null_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
@@ -18044,9 +18568,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpP_reg_imm16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpP_reg_imm16_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
@@ -18074,9 +18598,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpFUnordered_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpFUnordered_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF; }
@@ -18104,9 +18628,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmov_bns_less_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmov_bns_less_rule; }
   virtual int            ins_variable_size_depending_on_alignment() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -18135,9 +18659,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpF_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpF_reg_reg_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_CmpF; }
@@ -18151,7 +18675,7 @@ public:
 #endif
 };
 
-class cmpF3_reg_reg_ExExNode : public MachNode { 
+class cmpF3_reg_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -18163,17 +18687,22 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpF3_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpF3_reg_reg_ExEx_rule; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF3; }
 public:
-  cmpF3_reg_reg_ExExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpF3_reg_reg_ExExNode); }
+  cmpF3_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpF3_reg_regNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpF3_reg_reg_ExEx";}
+  virtual const char    *Name() const { return "cmpF3_reg_reg";}
 #endif
 };
 
@@ -18189,9 +18718,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpDUnordered_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpDUnordered_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD; }
@@ -18219,9 +18748,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpD_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpD_reg_reg_Ex_rule; }
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
   virtual int            ideal_Opcode() const { return Op_CmpD; }
@@ -18235,7 +18764,7 @@ public:
 #endif
 };
 
-class cmpD3_reg_reg_ExExNode : public MachNode { 
+class cmpD3_reg_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -18247,17 +18776,180 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpD3_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpD3_reg_reg_ExEx_rule; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD3; }
 public:
-  cmpD3_reg_reg_ExExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpD3_reg_reg_ExExNode); }
+  cmpD3_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpD3_reg_regNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpD3_reg_reg_ExEx";}
+  virtual const char    *Name() const { return "cmpD3_reg_reg";}
+#endif
+};
+
+class cmprb_Digit_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmprb_Digit_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_Digit; }
+public:
+  cmprb_Digit_reg_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmprb_Digit_reg_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmprb_Digit_reg_reg";}
+#endif
+};
+
+class cmprb_LowerCase_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmprb_LowerCase_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LowerCase; }
+public:
+  cmprb_LowerCase_reg_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmprb_LowerCase_reg_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmprb_LowerCase_reg_reg";}
+#endif
+};
+
+class cmprb_UpperCase_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmprb_UpperCase_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UpperCase; }
+public:
+  cmprb_UpperCase_reg_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmprb_UpperCase_reg_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmprb_UpperCase_reg_reg";}
+#endif
+};
+
+class cmprb_Whitespace_reg_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmprb_Whitespace_reg_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_Whitespace; }
+public:
+  cmprb_Whitespace_reg_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmprb_Whitespace_reg_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmprb_Whitespace_reg_reg";}
+#endif
+};
+
+class cmprb_Whitespace_reg_reg_prefixedNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmprb_Whitespace_reg_reg_prefixed_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ins_alignment() const { return 2; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_Whitespace; }
+  virtual int            alignment_required() const { return 2; }
+  virtual int            compute_padding(int current_offset) const;
+public:
+  cmprb_Whitespace_reg_reg_prefixedNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmprb_Whitespace_reg_reg_prefixedNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmprb_Whitespace_reg_reg_prefixed";}
 #endif
 };
 
@@ -18273,9 +18965,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return branch_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return branch_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -18308,9 +19000,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return branchCon_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return branchCon_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -18347,9 +19039,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return branchConFar_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return branchConFar_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -18375,47 +19067,6 @@ public:
 #endif
 };
 
-class branchConSchedNode : public MachIfNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return branchConSched_rule; }
-  virtual void           label_set( Label* label, uint block_num );
-  virtual void           save_label( Label** label, uint* block_num );
-  virtual int            ins_variable_size_depending_on_alignment() const { return true; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual uint           size(PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_If; }
-  virtual void           negate() { 
-    opnd_array(1)->negate();
-    _prob = 1.0f - _prob;
-  };
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  branchConSchedNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_may_be_short_branch); }
-  virtual uint           size_of() const { return sizeof(branchConSchedNode); }
-  virtual bool           pinned() const { return true; }
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  virtual MachNode      *short_branch_version();
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  const Type            *bottom_type() const { return TypeTuple::IFBOTH; } // matched IfNode
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "branchConSched";}
-#endif
-};
-
 class branchLoopEndNode : public MachIfNode { 
 private:
   MachOper *_opnd_array[4];
@@ -18428,9 +19079,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return branchLoopEnd_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return branchLoopEnd_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -18467,9 +19118,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return branchLoopEndFar_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return branchLoopEndFar_rule; }
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -18495,47 +19146,6 @@ public:
 #endif
 };
 
-class branchLoopEndSchedNode : public MachIfNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return branchLoopEndSched_rule; }
-  virtual void           label_set( Label* label, uint block_num );
-  virtual void           save_label( Label** label, uint* block_num );
-  virtual int            ins_variable_size_depending_on_alignment() const { return true; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual uint           size(PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_CountedLoopEnd; }
-  virtual void           negate() { 
-    opnd_array(1)->negate();
-    _prob = 1.0f - _prob;
-  };
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  branchLoopEndSchedNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_may_be_short_branch); }
-  virtual uint           size_of() const { return sizeof(branchLoopEndSchedNode); }
-  virtual bool           pinned() const { return true; }
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  virtual MachNode      *short_branch_version();
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  const Type            *bottom_type() const { return TypeTuple::IFBOTH; } // matched IfNode
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "branchLoopEndSched";}
-#endif
-};
-
 class partialSubtypeCheckNode : public MachNode { 
 private:
   MachOper *_opnd_array[6];
@@ -18548,9 +19158,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return partialSubtypeCheck_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return partialSubtypeCheck_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PartialSubtypeCheck; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -18580,9 +19190,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpFastLock_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpFastLock_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastLock; }
   virtual uint           oper_input_base() const { return 1; }
@@ -18612,9 +19222,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpFastLock_tm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpFastLock_tm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastLock; }
   virtual uint           oper_input_base() const { return 1; }
@@ -18644,9 +19254,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpFastUnlock_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpFastUnlock_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastUnlock; }
 public:
@@ -18675,9 +19285,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return cmpFastUnlock_tm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return cmpFastUnlock_tm_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastUnlock; }
 public:
@@ -18706,9 +19316,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return align_addr_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return align_addr_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastX2P; }
@@ -18736,9 +19346,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return array_size_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return array_size_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubL; }
@@ -18765,9 +19375,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return inlineCallClearArrayShort_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return inlineCallClearArrayShort_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
@@ -18796,9 +19406,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return inlineCallClearArrayLarge_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return inlineCallClearArrayLarge_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
@@ -18827,9 +19437,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return inlineCallClearArray_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return inlineCallClearArray_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
@@ -18858,9 +19468,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_compareL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_compareL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -18890,9 +19500,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_compareU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_compareU_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -18922,9 +19532,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_compareLU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_compareLU_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -18954,9 +19564,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_compareUL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_compareUL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -18986,9 +19596,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_equalsL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_equalsL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrEquals; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -19018,9 +19628,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_equalsU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_equalsU_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrEquals; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -19050,9 +19660,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return array_equalsB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return array_equalsB_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AryEq; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -19082,9 +19692,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return array_equalsC_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return array_equalsC_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AryEq; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
@@ -19114,9 +19724,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm1_char_U_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm1_char_U_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual int            reloc() const;
@@ -19146,9 +19756,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm1_char_L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm1_char_L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual int            reloc() const;
@@ -19178,9 +19788,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm1_char_UL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm1_char_UL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual int            reloc() const;
@@ -19210,9 +19820,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm1_U_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm1_U_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
@@ -19241,9 +19851,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm1_L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm1_L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
@@ -19272,9 +19882,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm1_UL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm1_UL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
@@ -19303,9 +19913,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOfChar_U_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOfChar_U_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOfChar; }
   virtual uint           oper_input_base() const { return 2; }
@@ -19322,6 +19932,37 @@ public:
 #endif
 };
 
+class indexOfChar_LNode : public MachNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return indexOfChar_L_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StrIndexOfChar; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  indexOfChar_LNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(indexOfChar_LNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "indexOfChar_L";}
+#endif
+};
+
 class indexOf_imm_UNode : public MachNode { 
 private:
   MachOper *_opnd_array[11];
@@ -19334,9 +19975,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm_U_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm_U_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -19366,9 +20007,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm_L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm_L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -19398,9 +20039,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_imm_UL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_imm_UL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -19430,9 +20071,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_U_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_U_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -19462,9 +20103,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_L_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -19494,9 +20135,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return indexOf_UL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return indexOf_UL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
@@ -19526,9 +20167,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_compress_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_compress_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrCompressedCopy; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -19546,7 +20187,7 @@ public:
 #endif
 };
 
-class string_inflateNode : public MachNode { 
+class string_inflateNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[9];
 public:
@@ -19558,9 +20199,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return string_inflate_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return string_inflate_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrInflatedCopy; }
   virtual uint           oper_input_base() const { return 2; }
@@ -19577,7 +20218,7 @@ public:
 #endif
 };
 
-class has_negativesNode : public MachNode { 
+class count_positivesNode : public MachNode { 
 private:
   MachOper *_opnd_array[6];
 public:
@@ -19589,23 +20230,23 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return count_positives_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return has_negatives_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_HasNegatives; }
+  virtual int            ideal_Opcode() const { return Op_CountPositives; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 2; }
 public:
-  has_negativesNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(has_negativesNode); }
+  count_positivesNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(count_positivesNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "has_negatives";}
+  virtual const char    *Name() const { return "count_positives";}
 #endif
 };
 
@@ -19621,9 +20262,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return encode_iso_array_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return encode_iso_array_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeISOArray; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
@@ -19641,6 +20282,38 @@ public:
 #endif
 };
 
+class encode_ascii_arrayNode : public MachNode { 
+private:
+  MachOper *_opnd_array[10];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return encode_ascii_array_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_EncodeISOArray; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  encode_ascii_arrayNode() {  _num_opnds = 10; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(encode_ascii_arrayNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "encode_ascii_array";}
+#endif
+};
+
 class minI_reg_reg_ExNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -19653,9 +20326,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return minI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return minI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_MinI; }
 public:
   minI_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -19679,9 +20352,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return minI_reg_reg_isel_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return minI_reg_reg_isel_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinI; }
 public:
@@ -19709,9 +20382,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return maxI_reg_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return maxI_reg_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_MaxI; }
 public:
   maxI_reg_reg_ExNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -19735,9 +20408,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return maxI_reg_reg_isel_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return maxI_reg_reg_isel_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxI; }
 public:
@@ -19765,9 +20438,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return popCountI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return popCountI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountI; }
@@ -19795,9 +20468,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return popCountL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return popCountL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountL; }
@@ -19825,9 +20498,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return countLeadingZerosI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return countLeadingZerosI_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosI; }
@@ -19855,9 +20528,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return countLeadingZerosL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return countLeadingZerosL_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosL; }
@@ -19885,9 +20558,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return countLeadingZerosP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return countLeadingZerosP_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -19915,9 +20588,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return countTrailingZerosI_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return countTrailingZerosI_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosI; }
 public:
   countTrailingZerosI_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -19927,6 +20600,36 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "countTrailingZerosI_Ex";}
+#endif
+};
+
+class countTrailingZerosI_cnttzwNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return countTrailingZerosI_cnttzw_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CountTrailingZerosI; }
+public:
+  countTrailingZerosI_cnttzwNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(countTrailingZerosI_cnttzwNode); }
+  // Rematerialize countTrailingZerosI_cnttzw
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "countTrailingZerosI_cnttzw";}
 #endif
 };
 
@@ -19942,9 +20645,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return countTrailingZerosL_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return countTrailingZerosL_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosL; }
 public:
   countTrailingZerosL_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -19954,6 +20657,36 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "countTrailingZerosL_Ex";}
+#endif
+};
+
+class countTrailingZerosL_cnttzdNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return countTrailingZerosL_cnttzd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CountTrailingZerosL; }
+public:
+  countTrailingZerosL_cnttzdNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(countTrailingZerosL_cnttzdNode); }
+  // Rematerialize countTrailingZerosL_cnttzd
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "countTrailingZerosL_cnttzd";}
 #endif
 };
 
@@ -19969,9 +20702,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return insrwi_a_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return insrwi_a_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -19998,9 +20731,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return insrwi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return insrwi_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -20028,9 +20761,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return bytes_reverse_int_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return bytes_reverse_int_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReverseBytesI; }
 public:
   bytes_reverse_int_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -20039,6 +20772,66 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "bytes_reverse_int_Ex";}
+#endif
+};
+
+class bytes_reverse_int_vecNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return bytes_reverse_int_vec_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesI; }
+public:
+  bytes_reverse_int_vecNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(bytes_reverse_int_vecNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "bytes_reverse_int_vec";}
+#endif
+};
+
+class bytes_reverse_intNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return bytes_reverse_int_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesI; }
+public:
+  bytes_reverse_intNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(bytes_reverse_intNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "bytes_reverse_int";}
 #endif
 };
 
@@ -20054,9 +20847,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return bytes_reverse_long_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return bytes_reverse_long_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReverseBytesL; }
 public:
   bytes_reverse_long_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -20065,6 +20858,66 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "bytes_reverse_long_Ex";}
+#endif
+};
+
+class bytes_reverse_long_vecNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return bytes_reverse_long_vec_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesL; }
+public:
+  bytes_reverse_long_vecNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(bytes_reverse_long_vecNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "bytes_reverse_long_vec";}
+#endif
+};
+
+class bytes_reverse_longNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return bytes_reverse_long_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesL; }
+public:
+  bytes_reverse_longNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(bytes_reverse_longNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "bytes_reverse_long";}
 #endif
 };
 
@@ -20080,9 +20933,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return bytes_reverse_ushort_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return bytes_reverse_ushort_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReverseBytesUS; }
 public:
   bytes_reverse_ushort_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -20091,6 +20944,35 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "bytes_reverse_ushort_Ex";}
+#endif
+};
+
+class bytes_reverse_ushortNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return bytes_reverse_ushort_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesUS; }
+public:
+  bytes_reverse_ushortNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(bytes_reverse_ushortNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "bytes_reverse_ushort";}
 #endif
 };
 
@@ -20106,9 +20988,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return bytes_reverse_short_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return bytes_reverse_short_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReverseBytesS; }
 public:
   bytes_reverse_short_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -20117,6 +20999,35 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "bytes_reverse_short_Ex";}
+#endif
+};
+
+class bytes_reverse_shortNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return bytes_reverse_short_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesS; }
+public:
+  bytes_reverse_shortNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(bytes_reverse_shortNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "bytes_reverse_short";}
 #endif
 };
 
@@ -20132,9 +21043,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadI_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadI_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesI; }
@@ -20151,6 +21062,37 @@ public:
 #endif
 };
 
+class loadI_reversed_acquireNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadI_reversed_acquire_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesI; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  loadI_reversed_acquireNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(loadI_reversed_acquireNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadI_reversed_acquire";}
+#endif
+};
+
 class loadL_reversedNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -20163,9 +21105,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadL_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadL_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesL; }
@@ -20182,6 +21124,37 @@ public:
 #endif
 };
 
+class loadL_reversed_acquireNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadL_reversed_acquire_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesL; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  loadL_reversed_acquireNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(loadL_reversed_acquireNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadL_reversed_acquire";}
+#endif
+};
+
 class loadUS_reversedNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -20194,9 +21167,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadUS_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadUS_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesUS; }
@@ -20213,6 +21186,37 @@ public:
 #endif
 };
 
+class loadUS_reversed_acquireNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadUS_reversed_acquire_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesUS; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  loadUS_reversed_acquireNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(loadUS_reversed_acquireNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadUS_reversed_acquire";}
+#endif
+};
+
 class loadS_reversedNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -20225,9 +21229,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return loadS_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return loadS_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesS; }
@@ -20244,6 +21248,37 @@ public:
 #endif
 };
 
+class loadS_reversed_acquireNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadS_reversed_acquire_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReverseBytesS; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  loadS_reversed_acquireNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(loadS_reversed_acquireNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadS_reversed_acquire";}
+#endif
+};
+
 class storeI_reversedNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[3];
@@ -20256,9 +21291,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeI_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeI_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
@@ -20287,9 +21322,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeL_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeL_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
@@ -20318,9 +21353,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeUS_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeUS_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreC; }
@@ -20349,9 +21384,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return storeS_reversed_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return storeS_reversed_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreC; }
@@ -20380,9 +21415,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mtvsrwz_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mtvsrwz_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -20410,9 +21445,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xxspltw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xxspltw_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -20424,6 +21459,36 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "xxspltw";}
+#endif
+};
+
+class xscvdpspn_regFNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xscvdpspn_regF_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+public:
+  xscvdpspn_regFNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(xscvdpspn_regFNode); }
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  // Rematerialize xscvdpspn_regF
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xscvdpspn_regF";}
 #endif
 };
 
@@ -20439,9 +21504,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl32_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -20470,9 +21535,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl48_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl48_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -20501,9 +21566,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl56_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl56_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -20532,15 +21597,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl8B_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl8B_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl8B_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl8B_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl8B_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl8B_reg_Ex";}
@@ -20559,9 +21625,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl8B_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl8B_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateB; }
@@ -20569,6 +21635,7 @@ private:
 public:
   repl8B_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl8B_immI0Node); }
+  // Rematerialize repl8B_immI0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20589,9 +21656,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl8B_immIminus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl8B_immIminus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateB; }
@@ -20599,6 +21666,7 @@ private:
 public:
   repl8B_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl8B_immIminus1Node); }
+  // Rematerialize repl8B_immIminus1
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20619,15 +21687,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl16B_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl16B_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl16B_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl16B_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl16B_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl16B_reg_Ex";}
@@ -20646,9 +21715,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl16B_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl16B_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateB; }
@@ -20656,6 +21725,7 @@ private:
 public:
   repl16B_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl16B_immI0Node); }
+  // Rematerialize repl16B_immI0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20676,9 +21746,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl16B_immIminus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl16B_immIminus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateB; }
@@ -20686,6 +21756,7 @@ private:
 public:
   repl16B_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl16B_immIminus1Node); }
+  // Rematerialize repl16B_immIminus1
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20706,15 +21777,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4S_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4S_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl4S_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4S_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl4S_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl4S_reg_Ex";}
@@ -20733,9 +21805,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4S_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4S_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateS; }
@@ -20743,6 +21815,7 @@ private:
 public:
   repl4S_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4S_immI0Node); }
+  // Rematerialize repl4S_immI0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20763,9 +21836,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4S_immIminus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4S_immIminus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateS; }
@@ -20773,6 +21846,7 @@ private:
 public:
   repl4S_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4S_immIminus1Node); }
+  // Rematerialize repl4S_immIminus1
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20793,15 +21867,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl8S_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl8S_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl8S_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl8S_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl8S_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl8S_reg_Ex";}
@@ -20820,9 +21895,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl8S_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl8S_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateS; }
@@ -20830,6 +21905,7 @@ private:
 public:
   repl8S_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl8S_immI0Node); }
+  // Rematerialize repl8S_immI0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20850,9 +21926,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl8S_immIminus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl8S_immIminus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateS; }
@@ -20860,6 +21936,7 @@ private:
 public:
   repl8S_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl8S_immIminus1Node); }
+  // Rematerialize repl8S_immIminus1
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20880,15 +21957,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2I_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2I_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl2I_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2I_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl2I_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl2I_reg_Ex";}
@@ -20907,9 +21985,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2I_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2I_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateI; }
@@ -20917,6 +21995,7 @@ private:
 public:
   repl2I_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2I_immI0Node); }
+  // Rematerialize repl2I_immI0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20937,9 +22016,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2I_immIminus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2I_immIminus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateI; }
@@ -20947,6 +22026,7 @@ private:
 public:
   repl2I_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2I_immIminus1Node); }
+  // Rematerialize repl2I_immIminus1
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -20967,15 +22047,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4I_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4I_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl4I_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4I_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl4I_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl4I_reg_Ex";}
@@ -20994,9 +22075,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4I_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4I_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateI; }
@@ -21004,6 +22085,7 @@ private:
 public:
   repl4I_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4I_immI0Node); }
+  // Rematerialize repl4I_immI0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -21024,9 +22106,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4I_immIminus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4I_immIminus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateI; }
@@ -21034,6 +22116,7 @@ private:
 public:
   repl4I_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4I_immIminus1Node); }
+  // Rematerialize repl4I_immIminus1
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -21054,15 +22137,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2F_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2F_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl2F_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2F_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl2F_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl2F_reg_Ex";}
@@ -21081,9 +22165,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2F_immF_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2F_immF_Ex_rule; }
   virtual void           eval_constant(Compile* C);
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
@@ -21094,6 +22178,7 @@ public:
   repl2F_immF_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2F_immF_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl2F_immF_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl2F_immF_Ex";}
@@ -21112,9 +22197,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2F_immF0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2F_immF0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateF; }
   virtual int            reloc() const;
@@ -21122,11 +22207,1078 @@ private:
 public:
   repl2F_immF0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2F_immF0Node); }
+  // Rematerialize repl2F_immF0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl2F_immF0";}
+#endif
+};
+
+class vadd16B_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vadd16B_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVB; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vadd16B_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vadd16B_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vadd16B_reg";}
+#endif
+};
+
+class vadd8S_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vadd8S_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVS; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vadd8S_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vadd8S_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vadd8S_reg";}
+#endif
+};
+
+class vadd4I_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vadd4I_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVI; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vadd4I_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vadd4I_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vadd4I_reg";}
+#endif
+};
+
+class vadd4F_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vadd4F_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vadd4F_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vadd4F_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vadd4F_reg";}
+#endif
+};
+
+class vadd2L_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vadd2L_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVL; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vadd2L_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vadd2L_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vadd2L_reg";}
+#endif
+};
+
+class vadd2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vadd2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVD; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vadd2D_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vadd2D_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vadd2D_reg";}
+#endif
+};
+
+class vsub16B_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsub16B_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVB; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsub16B_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsub16B_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsub16B_reg";}
+#endif
+};
+
+class vsub8S_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsub8S_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVS; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsub8S_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsub8S_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsub8S_reg";}
+#endif
+};
+
+class vsub4I_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsub4I_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVI; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsub4I_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsub4I_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsub4I_reg";}
+#endif
+};
+
+class vsub4F_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsub4F_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsub4F_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsub4F_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsub4F_reg";}
+#endif
+};
+
+class vsub2L_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsub2L_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVL; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsub2L_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsub2L_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsub2L_reg";}
+#endif
+};
+
+class vsub2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsub2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVD; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsub2D_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsub2D_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsub2D_reg";}
+#endif
+};
+
+class vmul8S_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vmul8S_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVS; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vmul8S_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vmul8S_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vmul8S_reg";}
+#endif
+};
+
+class vmul4I_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vmul4I_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVI; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vmul4I_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vmul4I_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vmul4I_reg";}
+#endif
+};
+
+class vmul4F_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vmul4F_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vmul4F_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vmul4F_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vmul4F_reg";}
+#endif
+};
+
+class vmul2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vmul2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVD; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vmul2D_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vmul2D_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vmul2D_reg";}
+#endif
+};
+
+class vdiv4F_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vdiv4F_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_DivVF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vdiv4F_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vdiv4F_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vdiv4F_reg";}
+#endif
+};
+
+class vdiv2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vdiv2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_DivVD; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vdiv2D_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vdiv2D_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vdiv2D_reg";}
+#endif
+};
+
+class vabs4F_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vabs4F_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AbsVF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vabs4F_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vabs4F_regNode); }
+  // Rematerialize vabs4F_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vabs4F_reg";}
+#endif
+};
+
+class vabs2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vabs2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AbsVD; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vabs2D_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vabs2D_regNode); }
+  // Rematerialize vabs2D_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vabs2D_reg";}
+#endif
+};
+
+class roundD_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return roundD_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RoundDoubleMode; }
+public:
+  roundD_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(roundD_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "roundD_reg";}
+#endif
+};
+
+class vround2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vround2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RoundDoubleModeV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vround2D_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vround2D_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vround2D_reg";}
+#endif
+};
+
+class vneg4F_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vneg4F_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_NegVF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vneg4F_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vneg4F_regNode); }
+  // Rematerialize vneg4F_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vneg4F_reg";}
+#endif
+};
+
+class vneg2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vneg2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_NegVD; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vneg2D_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vneg2D_regNode); }
+  // Rematerialize vneg2D_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vneg2D_reg";}
+#endif
+};
+
+class vsqrt4F_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsqrt4F_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SqrtVF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsqrt4F_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsqrt4F_regNode); }
+  // Rematerialize vsqrt4F_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsqrt4F_reg";}
+#endif
+};
+
+class vsqrt2D_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vsqrt2D_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SqrtVD; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vsqrt2D_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vsqrt2D_regNode); }
+  // Rematerialize vsqrt2D_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vsqrt2D_reg";}
+#endif
+};
+
+class vpopcnt_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vpopcnt_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_PopCountVI; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vpopcnt_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vpopcnt_regNode); }
+  // Rematerialize vpopcnt_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vpopcnt_reg";}
+#endif
+};
+
+class vfma4FNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma4F_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVF; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma4FNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma4FNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma4F";}
+#endif
+};
+
+class vfma4F_neg1Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma4F_neg1_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVF; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma4F_neg1Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma4F_neg1Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma4F_neg1";}
+#endif
+};
+
+class vfma4F_neg1_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma4F_neg1_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVF; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma4F_neg1_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma4F_neg1_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma4F_neg1_0";}
+#endif
+};
+
+class vfma4F_neg2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma4F_neg2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVF; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma4F_neg2Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma4F_neg2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma4F_neg2";}
+#endif
+};
+
+class vfma2DNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma2D_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVD; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma2DNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma2DNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma2D";}
+#endif
+};
+
+class vfma2D_neg1Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma2D_neg1_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVD; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma2D_neg1Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma2D_neg1Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma2D_neg1";}
+#endif
+};
+
+class vfma2D_neg1_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma2D_neg1_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVD; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma2D_neg1_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma2D_neg1_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma2D_neg1_0";}
+#endif
+};
+
+class vfma2D_neg2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vfma2D_neg2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVD; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vfma2D_neg2Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vfma2D_neg2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vfma2D_neg2";}
 #endif
 };
 
@@ -21142,9 +23294,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return overflowAddL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return overflowAddL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowAddL; }
 public:
@@ -21171,9 +23323,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return overflowSubL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return overflowSubL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubL; }
 public:
@@ -21200,9 +23352,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return overflowNegL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return overflowNegL_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubL; }
 public:
@@ -21229,9 +23381,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return overflowMulL_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return overflowMulL_reg_reg_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowMulL; }
 public:
@@ -21258,15 +23410,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4F_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4F_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl4F_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4F_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl4F_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl4F_reg_Ex";}
@@ -21285,9 +23438,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4F_immF_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4F_immF_Ex_rule; }
   virtual void           eval_constant(Compile* C);
   virtual bool           requires_postalloc_expand() const { return true; }
   virtual void           postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_);
@@ -21317,9 +23470,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl4F_immF0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl4F_immF0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateF; }
   virtual int            reloc() const;
@@ -21327,6 +23480,7 @@ private:
 public:
   repl4F_immF0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl4F_immF0Node); }
+  // Rematerialize repl4F_immF0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -21347,22 +23501,26 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2D_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2D_reg_Ex_rule; }
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl2D_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2D_reg_ExNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl2D_reg_Ex
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl2D_reg_Ex";}
 #endif
 };
 
-class repl2D_immI0Node : public MachTypeNode { 
+class repl2D_immD0Node : public MachTypeNode { 
 private:
   MachOper *_opnd_array[2];
 public:
@@ -21374,51 +23532,23 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2D_immD0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2D_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateD; }
+  virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
 public:
-  repl2D_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(repl2D_immI0Node); }
+  repl2D_immD0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(repl2D_immD0Node); }
+  // Rematerialize repl2D_immD0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "repl2D_immI0";}
-#endif
-};
-
-class repl2D_immIminus1Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2D_immIminus1_rule; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual uint           size(PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_ReplicateD; }
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  repl2D_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(repl2D_immIminus1Node); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "repl2D_immIminus1";}
+  virtual const char    *Name() const { return "repl2D_immD0";}
 #endif
 };
 
@@ -21434,9 +23564,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return mtvsrd_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return mtvsrd_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -21464,9 +23594,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xxspltd_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xxspltd_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -21493,9 +23623,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return xxpermdi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return xxpermdi_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
 public:
@@ -21522,15 +23652,16 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2L_reg_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2L_reg_Ex_rule; }
   virtual int            ideal_Opcode() const { return Op_ReplicateL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
   repl2L_reg_ExNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2L_reg_ExNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize repl2L_reg_Ex
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "repl2L_reg_Ex";}
@@ -21549,9 +23680,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2L_immI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2L_immI0_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateL; }
@@ -21559,6 +23690,7 @@ private:
 public:
   repl2L_immI0Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2L_immI0Node); }
+  // Rematerialize repl2L_immI0
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -21579,9 +23711,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return repl2L_immIminus1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return repl2L_immIminus1_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReplicateL; }
@@ -21589,6 +23721,7 @@ private:
 public:
   repl2L_immIminus1Node() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(repl2L_immIminus1Node); }
+  // Rematerialize repl2L_immIminus1
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -21609,9 +23742,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return safePoint_poll_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return safePoint_poll_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SafePoint; }
@@ -21640,9 +23773,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallStaticJavaDirect_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallStaticJavaDirect_rule; }
   virtual void           method_set( intptr_t method );
   virtual int            ins_num_consts() const { return 3 /* up to 3 patchable constants: inline cache, 2 call targets. */; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -21676,9 +23809,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallDynamicJavaDirectSched_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallDynamicJavaDirectSched_rule; }
   virtual void           method_set( intptr_t method );
   virtual int            ins_num_consts() const { return 1 /* 1 patchable constant: call destination */; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -21710,9 +23843,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallDynamicJavaDirectSched_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallDynamicJavaDirectSched_Ex_rule; }
   virtual void           method_set( intptr_t method );
   virtual int            ins_num_consts() const { return 2 /* 2 patchable constants: inline cache, call destination. */; }
   virtual bool           requires_postalloc_expand() const { return true; }
@@ -21744,9 +23877,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallDynamicJavaDirect_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallDynamicJavaDirect_rule; }
   virtual void           method_set( intptr_t method );
   virtual int            ins_num_consts() const { return 4; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -21779,9 +23912,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallRuntimeDirect_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallRuntimeDirect_rule; }
   virtual void           method_set( intptr_t method );
   virtual int            ins_num_consts() const { return 3; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
@@ -21812,9 +23945,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallLeafDirect_mtctr_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallLeafDirect_mtctr_rule; }
   virtual int            ins_num_consts() const { return 1; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -21843,9 +23976,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallLeafDirect_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallLeafDirect_rule; }
   virtual void           method_set( intptr_t method );
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -21876,9 +24009,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallLeafDirect_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallLeafDirect_Ex_rule; }
   virtual void           method_set( intptr_t method );
   virtual int            ins_num_consts() const { return 3; }
   virtual bool           requires_postalloc_expand() const { return true; }
@@ -21910,9 +24043,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CallLeafNoFPDirect_Ex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CallLeafNoFPDirect_Ex_rule; }
   virtual void           method_set( intptr_t method );
   virtual int            ins_num_consts() const { return 3; }
   virtual bool           requires_postalloc_expand() const { return true; }
@@ -21944,9 +24077,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return TailCalljmpInd_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return TailCalljmpInd_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_TailCall; }
@@ -21977,9 +24110,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return Ret_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return Ret_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Return; }
@@ -22010,9 +24143,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tailjmpInd_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tailjmpInd_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_TailJump; }
@@ -22043,9 +24176,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return CreateException_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return CreateException_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CreateEx; }
@@ -22073,9 +24206,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return RethrowException_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return RethrowException_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Rethrow; }
   virtual int            reloc() const;
@@ -22105,11 +24238,10 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return ShouldNotReachHere_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return ShouldNotReachHere_rule; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Halt; }
   virtual uint           oper_input_base() const { return 5; }
 public:
@@ -22137,9 +24269,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return tlsLoadP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return tlsLoadP_rule; }
   virtual int            ins_should_rematerialize() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22169,9 +24301,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return endGroup_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return endGroup_rule; }
   virtual int            ins_is_nop() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22198,9 +24330,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return fxNop_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return fxNop_rule; }
   virtual int            ins_is_nop() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22227,9 +24359,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return fpNop0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return fpNop0_rule; }
   virtual int            ins_is_nop() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22256,9 +24388,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return fpNop1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return fpNop1_rule; }
   virtual int            ins_is_nop() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22285,9 +24417,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return brNop0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return brNop0_rule; }
   virtual int            ins_is_nop() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22314,9 +24446,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return brNop1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return brNop1_rule; }
   virtual int            ins_is_nop() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22343,9 +24475,9 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
+  virtual uint           rule() const { return brNop2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual uint           rule() const { return brNop2_rule; }
   virtual int            ins_is_nop() const { return true; }
   virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
@@ -22360,9 +24492,785 @@ public:
 #endif
 };
 
+class cacheWBNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cacheWB_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CacheWB; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cacheWBNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cacheWBNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cacheWB";}
+#endif
+};
+
+class cacheWBPreSyncNode : public MachNode { 
+private:
+  MachOper *_opnd_array[1];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cacheWBPreSync_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CacheWBPreSync; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cacheWBPreSyncNode() {  _num_opnds = 1; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cacheWBPreSyncNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cacheWBPreSync";}
+#endif
+};
+
+class cacheWBPostSyncNode : public MachNode { 
+private:
+  MachOper *_opnd_array[1];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cacheWBPostSync_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CacheWBPostSync; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cacheWBPostSyncNode() {  _num_opnds = 1; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cacheWBPostSyncNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cacheWBPostSync";}
+#endif
+};
+
+class compareAndSwapP_shenandoahNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapP_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapP_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapP_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapP_shenandoah";}
+#endif
+};
+
+class compareAndSwapP_shenandoah_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapP_shenandoah_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahWeakCompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapP_shenandoah_0Node() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapP_shenandoah_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapP_shenandoah_0";}
+#endif
+};
+
+class compareAndSwapN_shenandoahNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapN_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndSwapN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapN_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapN_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapN_shenandoah";}
+#endif
+};
+
+class compareAndSwapN_shenandoah_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapN_shenandoah_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahWeakCompareAndSwapN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapN_shenandoah_0Node() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapN_shenandoah_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapN_shenandoah_0";}
+#endif
+};
+
+class compareAndSwapP_acq_shenandoahNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapP_acq_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapP_acq_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapP_acq_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapP_acq_shenandoah";}
+#endif
+};
+
+class compareAndSwapP_acq_shenandoah_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapP_acq_shenandoah_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahWeakCompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapP_acq_shenandoah_0Node() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapP_acq_shenandoah_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapP_acq_shenandoah_0";}
+#endif
+};
+
+class compareAndSwapN_acq_shenandoahNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapN_acq_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndSwapN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapN_acq_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapN_acq_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapN_acq_shenandoah";}
+#endif
+};
+
+class compareAndSwapN_acq_shenandoah_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndSwapN_acq_shenandoah_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahWeakCompareAndSwapN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndSwapN_acq_shenandoah_0Node() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndSwapN_acq_shenandoah_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndSwapN_acq_shenandoah_0";}
+#endif
+};
+
+class compareAndExchangeP_shenandoahNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndExchangeP_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndExchangeP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndExchangeP_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndExchangeP_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndExchangeP_shenandoah";}
+#endif
+};
+
+class compareAndExchangeN_shenandoahNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndExchangeN_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndExchangeN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndExchangeN_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndExchangeN_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndExchangeN_shenandoah";}
+#endif
+};
+
+class compareAndExchangePAcq_shenandoahNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndExchangePAcq_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndExchangeP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndExchangePAcq_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndExchangePAcq_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndExchangePAcq_shenandoah";}
+#endif
+};
+
+class compareAndExchangeNAcq_shenandoahNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return compareAndExchangeNAcq_shenandoah_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndExchangeN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  compareAndExchangeNAcq_shenandoahNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(compareAndExchangeNAcq_shenandoahNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "compareAndExchangeNAcq_shenandoah";}
+#endif
+};
+
+class zLoadPNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zLoadP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zLoadPNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(zLoadPNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zLoadP";}
+#endif
+};
+
+class zLoadP_acqNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zLoadP_acq_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zLoadP_acqNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(zLoadP_acqNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zLoadP_acq";}
+#endif
+};
+
+class zCompareAndSwapPNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zCompareAndSwapP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zCompareAndSwapPNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(zCompareAndSwapPNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zCompareAndSwapP";}
+#endif
+};
+
+class zCompareAndSwapP_acqNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zCompareAndSwapP_acq_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zCompareAndSwapP_acqNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(zCompareAndSwapP_acqNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zCompareAndSwapP_acq";}
+#endif
+};
+
+class zCompareAndSwapPWeakNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zCompareAndSwapPWeak_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zCompareAndSwapPWeakNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(zCompareAndSwapPWeakNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zCompareAndSwapPWeak";}
+#endif
+};
+
+class zCompareAndSwapPWeak_acqNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zCompareAndSwapPWeak_acq_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zCompareAndSwapPWeak_acqNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(zCompareAndSwapPWeak_acqNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zCompareAndSwapPWeak_acq";}
+#endif
+};
+
+class zCompareAndExchangePNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zCompareAndExchangeP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zCompareAndExchangePNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(zCompareAndExchangePNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zCompareAndExchangeP";}
+#endif
+};
+
+class zCompareAndExchangeP_acqNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zCompareAndExchangeP_acq_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zCompareAndExchangeP_acqNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(zCompareAndExchangeP_acqNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zCompareAndExchangeP_acq";}
+#endif
+};
+
+class zGetAndSetPNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return zGetAndSetP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_GetAndSetP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  zGetAndSetPNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(zGetAndSetPNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "zGetAndSetP";}
+#endif
+};
+
 //HeaderForm
 
-#line 977 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 967 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
   // Header information of the source block.
   // Method declarations/definitions which are used outside
@@ -22371,29 +25279,33 @@ public:
   // To keep related declarations/definitions/uses close together,
   // we switch between source %{ }% and source_hpp %{ }% freely as needed.
 
+#include "opto/convertnode.hpp"
+
   // Returns true if Node n is followed by a MemBar node that
   // will do an acquire. If so, this node must not do the acquire
   // operation.
   bool followed_by_acquire(const Node *n);
 
-#line 22379 "ad_ppc.hpp"
+#line 25289 "ad_ppc.hpp"
 
 
 //HeaderForm
 
-#line 1189 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 1227 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
 //--------------------------------------------------------------
 //---<  Used for optimization in Compile::Shorten_branches  >---
 //--------------------------------------------------------------
 
+class C2_MacroAssembler;
+
 class CallStubImpl {
 
  public:
 
   // Emit call stub, compiled java to interpreter.
-  static void emit_trampoline_stub(MacroAssembler &_masm, int destination_toc_offset, int insts_call_instruction_offset);
+  static void emit_trampoline_stub(C2_MacroAssembler &_masm, int destination_toc_offset, int insts_call_instruction_offset);
 
   // Size of call trampoline stub.
   // This doesn't need to be accurate to the byte, but it
@@ -22410,12 +25322,12 @@ class CallStubImpl {
 };
 
 
-#line 22413 "ad_ppc.hpp"
+#line 25325 "ad_ppc.hpp"
 
 
 //HeaderForm
 
-#line 2146 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2029 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
 class HandlerImpl {
@@ -22437,8 +25349,38 @@ class HandlerImpl {
 
 };
 
+class Node::PD {
+public:
+  enum NodeFlags {
+    _last_flag = Node::_last_flag
+  };
+};
 
-#line 22441 "ad_ppc.hpp"
+
+#line 25360 "ad_ppc.hpp"
+
+
+//HeaderForm
+
+#line 26 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+#include "gc/shenandoah/shenandoahBarrierSet.hpp"
+#include "gc/shenandoah/shenandoahBarrierSetAssembler.hpp"
+
+#line 25370 "ad_ppc.hpp"
+
+
+//HeaderForm
+
+#line 25 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+
+#include "gc/shared/gc_globals.hpp"
+#include "gc/z/c2/zBarrierSetC2.hpp"
+#include "gc/z/zThreadLocalData.hpp"
+
+
+#line 25383 "ad_ppc.hpp"
 
 
 extern const char  register_save_policy[];
@@ -22487,6 +25429,7 @@ enum machRegisterClass {
   DBL_REG,
   VS_REG,
   STACK_SLOTS,
+  DYNAMIC,
   _last_Mach_Reg_Class
 };
 
@@ -22553,5 +25496,7 @@ extern const RegMask _STACK_SLOTS_mask;
 inline const RegMask &STACK_SLOTS_mask() { return _STACK_SLOTS_mask; }
 extern const RegMask _STACK_OR_STACK_SLOTS_mask;
 inline const RegMask &STACK_OR_STACK_SLOTS_mask() { return _STACK_OR_STACK_SLOTS_mask; }
+extern const RegMask _DYNAMIC_mask;
+inline const RegMask &DYNAMIC_mask() { return _DYNAMIC_mask; }
 
 #endif // GENERATED_ADFILES_AD_HPP

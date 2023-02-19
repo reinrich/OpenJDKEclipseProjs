@@ -1,7 +1,7 @@
 #line 1 "adGlobals_ppc.hpp"
 //
-// Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2012, 2017 SAP SE. All rights reserved.
+// Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012, 2022 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -35,9 +35,9 @@
 #define REG_COUNT    206
 
 // the number of save_on_entry + always_saved registers.
-#define MAX_SAVED_ON_ENTRY_REG_COUNT    72
+#define MAX_SAVED_ON_ENTRY_REG_COUNT    102
 #define     SAVED_ON_ENTRY_REG_COUNT    0
-#define   C_SAVED_ON_ENTRY_REG_COUNT    72
+#define   C_SAVED_ON_ENTRY_REG_COUNT    102
 
 // Enumerate machine register numbers starting after reserved regs.
 // in the order of occurrence in the register block.

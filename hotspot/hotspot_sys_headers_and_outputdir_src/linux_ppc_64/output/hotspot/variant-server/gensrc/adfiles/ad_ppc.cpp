@@ -1,7 +1,7 @@
 #line 1 "ad_ppc.cpp"
 //
-// Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2012, 2017 SAP SE. All rights reserved.
+// Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012, 2022 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -30,15 +30,17 @@
 #include "adfiles/adGlobals_ppc.hpp"
 #include "adfiles/ad_ppc.hpp"
 #include "memory/allocation.inline.hpp"
-#include "asm/macroAssembler.inline.hpp"
+#include "code/codeCache.hpp"
 #include "code/compiledIC.hpp"
 #include "code/nativeInst.hpp"
 #include "code/vmreg.inline.hpp"
 #include "gc/shared/collectedHeap.inline.hpp"
 #include "oops/compiledICHolder.hpp"
-#include "oops/markOop.hpp"
+#include "oops/compressedOops.hpp"
+#include "oops/markWord.hpp"
 #include "oops/method.hpp"
 #include "oops/oop.inline.hpp"
+#include "opto/c2_MacroAssembler.hpp"
 #include "opto/cfgnode.hpp"
 #include "opto/intrinsicnode.hpp"
 #include "opto/locknode.hpp"
@@ -46,25 +48,41 @@
 #include "opto/regalloc.hpp"
 #include "opto/regmask.hpp"
 #include "opto/runtime.hpp"
-#include "runtime/biasedLocking.hpp"
 #include "runtime/safepointMechanism.hpp"
 #include "runtime/sharedRuntime.hpp"
 #include "runtime/stubRoutines.hpp"
 #include "utilities/growableArray.hpp"
+#include "utilities/powerOfTwo.hpp"
 
 //SourceForm
 
-#line 991 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 983 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
+
+#include "opto/c2_CodeStubs.hpp"
+#include "oops/klass.inline.hpp"
+
+void PhaseOutput::pd_perform_mach_node_analysis() {
+}
+
+int MachNode::pd_alignment_required() const {
+  return 1;
+}
+
+int MachNode::compute_padding(int current_offset) const {
+  return 0;
+}
+
+// Should the matcher clone input 'm' of node 'n'?
+bool Matcher::pd_clone_node(Node* n, Node* m, Matcher::MStack& mstack) {
+  return false;
+}
 
 // Should the Matcher clone shifts on addressing modes, expecting them
 // to be subsumed into complex addressing expressions or compute them
 // into registers?
-bool Matcher::clone_address_expressions(AddPNode* m, Matcher::MStack& mstack, VectorSet& address_visited) {
+bool Matcher::pd_clone_address_expressions(AddPNode* m, Matcher::MStack& mstack, VectorSet& address_visited) {
   return clone_base_plus_offset_address(m, mstack, address_visited);
-}
-
-void Compile::reshape_address(AddPNode* addp) {
 }
 
 // Optimize load-acquire.
@@ -161,8 +179,7 @@ int MachCallStaticJavaNode::ret_addr_offset() {
 int MachCallDynamicJavaNode::ret_addr_offset() {
   // Offset is 4 with postalloc expanded calls (bl is one instruction). We use
   // postalloc expanded calls if we use inline caches and do not update method data.
-  if (UseInlineCaches)
-    return 4;
+  if (UseInlineCaches) return 4;
 
   int vtable_index = this->_vtable_index;
   if (vtable_index < 0) {
@@ -170,17 +187,22 @@ int MachCallDynamicJavaNode::ret_addr_offset() {
     assert(vtable_index == Method::invalid_vtable_index, "correct sentinel value");
     return 12;
   } else {
-    assert(!UseInlineCaches, "expect vtable calls only if not using ICs");
-    return 24;
+    return 24 + MacroAssembler::instr_size_for_decode_klass_not_null();
   }
 }
 
 int MachCallRuntimeNode::ret_addr_offset() {
+  if (rule() == CallRuntimeDirect_rule) {
+    // CallRuntimeDirectNode uses call_c.
 #if defined(ABI_ELFv2)
-  return 28;
+    return 28;
 #else
-  return 40;
+    return 40;
 #endif
+  }
+  assert(rule() == CallLeafDirect_rule, "unexpected node with rule %u", rule());
+  // CallLeafDirectNode uses bl.
+  return 4;
 }
 
 //=============================================================================
@@ -205,21 +227,47 @@ static int cc_to_biint(int cc, int flags_reg) {
 // is the number of bytes (not instructions) which will be inserted before
 // the instruction. The padding must match the size of a NOP instruction.
 
-// Currently not used on this platform.
-
-//=============================================================================
-
-// Indicate if the safepoint node needs the polling page as an input.
-bool SafePointNode::needs_polling_address_input() {
-  // The address is loaded from thread by a seperate node.
-  return true;
+// Add nop if a prefixed (two-word) instruction is going to cross a 64-byte boundary.
+// (See Section 1.6 of Power ISA Version 3.1)
+static int compute_prefix_padding(int current_offset) {
+  assert(PowerArchitecturePPC64 >= 10 && (CodeEntryAlignment & 63) == 0,
+         "Code buffer must be aligned to a multiple of 64 bytes");
+  if (is_aligned(current_offset + BytesPerInstWord, 64)) {
+    return BytesPerInstWord;
+  }
+  return 0;
 }
+
+int loadConI32Node::compute_padding(int current_offset) const {
+  return compute_prefix_padding(current_offset);
+}
+
+int loadConL34Node::compute_padding(int current_offset) const {
+  return compute_prefix_padding(current_offset);
+}
+
+int addI_reg_imm32Node::compute_padding(int current_offset) const {
+  return compute_prefix_padding(current_offset);
+}
+
+int addL_reg_imm34Node::compute_padding(int current_offset) const {
+  return compute_prefix_padding(current_offset);
+}
+
+int addP_reg_imm34Node::compute_padding(int current_offset) const {
+  return compute_prefix_padding(current_offset);
+}
+
+int cmprb_Whitespace_reg_reg_prefixedNode::compute_padding(int current_offset) const {
+  return compute_prefix_padding(current_offset);
+}
+
 
 //=============================================================================
 
 // Emit an interrupt that is caught by the debugger (for debugging compiler).
 void emit_break(CodeBuffer &cbuf) {
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
   __ illtrap();
 }
 
@@ -240,7 +288,7 @@ uint MachBreakpointNode::size(PhaseRegAlloc *ra_) const {
 //=============================================================================
 
 void emit_nop(CodeBuffer &cbuf) {
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
   __ nop();
 }
 
@@ -252,12 +300,12 @@ static inline void emit_long(CodeBuffer &cbuf, int value) {
 //=============================================================================
 
 
-#line 255 "ad_ppc.cpp"
+#line 303 "ad_ppc.cpp"
 
 
 //SourceForm
 
-#line 1218 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 1258 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
 // Emit a trampoline stub for a call to a target which is too far away.
@@ -271,7 +319,7 @@ static inline void emit_long(CodeBuffer &cbuf, int value) {
 //   load the call target from the constant pool
 //   branch via CTR (LR/link still points to the call-site above)
 
-void CallStubImpl::emit_trampoline_stub(MacroAssembler &_masm, int destination_toc_offset, int insts_call_instruction_offset) {
+void CallStubImpl::emit_trampoline_stub(C2_MacroAssembler &_masm, int destination_toc_offset, int insts_call_instruction_offset) {
   address stub = __ emit_trampoline_stub(destination_toc_offset, insts_call_instruction_offset);
   if (stub == NULL) {
     ciEnv::current()->record_out_of_memory_failure();
@@ -302,7 +350,7 @@ typedef struct {
 // - Add a relocation at the branch-and-link instruction.
 // - Emit a branch-and-link.
 // - Remember the return pc offset.
-EmitCallOffsets emit_call_with_trampoline_stub(MacroAssembler &_masm, address entry_point, relocInfo::relocType rtype) {
+EmitCallOffsets emit_call_with_trampoline_stub(C2_MacroAssembler &_masm, address entry_point, relocInfo::relocType rtype) {
   EmitCallOffsets offsets = { -1, -1 };
   const int start_offset = __ offset();
   offsets.insts_call_instruction_offset = __ offset();
@@ -348,7 +396,7 @@ static inline jlong replicate_immF(float con) {
 //=============================================================================
 
 const RegMask& MachConstantBaseNode::_out_RegMask = BITS64_CONSTANT_TABLE_BASE_mask();
-int Compile::ConstantTable::calculate_table_base_offset() const {
+int ConstantTable::calculate_table_base_offset() const {
   return 0;  // absolute addressing, no offset
 }
 
@@ -389,10 +437,10 @@ void MachConstantBaseNode::format(PhaseRegAlloc* ra_, outputStream* st) const {
 #ifndef PRODUCT
 void MachPrologNode::format(PhaseRegAlloc *ra_, outputStream *st) const {
   Compile* C = ra_->C;
-  const long framesize = C->frame_slots() << LogBytesPerInt;
+  const long framesize = C->output()->frame_slots() << LogBytesPerInt;
 
   st->print("PROLOG\n\t");
-  if (C->need_stack_bang(framesize)) {
+  if (C->output()->need_stack_bang(framesize)) {
     st->print("stack_overflow_check\n\t");
   }
 
@@ -400,39 +448,18 @@ void MachPrologNode::format(PhaseRegAlloc *ra_, outputStream *st) const {
     st->print("save return pc\n\t");
     st->print("push frame %ld\n\t", -framesize);
   }
-}
-#endif
 
-// Macro used instead of the common __ to emulate the pipes of PPC.
-// Instead of e.g. __ ld(...) one hase to write ___(ld) ld(...) This enables the
-// micro scheduler to cope with "hand written" assembler like in the prolog. Though
-// still no scheduling of this code is possible, the micro scheduler is aware of the
-// code and can update its internal data. The following mechanism is used to achieve this:
-// The micro scheduler calls size() of each compound node during scheduling. size() does a
-// dummy emit and only during this dummy emit C->hb_scheduling() is not NULL.
-#if 0 // TODO: PPC port
-#define ___(op) if (UsePower6SchedulerPPC64 && C->hb_scheduling())                    \
-                  C->hb_scheduling()->_pdScheduling->PdEmulatePipe(ppc64Opcode_##op); \
-                _masm.
-#define ___stop if (UsePower6SchedulerPPC64 && C->hb_scheduling())                    \
-                  C->hb_scheduling()->_pdScheduling->PdEmulatePipe(archOpcode_none)
-#define ___advance if (UsePower6SchedulerPPC64 && C->hb_scheduling())                 \
-                  C->hb_scheduling()->_pdScheduling->advance_offset
-#else
-#define ___(op) if (UsePower6SchedulerPPC64)                                          \
-                  Unimplemented();                                                    \
-                _masm.
-#define ___stop if (UsePower6SchedulerPPC64)                                          \
-                  Unimplemented()
-#define ___advance if (UsePower6SchedulerPPC64)                                       \
-                  Unimplemented()
+  if (C->stub_function() == NULL) {
+    st->print("nmethod entry barrier\n\t");
+  }
+}
 #endif
 
 void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
   Compile* C = ra_->C;
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
 
-  const long framesize = C->frame_size_in_bytes();
+  const long framesize = C->output()->frame_size_in_bytes();
   assert(framesize % (2 * wordSize) == 0, "must preserve 2*wordSize alignment");
 
   const bool method_is_frameless      = false /* TODO: PPC port C->is_frameless_method()*/;
@@ -447,10 +474,28 @@ void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
     // Add nop at beginning of all frameless methods to prevent any
     // oop instructions from getting overwritten by make_not_entrant
     // (patching attempt would fail).
-    ___(nop) nop();
+    __ nop();
   } else {
     // Get return pc.
-    ___(mflr) mflr(return_pc);
+    __ mflr(return_pc);
+  }
+
+  if (C->clinit_barrier_on_entry()) {
+    assert(!C->method()->holder()->is_not_initialized(), "initialization should have been started");
+
+    Label L_skip_barrier;
+    Register klass = toc_temp;
+
+    // Notify OOP recorder (don't need the relocation)
+    AddressLiteral md = __ constant_metadata_address(C->method()->holder()->constant_encoding());
+    __ load_const_optimized(klass, md.value(), R0);
+    __ clinit_barrier(klass, R16_thread, &L_skip_barrier /*L_fast_path*/);
+
+    __ load_const_optimized(klass, SharedRuntime::get_handle_wrong_method_stub(), R0);
+    __ mtctr(klass);
+    __ bctr();
+
+    __ bind(L_skip_barrier);
   }
 
   // Calls to C2R adapters often do not accept exceptional returns.
@@ -459,15 +504,15 @@ void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
   // use several kilobytes of stack. But the stack safety zone should
   // account for that. See bugs 4446381, 4468289, 4497237.
 
-  int bangsize = C->bang_size_in_bytes();
+  int bangsize = C->output()->bang_size_in_bytes();
   assert(bangsize >= framesize || bangsize <= 0, "stack bang size incorrect");
-  if (C->need_stack_bang(bangsize) && UseStackBanging) {
+  if (C->output()->need_stack_bang(bangsize)) {
     // Unfortunately we cannot use the function provided in
     // assembler.cpp as we have to emulate the pipes. So I had to
     // insert the code of generate_stack_overflow_check(), see
     // assembler.cpp for some illuminative comments.
     const int page_size = os::vm_page_size();
-    int bang_end = JavaThread::stack_shadow_zone_size();
+    int bang_end = StackOverflow::stack_shadow_zone_size();
 
     // This is how far the previous frame's stack banging extended.
     const int bang_end_safe = bang_end;
@@ -492,9 +537,9 @@ void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
       if (Assembler::is_simm(stdoffset, 16)) {
         // Signed 16 bit offset, a simple std is ok.
         if (UseLoadInstructionsForStackBangingPPC64) {
-          ___(ld) ld(R0,  (int)(signed short)stdoffset, R1_SP);
+          __ ld(R0,  (int)(signed short)stdoffset, R1_SP);
         } else {
-          ___(std) std(R0, (int)(signed short)stdoffset, R1_SP);
+          __ std(R0, (int)(signed short)stdoffset, R1_SP);
         }
       } else if (Assembler::is_simm(stdoffset, 31)) {
         // Use largeoffset calculations for addis & ld/std.
@@ -502,11 +547,11 @@ void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
         const int lo = MacroAssembler::largeoffset_si16_si16_lo(stdoffset);
 
         Register tmp = R11;
-        ___(addis) addis(tmp, R1_SP, hi);
+        __ addis(tmp, R1_SP, hi);
         if (UseLoadInstructionsForStackBangingPPC64) {
-          ___(ld) ld(R0, lo, tmp);
+          __ ld(R0, lo, tmp);
         } else {
-          ___(std) std(R0, lo, tmp);
+          __ std(R0, lo, tmp);
         }
       } else {
         ShouldNotReachHere();
@@ -515,25 +560,15 @@ void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
       bang_offset += page_size;
     }
     // R11 trashed
-  } // C->need_stack_bang(framesize) && UseStackBanging
+  } // C->output()->need_stack_bang(framesize)
 
   unsigned int bytes = (unsigned int)framesize;
   long offset = Assembler::align_addr(bytes, frame::alignment_in_bytes);
   ciMethod *currMethod = C->method();
 
-  // Optimized version for most common case.
-  if (UsePower6SchedulerPPC64 &&
-      !method_is_frameless && Assembler::is_simm((int)(-offset), 16) &&
-      !(false /* ConstantsALot TODO: PPC port*/)) {
-    ___(or) mr(callers_sp, R1_SP);
-    ___(std) std(return_pc, _abi(lr), R1_SP);
-    ___(stdu) stdu(R1_SP, -offset, R1_SP);
-    return;
-  }
-
   if (!method_is_frameless) {
     // Get callers sp.
-    ___(or) mr(callers_sp, R1_SP);
+    __ mr(callers_sp, R1_SP);
 
     // Push method's frame, modifies SP.
     assert(Assembler::is_uimm(framesize, 32U), "wrong type");
@@ -542,17 +577,17 @@ void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
     Register tmp = push_frame_temp;
     // Had to insert code of push_frame((unsigned int)framesize, push_frame_temp).
     if (Assembler::is_simm(-offset, 16)) {
-      ___(stdu) stdu(R1_SP, -offset, R1_SP);
+      __ stdu(R1_SP, -offset, R1_SP);
     } else {
       long x = -offset;
       // Had to insert load_const(tmp, -offset).
-      ___(addis)  lis( tmp, (int)((signed short)(((x >> 32) & 0xffff0000) >> 16)));
-      ___(ori)    ori( tmp, tmp, ((x >> 32) & 0x0000ffff));
-      ___(rldicr) sldi(tmp, tmp, 32);
-      ___(oris)   oris(tmp, tmp, (x & 0xffff0000) >> 16);
-      ___(ori)    ori( tmp, tmp, (x & 0x0000ffff));
+      __ lis( tmp, (int)((signed short)(((x >> 32) & 0xffff0000) >> 16)));
+      __ ori( tmp, tmp, ((x >> 32) & 0x0000ffff));
+      __ sldi(tmp, tmp, 32);
+      __ oris(tmp, tmp, (x & 0xffff0000) >> 16);
+      __ ori( tmp, tmp, (x & 0x0000ffff));
 
-      ___(stdux) stdux(R1_SP, R1_SP, tmp);
+      __ stdux(R1_SP, R1_SP, tmp);
     }
   }
 #if 0 // TODO: PPC port
@@ -567,14 +602,16 @@ void MachPrologNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
 #endif
   if (!method_is_frameless) {
     // Save return pc.
-    ___(std) std(return_pc, _abi(lr), callers_sp);
+    __ std(return_pc, _abi0(lr), callers_sp);
   }
 
-  C->set_frame_complete(cbuf.insts_size());
+  if (C->stub_function() == NULL) {
+    BarrierSetAssembler* bs = BarrierSet::barrier_set()->barrier_set_assembler();
+    bs->nmethod_entry_barrier(&_masm, push_frame_temp);
+  }
+
+  C->output()->set_frame_complete(cbuf.insts_size());
 }
-#undef ___
-#undef ___stop
-#undef ___advance
 
 uint MachPrologNode::size(PhaseRegAlloc *ra_) const {
   // Variable size. determine dynamically.
@@ -597,37 +634,26 @@ void MachEpilogNode::format(PhaseRegAlloc *ra_, outputStream *st) const {
   st->print("pop frame\n\t");
 
   if (do_polling() && C->is_method_compilation()) {
-    st->print("touch polling page\n\t");
+    st->print("safepoint poll\n\t");
   }
 }
 #endif
 
 void MachEpilogNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
   Compile* C = ra_->C;
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
 
-  const long framesize = ((long)C->frame_slots()) << LogBytesPerInt;
+  const long framesize = ((long)C->output()->frame_slots()) << LogBytesPerInt;
   assert(framesize >= 0, "negative frame-size?");
 
   const bool method_needs_polling = do_polling() && C->is_method_compilation();
   const bool method_is_frameless  = false /* TODO: PPC port C->is_frameless_method()*/;
   const Register return_pc        = R31;  // Must survive C-call to enable_stack_reserved_zone().
-  const Register polling_page     = R12;
+  const Register temp             = R12;
 
   if (!method_is_frameless) {
     // Restore return pc relative to callers' sp.
-    __ ld(return_pc, ((int)framesize) + _abi(lr), R1_SP);
-  }
-
-  if (method_needs_polling) {
-    if (SafepointMechanism::uses_thread_local_poll()) {
-      __ ld(polling_page, in_bytes(JavaThread::polling_page_offset()), R16_thread);
-    } else {
-      __ load_const_optimized(polling_page, (long)(address) os::get_polling_page());
-    }
-  }
-
-  if (!method_is_frameless) {
+    __ ld(return_pc, ((int)framesize) + _abi0(lr), R1_SP);
     // Move return pc to LR.
     __ mtlr(return_pc);
     // Pop frame (fixed frame-size).
@@ -639,10 +665,15 @@ void MachEpilogNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
   }
 
   if (method_needs_polling) {
-    // We need to mark the code position where the load from the safepoint
-    // polling page was emitted as relocInfo::poll_return_type here.
-    __ relocate(relocInfo::poll_return_type);
-    __ load_from_polling_page(polling_page);
+    Label dummy_label;
+    Label* code_stub = &dummy_label;
+    if (!UseSIGTRAP && !C->output()->in_scratch_emit_size()) {
+      C2SafepointPollStub* stub = new (C->comp_arena()) C2SafepointPollStub(__ offset());
+      C->output()->add_stub(stub);
+      code_stub = &stub->entry();
+      __ relocate(relocInfo::poll_return_type);
+    }
+    __ safepoint_poll(*code_stub, temp, true /* at_return */, true /* in_nmethod */);
   }
 }
 
@@ -659,43 +690,6 @@ int MachEpilogNode::reloc() const {
 const Pipeline * MachEpilogNode::pipeline() const {
   return MachNode::pipeline_class();
 }
-
-// This method seems to be obsolete. It is declared in machnode.hpp
-// and defined in all *.ad files, but it is never called. Should we
-// get rid of it?
-int MachEpilogNode::safepoint_offset() const {
-  assert(do_polling(), "no return for this epilog node");
-  return 0;
-}
-
-#if 0 // TODO: PPC port
-void MachLoadPollAddrLateNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  MacroAssembler _masm(&cbuf);
-  if (LoadPollAddressFromThread) {
-    _masm.ld(R11, in_bytes(JavaThread::poll_address_offset()), R16_thread);
-  } else {
-    _masm.nop();
-  }
-}
-
-uint MachLoadPollAddrLateNode::size(PhaseRegAlloc* ra_) const {
-  if (LoadPollAddressFromThread) {
-    return 4;
-  } else {
-    return 4;
-  }
-}
-
-#ifndef PRODUCT
-void MachLoadPollAddrLateNode::format(PhaseRegAlloc* ra_, outputStream* st) const {
-  st->print_cr(" LD R11, PollAddressOffset, R16_thread \t// LoadPollAddressFromThread");
-}
-#endif
-
-const RegMask &MachLoadPollAddrLateNode::out_RegMask() const {
-  return RSCRATCH1_BITS64_REG_mask();
-}
-#endif // PPC port
 
 // =============================================================================
 
@@ -787,7 +781,7 @@ uint MachSpillCopyNode::implementation(CodeBuffer *cbuf, PhaseRegAlloc *ra_, boo
       int src_offset = ra_->reg2offset(src_lo);
       int dst_offset = ra_->reg2offset(dst_lo);
       if (cbuf) {
-        MacroAssembler _masm(cbuf);
+        C2_MacroAssembler _masm(cbuf);
         __ ld(R0, src_offset, R1_SP);
         __ std(R0, dst_offset, R1_SP);
         __ ld(R0, src_offset+8, R1_SP);
@@ -800,7 +794,7 @@ uint MachSpillCopyNode::implementation(CodeBuffer *cbuf, PhaseRegAlloc *ra_, boo
       VectorSRegister Rsrc = as_VectorSRegister(Matcher::_regEncode[src_lo]);
       int dst_offset = ra_->reg2offset(dst_lo);
       if (cbuf) {
-        MacroAssembler _masm(cbuf);
+        C2_MacroAssembler _masm(cbuf);
         __ addi(R0, R1_SP, dst_offset);
         __ stxvd2x(Rsrc, R0);
       }
@@ -811,7 +805,7 @@ uint MachSpillCopyNode::implementation(CodeBuffer *cbuf, PhaseRegAlloc *ra_, boo
       VectorSRegister Rdst = as_VectorSRegister(Matcher::_regEncode[dst_lo]);
       int src_offset = ra_->reg2offset(src_lo);
       if (cbuf) {
-        MacroAssembler _masm(cbuf);
+        C2_MacroAssembler _masm(cbuf);
         __ addi(R0, R1_SP, src_offset);
         __ lxvd2x(Rdst, R0);
       }
@@ -822,7 +816,7 @@ uint MachSpillCopyNode::implementation(CodeBuffer *cbuf, PhaseRegAlloc *ra_, boo
       VectorSRegister Rsrc = as_VectorSRegister(Matcher::_regEncode[src_lo]);
       VectorSRegister Rdst = as_VectorSRegister(Matcher::_regEncode[dst_lo]);
       if (cbuf) {
-        MacroAssembler _masm(cbuf);
+        C2_MacroAssembler _masm(cbuf);
         __ xxlor(Rdst, Rsrc, Rsrc);
       }
       size += 4;
@@ -866,7 +860,7 @@ uint MachSpillCopyNode::implementation(CodeBuffer *cbuf, PhaseRegAlloc *ra_, boo
       size = (Rsrc != Rdst) ? 4 : 0;
 
       if (cbuf) {
-        MacroAssembler _masm(cbuf);
+        C2_MacroAssembler _masm(cbuf);
         if (size) {
           __ mr(Rdst, Rsrc);
         }
@@ -912,7 +906,7 @@ uint MachSpillCopyNode::implementation(CodeBuffer *cbuf, PhaseRegAlloc *ra_, boo
   // Check for float reg-reg copy.
   if (src_lo_rc == rc_float && dst_lo_rc == rc_float) {
     if (cbuf) {
-      MacroAssembler _masm(cbuf);
+      C2_MacroAssembler _masm(cbuf);
       FloatRegister Rsrc = as_FloatRegister(Matcher::_regEncode[src_lo]);
       FloatRegister Rdst = as_FloatRegister(Matcher::_regEncode[dst_lo]);
       __ fmr(Rdst, Rsrc);
@@ -979,110 +973,14 @@ uint MachSpillCopyNode::size(PhaseRegAlloc *ra_) const {
   return implementation(NULL, ra_, true, NULL);
 }
 
-#if 0 // TODO: PPC port
-ArchOpcode MachSpillCopyNode_archOpcode(MachSpillCopyNode *n, PhaseRegAlloc *ra_) {
-#ifndef PRODUCT
-  if (ra_->node_regs_max_index() == 0) return archOpcode_undefined;
-#endif
-  assert(ra_->node_regs_max_index() != 0, "");
-
-  // Get registers to move.
-  OptoReg::Name src_hi = ra_->get_reg_second(n->in(1));
-  OptoReg::Name src_lo = ra_->get_reg_first(n->in(1));
-  OptoReg::Name dst_hi = ra_->get_reg_second(n);
-  OptoReg::Name dst_lo = ra_->get_reg_first(n);
-
-  enum RC src_lo_rc = rc_class(src_lo);
-  enum RC dst_lo_rc = rc_class(dst_lo);
-
-  if (src_lo == dst_lo && src_hi == dst_hi)
-    return ppc64Opcode_none;            // Self copy, no move.
-
-  // --------------------------------------
-  // Memory->Memory Spill. Use R0 to hold the value.
-  if (src_lo_rc == rc_stack && dst_lo_rc == rc_stack) {
-    return ppc64Opcode_compound;
-  }
-
-  // --------------------------------------
-  // Check for float->int copy; requires a trip through memory.
-  if (src_lo_rc == rc_float && dst_lo_rc == rc_int) {
-    Unimplemented();
-  }
-
-  // --------------------------------------
-  // Check for integer reg-reg copy.
-  if (src_lo_rc == rc_int && dst_lo_rc == rc_int) {
-    Register Rsrc = as_Register(Matcher::_regEncode[src_lo]);
-    Register Rdst = as_Register(Matcher::_regEncode[dst_lo]);
-    if (Rsrc == Rdst) {
-      return ppc64Opcode_none;
-    } else {
-      return ppc64Opcode_or;
-    }
-  }
-
-  // Check for integer store.
-  if (src_lo_rc == rc_int && dst_lo_rc == rc_stack) {
-    if (src_hi != OptoReg::Bad) {
-      return ppc64Opcode_std;
-    } else {
-      return ppc64Opcode_stw;
-    }
-  }
-
-  // Check for integer load.
-  if (dst_lo_rc == rc_int && src_lo_rc == rc_stack) {
-    if (src_hi != OptoReg::Bad) {
-      return ppc64Opcode_ld;
-    } else {
-      return ppc64Opcode_lwz;
-    }
-  }
-
-  // Check for float reg-reg copy.
-  if (src_lo_rc == rc_float && dst_lo_rc == rc_float) {
-    return ppc64Opcode_fmr;
-  }
-
-  // Check for float store.
-  if (src_lo_rc == rc_float && dst_lo_rc == rc_stack) {
-    if (src_hi != OptoReg::Bad) {
-      return ppc64Opcode_stfd;
-    } else {
-      return ppc64Opcode_stfs;
-    }
-  }
-
-  // Check for float load.
-  if (dst_lo_rc == rc_float && src_lo_rc == rc_stack) {
-    if (src_hi != OptoReg::Bad) {
-      return ppc64Opcode_lfd;
-    } else {
-      return ppc64Opcode_lfs;
-    }
-  }
-
-  // --------------------------------------------------------------------
-  // Check for hi bits still needing moving. Only happens for misaligned
-  // arguments to native calls.
-  if (src_hi == dst_hi) {
-    return ppc64Opcode_none;               // Self copy; no move.
-  }
-
-  ShouldNotReachHere();
-  return ppc64Opcode_undefined;
-}
-#endif // PPC port
-
 #ifndef PRODUCT
 void MachNopNode::format(PhaseRegAlloc *ra_, outputStream *st) const {
-  st->print("NOP \t// %d nops to pad for loops.", _count);
+  st->print("NOP \t// %d nops to pad for loops or prefixed instructions.", _count);
 }
 #endif
 
 void MachNopNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *) const {
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
   // _count contains the number of nops needed for padding.
   for (int i = 0; i < _count; i++) {
     __ nop();
@@ -1097,13 +995,13 @@ uint MachNopNode::size(PhaseRegAlloc *ra_) const {
 void BoxLockNode::format(PhaseRegAlloc *ra_, outputStream *st) const {
   int offset = ra_->reg2offset(in_RegMask(0).find_first_elem());
   char reg_str[128];
-  ra_->dump_register(this, reg_str);
+  ra_->dump_register(this, reg_str, sizeof(reg_str));
   st->print("ADDI    %s, SP, %d \t// box node", reg_str, offset);
 }
 #endif
 
 void BoxLockNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
 
   int offset = ra_->reg2offset(in_RegMask(0).find_first_elem());
   int reg    = ra_->get_encode(this);
@@ -1129,7 +1027,7 @@ void MachUEPNode::format(PhaseRegAlloc *ra_, outputStream *st) const {
 
 void MachUEPNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
   // This is the unverified entry point.
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
 
   // Inline_cache contains a klass.
   Register ic_klass       = as_Register(Matcher::inline_cache_reg_encode());
@@ -1170,13 +1068,6 @@ void MachUEPNode::emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const {
   // Argument is valid and klass is as expected, continue.
 }
 
-#if 0 // TODO: PPC port
-// Optimize UEP code on z (save a load_const() call in main path).
-int MachUEPNode::ep_offset() {
-  return 0;
-}
-#endif
-
 uint MachUEPNode::size(PhaseRegAlloc *ra_) const {
   // Variable size. Determine dynamically.
   return MachNode::size(ra_);
@@ -1185,16 +1076,16 @@ uint MachUEPNode::size(PhaseRegAlloc *ra_) const {
 //=============================================================================
 
 
-#line 1188 "ad_ppc.cpp"
+#line 1079 "ad_ppc.cpp"
 
 
 //SourceForm
 
-#line 2169 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2059 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
 int HandlerImpl::emit_exception_handler(CodeBuffer &cbuf) {
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
 
   address base = __ start_a_stub(size_exception_handler());
   if (base == NULL) return 0; // CodeBuffer::expand failed
@@ -1211,7 +1102,7 @@ int HandlerImpl::emit_exception_handler(CodeBuffer &cbuf) {
 // The deopt_handler is like the exception handler, but it calls to
 // the deoptimization blob instead of jumping to the exception blob.
 int HandlerImpl::emit_deopt_handler(CodeBuffer& cbuf) {
-  MacroAssembler _masm(&cbuf);
+  C2_MacroAssembler _masm(&cbuf);
 
   address base = __ start_a_stub(size_deopt_handler());
   if (base == NULL) return 0; // CodeBuffer::expand failed
@@ -1236,66 +1127,110 @@ static int frame_slots_bias(int reg_enc, PhaseRegAlloc* ra_) {
 }
 
 const bool Matcher::match_rule_supported(int opcode) {
-  if (!has_match_rule(opcode))
-    return false;
-
-  switch (opcode) {
-  case Op_SqrtD:
-    return VM_Version::has_fsqrt();
-  case Op_CountLeadingZerosI:
-  case Op_CountLeadingZerosL:
-  case Op_CountTrailingZerosI:
-  case Op_CountTrailingZerosL:
-    if (!UseCountLeadingZerosInstructionsPPC64)
-      return false;
-    break;
-
-  case Op_PopCountI:
-  case Op_PopCountL:
-    return (UsePopCountInstruction && VM_Version::has_popcntw());
-
-  case Op_StrComp:
-    return SpecialStringCompareTo;
-  case Op_StrEquals:
-    return SpecialStringEquals;
-  case Op_StrIndexOf:
-    return SpecialStringIndexOf;
-  case Op_StrIndexOfChar:
-    return SpecialStringIndexOf;
+  if (!has_match_rule(opcode)) {
+    return false; // no match rule present
   }
 
-  return true;  // Per default match rules are supported.
+  switch (opcode) {
+    case Op_SqrtD:
+      return VM_Version::has_fsqrt();
+    case Op_RoundDoubleMode:
+      return VM_Version::has_vsx();
+    case Op_CountLeadingZerosI:
+    case Op_CountLeadingZerosL:
+      return UseCountLeadingZerosInstructionsPPC64;
+    case Op_CountTrailingZerosI:
+    case Op_CountTrailingZerosL:
+      return (UseCountLeadingZerosInstructionsPPC64 || UseCountTrailingZerosInstructionsPPC64);
+    case Op_PopCountI:
+    case Op_PopCountL:
+      return (UsePopCountInstruction && VM_Version::has_popcntw());
+
+    case Op_AddVB:
+    case Op_AddVS:
+    case Op_AddVI:
+    case Op_AddVF:
+    case Op_AddVD:
+    case Op_SubVB:
+    case Op_SubVS:
+    case Op_SubVI:
+    case Op_SubVF:
+    case Op_SubVD:
+    case Op_MulVS:
+    case Op_MulVF:
+    case Op_MulVD:
+    case Op_DivVF:
+    case Op_DivVD:
+    case Op_AbsVF:
+    case Op_AbsVD:
+    case Op_NegVF:
+    case Op_NegVD:
+    case Op_SqrtVF:
+    case Op_SqrtVD:
+    case Op_AddVL:
+    case Op_SubVL:
+    case Op_MulVI:
+    case Op_RoundDoubleModeV:
+      return SuperwordUseVSX;
+    case Op_PopCountVI:
+      return (SuperwordUseVSX && UsePopCountInstruction);
+    case Op_FmaVF:
+    case Op_FmaVD:
+      return (SuperwordUseVSX && UseFMA);
+
+    case Op_Digit:
+      return vmIntrinsics::is_intrinsic_available(vmIntrinsics::_isDigit);
+    case Op_LowerCase:
+      return vmIntrinsics::is_intrinsic_available(vmIntrinsics::_isLowerCase);
+    case Op_UpperCase:
+      return vmIntrinsics::is_intrinsic_available(vmIntrinsics::_isUpperCase);
+    case Op_Whitespace:
+      return vmIntrinsics::is_intrinsic_available(vmIntrinsics::_isWhitespace);
+
+    case Op_CacheWB:
+    case Op_CacheWBPreSync:
+    case Op_CacheWBPostSync:
+      return VM_Version::supports_data_cache_line_flush();
+  }
+
+  return true; // Per default match rules are supported.
 }
 
-const bool Matcher::match_rule_supported_vector(int opcode, int vlen) {
-
-  // TODO
-  // identify extra cases that we might want to provide match rules for
-  // e.g. Op_ vector nodes and other intrinsics while guarding with vlen
-  bool ret_value = match_rule_supported(opcode);
-  // Add rules here.
-
-  return ret_value;  // Per default match rules are supported.
+const bool Matcher::match_rule_supported_superword(int opcode, int vlen, BasicType bt) {
+  return match_rule_supported_vector(opcode, vlen, bt);
 }
 
-const bool Matcher::has_predicated_vectors(void) {
+const bool Matcher::match_rule_supported_vector(int opcode, int vlen, BasicType bt) {
+  if (!match_rule_supported(opcode) || !vector_size_supported(bt, vlen)) {
+    return false;
+  }
+  return true; // Per default match rules are supported.
+}
+
+const bool Matcher::match_rule_supported_vector_masked(int opcode, int vlen, BasicType bt) {
   return false;
 }
 
-const int Matcher::float_pressure(int default_pressure_threshold) {
-  return default_pressure_threshold;
+const bool Matcher::vector_needs_partial_operations(Node* node, const TypeVect* vt) {
+  return false;
 }
 
-int Matcher::regnum_to_fpu_offset(int regnum) {
-  // No user for this method?
+const RegMask* Matcher::predicate_reg_mask(void) {
+  return NULL;
+}
+
+const TypeVectMask* Matcher::predicate_reg_type(const Type* elemTy, int length) {
+  return NULL;
+}
+
+// Vector calling convention not yet implemented.
+const bool Matcher::supports_vector_calling_convention(void) {
+  return false;
+}
+
+OptoRegPair Matcher::vector_return_value(uint ideal_reg) {
   Unimplemented();
-  return 999;
-}
-
-const bool Matcher::convL2FSupported(void) {
-  // fcfids can do the conversion (>= Power7).
-  // fcfid + frsp showed rounding problem when result should be 0x3f800001.
-  return VM_Version::has_fcfids(); // False means that conversion is done by runtime call.
+  return OptoRegPair(0, 0);
 }
 
 // Vector width in bytes.
@@ -1320,11 +1255,6 @@ const uint Matcher::vector_ideal_reg(int size) {
   }
 }
 
-const uint Matcher::vector_shift_count_ideal_reg(int size) {
-  fatal("vector shift is not supported");
-  return Node::NotAMachineReg;
-}
-
 // Limits on vector size (number of elements) loaded into vector.
 const int Matcher::max_vector_size(const BasicType bt) {
   assert(is_java_primitive(bt), "only primitive type vectors");
@@ -1335,14 +1265,8 @@ const int Matcher::min_vector_size(const BasicType bt) {
   return max_vector_size(bt); // Same as max.
 }
 
-// PPC doesn't support misaligned vectors store/load.
-const bool Matcher::misaligned_vectors_ok() {
-  return !AlignVector; // can be changed by flag
-}
-
-// PPC AES support not yet implemented
-const bool Matcher::pass_original_key_for_aes() {
-  return false;
+const int Matcher::scalable_vector_reg_size(const BasicType bt) {
+  return -1;
 }
 
 // RETURNS: whether this branch offset is short enough that a short
@@ -1367,14 +1291,10 @@ bool Matcher::is_short_branch_offset(int rule, int br_size, int offset) {
   return b;
 }
 
-const bool Matcher::isSimpleConstant64(jlong value) {
-  // Probably always true, even if a temp register is required.
-  return true;
-}
 /* TODO: PPC port
 // Make a new machine dependent decode node (with its operands).
 MachTypeNode *Matcher::make_decode_node() {
-  assert(Universe::narrow_oop_base() == NULL && Universe::narrow_oop_shift() == 0,
+  assert(CompressedOops::base() == NULL && CompressedOops::shift() == 0,
          "This method is only implemented for unscaled cOops mode so far");
   MachTypeNode *decode = new decodeN_unscaledNode();
   decode->set_opnd_array(0, new iRegPdstOper());
@@ -1383,87 +1303,20 @@ MachTypeNode *Matcher::make_decode_node() {
 }
 */
 
-// false => size gets scaled to BytesPerLong, ok.
-const bool Matcher::init_array_count_is_in_bytes = false;
+MachOper* Matcher::pd_specialize_generic_vector_operand(MachOper* original_opnd, uint ideal_reg, bool is_temp) {
+  ShouldNotReachHere(); // generic vector operands not supported
+  return NULL;
+}
 
-// Use conditional move (CMOVL) on Power7.
-const int Matcher::long_cmove_cost() { return 0; } // this only makes long cmoves more expensive than int cmoves
-
-// Suppress CMOVF. Conditional move available (sort of) on PPC64 only from P7 onwards. Not exploited yet.
-// fsel doesn't accept a condition register as input, so this would be slightly different.
-const int Matcher::float_cmove_cost() { return ConditionalMoveLimit; }
-
-// Power6 requires postalloc expand (see block.cpp for description of postalloc expand).
-const bool Matcher::require_postalloc_expand = true;
-
-// Do we need to mask the count passed to shift instructions or does
-// the cpu only look at the lower 5/6 bits anyway?
-// PowerPC requires masked shift counts.
-const bool Matcher::need_masked_shift_count = true;
-
-// This affects two different things:
-//  - how Decode nodes are matched
-//  - how ImplicitNullCheck opportunities are recognized
-// If true, the matcher will try to remove all Decodes and match them
-// (as operands) into nodes. NullChecks are not prepared to deal with
-// Decodes by final_graph_reshaping().
-// If false, final_graph_reshaping() forces the decode behind the Cmp
-// for a NullCheck. The matcher matches the Decode node into a register.
-// Implicit_null_check optimization moves the Decode along with the
-// memory operation back up before the NullCheck.
-bool Matcher::narrow_oop_use_complex_address() {
-  // TODO: PPC port if (MatchDecodeNodes) return true;
+bool Matcher::is_reg2reg_move(MachNode* m) {
+  ShouldNotReachHere();  // generic vector operands not supported
   return false;
 }
 
-bool Matcher::narrow_klass_use_complex_address() {
-  NOT_LP64(ShouldNotCallThis());
-  assert(UseCompressedClassPointers, "only for compressed klass code");
-  // TODO: PPC port if (MatchDecodeNodes) return true;
+bool Matcher::is_generic_vector(MachOper* opnd)  {
+  ShouldNotReachHere();  // generic vector operands not supported
   return false;
 }
-
-bool Matcher::const_oop_prefer_decode() {
-  // Prefer ConN+DecodeN over ConP in simple compressed oops mode.
-  return Universe::narrow_oop_base() == NULL;
-}
-
-bool Matcher::const_klass_prefer_decode() {
-  // Prefer ConNKlass+DecodeNKlass over ConP in simple compressed klass mode.
-  return Universe::narrow_klass_base() == NULL;
-}
-
-// Is it better to copy float constants, or load them directly from memory?
-// Intel can load a float constant from a direct address, requiring no
-// extra registers. Most RISCs will have to materialize an address into a
-// register first, so they would do better to copy the constant from stack.
-const bool Matcher::rematerialize_float_constants = false;
-
-// If CPU can load and store mis-aligned doubles directly then no fixup is
-// needed. Else we split the double into 2 integer pieces and move it
-// piece-by-piece. Only happens when passing doubles into C code as the
-// Java calling convention forces doubles to be aligned.
-const bool Matcher::misaligned_doubles_ok = true;
-
-void Matcher::pd_implicit_null_fixup(MachNode *node, uint idx) {
- Unimplemented();
-}
-
-// Advertise here if the CPU requires explicit rounding operations
-// to implement the UseStrictFP mode.
-const bool Matcher::strict_fp_requires_explicit_rounding = false;
-
-// Do floats take an entire double register or just half?
-//
-// A float occupies a ppc64 double register. For the allocator, a
-// ppc64 double register appears as a pair of float registers.
-bool Matcher::float_in_double() { return true; }
-
-// Do ints take an entire long register or just half?
-// The relevant question is how the int is callee-saved:
-// the whole long is written but de-opt'ing will have to extract
-// the relevant 32 bits.
-const bool Matcher::int_in_long = true;
 
 // Constants for c2c and c calling conventions.
 
@@ -1546,6 +1399,16 @@ bool Matcher::is_spillable_arg(int reg) {
   return can_be_java_arg(reg);
 }
 
+uint Matcher::int_pressure_limit()
+{
+  return (INTPRESSURE == -1) ? 26 : INTPRESSURE;
+}
+
+uint Matcher::float_pressure_limit()
+{
+  return (FLOATPRESSURE == -1) ? 28 : FLOATPRESSURE;
+}
+
 bool Matcher::use_asm_for_ldiv_by_con(jlong divisor) {
   return false;
 }
@@ -1578,15 +1441,13 @@ const RegMask Matcher::method_handle_invoke_SP_save_mask() {
   return RegMask();
 }
 
-const bool Matcher::convi2l_type_required = true;
 
-
-#line 1584 "ad_ppc.cpp"
+#line 1445 "ad_ppc.cpp"
 
 
 //SourceForm
 
-#line 2737 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2583 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
 typedef struct {
@@ -1773,7 +1634,118 @@ loadConLReplicatedNodesTuple loadConLReplicatedNodesTuple_create(Compile *C, Pha
 }
 
 
-#line 1776 "ad_ppc.cpp"
+#line 1637 "ad_ppc.cpp"
+
+
+//SourceForm
+
+#line 14381 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+
+#include "runtime/continuation.hpp"
+
+
+#line 1648 "ad_ppc.cpp"
+
+
+//SourceForm
+
+#line 33 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+
+static void z_load_barrier(MacroAssembler& _masm, const MachNode* node, Address ref_addr, Register ref,
+                           Register tmp, uint8_t barrier_data) {
+  if (barrier_data == ZLoadBarrierElided) {
+    return;
+  }
+
+  ZLoadBarrierStubC2* const stub = ZLoadBarrierStubC2::create(node, ref_addr, ref, tmp, barrier_data);
+  __ ld(tmp, in_bytes(ZThreadLocalData::address_bad_mask_offset()), R16_thread);
+  __ and_(tmp, tmp, ref);
+  __ bne_far(CCR0, *stub->entry(), MacroAssembler::bc_far_optimize_on_relocate);
+  __ bind(*stub->continuation());
+}
+
+static void z_load_barrier_slow_path(MacroAssembler& _masm, const MachNode* node, Address ref_addr, Register ref,
+                                     Register tmp) {
+  ZLoadBarrierStubC2* const stub = ZLoadBarrierStubC2::create(node, ref_addr, ref, tmp, ZLoadBarrierStrong);
+  __ b(*stub->entry());
+  __ bind(*stub->continuation());
+}
+
+static void z_compare_and_swap(MacroAssembler& _masm, const MachNode* node,
+                              Register res, Register mem, Register oldval, Register newval,
+                              Register tmp_xchg, Register tmp_mask,
+                              bool weak, bool acquire) {
+  // z-specific load barrier requires strong CAS operations.
+  // Weak CAS operations are thus only emitted if the barrier is elided.
+  __ cmpxchgd(CCR0, tmp_xchg, oldval, newval, mem,
+              MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(), res, NULL, true,
+              weak && node->barrier_data() == ZLoadBarrierElided);
+
+  if (node->barrier_data() != ZLoadBarrierElided) {
+    Label skip_barrier;
+
+    __ ld(tmp_mask, in_bytes(ZThreadLocalData::address_bad_mask_offset()), R16_thread);
+    __ and_(tmp_mask, tmp_mask, tmp_xchg);
+    __ beq(CCR0, skip_barrier);
+
+    // CAS must have failed because pointer in memory is bad.
+    z_load_barrier_slow_path(_masm, node, Address(mem), tmp_xchg, res /* used as tmp */);
+
+    __ cmpxchgd(CCR0, tmp_xchg, oldval, newval, mem,
+                MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(), res, NULL, true, weak);
+
+    __ bind(skip_barrier);
+  }
+
+  if (acquire) {
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      // Uses the isync instruction as an acquire barrier.
+      // This exploits the compare and the branch in the z load barrier (load, compare and branch, isync).
+      __ isync();
+    } else {
+      __ sync();
+    }
+  }
+}
+
+static void z_compare_and_exchange(MacroAssembler& _masm, const MachNode* node,
+                                   Register res, Register mem, Register oldval, Register newval, Register tmp,
+                                   bool weak, bool acquire) {
+  // z-specific load barrier requires strong CAS operations.
+  // Weak CAS operations are thus only emitted if the barrier is elided.
+  __ cmpxchgd(CCR0, res, oldval, newval, mem,
+              MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(), noreg, NULL, true,
+              weak && node->barrier_data() == ZLoadBarrierElided);
+
+  if (node->barrier_data() != ZLoadBarrierElided) {
+    Label skip_barrier;
+    __ ld(tmp, in_bytes(ZThreadLocalData::address_bad_mask_offset()), R16_thread);
+    __ and_(tmp, tmp, res);
+    __ beq(CCR0, skip_barrier);
+
+    z_load_barrier_slow_path(_masm, node, Address(mem), res, tmp);
+
+    __ cmpxchgd(CCR0, res, oldval, newval, mem,
+                MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(), noreg, NULL, true, weak);
+
+    __ bind(skip_barrier);
+  }
+
+  if (acquire) {
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      // Uses the isync instruction as an acquire barrier.
+      // This exploits the compare and the branch in the z load barrier (load, compare and branch, isync).
+      __ isync();
+    } else {
+      __ sync();
+    }
+  }
+}
+
+
+#line 1748 "ad_ppc.cpp"
 
 
 #ifndef PRODUCT
@@ -2152,24 +2124,24 @@ const        char c_reg_save_policy[] = {
   'C', // VSR11
   'C', // VSR12
   'C', // VSR13
-  'C', // VSR14
-  'C', // VSR15
-  'C', // VSR16
-  'C', // VSR17
-  'C', // VSR18
-  'C', // VSR19
-  'C', // VSR20
-  'C', // VSR21
-  'C', // VSR22
-  'C', // VSR23
-  'C', // VSR24
-  'C', // VSR25
-  'C', // VSR26
-  'C', // VSR27
-  'C', // VSR28
-  'C', // VSR29
-  'C', // VSR30
-  'C', // VSR31
+  'E', // VSR14
+  'E', // VSR15
+  'E', // VSR16
+  'E', // VSR17
+  'E', // VSR18
+  'E', // VSR19
+  'E', // VSR20
+  'E', // VSR21
+  'E', // VSR22
+  'E', // VSR23
+  'E', // VSR24
+  'E', // VSR25
+  'E', // VSR26
+  'E', // VSR27
+  'E', // VSR28
+  'E', // VSR29
+  'E', // VSR30
+  'E', // VSR31
   'C', // VSR32
   'C', // VSR33
   'C', // VSR34
@@ -2190,18 +2162,18 @@ const        char c_reg_save_policy[] = {
   'C', // VSR49
   'C', // VSR50
   'C', // VSR51
-  'C', // VSR52
-  'C', // VSR53
-  'C', // VSR54
-  'C', // VSR55
-  'C', // VSR56
-  'C', // VSR57
-  'C', // VSR58
-  'C', // VSR59
-  'C', // VSR60
-  'C', // VSR61
-  'C', // VSR62
-  'C', // VSR63
+  'E', // VSR52
+  'E', // VSR53
+  'E', // VSR54
+  'E', // VSR55
+  'E', // VSR56
+  'E', // VSR57
+  'E', // VSR58
+  'E', // VSR59
+  'E', // VSR60
+  'E', // VSR61
+  'E', // VSR62
+  'E', // VSR63
   'C', // SR_XER
   'C', // SR_LR
   'C', // SR_CTR
@@ -2435,430 +2407,430 @@ const        int   reduceOp[] = {
   /*   10 */  immI8_rule,
   /*   11 */  immI16_rule,
   /*   12 */  immIhi16_rule,
-  /*   13 */  immInegpow2_rule,
-  /*   14 */  immIpow2minus1_rule,
-  /*   15 */  immIpowerOf2_rule,
-  /*   16 */  uimmI5_rule,
-  /*   17 */  uimmI6_rule,
-  /*   18 */  uimmI6_ge32_rule,
-  /*   19 */  uimmI15_rule,
-  /*   20 */  uimmI16_rule,
-  /*   21 */  immI_0_rule,
-  /*   22 */  immI_1_rule,
-  /*   23 */  immI_minus1_rule,
-  /*   24 */  immI_16_rule,
-  /*   25 */  immI_24_rule,
-  /*   26 */  immN_rule,
-  /*   27 */  immN_0_rule,
-  /*   28 */  immNKlass_rule,
-  /*   29 */  immNKlass_NM_rule,
-  /*   30 */  immP_rule,
-  /*   31 */  immP_NM_rule,
-  /*   32 */  immP_0_rule,
-  /*   33 */  immP_0or1_rule,
-  /*   34 */  immL_rule,
-  /*   35 */  immLmax30_rule,
-  /*   36 */  immL16_rule,
-  /*   37 */  immL16Alg4_rule,
-  /*   38 */  immL32hi16_rule,
-  /*   39 */  immL32_rule,
-  /*   40 */  immLhighest16_rule,
-  /*   41 */  immLnegpow2_rule,
-  /*   42 */  immLpow2minus1_rule,
-  /*   43 */  immL_0_rule,
-  /*   44 */  immL_minus1_rule,
-  /*   45 */  immL_32bits_rule,
-  /*   46 */  uimmL16_rule,
-  /*   47 */  immF_rule,
-  /*   48 */  immF_0_rule,
-  /*   49 */  immD_rule,
-  /*   50 */  iRegIdst_rule,
-  /*   51 */  iRegIsrc_rule,
-  /*   52 */  rscratch1RegI_rule,
-  /*   53 */  rscratch2RegI_rule,
-  /*   54 */  rarg1RegI_rule,
-  /*   55 */  rarg2RegI_rule,
-  /*   56 */  rarg3RegI_rule,
-  /*   57 */  rarg4RegI_rule,
-  /*   58 */  rarg1RegL_rule,
-  /*   59 */  rarg2RegL_rule,
-  /*   60 */  rarg3RegL_rule,
-  /*   61 */  rarg4RegL_rule,
-  /*   62 */  iRegPdst_rule,
-  /*   63 */  iRegPdstNoScratch_rule,
-  /*   64 */  iRegPsrc_rule,
-  /*   65 */  threadRegP_rule,
-  /*   66 */  rscratch1RegP_rule,
-  /*   67 */  rscratch2RegP_rule,
-  /*   68 */  rarg1RegP_rule,
-  /*   69 */  rarg2RegP_rule,
-  /*   70 */  rarg3RegP_rule,
-  /*   71 */  rarg4RegP_rule,
-  /*   72 */  iRegNsrc_rule,
-  /*   73 */  iRegNdst_rule,
-  /*   74 */  iRegLdst_rule,
-  /*   75 */  iRegLsrc_rule,
-  /*   76 */  iRegL2Isrc_rule,
-  /*   77 */  rscratch1RegL_rule,
-  /*   78 */  rscratch2RegL_rule,
-  /*   79 */  flagsReg_rule,
-  /*   80 */  flagsRegSrc_rule,
-  /*   81 */  flagsRegCR0_rule,
-  /*   82 */  flagsRegCR1_rule,
-  /*   83 */  flagsRegCR6_rule,
-  /*   84 */  regCTR_rule,
-  /*   85 */  regD_rule,
-  /*   86 */  regF_rule,
-  /*   87 */  inline_cache_regP_rule,
-  /*   88 */  compiler_method_oop_regP_rule,
-  /*   89 */  interpreter_method_oop_regP_rule,
-  /*   90 */  iRegP2N_rule,
-  /*   91 */  iRegN2P_rule,
-  /*   92 */  iRegN2P_klass_rule,
-  /*   93 */  indirect_rule,
-  /*   94 */  indOffset16_rule,
-  /*   95 */  indOffset16Alg4_rule,
-  /*   96 */  indirectNarrow_rule,
-  /*   97 */  indirectNarrow_klass_rule,
-  /*   98 */  indOffset16Narrow_rule,
-  /*   99 */  indOffset16Narrow_klass_rule,
-  /*  100 */  indOffset16NarrowAlg4_rule,
-  /*  101 */  indOffset16NarrowAlg4_klass_rule,
-  /*  102 */  stackSlotI_rule,
-  /*  103 */  stackSlotL_rule,
-  /*  104 */  stackSlotP_rule,
-  /*  105 */  stackSlotF_rule,
-  /*  106 */  stackSlotD_rule,
-  /*  107 */  cmpOp_rule,
+  /*   13 */  immI32_rule,
+  /*   14 */  immInegpow2_rule,
+  /*   15 */  immIpow2minus1_rule,
+  /*   16 */  immIpowerOf2_rule,
+  /*   17 */  uimmI5_rule,
+  /*   18 */  uimmI6_rule,
+  /*   19 */  uimmI6_ge32_rule,
+  /*   20 */  uimmI15_rule,
+  /*   21 */  uimmI16_rule,
+  /*   22 */  immI_0_rule,
+  /*   23 */  immI_1_rule,
+  /*   24 */  immI_minus1_rule,
+  /*   25 */  immI_16_rule,
+  /*   26 */  immI_24_rule,
+  /*   27 */  immN_rule,
+  /*   28 */  immN_0_rule,
+  /*   29 */  immNKlass_rule,
+  /*   30 */  immNKlass_NM_rule,
+  /*   31 */  immP_rule,
+  /*   32 */  immP_NM_rule,
+  /*   33 */  immP_0_rule,
+  /*   34 */  immP_0or1_rule,
+  /*   35 */  immL_rule,
+  /*   36 */  immLmax30_rule,
+  /*   37 */  immL16_rule,
+  /*   38 */  immL16Alg4_rule,
+  /*   39 */  immL32hi16_rule,
+  /*   40 */  immL32_rule,
+  /*   41 */  immL34_rule,
+  /*   42 */  immLhighest16_rule,
+  /*   43 */  immLnegpow2_rule,
+  /*   44 */  immLpow2minus1_rule,
+  /*   45 */  immL_0_rule,
+  /*   46 */  immL_minus1_rule,
+  /*   47 */  immL_32bits_rule,
+  /*   48 */  uimmL16_rule,
+  /*   49 */  immF_rule,
+  /*   50 */  immF_0_rule,
+  /*   51 */  immD_rule,
+  /*   52 */  immD_0_rule,
+  /*   53 */  iRegIdst_rule,
+  /*   54 */  iRegIsrc_rule,
+  /*   55 */  rscratch1RegI_rule,
+  /*   56 */  rscratch2RegI_rule,
+  /*   57 */  rarg1RegI_rule,
+  /*   58 */  rarg2RegI_rule,
+  /*   59 */  rarg3RegI_rule,
+  /*   60 */  rarg4RegI_rule,
+  /*   61 */  rarg1RegL_rule,
+  /*   62 */  rarg2RegL_rule,
+  /*   63 */  rarg3RegL_rule,
+  /*   64 */  rarg4RegL_rule,
+  /*   65 */  iRegPdst_rule,
+  /*   66 */  iRegPdstNoScratch_rule,
+  /*   67 */  iRegPsrc_rule,
+  /*   68 */  threadRegP_rule,
+  /*   69 */  rscratch1RegP_rule,
+  /*   70 */  rscratch2RegP_rule,
+  /*   71 */  rarg1RegP_rule,
+  /*   72 */  rarg2RegP_rule,
+  /*   73 */  rarg3RegP_rule,
+  /*   74 */  rarg4RegP_rule,
+  /*   75 */  iRegNsrc_rule,
+  /*   76 */  iRegNdst_rule,
+  /*   77 */  iRegLdst_rule,
+  /*   78 */  iRegLsrc_rule,
+  /*   79 */  iRegL2Isrc_rule,
+  /*   80 */  rscratch1RegL_rule,
+  /*   81 */  rscratch2RegL_rule,
+  /*   82 */  flagsReg_rule,
+  /*   83 */  flagsRegSrc_rule,
+  /*   84 */  flagsRegCR0_rule,
+  /*   85 */  flagsRegCR1_rule,
+  /*   86 */  flagsRegCR6_rule,
+  /*   87 */  regCTR_rule,
+  /*   88 */  regD_rule,
+  /*   89 */  regF_rule,
+  /*   90 */  inline_cache_regP_rule,
+  /*   91 */  iRegP2N_rule,
+  /*   92 */  iRegN2P_rule,
+  /*   93 */  iRegN2P_klass_rule,
+  /*   94 */  indirect_rule,
+  /*   95 */  indOffset16_rule,
+  /*   96 */  indOffset16Alg4_rule,
+  /*   97 */  indirectNarrow_rule,
+  /*   98 */  indirectNarrow_klass_rule,
+  /*   99 */  indOffset16Narrow_rule,
+  /*  100 */  indOffset16Narrow_klass_rule,
+  /*  101 */  indOffset16NarrowAlg4_rule,
+  /*  102 */  indOffset16NarrowAlg4_klass_rule,
+  /*  103 */  stackSlotI_rule,
+  /*  104 */  stackSlotL_rule,
+  /*  105 */  stackSlotP_rule,
+  /*  106 */  stackSlotF_rule,
+  /*  107 */  stackSlotD_rule,
+  /*  108 */  cmpOp_rule,
   // last operand
-  /*  108 */  memory_rule,
-  /*  109 */  memoryAlg4_rule,
-  /*  110 */  indirectMemory_rule,
-  /*  111 */  iRegIsrc_iRegL2Isrc_rule,
-  /*  112 */  iRegN_P2N_rule,
-  /*  113 */  iRegP_N2P_rule,
+  /*  109 */  memory_rule,
+  /*  110 */  memoryAlg4_rule,
+  /*  111 */  indirectMemory_rule,
+  /*  112 */  iRegIsrc_iRegL2Isrc_rule,
+  /*  113 */  iRegN_P2N_rule,
+  /*  114 */  iRegP_N2P_rule,
   // last operand class
-  /*  114 */  _DecodeN_iRegNsrc__rule,
-  /*  115 */  _DecodeNKlass_iRegNsrc__rule,
-  /*  116 */  _LoadUB_memory__rule,
-  /*  117 */  _LoadUS_memory__rule,
-  /*  118 */  _LoadI_memory__rule,
-  /*  119 */  _ConvI2L__LoadI_memory___rule,
-  /*  120 */  _LoadI_memoryAlg4__rule,
-  /*  121 */  _LoadN_memory__rule,
-  /*  122 */  _LoadNKlass_memory__rule,
-  /*  123 */  _LoadP_memoryAlg4__rule,
-  /*  124 */  _AddP_indirectMemory_iRegLsrc_rule,
-  /*  125 */  _ConvL2I_iRegLsrc__rule,
-  /*  126 */  _Binary_flagsRegSrc_iRegPsrc_rule,
-  /*  127 */  _CastP2X__DecodeN_iRegNsrc___rule,
-  /*  128 */  _Binary_iRegLsrc_iRegPdst_rule,
-  /*  129 */  _Binary_iRegLsrc_iRegPsrc_rule,
-  /*  130 */  _Binary_iRegLsrc_iRegNsrc_rule,
-  /*  131 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  132 */  _Binary_iRegIdst_iRegIsrc_rule,
-  /*  133 */  _Binary_iRegIdst_immI16_rule,
-  /*  134 */  _Binary_iRegLdst_iRegLsrc_rule,
-  /*  135 */  _Binary_iRegLdst_immL16_rule,
-  /*  136 */  _Binary_iRegNdst_iRegNsrc_rule,
-  /*  137 */  _Binary_iRegNdst_immN_0_rule,
-  /*  138 */  _Binary_iRegPdst_iRegPsrc_rule,
-  /*  139 */  _Binary_iRegPdst_iRegP_N2P_rule,
-  /*  140 */  _Binary_iRegPdst_immP_0_rule,
-  /*  141 */  _Binary_regF_regF_rule,
-  /*  142 */  _Binary_regD_regD_rule,
-  /*  143 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  144 */  _Binary_iRegPsrc_iRegPsrc_rule,
-  /*  145 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  146 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  147 */  _Binary_iRegNsrc_iRegNsrc_rule,
-  /*  148 */  _AddI_iRegIsrc_iRegIsrc_rule,
-  /*  149 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  150 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
-  /*  151 */  _AddL_iRegLsrc_iRegLsrc_rule,
-  /*  152 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
-  /*  153 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
-  /*  154 */  _SubL_iRegLsrc_iRegLsrc_rule,
-  /*  155 */  _SubL_immL_0_iRegLsrc_rule,
-  /*  156 */  _AndI_iRegIsrc_immInegpow2_rule,
-  /*  157 */  _RShiftI_iRegIsrc_uimmI5_rule,
-  /*  158 */  _AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2_rule,
-  /*  159 */  _ConvI2L_iRegIsrc__rule,
-  /*  160 */  _RShiftL_iRegLsrc_immI_rule,
-  /*  161 */  _URShiftL_iRegLsrc_immI_rule,
-  /*  162 */  _CastP2X_iRegP_N2P__rule,
-  /*  163 */  _URShiftI_iRegIsrc_immI_rule,
-  /*  164 */  _LShiftI_iRegIsrc_immI8_rule,
-  /*  165 */  _URShiftI_iRegIsrc_immI8_rule,
-  /*  166 */  _AbsF_regF__rule,
-  /*  167 */  _AbsD_regD__rule,
-  /*  168 */  _ConvF2D_regF__rule,
-  /*  169 */  _SqrtD__ConvF2D_regF___rule,
-  /*  170 */  _NegF_regF__rule,
-  /*  171 */  _Binary__NegF_regF__regF_rule,
-  /*  172 */  _Binary_regF__NegF_regF__rule,
-  /*  173 */  _NegD_regD__rule,
-  /*  174 */  _Binary__NegD_regD__regD_rule,
-  /*  175 */  _Binary_regD__NegD_regD__rule,
-  /*  176 */  _AndL_iRegLsrc_immLpow2minus1_rule,
-  /*  177 */  _OrI_iRegIsrc_iRegIsrc_rule,
-  /*  178 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  179 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
-  /*  180 */  _OrL_iRegLsrc_iRegLsrc_rule,
-  /*  181 */  _XorI_iRegIsrc_iRegIsrc_rule,
-  /*  182 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  183 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
-  /*  184 */  _XorL_iRegLsrc_iRegLsrc_rule,
-  /*  185 */  _XorI_iRegIsrc_immI_minus1_rule,
-  /*  186 */  _Conv2B_iRegIsrc__rule,
-  /*  187 */  _AndI_iRegIsrc_immIpowerOf2_rule,
-  /*  188 */  _Conv2B_iRegP_N2P__rule,
-  /*  189 */  _LShiftI_iRegIsrc_immI_24_rule,
-  /*  190 */  _LShiftI_iRegIsrc_immI_16_rule,
-  /*  191 */  _AndI_iRegIsrc_uimmI16_rule,
-  /*  192 */  _AndL_iRegLsrc_iRegLsrc_rule,
-  /*  193 */  _AndL_iRegLsrc_uimmL16_rule,
-  /*  194 */  _CmpU_iRegIsrc_uimmI15_rule,
-  /*  195 */  _CmpU_iRegIsrc_iRegIsrc_rule,
-  /*  196 */  _CmpN_iRegNsrc_immN_0_rule,
-  /*  197 */  _CmpP_iRegP_N2P_immP_0_rule,
-  /*  198 */  _CastP2X_iRegPsrc__rule,
-  /*  199 */  _AndL__CastP2X_iRegPsrc__immLnegpow2_rule,
-  /*  200 */  _Binary_rarg1RegP_rarg3RegI_rule,
-  /*  201 */  _Binary_rarg2RegP_rarg4RegI_rule,
-  /*  202 */  _Binary_rarg1RegP_rarg2RegP_rule,
-  /*  203 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  204 */  _AddP_immP_immL_rule,
-  /*  205 */  _Binary__AddP_immP_immL_immI_1_rule,
-  /*  206 */  _Binary_rscratch2RegP_immI_1_rule,
-  /*  207 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  208 */  _Binary_iRegPsrc_uimmI15_rule,
-  /*  209 */  _Binary_iRegPsrc_rscratch2RegI_rule,
-  /*  210 */  _Binary_rarg2RegP_iRegIsrc_rule,
-  /*  211 */  _LoadI_indirect__rule,
-  /*  212 */  _LoadL_indirect__rule,
-  /*  213 */  _LoadUS_indirect__rule,
-  /*  214 */  _LoadS_indirect__rule,
-  /*  215 */  _ReverseBytesI_iRegIsrc__rule,
-  /*  216 */  _ReverseBytesL_iRegLsrc__rule,
-  /*  217 */  _ReverseBytesUS_iRegIsrc__rule,
-  /*  218 */  _ReverseBytesS_iRegIsrc__rule,
+  /*  115 */  _DecodeN_iRegNsrc__rule,
+  /*  116 */  _DecodeNKlass_iRegNsrc__rule,
+  /*  117 */  _LoadUB_memory__rule,
+  /*  118 */  _LoadUS_memory__rule,
+  /*  119 */  _LoadI_memory__rule,
+  /*  120 */  _ConvI2L__LoadI_memory___rule,
+  /*  121 */  _LoadI_memoryAlg4__rule,
+  /*  122 */  _LoadN_memory__rule,
+  /*  123 */  _LoadNKlass_memory__rule,
+  /*  124 */  _LoadP_memoryAlg4__rule,
+  /*  125 */  _AddP_indirectMemory_iRegLsrc_rule,
+  /*  126 */  _ConvL2I_iRegLsrc__rule,
+  /*  127 */  _Binary_flagsRegSrc_iRegPsrc_rule,
+  /*  128 */  _CastP2X__DecodeN_iRegNsrc___rule,
+  /*  129 */  _Binary_iRegLsrc_iRegPdst_rule,
+  /*  130 */  _Binary_iRegLsrc_iRegPsrc_rule,
+  /*  131 */  _Binary_iRegLsrc_iRegNsrc_rule,
+  /*  132 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  133 */  _Binary_iRegIdst_iRegIsrc_rule,
+  /*  134 */  _Binary_iRegIdst_immI16_rule,
+  /*  135 */  _Binary_iRegLdst_iRegLsrc_rule,
+  /*  136 */  _Binary_iRegLdst_immL16_rule,
+  /*  137 */  _Binary_iRegNdst_iRegNsrc_rule,
+  /*  138 */  _Binary_iRegNdst_immN_0_rule,
+  /*  139 */  _Binary_iRegPdst_iRegPsrc_rule,
+  /*  140 */  _Binary_iRegPdst_iRegP_N2P_rule,
+  /*  141 */  _Binary_iRegPdst_immP_0_rule,
+  /*  142 */  _Binary_regF_regF_rule,
+  /*  143 */  _Binary_regD_regD_rule,
+  /*  144 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  145 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  146 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  147 */  _Binary_iRegLsrc_iRegLsrc_rule,
+  /*  148 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  149 */  _AddI_iRegIsrc_iRegIsrc_rule,
+  /*  150 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  151 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
+  /*  152 */  _AddL_iRegLsrc_iRegLsrc_rule,
+  /*  153 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
+  /*  154 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
+  /*  155 */  _SubL_iRegLsrc_iRegLsrc_rule,
+  /*  156 */  _SubL_immL_0_iRegLsrc_rule,
+  /*  157 */  _AndI_iRegIsrc_immInegpow2_rule,
+  /*  158 */  _RShiftI_iRegIsrc_uimmI5_rule,
+  /*  159 */  _AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2_rule,
+  /*  160 */  _ConvI2L_iRegIsrc__rule,
+  /*  161 */  _RShiftL_iRegLsrc_immI_rule,
+  /*  162 */  _URShiftL_iRegLsrc_immI_rule,
+  /*  163 */  _CastP2X_iRegP_N2P__rule,
+  /*  164 */  _URShiftI_iRegIsrc_immI_rule,
+  /*  165 */  _LShiftI_iRegIsrc_immI8_rule,
+  /*  166 */  _URShiftI_iRegIsrc_immI8_rule,
+  /*  167 */  _AbsF_regF__rule,
+  /*  168 */  _AbsD_regD__rule,
+  /*  169 */  _NegF_regF__rule,
+  /*  170 */  _Binary__NegF_regF__regF_rule,
+  /*  171 */  _Binary_regF__NegF_regF__rule,
+  /*  172 */  _NegD_regD__rule,
+  /*  173 */  _Binary__NegD_regD__regD_rule,
+  /*  174 */  _Binary_regD__NegD_regD__rule,
+  /*  175 */  _AndL_iRegLsrc_immLpow2minus1_rule,
+  /*  176 */  _OrI_iRegIsrc_iRegIsrc_rule,
+  /*  177 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  178 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
+  /*  179 */  _OrL_iRegLsrc_iRegLsrc_rule,
+  /*  180 */  _XorI_iRegIsrc_iRegIsrc_rule,
+  /*  181 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  182 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
+  /*  183 */  _XorL_iRegLsrc_iRegLsrc_rule,
+  /*  184 */  _XorI_iRegIsrc_immI_minus1_rule,
+  /*  185 */  _Conv2B_iRegIsrc__rule,
+  /*  186 */  _AndI_iRegIsrc_immIpowerOf2_rule,
+  /*  187 */  _Conv2B_iRegP_N2P__rule,
+  /*  188 */  _LShiftI_iRegIsrc_immI_24_rule,
+  /*  189 */  _LShiftI_iRegIsrc_immI_16_rule,
+  /*  190 */  _AndI_iRegIsrc_uimmI16_rule,
+  /*  191 */  _AndL_iRegLsrc_iRegLsrc_rule,
+  /*  192 */  _AndL_iRegLsrc_uimmL16_rule,
+  /*  193 */  _CmpU_iRegIsrc_uimmI15_rule,
+  /*  194 */  _CmpU_iRegIsrc_iRegIsrc_rule,
+  /*  195 */  _CmpN_iRegNsrc_immN_0_rule,
+  /*  196 */  _CmpP_iRegP_N2P_immP_0_rule,
+  /*  197 */  _CastP2X_iRegPsrc__rule,
+  /*  198 */  _AndL__CastP2X_iRegPsrc__immLnegpow2_rule,
+  /*  199 */  _Binary_rarg1RegP_rarg3RegI_rule,
+  /*  200 */  _Binary_rarg2RegP_rarg4RegI_rule,
+  /*  201 */  _Binary_rarg1RegP_rarg2RegP_rule,
+  /*  202 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  203 */  _AddP_immP_immL_rule,
+  /*  204 */  _Binary__AddP_immP_immL_immI_1_rule,
+  /*  205 */  _Binary_rscratch2RegP_immI_1_rule,
+  /*  206 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  207 */  _Binary_iRegPsrc_uimmI15_rule,
+  /*  208 */  _Binary_iRegPsrc_rscratch2RegI_rule,
+  /*  209 */  _Binary_rarg2RegP_iRegIsrc_rule,
+  /*  210 */  _LoadI_indirect__rule,
+  /*  211 */  _LoadL_indirect__rule,
+  /*  212 */  _LoadUS_indirect__rule,
+  /*  213 */  _LoadS_indirect__rule,
+  /*  214 */  _ReverseBytesI_iRegIsrc__rule,
+  /*  215 */  _ReverseBytesL_iRegLsrc__rule,
+  /*  216 */  _ReverseBytesUS_iRegIsrc__rule,
+  /*  217 */  _ReverseBytesS_iRegIsrc__rule,
+  /*  218 */  _Binary_vecX_vecX_rule,
+  /*  219 */  _NegVF_vecX__rule,
+  /*  220 */  _Binary__NegVF_vecX__vecX_rule,
+  /*  221 */  _Binary_vecX__NegVF_vecX__rule,
+  /*  222 */  _NegVD_vecX__rule,
+  /*  223 */  _Binary__NegVD_vecX__vecX_rule,
+  /*  224 */  _Binary_vecX__NegVD_vecX__rule,
   // last internally defined operand
-  /*  219 */  stackSlotI_rule,
-  /*  220 */  stackSlotL_rule,
-  /*  221 */  iRegIdst_rule,
-  /*  222 */  iRegIdst_rule,
-  /*  223 */  iRegIdst_rule,
-  /*  224 */  iRegLdst_rule,
-  /*  225 */  iRegLdst_rule,
-  /*  226 */  iRegLdst_rule,
-  /*  227 */  iRegLdst_rule,
-  /*  228 */  iRegLdst_rule,
-  /*  229 */  iRegNdst_rule,
-  /*  230 */  iRegNdst_rule,
-  /*  231 */  iRegNdst_rule,
-  /*  232 */  iRegNdst_rule,
-  /*  233 */  iRegNdst_rule,
-  /*  234 */  iRegNdst_rule,
-  /*  235 */  iRegPdst_rule,
-  /*  236 */  iRegPdst_rule,
-  /*  237 */  iRegPdst_rule,
-  /*  238 */  iRegPdst_rule,
-  /*  239 */  regF_rule,
-  /*  240 */  regD_rule,
-  /*  241 */  iRegIdst_rule,
-  /*  242 */  iRegLdst_rule,
-  /*  243 */  0,
-  /*  244 */  iRegLdst_rule,
-  /*  245 */  0,
-  /*  246 */  0,
-  /*  247 */  0,
-  /*  248 */  flagsReg_rule,
-  /*  249 */  flagsRegCR0_rule,
-  /*  250 */  0,
-  /*  251 */  iRegIdst_rule,
-  /*  252 */  0,
+  /*  225 */  stackSlotI_rule,
+  /*  226 */  stackSlotL_rule,
+  /*  227 */  iRegIdst_rule,
+  /*  228 */  iRegIdst_rule,
+  /*  229 */  iRegIdst_rule,
+  /*  230 */  iRegIdst_rule,
+  /*  231 */  iRegLdst_rule,
+  /*  232 */  iRegLdst_rule,
+  /*  233 */  iRegLdst_rule,
+  /*  234 */  iRegLdst_rule,
+  /*  235 */  iRegLdst_rule,
+  /*  236 */  iRegLdst_rule,
+  /*  237 */  iRegNdst_rule,
+  /*  238 */  iRegNdst_rule,
+  /*  239 */  iRegNdst_rule,
+  /*  240 */  iRegNdst_rule,
+  /*  241 */  iRegNdst_rule,
+  /*  242 */  iRegNdst_rule,
+  /*  243 */  iRegPdst_rule,
+  /*  244 */  iRegPdst_rule,
+  /*  245 */  iRegPdst_rule,
+  /*  246 */  iRegPdst_rule,
+  /*  247 */  regF_rule,
+  /*  248 */  regD_rule,
+  /*  249 */  iRegIdst_rule,
+  /*  250 */  iRegLdst_rule,
+  /*  251 */  0,
+  /*  252 */  iRegLdst_rule,
   /*  253 */  0,
-  /*  254 */  regF_rule,
-  /*  255 */  regD_rule,
-  /*  256 */  regF_rule,
-  /*  257 */  regD_rule,
-  /*  258 */  regF_rule,
-  /*  259 */  regD_rule,
-  /*  260 */  regD_rule,
-  /*  261 */  regF_rule,
-  /*  262 */  regD_rule,
-  /*  263 */  0,
-  /*  264 */  iRegIdst_rule,
+  /*  254 */  0,
+  /*  255 */  0,
+  /*  256 */  iRegLdst_rule,
+  /*  257 */  vecX_rule,
+  /*  258 */  0,
+  /*  259 */  iRegIdst_rule,
+  /*  260 */  0,
+  /*  261 */  0,
+  /*  262 */  iRegLdst_rule,
+  /*  263 */  regF_rule,
+  /*  264 */  regD_rule,
   /*  265 */  regF_rule,
-  /*  266 */  iRegLdst_rule,
-  /*  267 */  regD_rule,
-  /*  268 */  0,
-  /*  269 */  iRegPdst_rule,
-  /*  270 */  iRegLdst_rule,
-  /*  271 */  iRegPdst_rule,
-  /*  272 */  iRegIdst_rule,
-  /*  273 */  iRegPdst_rule,
-  /*  274 */  iRegIdst_rule,
-  /*  275 */  iRegIdst_rule,
-  /*  276 */  0,
+  /*  266 */  regD_rule,
+  /*  267 */  regF_rule,
+  /*  268 */  regD_rule,
+  /*  269 */  regD_rule,
+  /*  270 */  regF_rule,
+  /*  271 */  regD_rule,
+  /*  272 */  0,
+  /*  273 */  iRegIdst_rule,
+  /*  274 */  regF_rule,
+  /*  275 */  iRegLdst_rule,
+  /*  276 */  regD_rule,
   /*  277 */  0,
-  /*  278 */  0,
-  /*  279 */  0,
-  /*  280 */  0,
-  /*  281 */  0,
-  /*  282 */  0,
-  /*  283 */  flagsReg_rule,
-  /*  284 */  flagsReg_rule,
-  /*  285 */  flagsRegCR0_rule,
-  /*  286 */  flagsReg_rule,
-  /*  287 */  flagsReg_rule,
-  /*  288 */  flagsReg_rule,
-  /*  289 */  flagsReg_rule,
-  /*  290 */  flagsRegCR0_rule,
-  /*  291 */  flagsRegCR0_rule,
+  /*  278 */  iRegPdst_rule,
+  /*  279 */  iRegLdst_rule,
+  /*  280 */  iRegPdst_rule,
+  /*  281 */  iRegIdst_rule,
+  /*  282 */  iRegLdst_rule,
+  /*  283 */  regF_rule,
+  /*  284 */  regD_rule,
+  /*  285 */  iRegLdst_rule,
+  /*  286 */  vecX_rule,
+  /*  287 */  iRegPdst_rule,
+  /*  288 */  iRegIdst_rule,
+  /*  289 */  iRegIdst_rule,
+  /*  290 */  0,
+  /*  291 */  0,
   /*  292 */  0,
   /*  293 */  0,
-  /*  294 */  flagsReg_rule,
-  /*  295 */  flagsReg_rule,
-  /*  296 */  flagsReg_rule,
+  /*  294 */  0,
+  /*  295 */  0,
+  /*  296 */  0,
   /*  297 */  flagsReg_rule,
   /*  298 */  flagsReg_rule,
-  /*  299 */  flagsReg_rule,
+  /*  299 */  flagsRegCR0_rule,
   /*  300 */  flagsReg_rule,
   /*  301 */  flagsReg_rule,
-  /*  302 */  0,
+  /*  302 */  flagsReg_rule,
   /*  303 */  flagsReg_rule,
-  /*  304 */  flagsReg_rule,
-  /*  305 */  flagsReg_rule,
+  /*  304 */  flagsRegCR0_rule,
+  /*  305 */  flagsRegCR0_rule,
   /*  306 */  flagsReg_rule,
   /*  307 */  flagsReg_rule,
   /*  308 */  flagsReg_rule,
   /*  309 */  flagsReg_rule,
-  /*  310 */  iRegIdst_rule,
-  /*  311 */  iRegIdst_rule,
-  /*  312 */  iRegIdst_rule,
-  /*  313 */  iRegIdst_rule,
+  /*  310 */  flagsReg_rule,
+  /*  311 */  flagsReg_rule,
+  /*  312 */  flagsReg_rule,
+  /*  313 */  flagsReg_rule,
   /*  314 */  0,
-  /*  315 */  iRegIdst_rule,
-  /*  316 */  iRegIdst_rule,
-  /*  317 */  0,
-  /*  318 */  0,
-  /*  319 */  0,
-  /*  320 */  0,
-  /*  321 */  flagsRegCR0_rule,
-  /*  322 */  flagsRegCR0_rule,
-  /*  323 */  flagsRegCR0_rule,
-  /*  324 */  flagsRegCR0_rule,
-  /*  325 */  0,
+  /*  315 */  flagsReg_rule,
+  /*  316 */  flagsReg_rule,
+  /*  317 */  flagsReg_rule,
+  /*  318 */  flagsReg_rule,
+  /*  319 */  flagsReg_rule,
+  /*  320 */  flagsReg_rule,
+  /*  321 */  flagsReg_rule,
+  /*  322 */  iRegIdst_rule,
+  /*  323 */  iRegIdst_rule,
+  /*  324 */  iRegIdst_rule,
+  /*  325 */  iRegIdst_rule,
   /*  326 */  0,
-  /*  327 */  threadRegP_rule,
+  /*  327 */  iRegIdst_rule,
   /*  328 */  iRegIdst_rule,
   /*  329 */  iRegIdst_rule,
   /*  330 */  iRegIdst_rule,
-  /*  331 */  iRegIdst_rule,
-  /*  332 */  iRegIdst_rule,
-  /*  333 */  iRegIdst_rule,
-  /*  334 */  iRegIdst_rule,
-  /*  335 */  iRegIdst_rule,
-  /*  336 */  iRegIdst_rule,
-  /*  337 */  iRegIdst_rule,
+  /*  331 */  0,
+  /*  332 */  0,
+  /*  333 */  0,
+  /*  334 */  0,
+  /*  335 */  0,
+  /*  336 */  iRegLdst_rule,
+  /*  337 */  iRegLdst_rule,
   /*  338 */  iRegLdst_rule,
-  /*  339 */  iRegLdst_rule,
-  /*  340 */  iRegIdst_rule,
-  /*  341 */  iRegIdst_rule,
-  /*  342 */  iRegIdst_rule,
-  /*  343 */  iRegIdst_rule,
+  /*  339 */  vecX_rule,
+  /*  340 */  vecX_rule,
+  /*  341 */  vecX_rule,
+  /*  342 */  iRegLdst_rule,
+  /*  343 */  iRegLdst_rule,
   /*  344 */  iRegLdst_rule,
-  /*  345 */  iRegLdst_rule,
-  /*  346 */  iRegIdst_rule,
-  /*  347 */  iRegIdst_rule,
+  /*  345 */  vecX_rule,
+  /*  346 */  vecX_rule,
+  /*  347 */  vecX_rule,
   /*  348 */  iRegLdst_rule,
   /*  349 */  iRegLdst_rule,
   /*  350 */  iRegLdst_rule,
-  /*  351 */  iRegLdst_rule,
-  /*  352 */  iRegLdst_rule,
-  /*  353 */  iRegLdst_rule,
+  /*  351 */  vecX_rule,
+  /*  352 */  vecX_rule,
+  /*  353 */  vecX_rule,
   /*  354 */  iRegLdst_rule,
-  /*  355 */  vecX_rule,
-  /*  356 */  iRegIdst_rule,
-  /*  357 */  iRegNdst_rule,
-  /*  358 */  iRegNdst_rule,
-  /*  359 */  iRegPdst_rule,
-  /*  360 */  iRegPdst_rule,
-  /*  361 */  iRegPdst_rule,
-  /*  362 */  iRegPdst_rule,
-  /*  363 */  iRegNdst_rule,
-  /*  364 */  iRegPdst_rule,
-  /*  365 */  regF_rule,
-  /*  366 */  regF_rule,
-  /*  367 */  regD_rule,
-  /*  368 */  regD_rule,
-  /*  369 */  regD_rule,
-  /*  370 */  0,
-  /*  371 */  0,
+  /*  355 */  iRegLdst_rule,
+  /*  356 */  iRegLdst_rule,
+  /*  357 */  vecX_rule,
+  /*  358 */  vecX_rule,
+  /*  359 */  vecX_rule,
+  /*  360 */  vecX_rule,
+  /*  361 */  vecX_rule,
+  /*  362 */  vecX_rule,
+  /*  363 */  vecX_rule,
+  /*  364 */  flagsRegCR0_rule,
+  /*  365 */  flagsRegCR0_rule,
+  /*  366 */  flagsRegCR0_rule,
+  /*  367 */  flagsRegCR0_rule,
+  /*  368 */  vecX_rule,
+  /*  369 */  vecX_rule,
+  /*  370 */  vecX_rule,
+  /*  371 */  vecX_rule,
   /*  372 */  0,
-  /*  373 */  0,
-  /*  374 */  0,
-  /*  375 */  0,
+  /*  373 */  vecX_rule,
+  /*  374 */  vecX_rule,
+  /*  375 */  vecX_rule,
   /*  376 */  0,
-  /*  377 */  0,
-  /*  378 */  0,
-  /*  379 */  0,
-  /*  380 */  0,
-  /*  381 */  0,
-  /*  382 */  0,
-  /*  383 */  0,
-  /*  384 */  Universe_rule,
-  /*  385 */  Universe_rule,
-  /*  386 */  Universe_rule,
-  /*  387 */  Universe_rule,
-  /*  388 */  Universe_rule,
-  /*  389 */  Universe_rule,
-  /*  390 */  Universe_rule,
-  /*  391 */  Universe_rule,
-  /*  392 */  Universe_rule,
-  /*  393 */  Universe_rule,
-  /*  394 */  Universe_rule,
-  /*  395 */  Universe_rule,
-  /*  396 */  Universe_rule,
-  /*  397 */  Universe_rule,
-  /*  398 */  Universe_rule,
-  /*  399 */  Universe_rule,
-  /*  400 */  Universe_rule,
-  /*  401 */  Universe_rule,
-  /*  402 */  Universe_rule,
-  /*  403 */  iRegNdst_rule,
-  /*  404 */  iRegPdst_rule,
-  /*  405 */  iRegNdst_rule,
-  /*  406 */  iRegNdst_rule,
+  /*  377 */  threadRegP_rule,
+  /*  378 */  iRegIdst_rule,
+  /*  379 */  iRegIdst_rule,
+  /*  380 */  iRegIdst_rule,
+  /*  381 */  iRegIdst_rule,
+  /*  382 */  iRegIdst_rule,
+  /*  383 */  iRegIdst_rule,
+  /*  384 */  iRegIdst_rule,
+  /*  385 */  iRegIdst_rule,
+  /*  386 */  iRegIdst_rule,
+  /*  387 */  iRegIdst_rule,
+  /*  388 */  iRegLdst_rule,
+  /*  389 */  iRegLdst_rule,
+  /*  390 */  iRegIdst_rule,
+  /*  391 */  iRegIdst_rule,
+  /*  392 */  iRegIdst_rule,
+  /*  393 */  iRegIdst_rule,
+  /*  394 */  iRegLdst_rule,
+  /*  395 */  iRegLdst_rule,
+  /*  396 */  iRegIdst_rule,
+  /*  397 */  iRegIdst_rule,
+  /*  398 */  iRegLdst_rule,
+  /*  399 */  iRegLdst_rule,
+  /*  400 */  iRegLdst_rule,
+  /*  401 */  iRegLdst_rule,
+  /*  402 */  iRegLdst_rule,
+  /*  403 */  iRegLdst_rule,
+  /*  404 */  iRegLdst_rule,
+  /*  405 */  vecX_rule,
+  /*  406 */  iRegIdst_rule,
   /*  407 */  iRegNdst_rule,
   /*  408 */  iRegNdst_rule,
-  /*  409 */  iRegNdst_rule,
-  /*  410 */  iRegNdst_rule,
-  /*  411 */  iRegNdst_rule,
+  /*  409 */  iRegPdst_rule,
+  /*  410 */  iRegPdst_rule,
+  /*  411 */  iRegPdst_rule,
   /*  412 */  iRegPdst_rule,
-  /*  413 */  iRegPdst_rule,
+  /*  413 */  iRegNdst_rule,
   /*  414 */  iRegPdst_rule,
-  /*  415 */  iRegPdst_rule,
-  /*  416 */  iRegPdst_rule,
-  /*  417 */  iRegPdst_rule,
-  /*  418 */  iRegPdst_rule,
-  /*  419 */  iRegPdst_rule,
-  /*  420 */  iRegPdst_rule,
-  /*  421 */  iRegPdst_rule,
-  /*  422 */  iRegPdst_rule,
-  /*  423 */  iRegIdst_rule,
-  /*  424 */  iRegNdst_rule,
-  /*  425 */  iRegPdst_rule,
-  /*  426 */  iRegNdst_rule,
-  /*  427 */  iRegNdst_rule,
-  /*  428 */  iRegNdst_rule,
-  /*  429 */  iRegPdst_rule,
-  /*  430 */  iRegPdst_rule,
-  /*  431 */  iRegPdst_rule,
-  /*  432 */  iRegPdst_rule,
-  /*  433 */  Universe_rule,
+  /*  415 */  regF_rule,
+  /*  416 */  regF_rule,
+  /*  417 */  regD_rule,
+  /*  418 */  regD_rule,
+  /*  419 */  regD_rule,
+  /*  420 */  0,
+  /*  421 */  0,
+  /*  422 */  0,
+  /*  423 */  0,
+  /*  424 */  0,
+  /*  425 */  0,
+  /*  426 */  0,
+  /*  427 */  0,
+  /*  428 */  0,
+  /*  429 */  0,
+  /*  430 */  0,
+  /*  431 */  0,
+  /*  432 */  0,
+  /*  433 */  0,
   /*  434 */  Universe_rule,
   /*  435 */  Universe_rule,
   /*  436 */  Universe_rule,
@@ -2867,375 +2839,468 @@ const        int   reduceOp[] = {
   /*  439 */  Universe_rule,
   /*  440 */  Universe_rule,
   /*  441 */  Universe_rule,
-  /*  442 */  iRegIdst_rule,
-  /*  443 */  iRegIdst_rule,
-  /*  444 */  iRegIdst_rule,
-  /*  445 */  iRegLdst_rule,
-  /*  446 */  iRegLdst_rule,
-  /*  447 */  iRegLdst_rule,
-  /*  448 */  iRegNdst_rule,
-  /*  449 */  iRegNdst_rule,
-  /*  450 */  iRegNdst_rule,
-  /*  451 */  iRegPdst_rule,
+  /*  442 */  Universe_rule,
+  /*  443 */  Universe_rule,
+  /*  444 */  Universe_rule,
+  /*  445 */  Universe_rule,
+  /*  446 */  Universe_rule,
+  /*  447 */  Universe_rule,
+  /*  448 */  Universe_rule,
+  /*  449 */  Universe_rule,
+  /*  450 */  Universe_rule,
+  /*  451 */  iRegNdst_rule,
   /*  452 */  iRegPdst_rule,
-  /*  453 */  iRegPdst_rule,
-  /*  454 */  regF_rule,
-  /*  455 */  regD_rule,
-  /*  456 */  iRegPdst_rule,
-  /*  457 */  iRegIdst_rule,
-  /*  458 */  iRegIdst_rule,
-  /*  459 */  iRegIdst_rule,
-  /*  460 */  iRegIdst_rule,
-  /*  461 */  iRegIdst_rule,
-  /*  462 */  iRegIdst_rule,
-  /*  463 */  iRegIdst_rule,
-  /*  464 */  iRegIdst_rule,
-  /*  465 */  iRegIdst_rule,
-  /*  466 */  iRegIdst_rule,
-  /*  467 */  iRegIdst_rule,
-  /*  468 */  iRegIdst_rule,
-  /*  469 */  iRegIdst_rule,
-  /*  470 */  iRegIdst_rule,
+  /*  453 */  iRegNdst_rule,
+  /*  454 */  iRegNdst_rule,
+  /*  455 */  iRegNdst_rule,
+  /*  456 */  iRegNdst_rule,
+  /*  457 */  iRegNdst_rule,
+  /*  458 */  iRegNdst_rule,
+  /*  459 */  iRegNdst_rule,
+  /*  460 */  iRegPdst_rule,
+  /*  461 */  iRegPdst_rule,
+  /*  462 */  iRegPdst_rule,
+  /*  463 */  iRegPdst_rule,
+  /*  464 */  iRegPdst_rule,
+  /*  465 */  iRegPdst_rule,
+  /*  466 */  iRegPdst_rule,
+  /*  467 */  iRegPdst_rule,
+  /*  468 */  iRegPdst_rule,
+  /*  469 */  iRegPdst_rule,
+  /*  470 */  iRegPdst_rule,
   /*  471 */  iRegIdst_rule,
-  /*  472 */  iRegIdst_rule,
-  /*  473 */  iRegIdst_rule,
-  /*  474 */  iRegIdst_rule,
-  /*  475 */  iRegIdst_rule,
-  /*  476 */  iRegIdst_rule,
-  /*  477 */  iRegIdst_rule,
-  /*  478 */  iRegIdst_rule,
-  /*  479 */  iRegIdst_rule,
-  /*  480 */  iRegIdst_rule,
-  /*  481 */  iRegIdst_rule,
-  /*  482 */  iRegIdst_rule,
-  /*  483 */  iRegIdst_rule,
-  /*  484 */  iRegIdst_rule,
-  /*  485 */  iRegIdst_rule,
-  /*  486 */  iRegIdst_rule,
-  /*  487 */  iRegIdst_rule,
-  /*  488 */  iRegIdst_rule,
-  /*  489 */  iRegIdst_rule,
-  /*  490 */  iRegIdst_rule,
-  /*  491 */  iRegNdst_rule,
-  /*  492 */  iRegNdst_rule,
-  /*  493 */  iRegLdst_rule,
+  /*  472 */  iRegNdst_rule,
+  /*  473 */  iRegPdst_rule,
+  /*  474 */  iRegNdst_rule,
+  /*  475 */  iRegNdst_rule,
+  /*  476 */  iRegNdst_rule,
+  /*  477 */  iRegPdst_rule,
+  /*  478 */  iRegPdst_rule,
+  /*  479 */  iRegPdst_rule,
+  /*  480 */  iRegPdst_rule,
+  /*  481 */  Universe_rule,
+  /*  482 */  Universe_rule,
+  /*  483 */  Universe_rule,
+  /*  484 */  Universe_rule,
+  /*  485 */  Universe_rule,
+  /*  486 */  Universe_rule,
+  /*  487 */  Universe_rule,
+  /*  488 */  Universe_rule,
+  /*  489 */  Universe_rule,
+  /*  490 */  Universe_rule,
+  /*  491 */  iRegIdst_rule,
+  /*  492 */  iRegIdst_rule,
+  /*  493 */  iRegIdst_rule,
   /*  494 */  iRegLdst_rule,
-  /*  495 */  iRegPdst_rule,
-  /*  496 */  iRegPdst_rule,
-  /*  497 */  iRegIdst_rule,
-  /*  498 */  iRegIdst_rule,
-  /*  499 */  iRegIdst_rule,
-  /*  500 */  iRegIdst_rule,
-  /*  501 */  iRegIdst_rule,
-  /*  502 */  iRegLdst_rule,
-  /*  503 */  iRegIdst_rule,
-  /*  504 */  iRegIdst_rule,
+  /*  495 */  iRegLdst_rule,
+  /*  496 */  iRegLdst_rule,
+  /*  497 */  iRegNdst_rule,
+  /*  498 */  iRegNdst_rule,
+  /*  499 */  iRegNdst_rule,
+  /*  500 */  iRegPdst_rule,
+  /*  501 */  iRegPdst_rule,
+  /*  502 */  iRegPdst_rule,
+  /*  503 */  regF_rule,
+  /*  504 */  regD_rule,
   /*  505 */  iRegIdst_rule,
   /*  506 */  iRegIdst_rule,
   /*  507 */  iRegIdst_rule,
-  /*  508 */  iRegLdst_rule,
-  /*  509 */  iRegPdst_rule,
-  /*  510 */  iRegNdst_rule,
+  /*  508 */  iRegIdst_rule,
+  /*  509 */  iRegIdst_rule,
+  /*  510 */  iRegIdst_rule,
   /*  511 */  iRegIdst_rule,
-  /*  512 */  0,
+  /*  512 */  iRegIdst_rule,
   /*  513 */  iRegIdst_rule,
   /*  514 */  iRegIdst_rule,
   /*  515 */  iRegIdst_rule,
   /*  516 */  iRegIdst_rule,
   /*  517 */  iRegIdst_rule,
   /*  518 */  iRegIdst_rule,
-  /*  519 */  iRegLdst_rule,
-  /*  520 */  0,
-  /*  521 */  iRegLdst_rule,
-  /*  522 */  iRegLdst_rule,
-  /*  523 */  iRegLdst_rule,
-  /*  524 */  iRegLdst_rule,
+  /*  519 */  iRegIdst_rule,
+  /*  520 */  iRegIdst_rule,
+  /*  521 */  iRegIdst_rule,
+  /*  522 */  iRegIdst_rule,
+  /*  523 */  iRegIdst_rule,
+  /*  524 */  iRegIdst_rule,
   /*  525 */  iRegIdst_rule,
-  /*  526 */  iRegLdst_rule,
-  /*  527 */  iRegLdst_rule,
-  /*  528 */  iRegPdst_rule,
-  /*  529 */  iRegPdst_rule,
-  /*  530 */  iRegPdst_rule,
+  /*  526 */  iRegIdst_rule,
+  /*  527 */  iRegIdst_rule,
+  /*  528 */  iRegIdst_rule,
+  /*  529 */  iRegIdst_rule,
+  /*  530 */  iRegIdst_rule,
   /*  531 */  iRegIdst_rule,
   /*  532 */  iRegIdst_rule,
   /*  533 */  iRegIdst_rule,
-  /*  534 */  iRegLdst_rule,
+  /*  534 */  iRegIdst_rule,
   /*  535 */  iRegIdst_rule,
-  /*  536 */  iRegLdst_rule,
+  /*  536 */  iRegIdst_rule,
   /*  537 */  iRegIdst_rule,
   /*  538 */  iRegIdst_rule,
-  /*  539 */  iRegIdst_rule,
-  /*  540 */  iRegLdst_rule,
+  /*  539 */  iRegNdst_rule,
+  /*  540 */  iRegNdst_rule,
   /*  541 */  iRegLdst_rule,
   /*  542 */  iRegLdst_rule,
-  /*  543 */  iRegIdst_rule,
-  /*  544 */  iRegIdst_rule,
-  /*  545 */  0,
+  /*  543 */  iRegPdst_rule,
+  /*  544 */  iRegPdst_rule,
+  /*  545 */  iRegIdst_rule,
   /*  546 */  iRegIdst_rule,
-  /*  547 */  iRegLdst_rule,
-  /*  548 */  iRegLdst_rule,
-  /*  549 */  0,
+  /*  547 */  iRegIdst_rule,
+  /*  548 */  iRegIdst_rule,
+  /*  549 */  iRegIdst_rule,
   /*  550 */  iRegLdst_rule,
   /*  551 */  iRegIdst_rule,
-  /*  552 */  iRegLdst_rule,
-  /*  553 */  0,
-  /*  554 */  0,
+  /*  552 */  iRegIdst_rule,
+  /*  553 */  iRegIdst_rule,
+  /*  554 */  iRegIdst_rule,
   /*  555 */  iRegIdst_rule,
-  /*  556 */  iRegIdst_rule,
-  /*  557 */  iRegIdst_rule,
-  /*  558 */  iRegIdst_rule,
-  /*  559 */  0,
-  /*  560 */  iRegLdst_rule,
-  /*  561 */  iRegLdst_rule,
-  /*  562 */  iRegLdst_rule,
-  /*  563 */  iRegLdst_rule,
-  /*  564 */  0,
+  /*  556 */  iRegLdst_rule,
+  /*  557 */  iRegPdst_rule,
+  /*  558 */  iRegNdst_rule,
+  /*  559 */  iRegIdst_rule,
+  /*  560 */  0,
+  /*  561 */  iRegIdst_rule,
+  /*  562 */  iRegIdst_rule,
+  /*  563 */  iRegIdst_rule,
+  /*  564 */  iRegIdst_rule,
   /*  565 */  iRegIdst_rule,
   /*  566 */  iRegIdst_rule,
-  /*  567 */  0,
+  /*  567 */  iRegIdst_rule,
   /*  568 */  iRegLdst_rule,
-  /*  569 */  iRegLdst_rule,
-  /*  570 */  iRegIdst_rule,
-  /*  571 */  0,
-  /*  572 */  iRegIdst_rule,
-  /*  573 */  iRegIdst_rule,
-  /*  574 */  0,
+  /*  569 */  0,
+  /*  570 */  iRegLdst_rule,
+  /*  571 */  iRegLdst_rule,
+  /*  572 */  iRegLdst_rule,
+  /*  573 */  iRegLdst_rule,
+  /*  574 */  iRegIdst_rule,
   /*  575 */  iRegLdst_rule,
   /*  576 */  iRegLdst_rule,
-  /*  577 */  iRegIdst_rule,
-  /*  578 */  iRegLdst_rule,
-  /*  579 */  iRegIdst_rule,
-  /*  580 */  iRegLdst_rule,
-  /*  581 */  iRegIdst_rule,
+  /*  577 */  iRegLdst_rule,
+  /*  578 */  iRegPdst_rule,
+  /*  579 */  iRegPdst_rule,
+  /*  580 */  iRegPdst_rule,
+  /*  581 */  iRegPdst_rule,
   /*  582 */  iRegIdst_rule,
   /*  583 */  iRegIdst_rule,
   /*  584 */  iRegIdst_rule,
-  /*  585 */  iRegIdst_rule,
-  /*  586 */  regF_rule,
-  /*  587 */  regD_rule,
-  /*  588 */  regF_rule,
-  /*  589 */  regD_rule,
-  /*  590 */  regF_rule,
-  /*  591 */  regD_rule,
-  /*  592 */  regF_rule,
-  /*  593 */  regD_rule,
-  /*  594 */  regD_rule,
-  /*  595 */  regF_rule,
-  /*  596 */  regF_rule,
-  /*  597 */  regD_rule,
-  /*  598 */  regF_rule,
-  /*  599 */  regF_rule,
-  /*  600 */  regD_rule,
-  /*  601 */  regD_rule,
-  /*  602 */  regF_rule,
-  /*  603 */  regF_rule,
-  /*  604 */  regD_rule,
-  /*  605 */  regD_rule,
-  /*  606 */  regF_rule,
-  /*  607 */  regD_rule,
-  /*  608 */  iRegIdst_rule,
-  /*  609 */  iRegIdst_rule,
+  /*  585 */  iRegLdst_rule,
+  /*  586 */  iRegIdst_rule,
+  /*  587 */  iRegLdst_rule,
+  /*  588 */  iRegIdst_rule,
+  /*  589 */  iRegIdst_rule,
+  /*  590 */  iRegIdst_rule,
+  /*  591 */  iRegLdst_rule,
+  /*  592 */  iRegLdst_rule,
+  /*  593 */  iRegLdst_rule,
+  /*  594 */  iRegIdst_rule,
+  /*  595 */  iRegIdst_rule,
+  /*  596 */  0,
+  /*  597 */  iRegIdst_rule,
+  /*  598 */  iRegLdst_rule,
+  /*  599 */  iRegLdst_rule,
+  /*  600 */  0,
+  /*  601 */  iRegLdst_rule,
+  /*  602 */  iRegIdst_rule,
+  /*  603 */  iRegLdst_rule,
+  /*  604 */  iRegIdst_rule,
+  /*  605 */  iRegIdst_rule,
+  /*  606 */  iRegLdst_rule,
+  /*  607 */  iRegLdst_rule,
+  /*  608 */  0,
+  /*  609 */  0,
   /*  610 */  iRegIdst_rule,
   /*  611 */  iRegIdst_rule,
   /*  612 */  iRegIdst_rule,
   /*  613 */  iRegIdst_rule,
-  /*  614 */  iRegLdst_rule,
+  /*  614 */  0,
   /*  615 */  iRegLdst_rule,
   /*  616 */  iRegLdst_rule,
   /*  617 */  iRegLdst_rule,
-  /*  618 */  iRegIdst_rule,
-  /*  619 */  iRegIdst_rule,
-  /*  620 */  0,
+  /*  618 */  iRegLdst_rule,
+  /*  619 */  0,
+  /*  620 */  iRegIdst_rule,
   /*  621 */  iRegIdst_rule,
-  /*  622 */  iRegIdst_rule,
-  /*  623 */  iRegIdst_rule,
-  /*  624 */  iRegIdst_rule,
+  /*  622 */  0,
+  /*  623 */  iRegLdst_rule,
+  /*  624 */  iRegLdst_rule,
   /*  625 */  iRegIdst_rule,
-  /*  626 */  iRegLdst_rule,
+  /*  626 */  0,
   /*  627 */  iRegIdst_rule,
-  /*  628 */  iRegLdst_rule,
-  /*  629 */  iRegIdst_rule,
-  /*  630 */  0,
-  /*  631 */  iRegIdst_rule,
+  /*  628 */  iRegIdst_rule,
+  /*  629 */  0,
+  /*  630 */  iRegLdst_rule,
+  /*  631 */  iRegLdst_rule,
   /*  632 */  iRegIdst_rule,
-  /*  633 */  iRegIdst_rule,
+  /*  633 */  iRegLdst_rule,
   /*  634 */  iRegIdst_rule,
-  /*  635 */  iRegIdst_rule,
-  /*  636 */  iRegLdst_rule,
+  /*  635 */  iRegLdst_rule,
+  /*  636 */  iRegIdst_rule,
   /*  637 */  iRegIdst_rule,
-  /*  638 */  iRegLdst_rule,
+  /*  638 */  iRegIdst_rule,
   /*  639 */  iRegIdst_rule,
-  /*  640 */  iRegLdst_rule,
-  /*  641 */  iRegIdst_rule,
-  /*  642 */  iRegIdst_rule,
-  /*  643 */  0,
-  /*  644 */  stackSlotI_rule,
-  /*  645 */  stackSlotF_rule,
-  /*  646 */  0,
-  /*  647 */  stackSlotL_rule,
-  /*  648 */  stackSlotD_rule,
-  /*  649 */  iRegIdst_rule,
-  /*  650 */  iRegIdst_rule,
-  /*  651 */  iRegIdst_rule,
-  /*  652 */  iRegIdst_rule,
-  /*  653 */  iRegIdst_rule,
-  /*  654 */  iRegIdst_rule,
-  /*  655 */  iRegIdst_rule,
-  /*  656 */  iRegIdst_rule,
-  /*  657 */  iRegIdst_rule,
-  /*  658 */  iRegIdst_rule,
-  /*  659 */  iRegIdst_rule,
-  /*  660 */  iRegLdst_rule,
-  /*  661 */  iRegIdst_rule,
-  /*  662 */  0,
-  /*  663 */  0,
-  /*  664 */  0,
-  /*  665 */  0,
+  /*  640 */  iRegIdst_rule,
+  /*  641 */  regF_rule,
+  /*  642 */  regD_rule,
+  /*  643 */  regF_rule,
+  /*  644 */  regD_rule,
+  /*  645 */  regF_rule,
+  /*  646 */  regD_rule,
+  /*  647 */  regF_rule,
+  /*  648 */  regD_rule,
+  /*  649 */  regD_rule,
+  /*  650 */  regF_rule,
+  /*  651 */  regF_rule,
+  /*  652 */  regD_rule,
+  /*  653 */  regF_rule,
+  /*  654 */  regF_rule,
+  /*  655 */  regD_rule,
+  /*  656 */  regD_rule,
+  /*  657 */  regF_rule,
+  /*  658 */  regF_rule,
+  /*  659 */  regD_rule,
+  /*  660 */  regD_rule,
+  /*  661 */  regF_rule,
+  /*  662 */  regD_rule,
+  /*  663 */  iRegIdst_rule,
+  /*  664 */  iRegIdst_rule,
+  /*  665 */  iRegIdst_rule,
   /*  666 */  iRegIdst_rule,
   /*  667 */  iRegIdst_rule,
   /*  668 */  iRegIdst_rule,
-  /*  669 */  iRegIdst_rule,
+  /*  669 */  iRegLdst_rule,
   /*  670 */  iRegLdst_rule,
   /*  671 */  iRegLdst_rule,
   /*  672 */  iRegLdst_rule,
-  /*  673 */  0,
-  /*  674 */  0,
+  /*  673 */  iRegIdst_rule,
+  /*  674 */  iRegIdst_rule,
   /*  675 */  0,
-  /*  676 */  0,
-  /*  677 */  iRegLdst_rule,
-  /*  678 */  iRegLdst_rule,
-  /*  679 */  iRegLdst_rule,
-  /*  680 */  iRegLdst_rule,
-  /*  681 */  regF_rule,
-  /*  682 */  regF_rule,
-  /*  683 */  regF_rule,
-  /*  684 */  regF_rule,
-  /*  685 */  regF_rule,
-  /*  686 */  regF_rule,
-  /*  687 */  regD_rule,
-  /*  688 */  regD_rule,
-  /*  689 */  regD_rule,
-  /*  690 */  regD_rule,
-  /*  691 */  regD_rule,
+  /*  676 */  iRegIdst_rule,
+  /*  677 */  iRegIdst_rule,
+  /*  678 */  iRegIdst_rule,
+  /*  679 */  iRegIdst_rule,
+  /*  680 */  iRegIdst_rule,
+  /*  681 */  iRegLdst_rule,
+  /*  682 */  iRegIdst_rule,
+  /*  683 */  iRegLdst_rule,
+  /*  684 */  iRegIdst_rule,
+  /*  685 */  0,
+  /*  686 */  iRegIdst_rule,
+  /*  687 */  iRegIdst_rule,
+  /*  688 */  iRegIdst_rule,
+  /*  689 */  iRegIdst_rule,
+  /*  690 */  iRegIdst_rule,
+  /*  691 */  iRegLdst_rule,
   /*  692 */  iRegIdst_rule,
-  /*  693 */  Universe_rule,
-  /*  694 */  Universe_rule,
-  /*  695 */  Universe_rule,
-  /*  696 */  Universe_rule,
-  /*  697 */  Universe_rule,
-  /*  698 */  iRegIdst_rule,
-  /*  699 */  iRegIdst_rule,
-  /*  700 */  Universe_rule,
-  /*  701 */  Universe_rule,
-  /*  702 */  Universe_rule,
-  /*  703 */  Universe_rule,
-  /*  704 */  Universe_rule,
-  /*  705 */  Universe_rule,
-  /*  706 */  Universe_rule,
-  /*  707 */  iRegPdst_rule,
-  /*  708 */  iRegPdst_rule,
-  /*  709 */  iRegLdst_rule,
-  /*  710 */  Universe_rule,
-  /*  711 */  Universe_rule,
-  /*  712 */  Universe_rule,
+  /*  693 */  iRegLdst_rule,
+  /*  694 */  iRegIdst_rule,
+  /*  695 */  iRegLdst_rule,
+  /*  696 */  iRegIdst_rule,
+  /*  697 */  iRegIdst_rule,
+  /*  698 */  0,
+  /*  699 */  stackSlotI_rule,
+  /*  700 */  stackSlotF_rule,
+  /*  701 */  0,
+  /*  702 */  stackSlotL_rule,
+  /*  703 */  stackSlotD_rule,
+  /*  704 */  iRegIdst_rule,
+  /*  705 */  iRegIdst_rule,
+  /*  706 */  iRegIdst_rule,
+  /*  707 */  iRegIdst_rule,
+  /*  708 */  iRegIdst_rule,
+  /*  709 */  iRegIdst_rule,
+  /*  710 */  iRegIdst_rule,
+  /*  711 */  iRegIdst_rule,
+  /*  712 */  iRegIdst_rule,
   /*  713 */  iRegIdst_rule,
   /*  714 */  iRegIdst_rule,
-  /*  715 */  iRegIdst_rule,
+  /*  715 */  iRegLdst_rule,
   /*  716 */  iRegIdst_rule,
-  /*  717 */  iRegIdst_rule,
-  /*  718 */  iRegIdst_rule,
-  /*  719 */  iRegIdst_rule,
-  /*  720 */  iRegIdst_rule,
+  /*  717 */  0,
+  /*  718 */  0,
+  /*  719 */  0,
+  /*  720 */  0,
   /*  721 */  iRegIdst_rule,
   /*  722 */  iRegIdst_rule,
   /*  723 */  iRegIdst_rule,
   /*  724 */  iRegIdst_rule,
-  /*  725 */  iRegIdst_rule,
-  /*  726 */  iRegIdst_rule,
-  /*  727 */  iRegIdst_rule,
-  /*  728 */  iRegIdst_rule,
-  /*  729 */  iRegIdst_rule,
-  /*  730 */  iRegIdst_rule,
-  /*  731 */  iRegIdst_rule,
-  /*  732 */  iRegIdst_rule,
-  /*  733 */  iRegIdst_rule,
-  /*  734 */  iRegIdst_rule,
-  /*  735 */  Universe_rule,
-  /*  736 */  iRegIdst_rule,
-  /*  737 */  iRegIdst_rule,
-  /*  738 */  iRegIdst_rule,
-  /*  739 */  iRegIdst_rule,
-  /*  740 */  iRegIdst_rule,
-  /*  741 */  iRegIdst_rule,
-  /*  742 */  0,
-  /*  743 */  0,
-  /*  744 */  iRegIdst_rule,
-  /*  745 */  iRegLdst_rule,
-  /*  746 */  iRegIdst_rule,
+  /*  725 */  iRegLdst_rule,
+  /*  726 */  iRegLdst_rule,
+  /*  727 */  iRegLdst_rule,
+  /*  728 */  0,
+  /*  729 */  0,
+  /*  730 */  0,
+  /*  731 */  0,
+  /*  732 */  iRegLdst_rule,
+  /*  733 */  iRegLdst_rule,
+  /*  734 */  iRegLdst_rule,
+  /*  735 */  iRegLdst_rule,
+  /*  736 */  regF_rule,
+  /*  737 */  regF_rule,
+  /*  738 */  regF_rule,
+  /*  739 */  regF_rule,
+  /*  740 */  regF_rule,
+  /*  741 */  regF_rule,
+  /*  742 */  regD_rule,
+  /*  743 */  regD_rule,
+  /*  744 */  regD_rule,
+  /*  745 */  regD_rule,
+  /*  746 */  regD_rule,
   /*  747 */  iRegIdst_rule,
-  /*  748 */  iRegIdst_rule,
-  /*  749 */  iRegLdst_rule,
-  /*  750 */  iRegIdst_rule,
-  /*  751 */  iRegIdst_rule,
+  /*  748 */  Universe_rule,
+  /*  749 */  Universe_rule,
+  /*  750 */  Universe_rule,
+  /*  751 */  Universe_rule,
   /*  752 */  Universe_rule,
-  /*  753 */  Universe_rule,
-  /*  754 */  Universe_rule,
-  /*  755 */  Universe_rule,
-  /*  756 */  0,
-  /*  757 */  iRegLdst_rule,
-  /*  758 */  iRegLdst_rule,
-  /*  759 */  iRegLdst_rule,
-  /*  760 */  vecX_rule,
-  /*  761 */  vecX_rule,
-  /*  762 */  vecX_rule,
-  /*  763 */  iRegLdst_rule,
-  /*  764 */  iRegLdst_rule,
-  /*  765 */  iRegLdst_rule,
-  /*  766 */  vecX_rule,
-  /*  767 */  vecX_rule,
-  /*  768 */  vecX_rule,
-  /*  769 */  iRegLdst_rule,
-  /*  770 */  iRegLdst_rule,
-  /*  771 */  iRegLdst_rule,
-  /*  772 */  vecX_rule,
-  /*  773 */  vecX_rule,
-  /*  774 */  vecX_rule,
-  /*  775 */  iRegLdst_rule,
-  /*  776 */  iRegLdst_rule,
-  /*  777 */  iRegLdst_rule,
-  /*  778 */  vecX_rule,
-  /*  779 */  vecX_rule,
-  /*  780 */  vecX_rule,
-  /*  781 */  vecX_rule,
-  /*  782 */  vecX_rule,
-  /*  783 */  vecX_rule,
-  /*  784 */  0,
-  /*  785 */  0,
-  /*  786 */  vecX_rule,
-  /*  787 */  vecX_rule,
-  /*  788 */  vecX_rule,
-  /*  789 */  Universe_rule,
-  /*  790 */  Universe_rule,
-  /*  791 */  Universe_rule,
-  /*  792 */  Universe_rule,
-  /*  793 */  Universe_rule,
+  /*  753 */  iRegIdst_rule,
+  /*  754 */  iRegIdst_rule,
+  /*  755 */  iRegIdst_rule,
+  /*  756 */  iRegIdst_rule,
+  /*  757 */  iRegIdst_rule,
+  /*  758 */  iRegIdst_rule,
+  /*  759 */  iRegIdst_rule,
+  /*  760 */  Universe_rule,
+  /*  761 */  Universe_rule,
+  /*  762 */  Universe_rule,
+  /*  763 */  Universe_rule,
+  /*  764 */  Universe_rule,
+  /*  765 */  iRegPdst_rule,
+  /*  766 */  iRegPdst_rule,
+  /*  767 */  iRegLdst_rule,
+  /*  768 */  Universe_rule,
+  /*  769 */  Universe_rule,
+  /*  770 */  Universe_rule,
+  /*  771 */  iRegIdst_rule,
+  /*  772 */  iRegIdst_rule,
+  /*  773 */  iRegIdst_rule,
+  /*  774 */  iRegIdst_rule,
+  /*  775 */  iRegIdst_rule,
+  /*  776 */  iRegIdst_rule,
+  /*  777 */  iRegIdst_rule,
+  /*  778 */  iRegIdst_rule,
+  /*  779 */  iRegIdst_rule,
+  /*  780 */  iRegIdst_rule,
+  /*  781 */  iRegIdst_rule,
+  /*  782 */  iRegIdst_rule,
+  /*  783 */  iRegIdst_rule,
+  /*  784 */  iRegIdst_rule,
+  /*  785 */  iRegIdst_rule,
+  /*  786 */  iRegIdst_rule,
+  /*  787 */  iRegIdst_rule,
+  /*  788 */  iRegIdst_rule,
+  /*  789 */  iRegIdst_rule,
+  /*  790 */  iRegIdst_rule,
+  /*  791 */  iRegIdst_rule,
+  /*  792 */  iRegIdst_rule,
+  /*  793 */  iRegIdst_rule,
   /*  794 */  Universe_rule,
-  /*  795 */  Universe_rule,
-  /*  796 */  Universe_rule,
-  /*  797 */  Universe_rule,
-  /*  798 */  Universe_rule,
-  /*  799 */  Universe_rule,
-  /*  800 */  Universe_rule,
-  /*  801 */  rarg1RegP_rule,
-  /*  802 */  Universe_rule,
-  /*  803 */  Universe_rule,
-  /*  804 */  0,
-  /*  805 */  0,
-  /*  806 */  0,
-  /*  807 */  0,
-  /*  808 */  0,
-  /*  809 */  0,
-  /*  810 */  0,
+  /*  795 */  iRegIdst_rule,
+  /*  796 */  iRegIdst_rule,
+  /*  797 */  iRegIdst_rule,
+  /*  798 */  iRegIdst_rule,
+  /*  799 */  iRegIdst_rule,
+  /*  800 */  iRegIdst_rule,
+  /*  801 */  iRegIdst_rule,
+  /*  802 */  0,
+  /*  803 */  0,
+  /*  804 */  iRegIdst_rule,
+  /*  805 */  iRegIdst_rule,
+  /*  806 */  iRegIdst_rule,
+  /*  807 */  iRegLdst_rule,
+  /*  808 */  iRegLdst_rule,
+  /*  809 */  iRegLdst_rule,
+  /*  810 */  iRegIdst_rule,
+  /*  811 */  iRegIdst_rule,
+  /*  812 */  iRegIdst_rule,
+  /*  813 */  iRegIdst_rule,
+  /*  814 */  iRegIdst_rule,
+  /*  815 */  iRegIdst_rule,
+  /*  816 */  iRegLdst_rule,
+  /*  817 */  iRegLdst_rule,
+  /*  818 */  iRegIdst_rule,
+  /*  819 */  iRegIdst_rule,
+  /*  820 */  iRegIdst_rule,
+  /*  821 */  iRegIdst_rule,
+  /*  822 */  Universe_rule,
+  /*  823 */  Universe_rule,
+  /*  824 */  Universe_rule,
+  /*  825 */  Universe_rule,
+  /*  826 */  0,
+  /*  827 */  vecX_rule,
+  /*  828 */  vecX_rule,
+  /*  829 */  vecX_rule,
+  /*  830 */  vecX_rule,
+  /*  831 */  vecX_rule,
+  /*  832 */  vecX_rule,
+  /*  833 */  vecX_rule,
+  /*  834 */  vecX_rule,
+  /*  835 */  vecX_rule,
+  /*  836 */  vecX_rule,
+  /*  837 */  vecX_rule,
+  /*  838 */  vecX_rule,
+  /*  839 */  vecX_rule,
+  /*  840 */  vecX_rule,
+  /*  841 */  vecX_rule,
+  /*  842 */  vecX_rule,
+  /*  843 */  vecX_rule,
+  /*  844 */  vecX_rule,
+  /*  845 */  regD_rule,
+  /*  846 */  vecX_rule,
+  /*  847 */  vecX_rule,
+  /*  848 */  vecX_rule,
+  /*  849 */  vecX_rule,
+  /*  850 */  vecX_rule,
+  /*  851 */  vecX_rule,
+  /*  852 */  vecX_rule,
+  /*  853 */  vecX_rule,
+  /*  854 */  vecX_rule,
+  /*  855 */  vecX_rule,
+  /*  856 */  0,
+  /*  857 */  0,
+  /*  858 */  Universe_rule,
+  /*  859 */  Universe_rule,
+  /*  860 */  Universe_rule,
+  /*  861 */  Universe_rule,
+  /*  862 */  Universe_rule,
+  /*  863 */  Universe_rule,
+  /*  864 */  Universe_rule,
+  /*  865 */  Universe_rule,
+  /*  866 */  Universe_rule,
+  /*  867 */  Universe_rule,
+  /*  868 */  Universe_rule,
+  /*  869 */  Universe_rule,
+  /*  870 */  rarg1RegP_rule,
+  /*  871 */  Universe_rule,
+  /*  872 */  Universe_rule,
+  /*  873 */  0,
+  /*  874 */  0,
+  /*  875 */  0,
+  /*  876 */  0,
+  /*  877 */  0,
+  /*  878 */  0,
+  /*  879 */  0,
+  /*  880 */  Universe_rule,
+  /*  881 */  Universe_rule,
+  /*  882 */  Universe_rule,
+  /*  883 */  iRegIdst_rule,
+  /*  884 */  iRegIdst_rule,
+  /*  885 */  iRegIdst_rule,
+  /*  886 */  iRegIdst_rule,
+  /*  887 */  iRegIdst_rule,
+  /*  888 */  iRegIdst_rule,
+  /*  889 */  iRegIdst_rule,
+  /*  890 */  iRegIdst_rule,
+  /*  891 */  iRegPdst_rule,
+  /*  892 */  iRegNdst_rule,
+  /*  893 */  iRegPdst_rule,
+  /*  894 */  iRegNdst_rule,
+  /*  895 */  iRegPdst_rule,
+  /*  896 */  iRegPdst_rule,
+  /*  897 */  iRegIdst_rule,
+  /*  898 */  iRegIdst_rule,
+  /*  899 */  iRegIdst_rule,
+  /*  900 */  iRegIdst_rule,
+  /*  901 */  iRegPdst_rule,
+  /*  902 */  iRegPdst_rule,
+  /*  903 */  iRegPdst_rule,
   // last instruction
   0 // no trailing comma
 };
@@ -3317,10 +3382,10 @@ const        int   leftOp[] = {
   /*   73 */  0,
   /*   74 */  0,
   /*   75 */  0,
-  /*   76 */  iRegLsrc_rule,
+  /*   76 */  0,
   /*   77 */  0,
   /*   78 */  0,
-  /*   79 */  0,
+  /*   79 */  iRegLsrc_rule,
   /*   80 */  0,
   /*   81 */  0,
   /*   82 */  0,
@@ -3331,730 +3396,823 @@ const        int   leftOp[] = {
   /*   87 */  0,
   /*   88 */  0,
   /*   89 */  0,
-  /*   90 */  iRegPsrc_rule,
-  /*   91 */  iRegNsrc_rule,
+  /*   90 */  0,
+  /*   91 */  iRegPsrc_rule,
   /*   92 */  iRegNsrc_rule,
-  /*   93 */  0,
-  /*   94 */  iRegPsrc_rule,
+  /*   93 */  iRegNsrc_rule,
+  /*   94 */  0,
   /*   95 */  iRegPsrc_rule,
-  /*   96 */  iRegNsrc_rule,
+  /*   96 */  iRegPsrc_rule,
   /*   97 */  iRegNsrc_rule,
-  /*   98 */  _DecodeN_iRegNsrc__rule,
-  /*   99 */  _DecodeNKlass_iRegNsrc__rule,
-  /*  100 */  _DecodeN_iRegNsrc__rule,
-  /*  101 */  _DecodeNKlass_iRegNsrc__rule,
-  /*  102 */  0,
+  /*   98 */  iRegNsrc_rule,
+  /*   99 */  _DecodeN_iRegNsrc__rule,
+  /*  100 */  _DecodeNKlass_iRegNsrc__rule,
+  /*  101 */  _DecodeN_iRegNsrc__rule,
+  /*  102 */  _DecodeNKlass_iRegNsrc__rule,
   /*  103 */  0,
   /*  104 */  0,
   /*  105 */  0,
   /*  106 */  0,
   /*  107 */  0,
-  // last operand
   /*  108 */  0,
+  // last operand
   /*  109 */  0,
   /*  110 */  0,
   /*  111 */  0,
   /*  112 */  0,
   /*  113 */  0,
+  /*  114 */  0,
   // last operand class
-  /*  114 */  iRegNsrc_rule,
   /*  115 */  iRegNsrc_rule,
-  /*  116 */  memory_rule,
+  /*  116 */  iRegNsrc_rule,
   /*  117 */  memory_rule,
   /*  118 */  memory_rule,
-  /*  119 */  _LoadI_memory__rule,
-  /*  120 */  memoryAlg4_rule,
-  /*  121 */  memory_rule,
+  /*  119 */  memory_rule,
+  /*  120 */  _LoadI_memory__rule,
+  /*  121 */  memoryAlg4_rule,
   /*  122 */  memory_rule,
-  /*  123 */  memoryAlg4_rule,
-  /*  124 */  indirectMemory_rule,
-  /*  125 */  iRegLsrc_rule,
-  /*  126 */  flagsRegSrc_rule,
-  /*  127 */  _DecodeN_iRegNsrc__rule,
-  /*  128 */  iRegLsrc_rule,
+  /*  123 */  memory_rule,
+  /*  124 */  memoryAlg4_rule,
+  /*  125 */  indirectMemory_rule,
+  /*  126 */  iRegLsrc_rule,
+  /*  127 */  flagsRegSrc_rule,
+  /*  128 */  _DecodeN_iRegNsrc__rule,
   /*  129 */  iRegLsrc_rule,
   /*  130 */  iRegLsrc_rule,
-  /*  131 */  cmpOp_rule,
-  /*  132 */  iRegIdst_rule,
+  /*  131 */  iRegLsrc_rule,
+  /*  132 */  cmpOp_rule,
   /*  133 */  iRegIdst_rule,
-  /*  134 */  iRegLdst_rule,
+  /*  134 */  iRegIdst_rule,
   /*  135 */  iRegLdst_rule,
-  /*  136 */  iRegNdst_rule,
+  /*  136 */  iRegLdst_rule,
   /*  137 */  iRegNdst_rule,
-  /*  138 */  iRegPdst_rule,
+  /*  138 */  iRegNdst_rule,
   /*  139 */  iRegPdst_rule,
   /*  140 */  iRegPdst_rule,
-  /*  141 */  regF_rule,
-  /*  142 */  regD_rule,
-  /*  143 */  iRegLsrc_rule,
-  /*  144 */  iRegPsrc_rule,
+  /*  141 */  iRegPdst_rule,
+  /*  142 */  regF_rule,
+  /*  143 */  regD_rule,
+  /*  144 */  iRegIsrc_rule,
   /*  145 */  iRegIsrc_rule,
-  /*  146 */  iRegIsrc_rule,
-  /*  147 */  iRegNsrc_rule,
-  /*  148 */  iRegIsrc_rule,
-  /*  149 */  _AddI_iRegIsrc_iRegIsrc_rule,
-  /*  150 */  iRegIsrc_rule,
-  /*  151 */  iRegLsrc_rule,
-  /*  152 */  _AddL_iRegLsrc_iRegLsrc_rule,
-  /*  153 */  iRegLsrc_rule,
+  /*  146 */  iRegNsrc_rule,
+  /*  147 */  iRegLsrc_rule,
+  /*  148 */  iRegPsrc_rule,
+  /*  149 */  iRegIsrc_rule,
+  /*  150 */  _AddI_iRegIsrc_iRegIsrc_rule,
+  /*  151 */  iRegIsrc_rule,
+  /*  152 */  iRegLsrc_rule,
+  /*  153 */  _AddL_iRegLsrc_iRegLsrc_rule,
   /*  154 */  iRegLsrc_rule,
-  /*  155 */  immL_0_rule,
-  /*  156 */  iRegIsrc_rule,
+  /*  155 */  iRegLsrc_rule,
+  /*  156 */  immL_0_rule,
   /*  157 */  iRegIsrc_rule,
-  /*  158 */  _RShiftI_iRegIsrc_uimmI5_rule,
-  /*  159 */  iRegIsrc_rule,
-  /*  160 */  iRegLsrc_rule,
+  /*  158 */  iRegIsrc_rule,
+  /*  159 */  _RShiftI_iRegIsrc_uimmI5_rule,
+  /*  160 */  iRegIsrc_rule,
   /*  161 */  iRegLsrc_rule,
-  /*  162 */  iRegP_N2P_rule,
-  /*  163 */  iRegIsrc_rule,
+  /*  162 */  iRegLsrc_rule,
+  /*  163 */  iRegP_N2P_rule,
   /*  164 */  iRegIsrc_rule,
   /*  165 */  iRegIsrc_rule,
-  /*  166 */  regF_rule,
-  /*  167 */  regD_rule,
-  /*  168 */  regF_rule,
-  /*  169 */  _ConvF2D_regF__rule,
-  /*  170 */  regF_rule,
-  /*  171 */  _NegF_regF__rule,
-  /*  172 */  regF_rule,
-  /*  173 */  regD_rule,
-  /*  174 */  _NegD_regD__rule,
-  /*  175 */  regD_rule,
-  /*  176 */  iRegLsrc_rule,
-  /*  177 */  iRegIsrc_rule,
-  /*  178 */  _OrI_iRegIsrc_iRegIsrc_rule,
-  /*  179 */  iRegIsrc_rule,
-  /*  180 */  iRegLsrc_rule,
-  /*  181 */  iRegIsrc_rule,
-  /*  182 */  _XorI_iRegIsrc_iRegIsrc_rule,
-  /*  183 */  iRegIsrc_rule,
-  /*  184 */  iRegLsrc_rule,
+  /*  166 */  iRegIsrc_rule,
+  /*  167 */  regF_rule,
+  /*  168 */  regD_rule,
+  /*  169 */  regF_rule,
+  /*  170 */  _NegF_regF__rule,
+  /*  171 */  regF_rule,
+  /*  172 */  regD_rule,
+  /*  173 */  _NegD_regD__rule,
+  /*  174 */  regD_rule,
+  /*  175 */  iRegLsrc_rule,
+  /*  176 */  iRegIsrc_rule,
+  /*  177 */  _OrI_iRegIsrc_iRegIsrc_rule,
+  /*  178 */  iRegIsrc_rule,
+  /*  179 */  iRegLsrc_rule,
+  /*  180 */  iRegIsrc_rule,
+  /*  181 */  _XorI_iRegIsrc_iRegIsrc_rule,
+  /*  182 */  iRegIsrc_rule,
+  /*  183 */  iRegLsrc_rule,
+  /*  184 */  iRegIsrc_rule,
   /*  185 */  iRegIsrc_rule,
   /*  186 */  iRegIsrc_rule,
-  /*  187 */  iRegIsrc_rule,
-  /*  188 */  iRegP_N2P_rule,
+  /*  187 */  iRegP_N2P_rule,
+  /*  188 */  iRegIsrc_rule,
   /*  189 */  iRegIsrc_rule,
   /*  190 */  iRegIsrc_rule,
-  /*  191 */  iRegIsrc_rule,
+  /*  191 */  iRegLsrc_rule,
   /*  192 */  iRegLsrc_rule,
-  /*  193 */  iRegLsrc_rule,
+  /*  193 */  iRegIsrc_rule,
   /*  194 */  iRegIsrc_rule,
-  /*  195 */  iRegIsrc_rule,
-  /*  196 */  iRegNsrc_rule,
-  /*  197 */  iRegP_N2P_rule,
-  /*  198 */  iRegPsrc_rule,
-  /*  199 */  _CastP2X_iRegPsrc__rule,
-  /*  200 */  rarg1RegP_rule,
-  /*  201 */  rarg2RegP_rule,
-  /*  202 */  rarg1RegP_rule,
-  /*  203 */  iRegPsrc_rule,
-  /*  204 */  immP_rule,
-  /*  205 */  _AddP_immP_immL_rule,
-  /*  206 */  rscratch2RegP_rule,
+  /*  195 */  iRegNsrc_rule,
+  /*  196 */  iRegP_N2P_rule,
+  /*  197 */  iRegPsrc_rule,
+  /*  198 */  _CastP2X_iRegPsrc__rule,
+  /*  199 */  rarg1RegP_rule,
+  /*  200 */  rarg2RegP_rule,
+  /*  201 */  rarg1RegP_rule,
+  /*  202 */  iRegPsrc_rule,
+  /*  203 */  immP_rule,
+  /*  204 */  _AddP_immP_immL_rule,
+  /*  205 */  rscratch2RegP_rule,
+  /*  206 */  iRegPsrc_rule,
   /*  207 */  iRegPsrc_rule,
   /*  208 */  iRegPsrc_rule,
-  /*  209 */  iRegPsrc_rule,
-  /*  210 */  rarg2RegP_rule,
+  /*  209 */  rarg2RegP_rule,
+  /*  210 */  indirect_rule,
   /*  211 */  indirect_rule,
   /*  212 */  indirect_rule,
   /*  213 */  indirect_rule,
-  /*  214 */  indirect_rule,
-  /*  215 */  iRegIsrc_rule,
-  /*  216 */  iRegLsrc_rule,
+  /*  214 */  iRegIsrc_rule,
+  /*  215 */  iRegLsrc_rule,
+  /*  216 */  iRegIsrc_rule,
   /*  217 */  iRegIsrc_rule,
-  /*  218 */  iRegIsrc_rule,
+  /*  218 */  vecX_rule,
+  /*  219 */  vecX_rule,
+  /*  220 */  _NegVF_vecX__rule,
+  /*  221 */  vecX_rule,
+  /*  222 */  vecX_rule,
+  /*  223 */  _NegVD_vecX__rule,
+  /*  224 */  vecX_rule,
   // last internally defined operand
-  /*  219 */  iRegIsrc_rule,
-  /*  220 */  iRegLsrc_rule,
-  /*  221 */  immI16_rule,
-  /*  222 */  immIhi16_rule,
-  /*  223 */  immI_rule,
-  /*  224 */  immL16_rule,
-  /*  225 */  immL32hi16_rule,
-  /*  226 */  immL32_rule,
-  /*  227 */  immLhighest16_rule,
-  /*  228 */  immL_rule,
-  /*  229 */  immN_0_rule,
-  /*  230 */  immN_rule,
-  /*  231 */  immNKlass_NM_rule,
-  /*  232 */  immNKlass_NM_rule,
-  /*  233 */  immNKlass_NM_rule,
-  /*  234 */  immNKlass_rule,
-  /*  235 */  immP_0or1_rule,
-  /*  236 */  immP_NM_rule,
-  /*  237 */  immP_NM_rule,
-  /*  238 */  immP_rule,
-  /*  239 */  immF_rule,
-  /*  240 */  immD_rule,
-  /*  241 */  stackSlotI_rule,
-  /*  242 */  stackSlotL_rule,
-  /*  243 */  0,
-  /*  244 */  _LoadP_memoryAlg4__rule,
-  /*  245 */  0,
-  /*  246 */  0,
-  /*  247 */  0,
-  /*  248 */  indirect_rule,
-  /*  249 */  indirect_rule,
-  /*  250 */  0,
-  /*  251 */  iRegIsrc_rule,
-  /*  252 */  0,
+  /*  225 */  iRegIsrc_rule,
+  /*  226 */  iRegLsrc_rule,
+  /*  227 */  immI16_rule,
+  /*  228 */  immIhi16_rule,
+  /*  229 */  immI32_rule,
+  /*  230 */  immI_rule,
+  /*  231 */  immL16_rule,
+  /*  232 */  immL32hi16_rule,
+  /*  233 */  immL32_rule,
+  /*  234 */  immL34_rule,
+  /*  235 */  immLhighest16_rule,
+  /*  236 */  immL_rule,
+  /*  237 */  immN_0_rule,
+  /*  238 */  immN_rule,
+  /*  239 */  immNKlass_NM_rule,
+  /*  240 */  immNKlass_NM_rule,
+  /*  241 */  immNKlass_NM_rule,
+  /*  242 */  immNKlass_rule,
+  /*  243 */  immP_0or1_rule,
+  /*  244 */  immP_NM_rule,
+  /*  245 */  immP_NM_rule,
+  /*  246 */  immP_rule,
+  /*  247 */  immF_rule,
+  /*  248 */  immD_rule,
+  /*  249 */  stackSlotI_rule,
+  /*  250 */  stackSlotL_rule,
+  /*  251 */  0,
+  /*  252 */  _LoadP_memoryAlg4__rule,
   /*  253 */  0,
-  /*  254 */  regF_rule,
-  /*  255 */  regD_rule,
-  /*  256 */  regF_rule,
-  /*  257 */  regD_rule,
-  /*  258 */  _AbsF_regF__rule,
-  /*  259 */  _AbsD_regD__rule,
-  /*  260 */  regD_rule,
-  /*  261 */  regF_rule,
+  /*  254 */  0,
+  /*  255 */  0,
+  /*  256 */  iRegLdst_rule,
+  /*  257 */  vecX_rule,
+  /*  258 */  0,
+  /*  259 */  iRegIsrc_rule,
+  /*  260 */  0,
+  /*  261 */  0,
   /*  262 */  iRegLsrc_rule,
-  /*  263 */  0,
-  /*  264 */  stackSlotF_rule,
-  /*  265 */  stackSlotI_rule,
-  /*  266 */  stackSlotD_rule,
-  /*  267 */  stackSlotL_rule,
-  /*  268 */  0,
-  /*  269 */  iRegLsrc_rule,
-  /*  270 */  iRegP_N2P_rule,
-  /*  271 */  iRegPdst_rule,
-  /*  272 */  iRegIdst_rule,
-  /*  273 */  iRegPdst_rule,
-  /*  274 */  iRegIsrc_rule,
-  /*  275 */  iRegP_N2P_rule,
-  /*  276 */  0,
+  /*  263 */  regF_rule,
+  /*  264 */  regD_rule,
+  /*  265 */  regF_rule,
+  /*  266 */  regD_rule,
+  /*  267 */  _AbsF_regF__rule,
+  /*  268 */  _AbsD_regD__rule,
+  /*  269 */  regD_rule,
+  /*  270 */  regF_rule,
+  /*  271 */  iRegLsrc_rule,
+  /*  272 */  0,
+  /*  273 */  stackSlotF_rule,
+  /*  274 */  stackSlotI_rule,
+  /*  275 */  stackSlotD_rule,
+  /*  276 */  stackSlotL_rule,
   /*  277 */  0,
-  /*  278 */  0,
-  /*  279 */  0,
-  /*  280 */  0,
-  /*  281 */  0,
-  /*  282 */  0,
-  /*  283 */  iRegIsrc_rule,
-  /*  284 */  iRegIsrc_rule,
-  /*  285 */  _AndI_iRegIsrc_uimmI16_rule,
-  /*  286 */  iRegLsrc_rule,
-  /*  287 */  iRegLsrc_rule,
-  /*  288 */  iRegLsrc_rule,
-  /*  289 */  iRegLsrc_rule,
-  /*  290 */  _AndL_iRegLsrc_iRegLsrc_rule,
-  /*  291 */  _AndL_iRegLsrc_uimmL16_rule,
+  /*  278 */  iRegLsrc_rule,
+  /*  279 */  iRegP_N2P_rule,
+  /*  280 */  iRegPdst_rule,
+  /*  281 */  iRegIdst_rule,
+  /*  282 */  iRegLdst_rule,
+  /*  283 */  regF_rule,
+  /*  284 */  regD_rule,
+  /*  285 */  iRegLdst_rule,
+  /*  286 */  vecX_rule,
+  /*  287 */  iRegPdst_rule,
+  /*  288 */  iRegIsrc_rule,
+  /*  289 */  iRegP_N2P_rule,
+  /*  290 */  0,
+  /*  291 */  0,
   /*  292 */  0,
   /*  293 */  0,
-  /*  294 */  iRegIsrc_rule,
-  /*  295 */  iRegIsrc_rule,
-  /*  296 */  iRegNsrc_rule,
-  /*  297 */  iRegNsrc_rule,
-  /*  298 */  iRegP_N2P_rule,
-  /*  299 */  iRegP_N2P_rule,
-  /*  300 */  iRegPsrc_rule,
-  /*  301 */  regF_rule,
-  /*  302 */  0,
-  /*  303 */  regF_rule,
-  /*  304 */  regD_rule,
-  /*  305 */  regD_rule,
-  /*  306 */  iRegPdst_rule,
-  /*  307 */  iRegPdst_rule,
-  /*  308 */  iRegPdst_rule,
-  /*  309 */  iRegPdst_rule,
-  /*  310 */  iRegIsrc_rule,
-  /*  311 */  iRegLsrc_rule,
-  /*  312 */  iRegIsrc_rule,
-  /*  313 */  iRegLsrc_rule,
+  /*  294 */  0,
+  /*  295 */  0,
+  /*  296 */  0,
+  /*  297 */  iRegIsrc_rule,
+  /*  298 */  iRegIsrc_rule,
+  /*  299 */  _AndI_iRegIsrc_uimmI16_rule,
+  /*  300 */  iRegLsrc_rule,
+  /*  301 */  iRegLsrc_rule,
+  /*  302 */  iRegLsrc_rule,
+  /*  303 */  iRegLsrc_rule,
+  /*  304 */  _AndL_iRegLsrc_iRegLsrc_rule,
+  /*  305 */  _AndL_iRegLsrc_uimmL16_rule,
+  /*  306 */  iRegIsrc_rule,
+  /*  307 */  iRegIsrc_rule,
+  /*  308 */  iRegNsrc_rule,
+  /*  309 */  iRegNsrc_rule,
+  /*  310 */  iRegP_N2P_rule,
+  /*  311 */  iRegP_N2P_rule,
+  /*  312 */  iRegPsrc_rule,
+  /*  313 */  regF_rule,
   /*  314 */  0,
-  /*  315 */  iRegIsrc_rule,
-  /*  316 */  iRegLsrc_rule,
-  /*  317 */  0,
-  /*  318 */  0,
-  /*  319 */  0,
-  /*  320 */  0,
-  /*  321 */  iRegLsrc_rule,
-  /*  322 */  iRegLsrc_rule,
-  /*  323 */  immL_0_rule,
-  /*  324 */  iRegLsrc_rule,
-  /*  325 */  0,
+  /*  315 */  regF_rule,
+  /*  316 */  regD_rule,
+  /*  317 */  regD_rule,
+  /*  318 */  iRegPdst_rule,
+  /*  319 */  iRegPdst_rule,
+  /*  320 */  iRegPdst_rule,
+  /*  321 */  iRegPdst_rule,
+  /*  322 */  iRegIsrc_rule,
+  /*  323 */  iRegLsrc_rule,
+  /*  324 */  iRegIsrc_rule,
+  /*  325 */  iRegLsrc_rule,
   /*  326 */  0,
-  /*  327 */  0,
-  /*  328 */  indirectMemory_rule,
-  /*  329 */  indirectMemory_rule,
-  /*  330 */  indirectMemory_rule,
-  /*  331 */  indirectMemory_rule,
-  /*  332 */  indOffset16_rule,
-  /*  333 */  indOffset16_rule,
-  /*  334 */  indOffset16_rule,
-  /*  335 */  indOffset16_rule,
-  /*  336 */  memory_rule,
-  /*  337 */  memory_rule,
-  /*  338 */  _LoadUB_memory__rule,
-  /*  339 */  _LoadUB_memory__rule,
-  /*  340 */  memory_rule,
-  /*  341 */  memory_rule,
-  /*  342 */  memory_rule,
-  /*  343 */  memory_rule,
-  /*  344 */  _LoadUS_memory__rule,
-  /*  345 */  _LoadUS_memory__rule,
-  /*  346 */  memory_rule,
-  /*  347 */  memory_rule,
-  /*  348 */  _ConvI2L__LoadI_memory___rule,
-  /*  349 */  _LoadI_memoryAlg4__rule,
-  /*  350 */  _LoadI_memoryAlg4__rule,
-  /*  351 */  memoryAlg4_rule,
-  /*  352 */  memoryAlg4_rule,
-  /*  353 */  memoryAlg4_rule,
-  /*  354 */  memoryAlg4_rule,
-  /*  355 */  indirect_rule,
-  /*  356 */  memory_rule,
-  /*  357 */  memory_rule,
-  /*  358 */  memory_rule,
-  /*  359 */  _LoadN_memory__rule,
-  /*  360 */  _LoadNKlass_memory__rule,
-  /*  361 */  memoryAlg4_rule,
-  /*  362 */  memoryAlg4_rule,
-  /*  363 */  memory_rule,
-  /*  364 */  memoryAlg4_rule,
-  /*  365 */  memory_rule,
-  /*  366 */  memory_rule,
-  /*  367 */  memory_rule,
-  /*  368 */  memory_rule,
-  /*  369 */  memory_rule,
-  /*  370 */  0,
-  /*  371 */  0,
+  /*  327 */  iRegIsrc_rule,
+  /*  328 */  iRegIsrc_rule,
+  /*  329 */  iRegLsrc_rule,
+  /*  330 */  iRegLsrc_rule,
+  /*  331 */  0,
+  /*  332 */  0,
+  /*  333 */  0,
+  /*  334 */  0,
+  /*  335 */  0,
+  /*  336 */  iRegIsrc_rule,
+  /*  337 */  immI_0_rule,
+  /*  338 */  immI_minus1_rule,
+  /*  339 */  iRegIsrc_rule,
+  /*  340 */  immI_0_rule,
+  /*  341 */  immI_minus1_rule,
+  /*  342 */  iRegIsrc_rule,
+  /*  343 */  immI_0_rule,
+  /*  344 */  immI_minus1_rule,
+  /*  345 */  iRegIsrc_rule,
+  /*  346 */  immI_0_rule,
+  /*  347 */  immI_minus1_rule,
+  /*  348 */  iRegIsrc_rule,
+  /*  349 */  immI_0_rule,
+  /*  350 */  immI_minus1_rule,
+  /*  351 */  iRegIsrc_rule,
+  /*  352 */  immI_0_rule,
+  /*  353 */  immI_minus1_rule,
+  /*  354 */  regF_rule,
+  /*  355 */  immF_rule,
+  /*  356 */  immF_0_rule,
+  /*  357 */  vecX_rule,
+  /*  358 */  vecX_rule,
+  /*  359 */  vecX_rule,
+  /*  360 */  vecX_rule,
+  /*  361 */  vecX_rule,
+  /*  362 */  vecX_rule,
+  /*  363 */  vecX_rule,
+  /*  364 */  iRegLsrc_rule,
+  /*  365 */  iRegLsrc_rule,
+  /*  366 */  immL_0_rule,
+  /*  367 */  iRegLsrc_rule,
+  /*  368 */  regF_rule,
+  /*  369 */  immF_0_rule,
+  /*  370 */  regD_rule,
+  /*  371 */  immD_0_rule,
   /*  372 */  0,
-  /*  373 */  0,
-  /*  374 */  0,
-  /*  375 */  0,
+  /*  373 */  iRegLsrc_rule,
+  /*  374 */  immI_0_rule,
+  /*  375 */  immI_minus1_rule,
   /*  376 */  0,
   /*  377 */  0,
-  /*  378 */  0,
-  /*  379 */  0,
-  /*  380 */  0,
-  /*  381 */  0,
-  /*  382 */  0,
-  /*  383 */  0,
-  /*  384 */  _AddP_indirectMemory_iRegLsrc_rule,
-  /*  385 */  indirectMemory_rule,
-  /*  386 */  _AddP_indirectMemory_iRegLsrc_rule,
-  /*  387 */  indirectMemory_rule,
-  /*  388 */  memory_rule,
-  /*  389 */  memory_rule,
+  /*  378 */  indirectMemory_rule,
+  /*  379 */  indirectMemory_rule,
+  /*  380 */  indirectMemory_rule,
+  /*  381 */  indirectMemory_rule,
+  /*  382 */  indOffset16_rule,
+  /*  383 */  indOffset16_rule,
+  /*  384 */  indOffset16_rule,
+  /*  385 */  indOffset16_rule,
+  /*  386 */  memory_rule,
+  /*  387 */  memory_rule,
+  /*  388 */  _LoadUB_memory__rule,
+  /*  389 */  _LoadUB_memory__rule,
   /*  390 */  memory_rule,
   /*  391 */  memory_rule,
-  /*  392 */  memoryAlg4_rule,
-  /*  393 */  memoryAlg4_rule,
-  /*  394 */  indirect_rule,
-  /*  395 */  memory_rule,
+  /*  392 */  memory_rule,
+  /*  393 */  memory_rule,
+  /*  394 */  _LoadUS_memory__rule,
+  /*  395 */  _LoadUS_memory__rule,
   /*  396 */  memory_rule,
-  /*  397 */  memoryAlg4_rule,
-  /*  398 */  memory_rule,
-  /*  399 */  memory_rule,
-  /*  400 */  memory_rule,
-  /*  401 */  memory_rule,
-  /*  402 */  memory_rule,
-  /*  403 */  iRegNsrc_rule,
-  /*  404 */  iRegPdst_rule,
-  /*  405 */  _Binary_flagsRegSrc_iRegPsrc_rule,
-  /*  406 */  _Binary_flagsRegSrc_iRegPsrc_rule,
-  /*  407 */  iRegPsrc_rule,
-  /*  408 */  iRegPsrc_rule,
-  /*  409 */  iRegPsrc_rule,
-  /*  410 */  iRegPsrc_rule,
-  /*  411 */  iRegPsrc_rule,
-  /*  412 */  iRegPsrc_rule,
-  /*  413 */  iRegPdst_rule,
-  /*  414 */  _Binary_flagsRegSrc_iRegPsrc_rule,
-  /*  415 */  _Binary_flagsRegSrc_iRegPsrc_rule,
-  /*  416 */  iRegNsrc_rule,
-  /*  417 */  iRegNsrc_rule,
-  /*  418 */  iRegNsrc_rule,
-  /*  419 */  iRegNsrc_rule,
-  /*  420 */  iRegNsrc_rule,
-  /*  421 */  iRegNsrc_rule,
-  /*  422 */  iRegNsrc_rule,
-  /*  423 */  _CastP2X__DecodeN_iRegNsrc___rule,
-  /*  424 */  iRegNsrc_rule,
-  /*  425 */  _Binary_iRegLsrc_iRegPdst_rule,
-  /*  426 */  iRegPsrc_rule,
-  /*  427 */  _Binary_iRegLsrc_iRegPsrc_rule,
-  /*  428 */  iRegPsrc_rule,
-  /*  429 */  iRegPsrc_rule,
-  /*  430 */  _Binary_iRegLsrc_iRegPdst_rule,
-  /*  431 */  _Binary_iRegLsrc_iRegNsrc_rule,
-  /*  432 */  iRegNsrc_rule,
+  /*  397 */  memory_rule,
+  /*  398 */  _ConvI2L__LoadI_memory___rule,
+  /*  399 */  _LoadI_memoryAlg4__rule,
+  /*  400 */  _LoadI_memoryAlg4__rule,
+  /*  401 */  memoryAlg4_rule,
+  /*  402 */  memoryAlg4_rule,
+  /*  403 */  memoryAlg4_rule,
+  /*  404 */  memoryAlg4_rule,
+  /*  405 */  indirect_rule,
+  /*  406 */  memory_rule,
+  /*  407 */  memory_rule,
+  /*  408 */  memory_rule,
+  /*  409 */  _LoadN_memory__rule,
+  /*  410 */  _LoadNKlass_memory__rule,
+  /*  411 */  memoryAlg4_rule,
+  /*  412 */  memoryAlg4_rule,
+  /*  413 */  memory_rule,
+  /*  414 */  memoryAlg4_rule,
+  /*  415 */  memory_rule,
+  /*  416 */  memory_rule,
+  /*  417 */  memory_rule,
+  /*  418 */  memory_rule,
+  /*  419 */  memory_rule,
+  /*  420 */  0,
+  /*  421 */  0,
+  /*  422 */  0,
+  /*  423 */  0,
+  /*  424 */  0,
+  /*  425 */  0,
+  /*  426 */  0,
+  /*  427 */  0,
+  /*  428 */  0,
+  /*  429 */  0,
+  /*  430 */  0,
+  /*  431 */  0,
+  /*  432 */  0,
   /*  433 */  0,
-  /*  434 */  0,
-  /*  435 */  0,
-  /*  436 */  0,
-  /*  437 */  0,
-  /*  438 */  0,
-  /*  439 */  0,
-  /*  440 */  0,
-  /*  441 */  0,
-  /*  442 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  443 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  444 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  445 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  446 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  447 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  448 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  449 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  450 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  451 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  452 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  453 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  454 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  455 */  _Binary_cmpOp_flagsRegSrc_rule,
-  /*  456 */  memory_rule,
-  /*  457 */  iRegPdst_rule,
-  /*  458 */  rarg3RegP_rule,
-  /*  459 */  iRegPdst_rule,
-  /*  460 */  rarg3RegP_rule,
+  /*  434 */  _AddP_indirectMemory_iRegLsrc_rule,
+  /*  435 */  indirectMemory_rule,
+  /*  436 */  _AddP_indirectMemory_iRegLsrc_rule,
+  /*  437 */  indirectMemory_rule,
+  /*  438 */  memory_rule,
+  /*  439 */  memory_rule,
+  /*  440 */  memory_rule,
+  /*  441 */  memory_rule,
+  /*  442 */  memoryAlg4_rule,
+  /*  443 */  memoryAlg4_rule,
+  /*  444 */  indirect_rule,
+  /*  445 */  memory_rule,
+  /*  446 */  memory_rule,
+  /*  447 */  memoryAlg4_rule,
+  /*  448 */  memory_rule,
+  /*  449 */  memory_rule,
+  /*  450 */  memory_rule,
+  /*  451 */  iRegNsrc_rule,
+  /*  452 */  iRegPdst_rule,
+  /*  453 */  _Binary_flagsRegSrc_iRegPsrc_rule,
+  /*  454 */  _Binary_flagsRegSrc_iRegPsrc_rule,
+  /*  455 */  iRegPsrc_rule,
+  /*  456 */  iRegPsrc_rule,
+  /*  457 */  iRegPsrc_rule,
+  /*  458 */  iRegPsrc_rule,
+  /*  459 */  iRegPsrc_rule,
+  /*  460 */  iRegPsrc_rule,
   /*  461 */  iRegPdst_rule,
-  /*  462 */  iRegPdst_rule,
-  /*  463 */  iRegPdst_rule,
-  /*  464 */  iRegPdst_rule,
-  /*  465 */  iRegPdst_rule,
-  /*  466 */  rarg3RegP_rule,
-  /*  467 */  iRegPdst_rule,
-  /*  468 */  rarg3RegP_rule,
-  /*  469 */  iRegPdst_rule,
-  /*  470 */  rarg3RegP_rule,
-  /*  471 */  iRegPdst_rule,
-  /*  472 */  rarg3RegP_rule,
-  /*  473 */  iRegPdst_rule,
-  /*  474 */  iRegPdst_rule,
-  /*  475 */  iRegPdst_rule,
-  /*  476 */  iRegPdst_rule,
-  /*  477 */  iRegPdst_rule,
-  /*  478 */  iRegPdst_rule,
-  /*  479 */  iRegPdst_rule,
-  /*  480 */  iRegPdst_rule,
-  /*  481 */  iRegPdst_rule,
-  /*  482 */  rarg3RegP_rule,
-  /*  483 */  iRegPdst_rule,
-  /*  484 */  rarg3RegP_rule,
-  /*  485 */  iRegPdst_rule,
-  /*  486 */  rarg3RegP_rule,
-  /*  487 */  iRegPdst_rule,
-  /*  488 */  rarg3RegP_rule,
-  /*  489 */  iRegPdst_rule,
-  /*  490 */  iRegPdst_rule,
-  /*  491 */  iRegPdst_rule,
-  /*  492 */  iRegPdst_rule,
-  /*  493 */  iRegPdst_rule,
-  /*  494 */  iRegPdst_rule,
-  /*  495 */  iRegPdst_rule,
-  /*  496 */  iRegPdst_rule,
-  /*  497 */  iRegPdst_rule,
-  /*  498 */  rarg3RegP_rule,
-  /*  499 */  iRegPdst_rule,
-  /*  500 */  rarg3RegP_rule,
-  /*  501 */  iRegPdst_rule,
-  /*  502 */  iRegPdst_rule,
-  /*  503 */  iRegPdst_rule,
-  /*  504 */  rarg3RegP_rule,
+  /*  462 */  _Binary_flagsRegSrc_iRegPsrc_rule,
+  /*  463 */  _Binary_flagsRegSrc_iRegPsrc_rule,
+  /*  464 */  iRegNsrc_rule,
+  /*  465 */  iRegNsrc_rule,
+  /*  466 */  iRegNsrc_rule,
+  /*  467 */  iRegNsrc_rule,
+  /*  468 */  iRegNsrc_rule,
+  /*  469 */  iRegNsrc_rule,
+  /*  470 */  iRegNsrc_rule,
+  /*  471 */  _CastP2X__DecodeN_iRegNsrc___rule,
+  /*  472 */  iRegNsrc_rule,
+  /*  473 */  _Binary_iRegLsrc_iRegPdst_rule,
+  /*  474 */  iRegPsrc_rule,
+  /*  475 */  _Binary_iRegLsrc_iRegPsrc_rule,
+  /*  476 */  iRegPsrc_rule,
+  /*  477 */  iRegPsrc_rule,
+  /*  478 */  _Binary_iRegLsrc_iRegPdst_rule,
+  /*  479 */  _Binary_iRegLsrc_iRegNsrc_rule,
+  /*  480 */  iRegNsrc_rule,
+  /*  481 */  0,
+  /*  482 */  0,
+  /*  483 */  0,
+  /*  484 */  0,
+  /*  485 */  0,
+  /*  486 */  0,
+  /*  487 */  0,
+  /*  488 */  0,
+  /*  489 */  0,
+  /*  490 */  0,
+  /*  491 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  492 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  493 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  494 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  495 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  496 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  497 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  498 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  499 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  500 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  501 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  502 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  503 */  _Binary_cmpOp_flagsRegSrc_rule,
+  /*  504 */  _Binary_cmpOp_flagsRegSrc_rule,
   /*  505 */  iRegPdst_rule,
   /*  506 */  rarg3RegP_rule,
   /*  507 */  iRegPdst_rule,
-  /*  508 */  iRegPdst_rule,
+  /*  508 */  rarg3RegP_rule,
   /*  509 */  iRegPdst_rule,
   /*  510 */  iRegPdst_rule,
-  /*  511 */  iRegIsrc_iRegL2Isrc_rule,
-  /*  512 */  0,
-  /*  513 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  514 */  iRegIsrc_rule,
-  /*  515 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
-  /*  516 */  iRegIsrc_rule,
-  /*  517 */  iRegIsrc_rule,
-  /*  518 */  iRegIsrc_rule,
-  /*  519 */  iRegLsrc_rule,
-  /*  520 */  0,
-  /*  521 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
-  /*  522 */  iRegLsrc_rule,
-  /*  523 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
-  /*  524 */  iRegLsrc_rule,
-  /*  525 */  _AddL_iRegLsrc_iRegLsrc_rule,
-  /*  526 */  iRegLsrc_rule,
-  /*  527 */  iRegLsrc_rule,
-  /*  528 */  iRegP_N2P_rule,
-  /*  529 */  iRegP_N2P_rule,
-  /*  530 */  iRegP_N2P_rule,
-  /*  531 */  iRegIsrc_rule,
-  /*  532 */  immI16_rule,
-  /*  533 */  immI_0_rule,
-  /*  534 */  iRegLsrc_rule,
-  /*  535 */  _SubL_iRegLsrc_iRegLsrc_rule,
-  /*  536 */  immL_0_rule,
-  /*  537 */  _SubL_immL_0_iRegLsrc_rule,
-  /*  538 */  iRegIsrc_rule,
-  /*  539 */  iRegIsrc_rule,
-  /*  540 */  iRegLsrc_rule,
-  /*  541 */  iRegLsrc_rule,
-  /*  542 */  iRegLsrc_rule,
-  /*  543 */  iRegIsrc_rule,
-  /*  544 */  iRegIsrc_rule,
-  /*  545 */  0,
-  /*  546 */  iRegIsrc_rule,
-  /*  547 */  iRegLsrc_rule,
-  /*  548 */  iRegLsrc_rule,
-  /*  549 */  0,
-  /*  550 */  iRegLsrc_rule,
-  /*  551 */  iRegIsrc_rule,
-  /*  552 */  iRegLsrc_rule,
-  /*  553 */  0,
-  /*  554 */  0,
-  /*  555 */  iRegIsrc_rule,
-  /*  556 */  iRegIsrc_rule,
-  /*  557 */  _AndI_iRegIsrc_immInegpow2_rule,
-  /*  558 */  _AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2_rule,
-  /*  559 */  0,
-  /*  560 */  iRegLsrc_rule,
-  /*  561 */  iRegLsrc_rule,
-  /*  562 */  _ConvI2L_iRegIsrc__rule,
-  /*  563 */  _ConvI2L_iRegIsrc__rule,
-  /*  564 */  0,
+  /*  511 */  iRegPdst_rule,
+  /*  512 */  iRegPdst_rule,
+  /*  513 */  iRegPdst_rule,
+  /*  514 */  rarg3RegP_rule,
+  /*  515 */  iRegPdst_rule,
+  /*  516 */  rarg3RegP_rule,
+  /*  517 */  iRegPdst_rule,
+  /*  518 */  rarg3RegP_rule,
+  /*  519 */  iRegPdst_rule,
+  /*  520 */  rarg3RegP_rule,
+  /*  521 */  iRegPdst_rule,
+  /*  522 */  iRegPdst_rule,
+  /*  523 */  iRegPdst_rule,
+  /*  524 */  iRegPdst_rule,
+  /*  525 */  iRegPdst_rule,
+  /*  526 */  iRegPdst_rule,
+  /*  527 */  iRegPdst_rule,
+  /*  528 */  iRegPdst_rule,
+  /*  529 */  iRegPdst_rule,
+  /*  530 */  rarg3RegP_rule,
+  /*  531 */  iRegPdst_rule,
+  /*  532 */  rarg3RegP_rule,
+  /*  533 */  iRegPdst_rule,
+  /*  534 */  rarg3RegP_rule,
+  /*  535 */  iRegPdst_rule,
+  /*  536 */  rarg3RegP_rule,
+  /*  537 */  iRegPdst_rule,
+  /*  538 */  iRegPdst_rule,
+  /*  539 */  iRegPdst_rule,
+  /*  540 */  iRegPdst_rule,
+  /*  541 */  iRegPdst_rule,
+  /*  542 */  iRegPdst_rule,
+  /*  543 */  iRegPdst_rule,
+  /*  544 */  iRegPdst_rule,
+  /*  545 */  iRegPdst_rule,
+  /*  546 */  rarg3RegP_rule,
+  /*  547 */  iRegPdst_rule,
+  /*  548 */  rarg3RegP_rule,
+  /*  549 */  iRegPdst_rule,
+  /*  550 */  iRegPdst_rule,
+  /*  551 */  iRegPdst_rule,
+  /*  552 */  rarg3RegP_rule,
+  /*  553 */  iRegPdst_rule,
+  /*  554 */  rarg3RegP_rule,
+  /*  555 */  iRegPdst_rule,
+  /*  556 */  iRegPdst_rule,
+  /*  557 */  iRegPdst_rule,
+  /*  558 */  iRegPdst_rule,
+  /*  559 */  iRegIsrc_iRegL2Isrc_rule,
+  /*  560 */  0,
+  /*  561 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  562 */  iRegIsrc_rule,
+  /*  563 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
+  /*  564 */  iRegIsrc_rule,
   /*  565 */  iRegIsrc_rule,
   /*  566 */  iRegIsrc_rule,
-  /*  567 */  0,
+  /*  567 */  iRegIsrc_rule,
   /*  568 */  iRegLsrc_rule,
-  /*  569 */  iRegLsrc_rule,
-  /*  570 */  _RShiftL_iRegLsrc_immI_rule,
-  /*  571 */  0,
-  /*  572 */  iRegIsrc_rule,
-  /*  573 */  iRegIsrc_rule,
-  /*  574 */  0,
+  /*  569 */  0,
+  /*  570 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
+  /*  571 */  iRegLsrc_rule,
+  /*  572 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
+  /*  573 */  iRegLsrc_rule,
+  /*  574 */  _AddL_iRegLsrc_iRegLsrc_rule,
   /*  575 */  iRegLsrc_rule,
   /*  576 */  iRegLsrc_rule,
-  /*  577 */  _URShiftL_iRegLsrc_immI_rule,
-  /*  578 */  _CastP2X_iRegP_N2P__rule,
-  /*  579 */  _URShiftI_iRegIsrc_immI_rule,
-  /*  580 */  _URShiftL_iRegLsrc_immI_rule,
-  /*  581 */  _ConvI2L_iRegIsrc__rule,
-  /*  582 */  _LShiftI_iRegIsrc_immI8_rule,
-  /*  583 */  _URShiftI_iRegIsrc_immI8_rule,
-  /*  584 */  _URShiftI_iRegIsrc_immI8_rule,
-  /*  585 */  _LShiftI_iRegIsrc_immI8_rule,
-  /*  586 */  regF_rule,
-  /*  587 */  regD_rule,
-  /*  588 */  regF_rule,
-  /*  589 */  regD_rule,
-  /*  590 */  regF_rule,
-  /*  591 */  regD_rule,
-  /*  592 */  regF_rule,
-  /*  593 */  regD_rule,
-  /*  594 */  regD_rule,
-  /*  595 */  _SqrtD__ConvF2D_regF___rule,
-  /*  596 */  regF_rule,
-  /*  597 */  regD_rule,
-  /*  598 */  regF_rule,
-  /*  599 */  regF_rule,
-  /*  600 */  regD_rule,
-  /*  601 */  regD_rule,
-  /*  602 */  _NegF_regF__rule,
-  /*  603 */  _NegF_regF__rule,
-  /*  604 */  _NegD_regD__rule,
-  /*  605 */  _NegD_regD__rule,
-  /*  606 */  _NegF_regF__rule,
-  /*  607 */  _NegD_regD__rule,
-  /*  608 */  iRegIsrc_rule,
-  /*  609 */  iRegIsrc_rule,
+  /*  577 */  iRegLsrc_rule,
+  /*  578 */  iRegP_N2P_rule,
+  /*  579 */  iRegP_N2P_rule,
+  /*  580 */  iRegP_N2P_rule,
+  /*  581 */  iRegP_N2P_rule,
+  /*  582 */  iRegIsrc_rule,
+  /*  583 */  immI16_rule,
+  /*  584 */  immI_0_rule,
+  /*  585 */  iRegLsrc_rule,
+  /*  586 */  _SubL_iRegLsrc_iRegLsrc_rule,
+  /*  587 */  immL_0_rule,
+  /*  588 */  _SubL_immL_0_iRegLsrc_rule,
+  /*  589 */  iRegIsrc_rule,
+  /*  590 */  iRegIsrc_rule,
+  /*  591 */  iRegLsrc_rule,
+  /*  592 */  iRegLsrc_rule,
+  /*  593 */  iRegLsrc_rule,
+  /*  594 */  iRegIsrc_rule,
+  /*  595 */  iRegIsrc_rule,
+  /*  596 */  0,
+  /*  597 */  iRegIsrc_rule,
+  /*  598 */  iRegLsrc_rule,
+  /*  599 */  iRegLsrc_rule,
+  /*  600 */  0,
+  /*  601 */  iRegLsrc_rule,
+  /*  602 */  iRegIsrc_rule,
+  /*  603 */  iRegLsrc_rule,
+  /*  604 */  iRegIsrc_rule,
+  /*  605 */  iRegIsrc_rule,
+  /*  606 */  iRegLsrc_rule,
+  /*  607 */  iRegLsrc_rule,
+  /*  608 */  0,
+  /*  609 */  0,
   /*  610 */  iRegIsrc_rule,
   /*  611 */  iRegIsrc_rule,
-  /*  612 */  iRegIsrc_rule,
-  /*  613 */  iRegIsrc_rule,
-  /*  614 */  iRegLsrc_rule,
+  /*  612 */  _AndI_iRegIsrc_immInegpow2_rule,
+  /*  613 */  _AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2_rule,
+  /*  614 */  0,
   /*  615 */  iRegLsrc_rule,
   /*  616 */  iRegLsrc_rule,
-  /*  617 */  iRegLsrc_rule,
-  /*  618 */  _AndL_iRegLsrc_immLpow2minus1_rule,
-  /*  619 */  iRegIsrc_rule,
-  /*  620 */  0,
-  /*  621 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  622 */  iRegIsrc_rule,
-  /*  623 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
-  /*  624 */  iRegIsrc_rule,
-  /*  625 */  iRegIsrc_rule,
-  /*  626 */  iRegLsrc_rule,
-  /*  627 */  _OrL_iRegLsrc_iRegLsrc_rule,
-  /*  628 */  iRegLsrc_rule,
-  /*  629 */  iRegIsrc_rule,
-  /*  630 */  0,
-  /*  631 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  632 */  iRegIsrc_rule,
-  /*  633 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
-  /*  634 */  iRegIsrc_rule,
-  /*  635 */  iRegIsrc_rule,
-  /*  636 */  iRegLsrc_rule,
-  /*  637 */  _XorL_iRegLsrc_iRegLsrc_rule,
-  /*  638 */  iRegLsrc_rule,
-  /*  639 */  iRegIsrc_rule,
-  /*  640 */  iRegLsrc_rule,
-  /*  641 */  _XorI_iRegIsrc_immI_minus1_rule,
-  /*  642 */  iRegIsrc_rule,
-  /*  643 */  0,
-  /*  644 */  regF_rule,
-  /*  645 */  iRegIsrc_rule,
-  /*  646 */  0,
-  /*  647 */  regD_rule,
-  /*  648 */  iRegLsrc_rule,
-  /*  649 */  iRegIsrc_rule,
-  /*  650 */  _Conv2B_iRegIsrc__rule,
-  /*  651 */  _Conv2B_iRegIsrc__rule,
-  /*  652 */  _AndI_iRegIsrc_immIpowerOf2_rule,
-  /*  653 */  iRegP_N2P_rule,
-  /*  654 */  _Conv2B_iRegP_N2P__rule,
-  /*  655 */  _Conv2B_iRegP_N2P__rule,
-  /*  656 */  iRegIsrc_rule,
-  /*  657 */  iRegIsrc_rule,
-  /*  658 */  _LShiftI_iRegIsrc_immI_24_rule,
-  /*  659 */  _LShiftI_iRegIsrc_immI_16_rule,
-  /*  660 */  _ConvL2I_iRegLsrc__rule,
-  /*  661 */  iRegLsrc_rule,
-  /*  662 */  0,
-  /*  663 */  0,
-  /*  664 */  0,
-  /*  665 */  0,
-  /*  666 */  regD_rule,
-  /*  667 */  regD_rule,
-  /*  668 */  regF_rule,
-  /*  669 */  regF_rule,
-  /*  670 */  iRegIsrc_rule,
-  /*  671 */  _ConvI2L_iRegIsrc__rule,
+  /*  617 */  _ConvI2L_iRegIsrc__rule,
+  /*  618 */  _ConvI2L_iRegIsrc__rule,
+  /*  619 */  0,
+  /*  620 */  iRegIsrc_rule,
+  /*  621 */  iRegIsrc_rule,
+  /*  622 */  0,
+  /*  623 */  iRegLsrc_rule,
+  /*  624 */  iRegLsrc_rule,
+  /*  625 */  _RShiftL_iRegLsrc_immI_rule,
+  /*  626 */  0,
+  /*  627 */  iRegIsrc_rule,
+  /*  628 */  iRegIsrc_rule,
+  /*  629 */  0,
+  /*  630 */  iRegLsrc_rule,
+  /*  631 */  iRegLsrc_rule,
+  /*  632 */  _URShiftL_iRegLsrc_immI_rule,
+  /*  633 */  _CastP2X_iRegP_N2P__rule,
+  /*  634 */  _URShiftI_iRegIsrc_immI_rule,
+  /*  635 */  _URShiftL_iRegLsrc_immI_rule,
+  /*  636 */  _ConvI2L_iRegIsrc__rule,
+  /*  637 */  _LShiftI_iRegIsrc_immI8_rule,
+  /*  638 */  _URShiftI_iRegIsrc_immI8_rule,
+  /*  639 */  _URShiftI_iRegIsrc_immI8_rule,
+  /*  640 */  _LShiftI_iRegIsrc_immI8_rule,
+  /*  641 */  regF_rule,
+  /*  642 */  regD_rule,
+  /*  643 */  regF_rule,
+  /*  644 */  regD_rule,
+  /*  645 */  regF_rule,
+  /*  646 */  regD_rule,
+  /*  647 */  regF_rule,
+  /*  648 */  regD_rule,
+  /*  649 */  regD_rule,
+  /*  650 */  regF_rule,
+  /*  651 */  regF_rule,
+  /*  652 */  regD_rule,
+  /*  653 */  regF_rule,
+  /*  654 */  regF_rule,
+  /*  655 */  regD_rule,
+  /*  656 */  regD_rule,
+  /*  657 */  _NegF_regF__rule,
+  /*  658 */  _NegF_regF__rule,
+  /*  659 */  _NegD_regD__rule,
+  /*  660 */  _NegD_regD__rule,
+  /*  661 */  _NegF_regF__rule,
+  /*  662 */  _NegD_regD__rule,
+  /*  663 */  iRegIsrc_rule,
+  /*  664 */  iRegIsrc_rule,
+  /*  665 */  iRegIsrc_rule,
+  /*  666 */  iRegIsrc_rule,
+  /*  667 */  iRegIsrc_rule,
+  /*  668 */  iRegIsrc_rule,
+  /*  669 */  iRegLsrc_rule,
+  /*  670 */  iRegLsrc_rule,
+  /*  671 */  iRegLsrc_rule,
   /*  672 */  iRegLsrc_rule,
-  /*  673 */  0,
-  /*  674 */  0,
+  /*  673 */  _AndL_iRegLsrc_immLpow2minus1_rule,
+  /*  674 */  iRegIsrc_rule,
   /*  675 */  0,
-  /*  676 */  0,
-  /*  677 */  regF_rule,
-  /*  678 */  regF_rule,
-  /*  679 */  regD_rule,
-  /*  680 */  regD_rule,
-  /*  681 */  regD_rule,
-  /*  682 */  iRegIsrc_rule,
-  /*  683 */  iRegIsrc_rule,
+  /*  676 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  677 */  iRegIsrc_rule,
+  /*  678 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
+  /*  679 */  iRegIsrc_rule,
+  /*  680 */  iRegIsrc_rule,
+  /*  681 */  iRegLsrc_rule,
+  /*  682 */  _OrL_iRegLsrc_iRegLsrc_rule,
+  /*  683 */  iRegLsrc_rule,
   /*  684 */  iRegIsrc_rule,
-  /*  685 */  iRegLsrc_rule,
-  /*  686 */  iRegLsrc_rule,
+  /*  685 */  0,
+  /*  686 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
   /*  687 */  iRegIsrc_rule,
-  /*  688 */  iRegIsrc_rule,
-  /*  689 */  stackSlotL_rule,
-  /*  690 */  iRegLsrc_rule,
-  /*  691 */  regF_rule,
-  /*  692 */  iRegLsrc_rule,
-  /*  693 */  cmpOp_rule,
-  /*  694 */  cmpOp_rule,
-  /*  695 */  cmpOp_rule,
-  /*  696 */  cmpOp_rule,
-  /*  697 */  cmpOp_rule,
-  /*  698 */  regF_rule,
-  /*  699 */  regD_rule,
-  /*  700 */  0,
-  /*  701 */  cmpOp_rule,
-  /*  702 */  cmpOp_rule,
-  /*  703 */  cmpOp_rule,
-  /*  704 */  cmpOp_rule,
-  /*  705 */  cmpOp_rule,
-  /*  706 */  cmpOp_rule,
-  /*  707 */  iRegP_N2P_rule,
-  /*  708 */  _AndL__CastP2X_iRegPsrc__immLnegpow2_rule,
-  /*  709 */  _CastP2X_iRegPsrc__rule,
-  /*  710 */  immLmax30_rule,
-  /*  711 */  immL_rule,
-  /*  712 */  rarg1RegL_rule,
-  /*  713 */  _Binary_rarg1RegP_rarg3RegI_rule,
-  /*  714 */  _Binary_rarg1RegP_rarg3RegI_rule,
-  /*  715 */  _Binary_rarg1RegP_rarg3RegI_rule,
-  /*  716 */  _Binary_rarg1RegP_rarg3RegI_rule,
-  /*  717 */  _Binary_rarg1RegP_rarg2RegP_rule,
-  /*  718 */  _Binary_rarg1RegP_rarg2RegP_rule,
-  /*  719 */  rarg1RegP_rule,
-  /*  720 */  rarg1RegP_rule,
-  /*  721 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  722 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  723 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  724 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  725 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  726 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  727 */  _Binary_iRegPsrc_iRegIsrc_rule,
-  /*  728 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  729 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  730 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  731 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  732 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  733 */  _Binary_iRegPsrc_rscratch1RegI_rule,
-  /*  734 */  rarg1RegP_rule,
-  /*  735 */  rarg1RegP_rule,
-  /*  736 */  rarg1RegP_rule,
-  /*  737 */  rarg1RegP_rule,
+  /*  688 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
+  /*  689 */  iRegIsrc_rule,
+  /*  690 */  iRegIsrc_rule,
+  /*  691 */  iRegLsrc_rule,
+  /*  692 */  _XorL_iRegLsrc_iRegLsrc_rule,
+  /*  693 */  iRegLsrc_rule,
+  /*  694 */  iRegIsrc_rule,
+  /*  695 */  iRegLsrc_rule,
+  /*  696 */  _XorI_iRegIsrc_immI_minus1_rule,
+  /*  697 */  iRegIsrc_rule,
+  /*  698 */  0,
+  /*  699 */  regF_rule,
+  /*  700 */  iRegIsrc_rule,
+  /*  701 */  0,
+  /*  702 */  regD_rule,
+  /*  703 */  iRegLsrc_rule,
+  /*  704 */  iRegIsrc_rule,
+  /*  705 */  _Conv2B_iRegIsrc__rule,
+  /*  706 */  _Conv2B_iRegIsrc__rule,
+  /*  707 */  _AndI_iRegIsrc_immIpowerOf2_rule,
+  /*  708 */  iRegP_N2P_rule,
+  /*  709 */  _Conv2B_iRegP_N2P__rule,
+  /*  710 */  _Conv2B_iRegP_N2P__rule,
+  /*  711 */  iRegIsrc_rule,
+  /*  712 */  iRegIsrc_rule,
+  /*  713 */  _LShiftI_iRegIsrc_immI_24_rule,
+  /*  714 */  _LShiftI_iRegIsrc_immI_16_rule,
+  /*  715 */  _ConvL2I_iRegLsrc__rule,
+  /*  716 */  iRegLsrc_rule,
+  /*  717 */  0,
+  /*  718 */  0,
+  /*  719 */  0,
+  /*  720 */  0,
+  /*  721 */  regD_rule,
+  /*  722 */  regD_rule,
+  /*  723 */  regF_rule,
+  /*  724 */  regF_rule,
+  /*  725 */  iRegIsrc_rule,
+  /*  726 */  _ConvI2L_iRegIsrc__rule,
+  /*  727 */  iRegLsrc_rule,
+  /*  728 */  0,
+  /*  729 */  0,
+  /*  730 */  0,
+  /*  731 */  0,
+  /*  732 */  regF_rule,
+  /*  733 */  regF_rule,
+  /*  734 */  regD_rule,
+  /*  735 */  regD_rule,
+  /*  736 */  regD_rule,
+  /*  737 */  iRegIsrc_rule,
   /*  738 */  iRegIsrc_rule,
   /*  739 */  iRegIsrc_rule,
-  /*  740 */  iRegIsrc_rule,
-  /*  741 */  iRegIsrc_rule,
-  /*  742 */  0,
-  /*  743 */  0,
-  /*  744 */  iRegIsrc_rule,
+  /*  740 */  iRegLsrc_rule,
+  /*  741 */  iRegLsrc_rule,
+  /*  742 */  iRegIsrc_rule,
+  /*  743 */  iRegIsrc_rule,
+  /*  744 */  stackSlotL_rule,
   /*  745 */  iRegLsrc_rule,
-  /*  746 */  iRegIsrc_rule,
-  /*  747 */  iRegIsrc_rule,
-  /*  748 */  _LoadI_indirect__rule,
-  /*  749 */  _LoadL_indirect__rule,
-  /*  750 */  _LoadUS_indirect__rule,
-  /*  751 */  _LoadS_indirect__rule,
-  /*  752 */  indirect_rule,
-  /*  753 */  indirect_rule,
-  /*  754 */  indirect_rule,
-  /*  755 */  indirect_rule,
-  /*  756 */  0,
+  /*  746 */  regF_rule,
+  /*  747 */  iRegLsrc_rule,
+  /*  748 */  cmpOp_rule,
+  /*  749 */  cmpOp_rule,
+  /*  750 */  cmpOp_rule,
+  /*  751 */  cmpOp_rule,
+  /*  752 */  cmpOp_rule,
+  /*  753 */  regF_rule,
+  /*  754 */  regD_rule,
+  /*  755 */  iRegIsrc_rule,
+  /*  756 */  iRegIsrc_rule,
   /*  757 */  iRegIsrc_rule,
-  /*  758 */  immI_0_rule,
-  /*  759 */  immI_minus1_rule,
-  /*  760 */  iRegIsrc_rule,
-  /*  761 */  immI_0_rule,
-  /*  762 */  immI_minus1_rule,
-  /*  763 */  iRegIsrc_rule,
-  /*  764 */  immI_0_rule,
-  /*  765 */  immI_minus1_rule,
-  /*  766 */  iRegIsrc_rule,
-  /*  767 */  immI_0_rule,
-  /*  768 */  immI_minus1_rule,
-  /*  769 */  iRegIsrc_rule,
-  /*  770 */  immI_0_rule,
-  /*  771 */  immI_minus1_rule,
-  /*  772 */  iRegIsrc_rule,
-  /*  773 */  immI_0_rule,
-  /*  774 */  immI_minus1_rule,
-  /*  775 */  regF_rule,
-  /*  776 */  immF_rule,
-  /*  777 */  immF_0_rule,
-  /*  778 */  regF_rule,
-  /*  779 */  immF_rule,
-  /*  780 */  immF_0_rule,
-  /*  781 */  regD_rule,
-  /*  782 */  immI_0_rule,
-  /*  783 */  immI_minus1_rule,
-  /*  784 */  0,
-  /*  785 */  0,
-  /*  786 */  iRegLsrc_rule,
-  /*  787 */  immI_0_rule,
-  /*  788 */  immI_minus1_rule,
-  /*  789 */  iRegPdst_rule,
-  /*  790 */  0,
-  /*  791 */  0,
-  /*  792 */  0,
-  /*  793 */  0,
-  /*  794 */  0,
-  /*  795 */  0,
-  /*  796 */  0,
-  /*  797 */  0,
-  /*  798 */  iRegPdstNoScratch_rule,
-  /*  799 */  0,
-  /*  800 */  iRegPdstNoScratch_rule,
-  /*  801 */  0,
+  /*  758 */  iRegIsrc_rule,
+  /*  759 */  iRegIsrc_rule,
+  /*  760 */  0,
+  /*  761 */  cmpOp_rule,
+  /*  762 */  cmpOp_rule,
+  /*  763 */  cmpOp_rule,
+  /*  764 */  cmpOp_rule,
+  /*  765 */  iRegP_N2P_rule,
+  /*  766 */  _AndL__CastP2X_iRegPsrc__immLnegpow2_rule,
+  /*  767 */  _CastP2X_iRegPsrc__rule,
+  /*  768 */  immLmax30_rule,
+  /*  769 */  immL_rule,
+  /*  770 */  rarg1RegL_rule,
+  /*  771 */  _Binary_rarg1RegP_rarg3RegI_rule,
+  /*  772 */  _Binary_rarg1RegP_rarg3RegI_rule,
+  /*  773 */  _Binary_rarg1RegP_rarg3RegI_rule,
+  /*  774 */  _Binary_rarg1RegP_rarg3RegI_rule,
+  /*  775 */  _Binary_rarg1RegP_rarg2RegP_rule,
+  /*  776 */  _Binary_rarg1RegP_rarg2RegP_rule,
+  /*  777 */  rarg1RegP_rule,
+  /*  778 */  rarg1RegP_rule,
+  /*  779 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  780 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  781 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  782 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  783 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  784 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  785 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  786 */  _Binary_iRegPsrc_iRegIsrc_rule,
+  /*  787 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  788 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  789 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  790 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  791 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  792 */  _Binary_iRegPsrc_rscratch1RegI_rule,
+  /*  793 */  rarg1RegP_rule,
+  /*  794 */  rarg1RegP_rule,
+  /*  795 */  iRegPsrc_rule,
+  /*  796 */  rarg1RegP_rule,
+  /*  797 */  rarg1RegP_rule,
+  /*  798 */  iRegIsrc_rule,
+  /*  799 */  iRegIsrc_rule,
+  /*  800 */  iRegIsrc_rule,
+  /*  801 */  iRegIsrc_rule,
   /*  802 */  0,
   /*  803 */  0,
-  /*  804 */  0,
-  /*  805 */  0,
-  /*  806 */  0,
-  /*  807 */  0,
-  /*  808 */  0,
-  /*  809 */  0,
-  /*  810 */  0,
+  /*  804 */  iRegIsrc_rule,
+  /*  805 */  iRegIsrc_rule,
+  /*  806 */  iRegIsrc_rule,
+  /*  807 */  iRegLsrc_rule,
+  /*  808 */  iRegLsrc_rule,
+  /*  809 */  iRegLsrc_rule,
+  /*  810 */  iRegIsrc_rule,
+  /*  811 */  iRegIsrc_rule,
+  /*  812 */  iRegIsrc_rule,
+  /*  813 */  iRegIsrc_rule,
+  /*  814 */  _LoadI_indirect__rule,
+  /*  815 */  _LoadI_indirect__rule,
+  /*  816 */  _LoadL_indirect__rule,
+  /*  817 */  _LoadL_indirect__rule,
+  /*  818 */  _LoadUS_indirect__rule,
+  /*  819 */  _LoadUS_indirect__rule,
+  /*  820 */  _LoadS_indirect__rule,
+  /*  821 */  _LoadS_indirect__rule,
+  /*  822 */  indirect_rule,
+  /*  823 */  indirect_rule,
+  /*  824 */  indirect_rule,
+  /*  825 */  indirect_rule,
+  /*  826 */  0,
+  /*  827 */  vecX_rule,
+  /*  828 */  vecX_rule,
+  /*  829 */  vecX_rule,
+  /*  830 */  vecX_rule,
+  /*  831 */  vecX_rule,
+  /*  832 */  vecX_rule,
+  /*  833 */  vecX_rule,
+  /*  834 */  vecX_rule,
+  /*  835 */  vecX_rule,
+  /*  836 */  vecX_rule,
+  /*  837 */  vecX_rule,
+  /*  838 */  vecX_rule,
+  /*  839 */  vecX_rule,
+  /*  840 */  vecX_rule,
+  /*  841 */  vecX_rule,
+  /*  842 */  vecX_rule,
+  /*  843 */  vecX_rule,
+  /*  844 */  vecX_rule,
+  /*  845 */  regD_rule,
+  /*  846 */  vecX_rule,
+  /*  847 */  vecX_rule,
+  /*  848 */  vecX_rule,
+  /*  849 */  vecX_rule,
+  /*  850 */  _NegVF_vecX__rule,
+  /*  851 */  vecX_rule,
+  /*  852 */  vecX_rule,
+  /*  853 */  vecX_rule,
+  /*  854 */  _NegVD_vecX__rule,
+  /*  855 */  immF_rule,
+  /*  856 */  0,
+  /*  857 */  0,
+  /*  858 */  iRegPdst_rule,
+  /*  859 */  0,
+  /*  860 */  0,
+  /*  861 */  0,
+  /*  862 */  0,
+  /*  863 */  0,
+  /*  864 */  0,
+  /*  865 */  0,
+  /*  866 */  0,
+  /*  867 */  iRegPdstNoScratch_rule,
+  /*  868 */  0,
+  /*  869 */  iRegPdstNoScratch_rule,
+  /*  870 */  0,
+  /*  871 */  0,
+  /*  872 */  0,
+  /*  873 */  0,
+  /*  874 */  0,
+  /*  875 */  0,
+  /*  876 */  0,
+  /*  877 */  0,
+  /*  878 */  0,
+  /*  879 */  0,
+  /*  880 */  indirect_rule,
+  /*  881 */  0,
+  /*  882 */  0,
+  /*  883 */  indirect_rule,
+  /*  884 */  indirect_rule,
+  /*  885 */  indirect_rule,
+  /*  886 */  indirect_rule,
+  /*  887 */  indirect_rule,
+  /*  888 */  indirect_rule,
+  /*  889 */  indirect_rule,
+  /*  890 */  indirect_rule,
+  /*  891 */  indirect_rule,
+  /*  892 */  indirect_rule,
+  /*  893 */  indirect_rule,
+  /*  894 */  indirect_rule,
+  /*  895 */  memoryAlg4_rule,
+  /*  896 */  memoryAlg4_rule,
+  /*  897 */  iRegPdst_rule,
+  /*  898 */  iRegPdst_rule,
+  /*  899 */  iRegPdst_rule,
+  /*  900 */  iRegPdst_rule,
+  /*  901 */  iRegPdst_rule,
+  /*  902 */  iRegPdst_rule,
+  /*  903 */  iRegPdst_rule,
   // last instruction
   0 // no trailing comma
 };
@@ -4154,29 +4312,29 @@ const        int   rightOp[] = {
   /*   91 */  0,
   /*   92 */  0,
   /*   93 */  0,
-  /*   94 */  immL16_rule,
-  /*   95 */  immL16Alg4_rule,
-  /*   96 */  0,
+  /*   94 */  0,
+  /*   95 */  immL16_rule,
+  /*   96 */  immL16Alg4_rule,
   /*   97 */  0,
-  /*   98 */  immL16_rule,
+  /*   98 */  0,
   /*   99 */  immL16_rule,
-  /*  100 */  immL16Alg4_rule,
+  /*  100 */  immL16_rule,
   /*  101 */  immL16Alg4_rule,
-  /*  102 */  0,
+  /*  102 */  immL16Alg4_rule,
   /*  103 */  0,
   /*  104 */  0,
   /*  105 */  0,
   /*  106 */  0,
   /*  107 */  0,
-  // last operand
   /*  108 */  0,
+  // last operand
   /*  109 */  0,
   /*  110 */  0,
   /*  111 */  0,
   /*  112 */  0,
   /*  113 */  0,
-  // last operand class
   /*  114 */  0,
+  // last operand class
   /*  115 */  0,
   /*  116 */  0,
   /*  117 */  0,
@@ -4186,93 +4344,93 @@ const        int   rightOp[] = {
   /*  121 */  0,
   /*  122 */  0,
   /*  123 */  0,
-  /*  124 */  iRegLsrc_rule,
-  /*  125 */  0,
-  /*  126 */  iRegPsrc_rule,
-  /*  127 */  0,
-  /*  128 */  iRegPdst_rule,
-  /*  129 */  iRegPsrc_rule,
-  /*  130 */  iRegNsrc_rule,
-  /*  131 */  flagsRegSrc_rule,
-  /*  132 */  iRegIsrc_rule,
-  /*  133 */  immI16_rule,
-  /*  134 */  iRegLsrc_rule,
-  /*  135 */  immL16_rule,
-  /*  136 */  iRegNsrc_rule,
-  /*  137 */  immN_0_rule,
-  /*  138 */  iRegPsrc_rule,
-  /*  139 */  iRegP_N2P_rule,
-  /*  140 */  immP_0_rule,
-  /*  141 */  regF_rule,
-  /*  142 */  regD_rule,
-  /*  143 */  iRegLsrc_rule,
-  /*  144 */  iRegPsrc_rule,
-  /*  145 */  iRegIsrc_rule,
-  /*  146 */  rarg4RegI_rule,
-  /*  147 */  iRegNsrc_rule,
-  /*  148 */  iRegIsrc_rule,
+  /*  124 */  0,
+  /*  125 */  iRegLsrc_rule,
+  /*  126 */  0,
+  /*  127 */  iRegPsrc_rule,
+  /*  128 */  0,
+  /*  129 */  iRegPdst_rule,
+  /*  130 */  iRegPsrc_rule,
+  /*  131 */  iRegNsrc_rule,
+  /*  132 */  flagsRegSrc_rule,
+  /*  133 */  iRegIsrc_rule,
+  /*  134 */  immI16_rule,
+  /*  135 */  iRegLsrc_rule,
+  /*  136 */  immL16_rule,
+  /*  137 */  iRegNsrc_rule,
+  /*  138 */  immN_0_rule,
+  /*  139 */  iRegPsrc_rule,
+  /*  140 */  iRegP_N2P_rule,
+  /*  141 */  immP_0_rule,
+  /*  142 */  regF_rule,
+  /*  143 */  regD_rule,
+  /*  144 */  iRegIsrc_rule,
+  /*  145 */  rarg4RegI_rule,
+  /*  146 */  iRegNsrc_rule,
+  /*  147 */  iRegLsrc_rule,
+  /*  148 */  iRegPsrc_rule,
   /*  149 */  iRegIsrc_rule,
-  /*  150 */  _AddI_iRegIsrc_iRegIsrc_rule,
-  /*  151 */  iRegLsrc_rule,
+  /*  150 */  iRegIsrc_rule,
+  /*  151 */  _AddI_iRegIsrc_iRegIsrc_rule,
   /*  152 */  iRegLsrc_rule,
-  /*  153 */  _AddL_iRegLsrc_iRegLsrc_rule,
-  /*  154 */  iRegLsrc_rule,
+  /*  153 */  iRegLsrc_rule,
+  /*  154 */  _AddL_iRegLsrc_iRegLsrc_rule,
   /*  155 */  iRegLsrc_rule,
-  /*  156 */  immInegpow2_rule,
-  /*  157 */  uimmI5_rule,
-  /*  158 */  immInegpow2_rule,
-  /*  159 */  0,
-  /*  160 */  immI_rule,
+  /*  156 */  iRegLsrc_rule,
+  /*  157 */  immInegpow2_rule,
+  /*  158 */  uimmI5_rule,
+  /*  159 */  immInegpow2_rule,
+  /*  160 */  0,
   /*  161 */  immI_rule,
-  /*  162 */  0,
-  /*  163 */  immI_rule,
-  /*  164 */  immI8_rule,
+  /*  162 */  immI_rule,
+  /*  163 */  0,
+  /*  164 */  immI_rule,
   /*  165 */  immI8_rule,
-  /*  166 */  0,
+  /*  166 */  immI8_rule,
   /*  167 */  0,
   /*  168 */  0,
   /*  169 */  0,
-  /*  170 */  0,
-  /*  171 */  regF_rule,
-  /*  172 */  _NegF_regF__rule,
-  /*  173 */  0,
-  /*  174 */  regD_rule,
-  /*  175 */  _NegD_regD__rule,
-  /*  176 */  immLpow2minus1_rule,
+  /*  170 */  regF_rule,
+  /*  171 */  _NegF_regF__rule,
+  /*  172 */  0,
+  /*  173 */  regD_rule,
+  /*  174 */  _NegD_regD__rule,
+  /*  175 */  immLpow2minus1_rule,
+  /*  176 */  iRegIsrc_rule,
   /*  177 */  iRegIsrc_rule,
-  /*  178 */  iRegIsrc_rule,
-  /*  179 */  _OrI_iRegIsrc_iRegIsrc_rule,
-  /*  180 */  iRegLsrc_rule,
+  /*  178 */  _OrI_iRegIsrc_iRegIsrc_rule,
+  /*  179 */  iRegLsrc_rule,
+  /*  180 */  iRegIsrc_rule,
   /*  181 */  iRegIsrc_rule,
-  /*  182 */  iRegIsrc_rule,
-  /*  183 */  _XorI_iRegIsrc_iRegIsrc_rule,
-  /*  184 */  iRegLsrc_rule,
-  /*  185 */  immI_minus1_rule,
-  /*  186 */  0,
-  /*  187 */  immIpowerOf2_rule,
-  /*  188 */  0,
-  /*  189 */  immI_24_rule,
-  /*  190 */  immI_16_rule,
-  /*  191 */  uimmI16_rule,
-  /*  192 */  iRegLsrc_rule,
-  /*  193 */  uimmL16_rule,
-  /*  194 */  uimmI15_rule,
-  /*  195 */  iRegIsrc_rule,
-  /*  196 */  immN_0_rule,
-  /*  197 */  immP_0_rule,
-  /*  198 */  0,
-  /*  199 */  immLnegpow2_rule,
-  /*  200 */  rarg3RegI_rule,
-  /*  201 */  rarg4RegI_rule,
-  /*  202 */  rarg2RegP_rule,
-  /*  203 */  iRegIsrc_rule,
-  /*  204 */  immL_rule,
+  /*  182 */  _XorI_iRegIsrc_iRegIsrc_rule,
+  /*  183 */  iRegLsrc_rule,
+  /*  184 */  immI_minus1_rule,
+  /*  185 */  0,
+  /*  186 */  immIpowerOf2_rule,
+  /*  187 */  0,
+  /*  188 */  immI_24_rule,
+  /*  189 */  immI_16_rule,
+  /*  190 */  uimmI16_rule,
+  /*  191 */  iRegLsrc_rule,
+  /*  192 */  uimmL16_rule,
+  /*  193 */  uimmI15_rule,
+  /*  194 */  iRegIsrc_rule,
+  /*  195 */  immN_0_rule,
+  /*  196 */  immP_0_rule,
+  /*  197 */  0,
+  /*  198 */  immLnegpow2_rule,
+  /*  199 */  rarg3RegI_rule,
+  /*  200 */  rarg4RegI_rule,
+  /*  201 */  rarg2RegP_rule,
+  /*  202 */  iRegIsrc_rule,
+  /*  203 */  immL_rule,
+  /*  204 */  immI_1_rule,
   /*  205 */  immI_1_rule,
-  /*  206 */  immI_1_rule,
-  /*  207 */  rscratch1RegI_rule,
-  /*  208 */  uimmI15_rule,
-  /*  209 */  rscratch2RegI_rule,
-  /*  210 */  iRegIsrc_rule,
+  /*  206 */  rscratch1RegI_rule,
+  /*  207 */  uimmI15_rule,
+  /*  208 */  rscratch2RegI_rule,
+  /*  209 */  iRegIsrc_rule,
+  /*  210 */  0,
   /*  211 */  0,
   /*  212 */  0,
   /*  213 */  0,
@@ -4280,14 +4438,14 @@ const        int   rightOp[] = {
   /*  215 */  0,
   /*  216 */  0,
   /*  217 */  0,
-  /*  218 */  0,
-  // last internally defined operand
+  /*  218 */  vecX_rule,
   /*  219 */  0,
-  /*  220 */  0,
-  /*  221 */  0,
+  /*  220 */  vecX_rule,
+  /*  221 */  _NegVF_vecX__rule,
   /*  222 */  0,
-  /*  223 */  0,
-  /*  224 */  0,
+  /*  223 */  vecX_rule,
+  /*  224 */  _NegVD_vecX__rule,
+  // last internally defined operand
   /*  225 */  0,
   /*  226 */  0,
   /*  227 */  0,
@@ -4311,8 +4469,8 @@ const        int   rightOp[] = {
   /*  245 */  0,
   /*  246 */  0,
   /*  247 */  0,
-  /*  248 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  249 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  248 */  0,
+  /*  249 */  0,
   /*  250 */  0,
   /*  251 */  0,
   /*  252 */  0,
@@ -4346,48 +4504,48 @@ const        int   rightOp[] = {
   /*  280 */  0,
   /*  281 */  0,
   /*  282 */  0,
-  /*  283 */  iRegIsrc_rule,
-  /*  284 */  immI16_rule,
-  /*  285 */  immI_0_rule,
-  /*  286 */  iRegLsrc_rule,
-  /*  287 */  immL16_rule,
-  /*  288 */  iRegLsrc_rule,
-  /*  289 */  uimmL16_rule,
-  /*  290 */  immL_0_rule,
-  /*  291 */  immL_0_rule,
+  /*  283 */  0,
+  /*  284 */  0,
+  /*  285 */  0,
+  /*  286 */  0,
+  /*  287 */  0,
+  /*  288 */  0,
+  /*  289 */  0,
+  /*  290 */  0,
+  /*  291 */  0,
   /*  292 */  0,
   /*  293 */  0,
-  /*  294 */  iRegIsrc_rule,
-  /*  295 */  uimmI16_rule,
-  /*  296 */  iRegNsrc_rule,
-  /*  297 */  immN_0_rule,
-  /*  298 */  iRegP_N2P_rule,
-  /*  299 */  immP_0or1_rule,
-  /*  300 */  immL16_rule,
-  /*  301 */  regF_rule,
-  /*  302 */  0,
-  /*  303 */  regF_rule,
-  /*  304 */  regD_rule,
-  /*  305 */  regD_rule,
-  /*  306 */  iRegPdst_rule,
-  /*  307 */  rarg2RegP_rule,
-  /*  308 */  iRegPdst_rule,
-  /*  309 */  iRegPdst_rule,
-  /*  310 */  0,
-  /*  311 */  0,
-  /*  312 */  0,
-  /*  313 */  0,
+  /*  294 */  0,
+  /*  295 */  0,
+  /*  296 */  0,
+  /*  297 */  iRegIsrc_rule,
+  /*  298 */  immI16_rule,
+  /*  299 */  immI_0_rule,
+  /*  300 */  iRegLsrc_rule,
+  /*  301 */  immL16_rule,
+  /*  302 */  iRegLsrc_rule,
+  /*  303 */  uimmL16_rule,
+  /*  304 */  immL_0_rule,
+  /*  305 */  immL_0_rule,
+  /*  306 */  iRegIsrc_rule,
+  /*  307 */  uimmI16_rule,
+  /*  308 */  iRegNsrc_rule,
+  /*  309 */  immN_0_rule,
+  /*  310 */  iRegP_N2P_rule,
+  /*  311 */  immP_0or1_rule,
+  /*  312 */  immL16_rule,
+  /*  313 */  regF_rule,
   /*  314 */  0,
-  /*  315 */  0,
-  /*  316 */  0,
-  /*  317 */  0,
-  /*  318 */  0,
-  /*  319 */  0,
-  /*  320 */  0,
-  /*  321 */  iRegLsrc_rule,
-  /*  322 */  iRegLsrc_rule,
-  /*  323 */  iRegLsrc_rule,
-  /*  324 */  iRegLsrc_rule,
+  /*  315 */  regF_rule,
+  /*  316 */  regD_rule,
+  /*  317 */  regD_rule,
+  /*  318 */  iRegPdst_rule,
+  /*  319 */  rarg2RegP_rule,
+  /*  320 */  iRegPdst_rule,
+  /*  321 */  iRegPdst_rule,
+  /*  322 */  0,
+  /*  323 */  0,
+  /*  324 */  0,
   /*  325 */  0,
   /*  326 */  0,
   /*  327 */  0,
@@ -4411,7 +4569,7 @@ const        int   rightOp[] = {
   /*  345 */  0,
   /*  346 */  0,
   /*  347 */  0,
-  /*  348 */  immL_32bits_rule,
+  /*  348 */  0,
   /*  349 */  0,
   /*  350 */  0,
   /*  351 */  0,
@@ -4427,10 +4585,10 @@ const        int   rightOp[] = {
   /*  361 */  0,
   /*  362 */  0,
   /*  363 */  0,
-  /*  364 */  0,
-  /*  365 */  0,
-  /*  366 */  0,
-  /*  367 */  0,
+  /*  364 */  iRegLsrc_rule,
+  /*  365 */  iRegLsrc_rule,
+  /*  366 */  iRegLsrc_rule,
+  /*  367 */  iRegLsrc_rule,
   /*  368 */  0,
   /*  369 */  0,
   /*  370 */  0,
@@ -4451,21 +4609,21 @@ const        int   rightOp[] = {
   /*  385 */  0,
   /*  386 */  0,
   /*  387 */  0,
-  /*  388 */  iRegIsrc_rule,
-  /*  389 */  iRegIsrc_rule,
-  /*  390 */  iRegIsrc_rule,
-  /*  391 */  _ConvL2I_iRegLsrc__rule,
-  /*  392 */  iRegLsrc_rule,
-  /*  393 */  iRegLsrc_rule,
-  /*  394 */  vecX_rule,
-  /*  395 */  iRegN_P2N_rule,
-  /*  396 */  iRegN_P2N_rule,
-  /*  397 */  iRegPsrc_rule,
-  /*  398 */  regF_rule,
-  /*  399 */  regD_rule,
-  /*  400 */  iRegLdst_rule,
-  /*  401 */  immI_0_rule,
-  /*  402 */  immI_0_rule,
+  /*  388 */  0,
+  /*  389 */  0,
+  /*  390 */  0,
+  /*  391 */  0,
+  /*  392 */  0,
+  /*  393 */  0,
+  /*  394 */  0,
+  /*  395 */  0,
+  /*  396 */  0,
+  /*  397 */  0,
+  /*  398 */  immL_32bits_rule,
+  /*  399 */  0,
+  /*  400 */  0,
+  /*  401 */  0,
+  /*  402 */  0,
   /*  403 */  0,
   /*  404 */  0,
   /*  405 */  0,
@@ -4501,370 +4659,370 @@ const        int   rightOp[] = {
   /*  435 */  0,
   /*  436 */  0,
   /*  437 */  0,
-  /*  438 */  0,
-  /*  439 */  0,
-  /*  440 */  0,
-  /*  441 */  0,
-  /*  442 */  _Binary_iRegIdst_iRegIsrc_rule,
-  /*  443 */  _Binary_iRegIdst_iRegIsrc_rule,
-  /*  444 */  _Binary_iRegIdst_immI16_rule,
-  /*  445 */  _Binary_iRegLdst_iRegLsrc_rule,
-  /*  446 */  _Binary_iRegLdst_iRegLsrc_rule,
-  /*  447 */  _Binary_iRegLdst_immL16_rule,
-  /*  448 */  _Binary_iRegNdst_iRegNsrc_rule,
-  /*  449 */  _Binary_iRegNdst_iRegNsrc_rule,
-  /*  450 */  _Binary_iRegNdst_immN_0_rule,
-  /*  451 */  _Binary_iRegPdst_iRegPsrc_rule,
-  /*  452 */  _Binary_iRegPdst_iRegP_N2P_rule,
-  /*  453 */  _Binary_iRegPdst_immP_0_rule,
-  /*  454 */  _Binary_regF_regF_rule,
-  /*  455 */  _Binary_regD_regD_rule,
+  /*  438 */  iRegIsrc_rule,
+  /*  439 */  iRegIsrc_rule,
+  /*  440 */  iRegIsrc_rule,
+  /*  441 */  _ConvL2I_iRegLsrc__rule,
+  /*  442 */  iRegLsrc_rule,
+  /*  443 */  iRegLsrc_rule,
+  /*  444 */  vecX_rule,
+  /*  445 */  iRegN_P2N_rule,
+  /*  446 */  iRegN_P2N_rule,
+  /*  447 */  iRegPsrc_rule,
+  /*  448 */  regF_rule,
+  /*  449 */  regD_rule,
+  /*  450 */  immI_0_rule,
+  /*  451 */  0,
+  /*  452 */  0,
+  /*  453 */  0,
+  /*  454 */  0,
+  /*  455 */  0,
   /*  456 */  0,
-  /*  457 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  458 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  459 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  460 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  461 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  462 */  _Binary_iRegNsrc_iRegNsrc_rule,
-  /*  463 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  464 */  _Binary_iRegPsrc_iRegPsrc_rule,
-  /*  465 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  466 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  467 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  468 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  469 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  470 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  471 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  472 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  473 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  474 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  475 */  _Binary_iRegNsrc_iRegNsrc_rule,
-  /*  476 */  _Binary_iRegNsrc_iRegNsrc_rule,
-  /*  477 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  478 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  479 */  _Binary_iRegPsrc_iRegPsrc_rule,
-  /*  480 */  _Binary_iRegPsrc_iRegPsrc_rule,
-  /*  481 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  482 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  483 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  484 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  485 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  486 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  487 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  488 */  _Binary_iRegIsrc_rarg4RegI_rule,
-  /*  489 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  490 */  _Binary_iRegIsrc_iRegIsrc_rule,
-  /*  491 */  _Binary_iRegNsrc_iRegNsrc_rule,
-  /*  492 */  _Binary_iRegNsrc_iRegNsrc_rule,
-  /*  493 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  494 */  _Binary_iRegLsrc_iRegLsrc_rule,
-  /*  495 */  _Binary_iRegPsrc_iRegPsrc_rule,
-  /*  496 */  _Binary_iRegPsrc_iRegPsrc_rule,
-  /*  497 */  iRegIsrc_rule,
-  /*  498 */  iRegIsrc_rule,
-  /*  499 */  iRegIsrc_rule,
-  /*  500 */  iRegIsrc_rule,
-  /*  501 */  iRegIsrc_rule,
-  /*  502 */  iRegLsrc_rule,
-  /*  503 */  iRegIsrc_rule,
-  /*  504 */  iRegIsrc_rule,
-  /*  505 */  iRegIsrc_rule,
-  /*  506 */  iRegIsrc_rule,
-  /*  507 */  iRegIsrc_rule,
-  /*  508 */  iRegLsrc_rule,
-  /*  509 */  iRegPsrc_rule,
-  /*  510 */  iRegNsrc_rule,
-  /*  511 */  iRegIsrc_iRegL2Isrc_rule,
-  /*  512 */  0,
-  /*  513 */  iRegIsrc_rule,
-  /*  514 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  515 */  iRegIsrc_rule,
-  /*  516 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
-  /*  517 */  immI16_rule,
-  /*  518 */  immIhi16_rule,
-  /*  519 */  iRegLsrc_rule,
-  /*  520 */  0,
-  /*  521 */  iRegLsrc_rule,
-  /*  522 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
-  /*  523 */  iRegLsrc_rule,
-  /*  524 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
-  /*  525 */  0,
-  /*  526 */  immL16_rule,
-  /*  527 */  immL32hi16_rule,
-  /*  528 */  iRegLsrc_rule,
-  /*  529 */  immL16_rule,
-  /*  530 */  immL32hi16_rule,
-  /*  531 */  iRegIsrc_rule,
-  /*  532 */  iRegIsrc_rule,
-  /*  533 */  iRegIsrc_rule,
-  /*  534 */  iRegLsrc_rule,
-  /*  535 */  0,
-  /*  536 */  iRegLsrc_rule,
-  /*  537 */  0,
-  /*  538 */  iRegIsrc_rule,
-  /*  539 */  immI16_rule,
-  /*  540 */  iRegLsrc_rule,
-  /*  541 */  iRegLsrc_rule,
-  /*  542 */  immL16_rule,
-  /*  543 */  immI_minus1_rule,
-  /*  544 */  iRegIsrc_rule,
-  /*  545 */  0,
+  /*  457 */  0,
+  /*  458 */  0,
+  /*  459 */  0,
+  /*  460 */  0,
+  /*  461 */  0,
+  /*  462 */  0,
+  /*  463 */  0,
+  /*  464 */  0,
+  /*  465 */  0,
+  /*  466 */  0,
+  /*  467 */  0,
+  /*  468 */  0,
+  /*  469 */  0,
+  /*  470 */  0,
+  /*  471 */  0,
+  /*  472 */  0,
+  /*  473 */  0,
+  /*  474 */  0,
+  /*  475 */  0,
+  /*  476 */  0,
+  /*  477 */  0,
+  /*  478 */  0,
+  /*  479 */  0,
+  /*  480 */  0,
+  /*  481 */  0,
+  /*  482 */  0,
+  /*  483 */  0,
+  /*  484 */  0,
+  /*  485 */  0,
+  /*  486 */  0,
+  /*  487 */  0,
+  /*  488 */  0,
+  /*  489 */  0,
+  /*  490 */  0,
+  /*  491 */  _Binary_iRegIdst_iRegIsrc_rule,
+  /*  492 */  _Binary_iRegIdst_iRegIsrc_rule,
+  /*  493 */  _Binary_iRegIdst_immI16_rule,
+  /*  494 */  _Binary_iRegLdst_iRegLsrc_rule,
+  /*  495 */  _Binary_iRegLdst_iRegLsrc_rule,
+  /*  496 */  _Binary_iRegLdst_immL16_rule,
+  /*  497 */  _Binary_iRegNdst_iRegNsrc_rule,
+  /*  498 */  _Binary_iRegNdst_iRegNsrc_rule,
+  /*  499 */  _Binary_iRegNdst_immN_0_rule,
+  /*  500 */  _Binary_iRegPdst_iRegPsrc_rule,
+  /*  501 */  _Binary_iRegPdst_iRegP_N2P_rule,
+  /*  502 */  _Binary_iRegPdst_immP_0_rule,
+  /*  503 */  _Binary_regF_regF_rule,
+  /*  504 */  _Binary_regD_regD_rule,
+  /*  505 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  506 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  507 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  508 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  509 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  510 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  511 */  _Binary_iRegLsrc_iRegLsrc_rule,
+  /*  512 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  513 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  514 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  515 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  516 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  517 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  518 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  519 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  520 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  521 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  522 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  523 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  524 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  525 */  _Binary_iRegLsrc_iRegLsrc_rule,
+  /*  526 */  _Binary_iRegLsrc_iRegLsrc_rule,
+  /*  527 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  528 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  529 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  530 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  531 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  532 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  533 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  534 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  535 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  536 */  _Binary_iRegIsrc_rarg4RegI_rule,
+  /*  537 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  538 */  _Binary_iRegIsrc_iRegIsrc_rule,
+  /*  539 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  540 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  541 */  _Binary_iRegLsrc_iRegLsrc_rule,
+  /*  542 */  _Binary_iRegLsrc_iRegLsrc_rule,
+  /*  543 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  544 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  545 */  iRegIsrc_rule,
   /*  546 */  iRegIsrc_rule,
-  /*  547 */  immL_minus1_rule,
-  /*  548 */  iRegLsrc_rule,
-  /*  549 */  0,
+  /*  547 */  iRegIsrc_rule,
+  /*  548 */  iRegIsrc_rule,
+  /*  549 */  iRegIsrc_rule,
   /*  550 */  iRegLsrc_rule,
   /*  551 */  iRegIsrc_rule,
-  /*  552 */  iRegLsrc_rule,
-  /*  553 */  0,
-  /*  554 */  0,
+  /*  552 */  iRegIsrc_rule,
+  /*  553 */  iRegIsrc_rule,
+  /*  554 */  iRegIsrc_rule,
   /*  555 */  iRegIsrc_rule,
-  /*  556 */  immI_rule,
-  /*  557 */  uimmI5_rule,
-  /*  558 */  uimmI5_rule,
-  /*  559 */  0,
-  /*  560 */  iRegIsrc_rule,
-  /*  561 */  immI_rule,
-  /*  562 */  uimmI6_ge32_rule,
-  /*  563 */  uimmI6_rule,
-  /*  564 */  0,
-  /*  565 */  iRegIsrc_rule,
-  /*  566 */  immI_rule,
-  /*  567 */  0,
-  /*  568 */  iRegIsrc_rule,
-  /*  569 */  immI_rule,
-  /*  570 */  0,
-  /*  571 */  0,
-  /*  572 */  iRegIsrc_rule,
-  /*  573 */  immI_rule,
+  /*  556 */  iRegLsrc_rule,
+  /*  557 */  iRegPsrc_rule,
+  /*  558 */  iRegNsrc_rule,
+  /*  559 */  iRegIsrc_iRegL2Isrc_rule,
+  /*  560 */  0,
+  /*  561 */  iRegIsrc_rule,
+  /*  562 */  _AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  563 */  iRegIsrc_rule,
+  /*  564 */  _AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc_rule,
+  /*  565 */  immI16_rule,
+  /*  566 */  immIhi16_rule,
+  /*  567 */  immI32_rule,
+  /*  568 */  iRegLsrc_rule,
+  /*  569 */  0,
+  /*  570 */  iRegLsrc_rule,
+  /*  571 */  _AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc_rule,
+  /*  572 */  iRegLsrc_rule,
+  /*  573 */  _AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc_rule,
   /*  574 */  0,
-  /*  575 */  iRegIsrc_rule,
-  /*  576 */  immI_rule,
-  /*  577 */  0,
-  /*  578 */  uimmI6_rule,
-  /*  579 */  immIpow2minus1_rule,
-  /*  580 */  immLpow2minus1_rule,
-  /*  581 */  0,
-  /*  582 */  _URShiftI_iRegIsrc_immI8_rule,
-  /*  583 */  _LShiftI_iRegIsrc_immI8_rule,
-  /*  584 */  _LShiftI_iRegIsrc_immI8_rule,
-  /*  585 */  _URShiftI_iRegIsrc_immI8_rule,
-  /*  586 */  regF_rule,
-  /*  587 */  regD_rule,
-  /*  588 */  regF_rule,
-  /*  589 */  regD_rule,
-  /*  590 */  regF_rule,
-  /*  591 */  regD_rule,
-  /*  592 */  regF_rule,
-  /*  593 */  regD_rule,
-  /*  594 */  0,
-  /*  595 */  0,
-  /*  596 */  _Binary_regF_regF_rule,
-  /*  597 */  _Binary_regD_regD_rule,
-  /*  598 */  _Binary__NegF_regF__regF_rule,
-  /*  599 */  _Binary_regF__NegF_regF__rule,
-  /*  600 */  _Binary__NegD_regD__regD_rule,
-  /*  601 */  _Binary_regD__NegD_regD__rule,
-  /*  602 */  _Binary__NegF_regF__regF_rule,
-  /*  603 */  _Binary_regF__NegF_regF__rule,
-  /*  604 */  _Binary__NegD_regD__regD_rule,
-  /*  605 */  _Binary_regD__NegD_regD__rule,
-  /*  606 */  _Binary_regF_regF_rule,
-  /*  607 */  _Binary_regD_regD_rule,
-  /*  608 */  iRegIsrc_rule,
-  /*  609 */  immIhi16_rule,
-  /*  610 */  uimmI16_rule,
-  /*  611 */  immInegpow2_rule,
-  /*  612 */  immIpow2minus1_rule,
-  /*  613 */  immIpowerOf2_rule,
-  /*  614 */  iRegLsrc_rule,
-  /*  615 */  uimmL16_rule,
-  /*  616 */  immLnegpow2_rule,
-  /*  617 */  immLpow2minus1_rule,
-  /*  618 */  0,
-  /*  619 */  iRegIsrc_rule,
-  /*  620 */  0,
-  /*  621 */  iRegIsrc_rule,
-  /*  622 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  575 */  immL16_rule,
+  /*  576 */  immL32hi16_rule,
+  /*  577 */  immL34_rule,
+  /*  578 */  iRegLsrc_rule,
+  /*  579 */  immL16_rule,
+  /*  580 */  immL32hi16_rule,
+  /*  581 */  immL34_rule,
+  /*  582 */  iRegIsrc_rule,
+  /*  583 */  iRegIsrc_rule,
+  /*  584 */  iRegIsrc_rule,
+  /*  585 */  iRegLsrc_rule,
+  /*  586 */  0,
+  /*  587 */  iRegLsrc_rule,
+  /*  588 */  0,
+  /*  589 */  iRegIsrc_rule,
+  /*  590 */  immI16_rule,
+  /*  591 */  iRegLsrc_rule,
+  /*  592 */  iRegLsrc_rule,
+  /*  593 */  immL16_rule,
+  /*  594 */  immI_minus1_rule,
+  /*  595 */  iRegIsrc_rule,
+  /*  596 */  0,
+  /*  597 */  iRegIsrc_rule,
+  /*  598 */  immL_minus1_rule,
+  /*  599 */  iRegLsrc_rule,
+  /*  600 */  0,
+  /*  601 */  iRegLsrc_rule,
+  /*  602 */  iRegIsrc_rule,
+  /*  603 */  iRegLsrc_rule,
+  /*  604 */  iRegIsrc_rule,
+  /*  605 */  iRegIsrc_rule,
+  /*  606 */  iRegLsrc_rule,
+  /*  607 */  iRegLsrc_rule,
+  /*  608 */  0,
+  /*  609 */  0,
+  /*  610 */  iRegIsrc_rule,
+  /*  611 */  immI_rule,
+  /*  612 */  uimmI5_rule,
+  /*  613 */  uimmI5_rule,
+  /*  614 */  0,
+  /*  615 */  iRegIsrc_rule,
+  /*  616 */  immI_rule,
+  /*  617 */  uimmI6_ge32_rule,
+  /*  618 */  uimmI6_rule,
+  /*  619 */  0,
+  /*  620 */  iRegIsrc_rule,
+  /*  621 */  immI_rule,
+  /*  622 */  0,
   /*  623 */  iRegIsrc_rule,
-  /*  624 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
-  /*  625 */  uimmI16_rule,
-  /*  626 */  iRegLsrc_rule,
-  /*  627 */  0,
-  /*  628 */  uimmL16_rule,
-  /*  629 */  iRegIsrc_rule,
-  /*  630 */  0,
-  /*  631 */  iRegIsrc_rule,
-  /*  632 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
-  /*  633 */  iRegIsrc_rule,
-  /*  634 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
-  /*  635 */  uimmI16_rule,
-  /*  636 */  iRegLsrc_rule,
-  /*  637 */  0,
-  /*  638 */  uimmL16_rule,
-  /*  639 */  immI_minus1_rule,
-  /*  640 */  immL_minus1_rule,
-  /*  641 */  iRegIsrc_rule,
-  /*  642 */  _XorI_iRegIsrc_immI_minus1_rule,
-  /*  643 */  0,
-  /*  644 */  0,
-  /*  645 */  0,
-  /*  646 */  0,
-  /*  647 */  0,
-  /*  648 */  0,
+  /*  624 */  immI_rule,
+  /*  625 */  0,
+  /*  626 */  0,
+  /*  627 */  iRegIsrc_rule,
+  /*  628 */  immI_rule,
+  /*  629 */  0,
+  /*  630 */  iRegIsrc_rule,
+  /*  631 */  immI_rule,
+  /*  632 */  0,
+  /*  633 */  uimmI6_rule,
+  /*  634 */  immIpow2minus1_rule,
+  /*  635 */  immLpow2minus1_rule,
+  /*  636 */  0,
+  /*  637 */  _URShiftI_iRegIsrc_immI8_rule,
+  /*  638 */  _LShiftI_iRegIsrc_immI8_rule,
+  /*  639 */  _LShiftI_iRegIsrc_immI8_rule,
+  /*  640 */  _URShiftI_iRegIsrc_immI8_rule,
+  /*  641 */  regF_rule,
+  /*  642 */  regD_rule,
+  /*  643 */  regF_rule,
+  /*  644 */  regD_rule,
+  /*  645 */  regF_rule,
+  /*  646 */  regD_rule,
+  /*  647 */  regF_rule,
+  /*  648 */  regD_rule,
   /*  649 */  0,
-  /*  650 */  immI_1_rule,
-  /*  651 */  immI_1_rule,
-  /*  652 */  0,
-  /*  653 */  0,
-  /*  654 */  immI_1_rule,
-  /*  655 */  immI_1_rule,
-  /*  656 */  iRegIsrc_rule,
-  /*  657 */  immI_0_rule,
-  /*  658 */  immI_24_rule,
-  /*  659 */  immI_16_rule,
-  /*  660 */  0,
-  /*  661 */  0,
-  /*  662 */  0,
-  /*  663 */  0,
-  /*  664 */  0,
-  /*  665 */  0,
-  /*  666 */  0,
-  /*  667 */  0,
-  /*  668 */  0,
-  /*  669 */  0,
-  /*  670 */  0,
-  /*  671 */  immL_32bits_rule,
-  /*  672 */  immL_32bits_rule,
+  /*  650 */  0,
+  /*  651 */  _Binary_regF_regF_rule,
+  /*  652 */  _Binary_regD_regD_rule,
+  /*  653 */  _Binary__NegF_regF__regF_rule,
+  /*  654 */  _Binary_regF__NegF_regF__rule,
+  /*  655 */  _Binary__NegD_regD__regD_rule,
+  /*  656 */  _Binary_regD__NegD_regD__rule,
+  /*  657 */  _Binary__NegF_regF__regF_rule,
+  /*  658 */  _Binary_regF__NegF_regF__rule,
+  /*  659 */  _Binary__NegD_regD__regD_rule,
+  /*  660 */  _Binary_regD__NegD_regD__rule,
+  /*  661 */  _Binary_regF_regF_rule,
+  /*  662 */  _Binary_regD_regD_rule,
+  /*  663 */  iRegIsrc_rule,
+  /*  664 */  immIhi16_rule,
+  /*  665 */  uimmI16_rule,
+  /*  666 */  immInegpow2_rule,
+  /*  667 */  immIpow2minus1_rule,
+  /*  668 */  immIpowerOf2_rule,
+  /*  669 */  iRegLsrc_rule,
+  /*  670 */  uimmL16_rule,
+  /*  671 */  immLnegpow2_rule,
+  /*  672 */  immLpow2minus1_rule,
   /*  673 */  0,
-  /*  674 */  0,
+  /*  674 */  iRegIsrc_rule,
   /*  675 */  0,
-  /*  676 */  0,
-  /*  677 */  0,
-  /*  678 */  0,
-  /*  679 */  0,
-  /*  680 */  0,
-  /*  681 */  0,
+  /*  676 */  iRegIsrc_rule,
+  /*  677 */  _OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  678 */  iRegIsrc_rule,
+  /*  679 */  _OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc_rule,
+  /*  680 */  uimmI16_rule,
+  /*  681 */  iRegLsrc_rule,
   /*  682 */  0,
-  /*  683 */  0,
-  /*  684 */  0,
+  /*  683 */  uimmL16_rule,
+  /*  684 */  iRegIsrc_rule,
   /*  685 */  0,
-  /*  686 */  0,
-  /*  687 */  0,
-  /*  688 */  0,
-  /*  689 */  0,
-  /*  690 */  0,
-  /*  691 */  0,
-  /*  692 */  iRegLsrc_rule,
-  /*  693 */  _CmpU_iRegIsrc_uimmI15_rule,
-  /*  694 */  _CmpU_iRegIsrc_iRegIsrc_rule,
-  /*  695 */  _CmpU_iRegIsrc_uimmI15_rule,
-  /*  696 */  _CmpN_iRegNsrc_immN_0_rule,
-  /*  697 */  _CmpP_iRegP_N2P_immP_0_rule,
-  /*  698 */  regF_rule,
-  /*  699 */  regD_rule,
+  /*  686 */  iRegIsrc_rule,
+  /*  687 */  _XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc_rule,
+  /*  688 */  iRegIsrc_rule,
+  /*  689 */  _XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc_rule,
+  /*  690 */  uimmI16_rule,
+  /*  691 */  iRegLsrc_rule,
+  /*  692 */  0,
+  /*  693 */  uimmL16_rule,
+  /*  694 */  immI_minus1_rule,
+  /*  695 */  immL_minus1_rule,
+  /*  696 */  iRegIsrc_rule,
+  /*  697 */  _XorI_iRegIsrc_immI_minus1_rule,
+  /*  698 */  0,
+  /*  699 */  0,
   /*  700 */  0,
-  /*  701 */  flagsRegSrc_rule,
-  /*  702 */  flagsRegSrc_rule,
-  /*  703 */  flagsRegSrc_rule,
-  /*  704 */  flagsRegSrc_rule,
-  /*  705 */  flagsRegSrc_rule,
-  /*  706 */  flagsRegSrc_rule,
-  /*  707 */  iRegP_N2P_rule,
+  /*  701 */  0,
+  /*  702 */  0,
+  /*  703 */  0,
+  /*  704 */  0,
+  /*  705 */  immI_1_rule,
+  /*  706 */  immI_1_rule,
+  /*  707 */  0,
   /*  708 */  0,
-  /*  709 */  _CastP2X_iRegPsrc__rule,
-  /*  710 */  rarg2RegP_rule,
-  /*  711 */  rarg2RegP_rule,
-  /*  712 */  rarg2RegP_rule,
-  /*  713 */  _Binary_rarg2RegP_rarg4RegI_rule,
-  /*  714 */  _Binary_rarg2RegP_rarg4RegI_rule,
-  /*  715 */  _Binary_rarg2RegP_rarg4RegI_rule,
-  /*  716 */  _Binary_rarg2RegP_rarg4RegI_rule,
-  /*  717 */  rarg3RegI_rule,
-  /*  718 */  rarg3RegI_rule,
-  /*  719 */  rarg2RegP_rule,
-  /*  720 */  rarg2RegP_rule,
-  /*  721 */  _Binary__AddP_immP_immL_immI_1_rule,
-  /*  722 */  _Binary__AddP_immP_immL_immI_1_rule,
-  /*  723 */  _Binary__AddP_immP_immL_immI_1_rule,
-  /*  724 */  _Binary_rscratch2RegP_immI_1_rule,
-  /*  725 */  _Binary_rscratch2RegP_immI_1_rule,
-  /*  726 */  _Binary_rscratch2RegP_immI_1_rule,
-  /*  727 */  iRegIsrc_rule,
-  /*  728 */  _Binary_iRegPsrc_uimmI15_rule,
-  /*  729 */  _Binary_iRegPsrc_uimmI15_rule,
-  /*  730 */  _Binary_iRegPsrc_uimmI15_rule,
-  /*  731 */  _Binary_iRegPsrc_rscratch2RegI_rule,
-  /*  732 */  _Binary_iRegPsrc_rscratch2RegI_rule,
-  /*  733 */  _Binary_iRegPsrc_rscratch2RegI_rule,
-  /*  734 */  _Binary_rarg2RegP_iRegIsrc_rule,
-  /*  735 */  _Binary_rarg2RegP_iRegIsrc_rule,
-  /*  736 */  iRegIsrc_rule,
-  /*  737 */  _Binary_rarg2RegP_iRegIsrc_rule,
-  /*  738 */  iRegIsrc_rule,
-  /*  739 */  iRegIsrc_rule,
-  /*  740 */  iRegIsrc_rule,
-  /*  741 */  iRegIsrc_rule,
+  /*  709 */  immI_1_rule,
+  /*  710 */  immI_1_rule,
+  /*  711 */  iRegIsrc_rule,
+  /*  712 */  immI_0_rule,
+  /*  713 */  immI_24_rule,
+  /*  714 */  immI_16_rule,
+  /*  715 */  0,
+  /*  716 */  0,
+  /*  717 */  0,
+  /*  718 */  0,
+  /*  719 */  0,
+  /*  720 */  0,
+  /*  721 */  0,
+  /*  722 */  0,
+  /*  723 */  0,
+  /*  724 */  0,
+  /*  725 */  0,
+  /*  726 */  immL_32bits_rule,
+  /*  727 */  immL_32bits_rule,
+  /*  728 */  0,
+  /*  729 */  0,
+  /*  730 */  0,
+  /*  731 */  0,
+  /*  732 */  0,
+  /*  733 */  0,
+  /*  734 */  0,
+  /*  735 */  0,
+  /*  736 */  0,
+  /*  737 */  0,
+  /*  738 */  0,
+  /*  739 */  0,
+  /*  740 */  0,
+  /*  741 */  0,
   /*  742 */  0,
   /*  743 */  0,
   /*  744 */  0,
   /*  745 */  0,
   /*  746 */  0,
-  /*  747 */  0,
-  /*  748 */  0,
-  /*  749 */  0,
-  /*  750 */  0,
-  /*  751 */  0,
-  /*  752 */  _ReverseBytesI_iRegIsrc__rule,
-  /*  753 */  _ReverseBytesL_iRegLsrc__rule,
-  /*  754 */  _ReverseBytesUS_iRegIsrc__rule,
-  /*  755 */  _ReverseBytesS_iRegIsrc__rule,
+  /*  747 */  iRegLsrc_rule,
+  /*  748 */  _CmpU_iRegIsrc_uimmI15_rule,
+  /*  749 */  _CmpU_iRegIsrc_iRegIsrc_rule,
+  /*  750 */  _CmpU_iRegIsrc_uimmI15_rule,
+  /*  751 */  _CmpN_iRegNsrc_immN_0_rule,
+  /*  752 */  _CmpP_iRegP_N2P_immP_0_rule,
+  /*  753 */  regF_rule,
+  /*  754 */  regD_rule,
+  /*  755 */  0,
   /*  756 */  0,
   /*  757 */  0,
   /*  758 */  0,
   /*  759 */  0,
   /*  760 */  0,
-  /*  761 */  0,
-  /*  762 */  0,
-  /*  763 */  0,
-  /*  764 */  0,
-  /*  765 */  0,
+  /*  761 */  flagsRegSrc_rule,
+  /*  762 */  flagsRegSrc_rule,
+  /*  763 */  flagsRegSrc_rule,
+  /*  764 */  flagsRegSrc_rule,
+  /*  765 */  iRegP_N2P_rule,
   /*  766 */  0,
-  /*  767 */  0,
-  /*  768 */  0,
-  /*  769 */  0,
-  /*  770 */  0,
-  /*  771 */  0,
-  /*  772 */  0,
-  /*  773 */  0,
-  /*  774 */  0,
-  /*  775 */  0,
-  /*  776 */  0,
-  /*  777 */  0,
-  /*  778 */  0,
-  /*  779 */  0,
-  /*  780 */  0,
-  /*  781 */  0,
-  /*  782 */  0,
-  /*  783 */  0,
-  /*  784 */  0,
-  /*  785 */  0,
-  /*  786 */  0,
-  /*  787 */  0,
-  /*  788 */  0,
-  /*  789 */  0,
-  /*  790 */  0,
-  /*  791 */  0,
-  /*  792 */  0,
-  /*  793 */  0,
-  /*  794 */  0,
-  /*  795 */  0,
-  /*  796 */  0,
-  /*  797 */  0,
-  /*  798 */  inline_cache_regP_rule,
-  /*  799 */  0,
-  /*  800 */  rarg1RegP_rule,
-  /*  801 */  0,
+  /*  767 */  _CastP2X_iRegPsrc__rule,
+  /*  768 */  rarg2RegP_rule,
+  /*  769 */  rarg2RegP_rule,
+  /*  770 */  rarg2RegP_rule,
+  /*  771 */  _Binary_rarg2RegP_rarg4RegI_rule,
+  /*  772 */  _Binary_rarg2RegP_rarg4RegI_rule,
+  /*  773 */  _Binary_rarg2RegP_rarg4RegI_rule,
+  /*  774 */  _Binary_rarg2RegP_rarg4RegI_rule,
+  /*  775 */  rarg3RegI_rule,
+  /*  776 */  rarg3RegI_rule,
+  /*  777 */  rarg2RegP_rule,
+  /*  778 */  rarg2RegP_rule,
+  /*  779 */  _Binary__AddP_immP_immL_immI_1_rule,
+  /*  780 */  _Binary__AddP_immP_immL_immI_1_rule,
+  /*  781 */  _Binary__AddP_immP_immL_immI_1_rule,
+  /*  782 */  _Binary_rscratch2RegP_immI_1_rule,
+  /*  783 */  _Binary_rscratch2RegP_immI_1_rule,
+  /*  784 */  _Binary_rscratch2RegP_immI_1_rule,
+  /*  785 */  iRegIsrc_rule,
+  /*  786 */  iRegIsrc_rule,
+  /*  787 */  _Binary_iRegPsrc_uimmI15_rule,
+  /*  788 */  _Binary_iRegPsrc_uimmI15_rule,
+  /*  789 */  _Binary_iRegPsrc_uimmI15_rule,
+  /*  790 */  _Binary_iRegPsrc_rscratch2RegI_rule,
+  /*  791 */  _Binary_iRegPsrc_rscratch2RegI_rule,
+  /*  792 */  _Binary_iRegPsrc_rscratch2RegI_rule,
+  /*  793 */  _Binary_rarg2RegP_iRegIsrc_rule,
+  /*  794 */  _Binary_rarg2RegP_iRegIsrc_rule,
+  /*  795 */  iRegIsrc_rule,
+  /*  796 */  _Binary_rarg2RegP_iRegIsrc_rule,
+  /*  797 */  _Binary_rarg2RegP_iRegIsrc_rule,
+  /*  798 */  iRegIsrc_rule,
+  /*  799 */  iRegIsrc_rule,
+  /*  800 */  iRegIsrc_rule,
+  /*  801 */  iRegIsrc_rule,
   /*  802 */  0,
   /*  803 */  0,
   /*  804 */  0,
@@ -4874,6 +5032,99 @@ const        int   rightOp[] = {
   /*  808 */  0,
   /*  809 */  0,
   /*  810 */  0,
+  /*  811 */  0,
+  /*  812 */  0,
+  /*  813 */  0,
+  /*  814 */  0,
+  /*  815 */  0,
+  /*  816 */  0,
+  /*  817 */  0,
+  /*  818 */  0,
+  /*  819 */  0,
+  /*  820 */  0,
+  /*  821 */  0,
+  /*  822 */  _ReverseBytesI_iRegIsrc__rule,
+  /*  823 */  _ReverseBytesL_iRegLsrc__rule,
+  /*  824 */  _ReverseBytesUS_iRegIsrc__rule,
+  /*  825 */  _ReverseBytesS_iRegIsrc__rule,
+  /*  826 */  0,
+  /*  827 */  vecX_rule,
+  /*  828 */  vecX_rule,
+  /*  829 */  vecX_rule,
+  /*  830 */  vecX_rule,
+  /*  831 */  vecX_rule,
+  /*  832 */  vecX_rule,
+  /*  833 */  vecX_rule,
+  /*  834 */  vecX_rule,
+  /*  835 */  vecX_rule,
+  /*  836 */  vecX_rule,
+  /*  837 */  vecX_rule,
+  /*  838 */  vecX_rule,
+  /*  839 */  vecX_rule,
+  /*  840 */  vecX_rule,
+  /*  841 */  vecX_rule,
+  /*  842 */  vecX_rule,
+  /*  843 */  vecX_rule,
+  /*  844 */  vecX_rule,
+  /*  845 */  immI8_rule,
+  /*  846 */  immI8_rule,
+  /*  847 */  _Binary_vecX_vecX_rule,
+  /*  848 */  _Binary__NegVF_vecX__vecX_rule,
+  /*  849 */  _Binary_vecX__NegVF_vecX__rule,
+  /*  850 */  _Binary_vecX_vecX_rule,
+  /*  851 */  _Binary_vecX_vecX_rule,
+  /*  852 */  _Binary__NegVD_vecX__vecX_rule,
+  /*  853 */  _Binary_vecX__NegVD_vecX__rule,
+  /*  854 */  _Binary_vecX_vecX_rule,
+  /*  855 */  0,
+  /*  856 */  0,
+  /*  857 */  0,
+  /*  858 */  0,
+  /*  859 */  0,
+  /*  860 */  0,
+  /*  861 */  0,
+  /*  862 */  0,
+  /*  863 */  0,
+  /*  864 */  0,
+  /*  865 */  0,
+  /*  866 */  0,
+  /*  867 */  inline_cache_regP_rule,
+  /*  868 */  0,
+  /*  869 */  rarg1RegP_rule,
+  /*  870 */  0,
+  /*  871 */  0,
+  /*  872 */  0,
+  /*  873 */  0,
+  /*  874 */  0,
+  /*  875 */  0,
+  /*  876 */  0,
+  /*  877 */  0,
+  /*  878 */  0,
+  /*  879 */  0,
+  /*  880 */  0,
+  /*  881 */  0,
+  /*  882 */  0,
+  /*  883 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  884 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  885 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  886 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  887 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  888 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  889 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  890 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  891 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  892 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  893 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  894 */  _Binary_iRegNsrc_iRegNsrc_rule,
+  /*  895 */  0,
+  /*  896 */  0,
+  /*  897 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  898 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  899 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  900 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  901 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  902 */  _Binary_iRegPsrc_iRegPsrc_rule,
+  /*  903 */  iRegPsrc_rule,
   // last instruction
   0 // no trailing comma
 };
@@ -4892,807 +5143,900 @@ const char        *ruleName[] = {
   /*   10 */  "IMMI8",
   /*   11 */  "IMMI16",
   /*   12 */  "IMMIHI16",
-  /*   13 */  "IMMINEGPOW2",
-  /*   14 */  "IMMIPOW2MINUS1",
-  /*   15 */  "IMMIPOWEROF2",
-  /*   16 */  "UIMMI5",
-  /*   17 */  "UIMMI6",
-  /*   18 */  "UIMMI6_GE32",
-  /*   19 */  "UIMMI15",
-  /*   20 */  "UIMMI16",
-  /*   21 */  "IMMI_0",
-  /*   22 */  "IMMI_1",
-  /*   23 */  "IMMI_MINUS1",
-  /*   24 */  "IMMI_16",
-  /*   25 */  "IMMI_24",
-  /*   26 */  "IMMN",
-  /*   27 */  "IMMN_0",
-  /*   28 */  "IMMNKLASS",
-  /*   29 */  "IMMNKLASS_NM",
-  /*   30 */  "IMMP",
-  /*   31 */  "IMMP_NM",
-  /*   32 */  "IMMP_0",
-  /*   33 */  "IMMP_0OR1",
-  /*   34 */  "IMML",
-  /*   35 */  "IMMLMAX30",
-  /*   36 */  "IMML16",
-  /*   37 */  "IMML16ALG4",
-  /*   38 */  "IMML32HI16",
-  /*   39 */  "IMML32",
-  /*   40 */  "IMMLHIGHEST16",
-  /*   41 */  "IMMLNEGPOW2",
-  /*   42 */  "IMMLPOW2MINUS1",
-  /*   43 */  "IMML_0",
-  /*   44 */  "IMML_MINUS1",
-  /*   45 */  "IMML_32BITS",
-  /*   46 */  "UIMML16",
-  /*   47 */  "IMMF",
-  /*   48 */  "IMMF_0",
-  /*   49 */  "IMMD",
-  /*   50 */  "IREGIDST",
-  /*   51 */  "IREGISRC",
-  /*   52 */  "RSCRATCH1REGI",
-  /*   53 */  "RSCRATCH2REGI",
-  /*   54 */  "RARG1REGI",
-  /*   55 */  "RARG2REGI",
-  /*   56 */  "RARG3REGI",
-  /*   57 */  "RARG4REGI",
-  /*   58 */  "RARG1REGL",
-  /*   59 */  "RARG2REGL",
-  /*   60 */  "RARG3REGL",
-  /*   61 */  "RARG4REGL",
-  /*   62 */  "IREGPDST",
-  /*   63 */  "IREGPDSTNOSCRATCH",
-  /*   64 */  "IREGPSRC",
-  /*   65 */  "THREADREGP",
-  /*   66 */  "RSCRATCH1REGP",
-  /*   67 */  "RSCRATCH2REGP",
-  /*   68 */  "RARG1REGP",
-  /*   69 */  "RARG2REGP",
-  /*   70 */  "RARG3REGP",
-  /*   71 */  "RARG4REGP",
-  /*   72 */  "IREGNSRC",
-  /*   73 */  "IREGNDST",
-  /*   74 */  "IREGLDST",
-  /*   75 */  "IREGLSRC",
-  /*   76 */  "IREGL2ISRC",
-  /*   77 */  "RSCRATCH1REGL",
-  /*   78 */  "RSCRATCH2REGL",
-  /*   79 */  "FLAGSREG",
-  /*   80 */  "FLAGSREGSRC",
-  /*   81 */  "FLAGSREGCR0",
-  /*   82 */  "FLAGSREGCR1",
-  /*   83 */  "FLAGSREGCR6",
-  /*   84 */  "REGCTR",
-  /*   85 */  "REGD",
-  /*   86 */  "REGF",
-  /*   87 */  "INLINE_CACHE_REGP",
-  /*   88 */  "COMPILER_METHOD_OOP_REGP",
-  /*   89 */  "INTERPRETER_METHOD_OOP_REGP",
-  /*   90 */  "IREGP2N",
-  /*   91 */  "IREGN2P",
-  /*   92 */  "IREGN2P_KLASS",
-  /*   93 */  "INDIRECT",
-  /*   94 */  "INDOFFSET16",
-  /*   95 */  "INDOFFSET16ALG4",
-  /*   96 */  "INDIRECTNARROW",
-  /*   97 */  "INDIRECTNARROW_KLASS",
-  /*   98 */  "INDOFFSET16NARROW",
-  /*   99 */  "INDOFFSET16NARROW_KLASS",
-  /*  100 */  "INDOFFSET16NARROWALG4",
-  /*  101 */  "INDOFFSET16NARROWALG4_KLASS",
-  /*  102 */  "STACKSLOTI",
-  /*  103 */  "STACKSLOTL",
-  /*  104 */  "STACKSLOTP",
-  /*  105 */  "STACKSLOTF",
-  /*  106 */  "STACKSLOTD",
-  /*  107 */  "CMPOP",
+  /*   13 */  "IMMI32",
+  /*   14 */  "IMMINEGPOW2",
+  /*   15 */  "IMMIPOW2MINUS1",
+  /*   16 */  "IMMIPOWEROF2",
+  /*   17 */  "UIMMI5",
+  /*   18 */  "UIMMI6",
+  /*   19 */  "UIMMI6_GE32",
+  /*   20 */  "UIMMI15",
+  /*   21 */  "UIMMI16",
+  /*   22 */  "IMMI_0",
+  /*   23 */  "IMMI_1",
+  /*   24 */  "IMMI_MINUS1",
+  /*   25 */  "IMMI_16",
+  /*   26 */  "IMMI_24",
+  /*   27 */  "IMMN",
+  /*   28 */  "IMMN_0",
+  /*   29 */  "IMMNKLASS",
+  /*   30 */  "IMMNKLASS_NM",
+  /*   31 */  "IMMP",
+  /*   32 */  "IMMP_NM",
+  /*   33 */  "IMMP_0",
+  /*   34 */  "IMMP_0OR1",
+  /*   35 */  "IMML",
+  /*   36 */  "IMMLMAX30",
+  /*   37 */  "IMML16",
+  /*   38 */  "IMML16ALG4",
+  /*   39 */  "IMML32HI16",
+  /*   40 */  "IMML32",
+  /*   41 */  "IMML34",
+  /*   42 */  "IMMLHIGHEST16",
+  /*   43 */  "IMMLNEGPOW2",
+  /*   44 */  "IMMLPOW2MINUS1",
+  /*   45 */  "IMML_0",
+  /*   46 */  "IMML_MINUS1",
+  /*   47 */  "IMML_32BITS",
+  /*   48 */  "UIMML16",
+  /*   49 */  "IMMF",
+  /*   50 */  "IMMF_0",
+  /*   51 */  "IMMD",
+  /*   52 */  "IMMD_0",
+  /*   53 */  "IREGIDST",
+  /*   54 */  "IREGISRC",
+  /*   55 */  "RSCRATCH1REGI",
+  /*   56 */  "RSCRATCH2REGI",
+  /*   57 */  "RARG1REGI",
+  /*   58 */  "RARG2REGI",
+  /*   59 */  "RARG3REGI",
+  /*   60 */  "RARG4REGI",
+  /*   61 */  "RARG1REGL",
+  /*   62 */  "RARG2REGL",
+  /*   63 */  "RARG3REGL",
+  /*   64 */  "RARG4REGL",
+  /*   65 */  "IREGPDST",
+  /*   66 */  "IREGPDSTNOSCRATCH",
+  /*   67 */  "IREGPSRC",
+  /*   68 */  "THREADREGP",
+  /*   69 */  "RSCRATCH1REGP",
+  /*   70 */  "RSCRATCH2REGP",
+  /*   71 */  "RARG1REGP",
+  /*   72 */  "RARG2REGP",
+  /*   73 */  "RARG3REGP",
+  /*   74 */  "RARG4REGP",
+  /*   75 */  "IREGNSRC",
+  /*   76 */  "IREGNDST",
+  /*   77 */  "IREGLDST",
+  /*   78 */  "IREGLSRC",
+  /*   79 */  "IREGL2ISRC",
+  /*   80 */  "RSCRATCH1REGL",
+  /*   81 */  "RSCRATCH2REGL",
+  /*   82 */  "FLAGSREG",
+  /*   83 */  "FLAGSREGSRC",
+  /*   84 */  "FLAGSREGCR0",
+  /*   85 */  "FLAGSREGCR1",
+  /*   86 */  "FLAGSREGCR6",
+  /*   87 */  "REGCTR",
+  /*   88 */  "REGD",
+  /*   89 */  "REGF",
+  /*   90 */  "INLINE_CACHE_REGP",
+  /*   91 */  "IREGP2N",
+  /*   92 */  "IREGN2P",
+  /*   93 */  "IREGN2P_KLASS",
+  /*   94 */  "INDIRECT",
+  /*   95 */  "INDOFFSET16",
+  /*   96 */  "INDOFFSET16ALG4",
+  /*   97 */  "INDIRECTNARROW",
+  /*   98 */  "INDIRECTNARROW_KLASS",
+  /*   99 */  "INDOFFSET16NARROW",
+  /*  100 */  "INDOFFSET16NARROW_KLASS",
+  /*  101 */  "INDOFFSET16NARROWALG4",
+  /*  102 */  "INDOFFSET16NARROWALG4_KLASS",
+  /*  103 */  "STACKSLOTI",
+  /*  104 */  "STACKSLOTL",
+  /*  105 */  "STACKSLOTP",
+  /*  106 */  "STACKSLOTF",
+  /*  107 */  "STACKSLOTD",
+  /*  108 */  "CMPOP",
   // last operand
-  /*  108 */  "MEMORY",
-  /*  109 */  "MEMORYALG4",
-  /*  110 */  "INDIRECTMEMORY",
-  /*  111 */  "IREGISRC_IREGL2ISRC",
-  /*  112 */  "IREGN_P2N",
-  /*  113 */  "IREGP_N2P",
+  /*  109 */  "MEMORY",
+  /*  110 */  "MEMORYALG4",
+  /*  111 */  "INDIRECTMEMORY",
+  /*  112 */  "IREGISRC_IREGL2ISRC",
+  /*  113 */  "IREGN_P2N",
+  /*  114 */  "IREGP_N2P",
   // last operand class
-  /*  114 */  "_DecodeN_iRegNsrc_",
-  /*  115 */  "_DecodeNKlass_iRegNsrc_",
-  /*  116 */  "_LoadUB_memory_",
-  /*  117 */  "_LoadUS_memory_",
-  /*  118 */  "_LoadI_memory_",
-  /*  119 */  "_ConvI2L__LoadI_memory__",
-  /*  120 */  "_LoadI_memoryAlg4_",
-  /*  121 */  "_LoadN_memory_",
-  /*  122 */  "_LoadNKlass_memory_",
-  /*  123 */  "_LoadP_memoryAlg4_",
-  /*  124 */  "_AddP_indirectMemory_iRegLsrc",
-  /*  125 */  "_ConvL2I_iRegLsrc_",
-  /*  126 */  "_Binary_flagsRegSrc_iRegPsrc",
-  /*  127 */  "_CastP2X__DecodeN_iRegNsrc__",
-  /*  128 */  "_Binary_iRegLsrc_iRegPdst",
-  /*  129 */  "_Binary_iRegLsrc_iRegPsrc",
-  /*  130 */  "_Binary_iRegLsrc_iRegNsrc",
-  /*  131 */  "_Binary_cmpOp_flagsRegSrc",
-  /*  132 */  "_Binary_iRegIdst_iRegIsrc",
-  /*  133 */  "_Binary_iRegIdst_immI16",
-  /*  134 */  "_Binary_iRegLdst_iRegLsrc",
-  /*  135 */  "_Binary_iRegLdst_immL16",
-  /*  136 */  "_Binary_iRegNdst_iRegNsrc",
-  /*  137 */  "_Binary_iRegNdst_immN_0",
-  /*  138 */  "_Binary_iRegPdst_iRegPsrc",
-  /*  139 */  "_Binary_iRegPdst_iRegP_N2P",
-  /*  140 */  "_Binary_iRegPdst_immP_0",
-  /*  141 */  "_Binary_regF_regF",
-  /*  142 */  "_Binary_regD_regD",
-  /*  143 */  "_Binary_iRegLsrc_iRegLsrc",
-  /*  144 */  "_Binary_iRegPsrc_iRegPsrc",
-  /*  145 */  "_Binary_iRegIsrc_iRegIsrc",
-  /*  146 */  "_Binary_iRegIsrc_rarg4RegI",
-  /*  147 */  "_Binary_iRegNsrc_iRegNsrc",
-  /*  148 */  "_AddI_iRegIsrc_iRegIsrc",
-  /*  149 */  "_AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc",
-  /*  150 */  "_AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc",
-  /*  151 */  "_AddL_iRegLsrc_iRegLsrc",
-  /*  152 */  "_AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc",
-  /*  153 */  "_AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc",
-  /*  154 */  "_SubL_iRegLsrc_iRegLsrc",
-  /*  155 */  "_SubL_immL_0_iRegLsrc",
-  /*  156 */  "_AndI_iRegIsrc_immInegpow2",
-  /*  157 */  "_RShiftI_iRegIsrc_uimmI5",
-  /*  158 */  "_AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2",
-  /*  159 */  "_ConvI2L_iRegIsrc_",
-  /*  160 */  "_RShiftL_iRegLsrc_immI",
-  /*  161 */  "_URShiftL_iRegLsrc_immI",
-  /*  162 */  "_CastP2X_iRegP_N2P_",
-  /*  163 */  "_URShiftI_iRegIsrc_immI",
-  /*  164 */  "_LShiftI_iRegIsrc_immI8",
-  /*  165 */  "_URShiftI_iRegIsrc_immI8",
-  /*  166 */  "_AbsF_regF_",
-  /*  167 */  "_AbsD_regD_",
-  /*  168 */  "_ConvF2D_regF_",
-  /*  169 */  "_SqrtD__ConvF2D_regF__",
-  /*  170 */  "_NegF_regF_",
-  /*  171 */  "_Binary__NegF_regF__regF",
-  /*  172 */  "_Binary_regF__NegF_regF_",
-  /*  173 */  "_NegD_regD_",
-  /*  174 */  "_Binary__NegD_regD__regD",
-  /*  175 */  "_Binary_regD__NegD_regD_",
-  /*  176 */  "_AndL_iRegLsrc_immLpow2minus1",
-  /*  177 */  "_OrI_iRegIsrc_iRegIsrc",
-  /*  178 */  "_OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc",
-  /*  179 */  "_OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc",
-  /*  180 */  "_OrL_iRegLsrc_iRegLsrc",
-  /*  181 */  "_XorI_iRegIsrc_iRegIsrc",
-  /*  182 */  "_XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc",
-  /*  183 */  "_XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc",
-  /*  184 */  "_XorL_iRegLsrc_iRegLsrc",
-  /*  185 */  "_XorI_iRegIsrc_immI_minus1",
-  /*  186 */  "_Conv2B_iRegIsrc_",
-  /*  187 */  "_AndI_iRegIsrc_immIpowerOf2",
-  /*  188 */  "_Conv2B_iRegP_N2P_",
-  /*  189 */  "_LShiftI_iRegIsrc_immI_24",
-  /*  190 */  "_LShiftI_iRegIsrc_immI_16",
-  /*  191 */  "_AndI_iRegIsrc_uimmI16",
-  /*  192 */  "_AndL_iRegLsrc_iRegLsrc",
-  /*  193 */  "_AndL_iRegLsrc_uimmL16",
-  /*  194 */  "_CmpU_iRegIsrc_uimmI15",
-  /*  195 */  "_CmpU_iRegIsrc_iRegIsrc",
-  /*  196 */  "_CmpN_iRegNsrc_immN_0",
-  /*  197 */  "_CmpP_iRegP_N2P_immP_0",
-  /*  198 */  "_CastP2X_iRegPsrc_",
-  /*  199 */  "_AndL__CastP2X_iRegPsrc__immLnegpow2",
-  /*  200 */  "_Binary_rarg1RegP_rarg3RegI",
-  /*  201 */  "_Binary_rarg2RegP_rarg4RegI",
-  /*  202 */  "_Binary_rarg1RegP_rarg2RegP",
-  /*  203 */  "_Binary_iRegPsrc_iRegIsrc",
-  /*  204 */  "_AddP_immP_immL",
-  /*  205 */  "_Binary__AddP_immP_immL_immI_1",
-  /*  206 */  "_Binary_rscratch2RegP_immI_1",
-  /*  207 */  "_Binary_iRegPsrc_rscratch1RegI",
-  /*  208 */  "_Binary_iRegPsrc_uimmI15",
-  /*  209 */  "_Binary_iRegPsrc_rscratch2RegI",
-  /*  210 */  "_Binary_rarg2RegP_iRegIsrc",
-  /*  211 */  "_LoadI_indirect_",
-  /*  212 */  "_LoadL_indirect_",
-  /*  213 */  "_LoadUS_indirect_",
-  /*  214 */  "_LoadS_indirect_",
-  /*  215 */  "_ReverseBytesI_iRegIsrc_",
-  /*  216 */  "_ReverseBytesL_iRegLsrc_",
-  /*  217 */  "_ReverseBytesUS_iRegIsrc_",
-  /*  218 */  "_ReverseBytesS_iRegIsrc_",
+  /*  115 */  "_DecodeN_iRegNsrc_",
+  /*  116 */  "_DecodeNKlass_iRegNsrc_",
+  /*  117 */  "_LoadUB_memory_",
+  /*  118 */  "_LoadUS_memory_",
+  /*  119 */  "_LoadI_memory_",
+  /*  120 */  "_ConvI2L__LoadI_memory__",
+  /*  121 */  "_LoadI_memoryAlg4_",
+  /*  122 */  "_LoadN_memory_",
+  /*  123 */  "_LoadNKlass_memory_",
+  /*  124 */  "_LoadP_memoryAlg4_",
+  /*  125 */  "_AddP_indirectMemory_iRegLsrc",
+  /*  126 */  "_ConvL2I_iRegLsrc_",
+  /*  127 */  "_Binary_flagsRegSrc_iRegPsrc",
+  /*  128 */  "_CastP2X__DecodeN_iRegNsrc__",
+  /*  129 */  "_Binary_iRegLsrc_iRegPdst",
+  /*  130 */  "_Binary_iRegLsrc_iRegPsrc",
+  /*  131 */  "_Binary_iRegLsrc_iRegNsrc",
+  /*  132 */  "_Binary_cmpOp_flagsRegSrc",
+  /*  133 */  "_Binary_iRegIdst_iRegIsrc",
+  /*  134 */  "_Binary_iRegIdst_immI16",
+  /*  135 */  "_Binary_iRegLdst_iRegLsrc",
+  /*  136 */  "_Binary_iRegLdst_immL16",
+  /*  137 */  "_Binary_iRegNdst_iRegNsrc",
+  /*  138 */  "_Binary_iRegNdst_immN_0",
+  /*  139 */  "_Binary_iRegPdst_iRegPsrc",
+  /*  140 */  "_Binary_iRegPdst_iRegP_N2P",
+  /*  141 */  "_Binary_iRegPdst_immP_0",
+  /*  142 */  "_Binary_regF_regF",
+  /*  143 */  "_Binary_regD_regD",
+  /*  144 */  "_Binary_iRegIsrc_iRegIsrc",
+  /*  145 */  "_Binary_iRegIsrc_rarg4RegI",
+  /*  146 */  "_Binary_iRegNsrc_iRegNsrc",
+  /*  147 */  "_Binary_iRegLsrc_iRegLsrc",
+  /*  148 */  "_Binary_iRegPsrc_iRegPsrc",
+  /*  149 */  "_AddI_iRegIsrc_iRegIsrc",
+  /*  150 */  "_AddI__AddI_iRegIsrc_iRegIsrc_iRegIsrc",
+  /*  151 */  "_AddI_iRegIsrc__AddI_iRegIsrc_iRegIsrc",
+  /*  152 */  "_AddL_iRegLsrc_iRegLsrc",
+  /*  153 */  "_AddL__AddL_iRegLsrc_iRegLsrc_iRegLsrc",
+  /*  154 */  "_AddL_iRegLsrc__AddL_iRegLsrc_iRegLsrc",
+  /*  155 */  "_SubL_iRegLsrc_iRegLsrc",
+  /*  156 */  "_SubL_immL_0_iRegLsrc",
+  /*  157 */  "_AndI_iRegIsrc_immInegpow2",
+  /*  158 */  "_RShiftI_iRegIsrc_uimmI5",
+  /*  159 */  "_AndI__RShiftI_iRegIsrc_uimmI5_immInegpow2",
+  /*  160 */  "_ConvI2L_iRegIsrc_",
+  /*  161 */  "_RShiftL_iRegLsrc_immI",
+  /*  162 */  "_URShiftL_iRegLsrc_immI",
+  /*  163 */  "_CastP2X_iRegP_N2P_",
+  /*  164 */  "_URShiftI_iRegIsrc_immI",
+  /*  165 */  "_LShiftI_iRegIsrc_immI8",
+  /*  166 */  "_URShiftI_iRegIsrc_immI8",
+  /*  167 */  "_AbsF_regF_",
+  /*  168 */  "_AbsD_regD_",
+  /*  169 */  "_NegF_regF_",
+  /*  170 */  "_Binary__NegF_regF__regF",
+  /*  171 */  "_Binary_regF__NegF_regF_",
+  /*  172 */  "_NegD_regD_",
+  /*  173 */  "_Binary__NegD_regD__regD",
+  /*  174 */  "_Binary_regD__NegD_regD_",
+  /*  175 */  "_AndL_iRegLsrc_immLpow2minus1",
+  /*  176 */  "_OrI_iRegIsrc_iRegIsrc",
+  /*  177 */  "_OrI__OrI_iRegIsrc_iRegIsrc_iRegIsrc",
+  /*  178 */  "_OrI_iRegIsrc__OrI_iRegIsrc_iRegIsrc",
+  /*  179 */  "_OrL_iRegLsrc_iRegLsrc",
+  /*  180 */  "_XorI_iRegIsrc_iRegIsrc",
+  /*  181 */  "_XorI__XorI_iRegIsrc_iRegIsrc_iRegIsrc",
+  /*  182 */  "_XorI_iRegIsrc__XorI_iRegIsrc_iRegIsrc",
+  /*  183 */  "_XorL_iRegLsrc_iRegLsrc",
+  /*  184 */  "_XorI_iRegIsrc_immI_minus1",
+  /*  185 */  "_Conv2B_iRegIsrc_",
+  /*  186 */  "_AndI_iRegIsrc_immIpowerOf2",
+  /*  187 */  "_Conv2B_iRegP_N2P_",
+  /*  188 */  "_LShiftI_iRegIsrc_immI_24",
+  /*  189 */  "_LShiftI_iRegIsrc_immI_16",
+  /*  190 */  "_AndI_iRegIsrc_uimmI16",
+  /*  191 */  "_AndL_iRegLsrc_iRegLsrc",
+  /*  192 */  "_AndL_iRegLsrc_uimmL16",
+  /*  193 */  "_CmpU_iRegIsrc_uimmI15",
+  /*  194 */  "_CmpU_iRegIsrc_iRegIsrc",
+  /*  195 */  "_CmpN_iRegNsrc_immN_0",
+  /*  196 */  "_CmpP_iRegP_N2P_immP_0",
+  /*  197 */  "_CastP2X_iRegPsrc_",
+  /*  198 */  "_AndL__CastP2X_iRegPsrc__immLnegpow2",
+  /*  199 */  "_Binary_rarg1RegP_rarg3RegI",
+  /*  200 */  "_Binary_rarg2RegP_rarg4RegI",
+  /*  201 */  "_Binary_rarg1RegP_rarg2RegP",
+  /*  202 */  "_Binary_iRegPsrc_iRegIsrc",
+  /*  203 */  "_AddP_immP_immL",
+  /*  204 */  "_Binary__AddP_immP_immL_immI_1",
+  /*  205 */  "_Binary_rscratch2RegP_immI_1",
+  /*  206 */  "_Binary_iRegPsrc_rscratch1RegI",
+  /*  207 */  "_Binary_iRegPsrc_uimmI15",
+  /*  208 */  "_Binary_iRegPsrc_rscratch2RegI",
+  /*  209 */  "_Binary_rarg2RegP_iRegIsrc",
+  /*  210 */  "_LoadI_indirect_",
+  /*  211 */  "_LoadL_indirect_",
+  /*  212 */  "_LoadUS_indirect_",
+  /*  213 */  "_LoadS_indirect_",
+  /*  214 */  "_ReverseBytesI_iRegIsrc_",
+  /*  215 */  "_ReverseBytesL_iRegLsrc_",
+  /*  216 */  "_ReverseBytesUS_iRegIsrc_",
+  /*  217 */  "_ReverseBytesS_iRegIsrc_",
+  /*  218 */  "_Binary_vecX_vecX",
+  /*  219 */  "_NegVF_vecX_",
+  /*  220 */  "_Binary__NegVF_vecX__vecX",
+  /*  221 */  "_Binary_vecX__NegVF_vecX_",
+  /*  222 */  "_NegVD_vecX_",
+  /*  223 */  "_Binary__NegVD_vecX__vecX",
+  /*  224 */  "_Binary_vecX__NegVD_vecX_",
   // last internally defined operand
-  /*  219 */  "regI_to_stkI",
-  /*  220 */  "regL_to_stkL",
-  /*  221 */  "loadConI16",
-  /*  222 */  "loadConIhi16",
-  /*  223 */  "loadConI_Ex",
-  /*  224 */  "loadConL16",
-  /*  225 */  "loadConL32hi16",
-  /*  226 */  "loadConL32_Ex",
-  /*  227 */  "loadConLhighest16_Ex",
-  /*  228 */  "loadConL_Ex",
-  /*  229 */  "loadConN0",
-  /*  230 */  "loadConN_Ex",
-  /*  231 */  "loadConNKlass_hi",
-  /*  232 */  "loadConNKlass_mask",
-  /*  233 */  "loadConNKlass_lo",
-  /*  234 */  "loadConNKlass_Ex",
-  /*  235 */  "loadConP0or1",
-  /*  236 */  "loadConP",
-  /*  237 */  "loadConP_lo",
-  /*  238 */  "loadConP_Ex",
-  /*  239 */  "loadConF_Ex",
-  /*  240 */  "loadConD_Ex",
-  /*  241 */  "stkI_to_regI",
-  /*  242 */  "stkL_to_regL",
-  /*  243 */  "convB2I_reg_2",
-  /*  244 */  "loadP2X",
-  /*  245 */  "loadToc_lo",
-  /*  246 */  "loadConN_hi",
-  /*  247 */  "clearMs32b",
-  /*  248 */  "storeLConditional_regP_regL_regL",
-  /*  249 */  "storePConditional_regP_regP_regP",
-  /*  250 */  "signmask32I_regI",
-  /*  251 */  "absI_reg_Ex",
-  /*  252 */  "signmask64I_regL",
-  /*  253 */  "signmask64L_regL",
-  /*  254 */  "absF_reg",
-  /*  255 */  "absD_reg",
-  /*  256 */  "negF_reg",
-  /*  257 */  "negD_reg",
-  /*  258 */  "negF_absF_reg",
-  /*  259 */  "negD_absD_reg",
-  /*  260 */  "roundDouble_nop",
-  /*  261 */  "roundFloat_nop",
-  /*  262 */  "moveL2D_reg",
-  /*  263 */  "moveI2D_reg",
-  /*  264 */  "moveF2I_stack_reg",
-  /*  265 */  "moveI2F_stack_reg",
-  /*  266 */  "moveD2L_stack_reg",
-  /*  267 */  "moveL2D_stack_reg",
-  /*  268 */  "moveReg",
-  /*  269 */  "castX2P",
-  /*  270 */  "castP2X",
-  /*  271 */  "castPP",
-  /*  272 */  "castII",
-  /*  273 */  "checkCastPP",
-  /*  274 */  "convI2Bool_reg__cntlz_Ex",
-  /*  275 */  "convP2Bool_reg__cntlz_Ex",
-  /*  276 */  "extsh",
-  /*  277 */  "convD2IRaw_regD",
-  /*  278 */  "convF2IRaw_regF",
-  /*  279 */  "convF2LRaw_regF",
-  /*  280 */  "convD2LRaw_regD",
-  /*  281 */  "convL2DRaw_regD",
-  /*  282 */  "convL2FRaw_regF",
-  /*  283 */  "cmpI_reg_reg",
-  /*  284 */  "cmpI_reg_imm16",
-  /*  285 */  "testI_reg_imm",
-  /*  286 */  "cmpL_reg_reg",
-  /*  287 */  "cmpL_reg_imm16",
-  /*  288 */  "cmpUL_reg_reg",
-  /*  289 */  "cmpUL_reg_imm16",
-  /*  290 */  "testL_reg_reg",
-  /*  291 */  "testL_reg_imm",
-  /*  292 */  "cmovI_conIvalueMinus1_conIvalue1",
-  /*  293 */  "cmovI_conIvalueMinus1_conIvalue0_conIvalue1_Ex",
-  /*  294 */  "compU_reg_reg",
-  /*  295 */  "compU_reg_uimm16",
-  /*  296 */  "cmpN_reg_reg",
-  /*  297 */  "cmpN_reg_imm0",
-  /*  298 */  "cmpP_reg_reg",
-  /*  299 */  "cmpP_reg_null",
-  /*  300 */  "cmpP_reg_imm16",
-  /*  301 */  "cmpFUnordered_reg_reg",
-  /*  302 */  "cmov_bns_less",
-  /*  303 */  "cmpF_reg_reg_Ex",
-  /*  304 */  "cmpDUnordered_reg_reg",
-  /*  305 */  "cmpD_reg_reg_Ex",
-  /*  306 */  "cmpFastLock",
-  /*  307 */  "cmpFastLock_tm",
-  /*  308 */  "cmpFastUnlock",
-  /*  309 */  "cmpFastUnlock_tm",
-  /*  310 */  "popCountI",
-  /*  311 */  "popCountL",
-  /*  312 */  "countLeadingZerosI",
-  /*  313 */  "countLeadingZerosL",
-  /*  314 */  "countLeadingZerosP",
-  /*  315 */  "countTrailingZerosI_Ex",
-  /*  316 */  "countTrailingZerosL_Ex",
-  /*  317 */  "mtvsrwz",
-  /*  318 */  "repl32",
-  /*  319 */  "repl48",
-  /*  320 */  "repl56",
-  /*  321 */  "overflowAddL_reg_reg",
-  /*  322 */  "overflowSubL_reg_reg",
-  /*  323 */  "overflowNegL_reg",
-  /*  324 */  "overflowMulL_reg_reg",
-  /*  325 */  "mtvsrd",
-  /*  326 */  "CallLeafDirect_mtctr",
-  /*  327 */  "tlsLoadP",
-  /*  328 */  "loadUB_indirect",
-  /*  329 */  "loadUB_indirect_ac",
-  /*  330 */  "loadB_indirect_Ex",
-  /*  331 */  "loadB_indirect_ac_Ex",
-  /*  332 */  "loadUB_indOffset16",
-  /*  333 */  "loadUB_indOffset16_ac",
-  /*  334 */  "loadB_indOffset16_Ex",
-  /*  335 */  "loadB_indOffset16_ac_Ex",
-  /*  336 */  "loadUB",
-  /*  337 */  "loadUB_ac",
-  /*  338 */  "loadUB2L",
-  /*  339 */  "loadUB2L_ac",
-  /*  340 */  "loadS",
-  /*  341 */  "loadS_ac",
-  /*  342 */  "loadUS",
-  /*  343 */  "loadUS_ac",
-  /*  344 */  "loadUS2L",
-  /*  345 */  "loadUS2L_ac",
-  /*  346 */  "loadI",
-  /*  347 */  "loadI_ac",
-  /*  348 */  "loadUI2L",
-  /*  349 */  "loadI2L",
-  /*  350 */  "loadI2L_ac",
-  /*  351 */  "loadL",
-  /*  352 */  "loadL_ac",
-  /*  353 */  "loadL_unaligned",
-  /*  354 */  "loadV8",
-  /*  355 */  "loadV16",
-  /*  356 */  "loadRange",
-  /*  357 */  "loadN",
-  /*  358 */  "loadN_ac",
-  /*  359 */  "loadN2P_unscaled",
-  /*  360 */  "loadN2P_klass_unscaled",
-  /*  361 */  "loadP",
-  /*  362 */  "loadP_ac",
-  /*  363 */  "loadNKlass",
-  /*  364 */  "loadKlass",
-  /*  365 */  "loadF",
-  /*  366 */  "loadF_ac",
-  /*  367 */  "loadD",
-  /*  368 */  "loadD_ac",
-  /*  369 */  "loadD_unaligned",
-  /*  370 */  "loadToc_hi",
-  /*  371 */  "loadConI32_lo16",
-  /*  372 */  "loadConL32_lo16",
-  /*  373 */  "loadConL",
-  /*  374 */  "loadConL_hi",
-  /*  375 */  "loadConL_lo",
-  /*  376 */  "loadConN_lo",
-  /*  377 */  "rldicl",
-  /*  378 */  "loadBase",
-  /*  379 */  "loadConP_hi",
-  /*  380 */  "loadConF",
-  /*  381 */  "loadConFComp",
-  /*  382 */  "loadConD",
-  /*  383 */  "loadConDComp",
-  /*  384 */  "prefetch_alloc_zero",
-  /*  385 */  "prefetch_alloc_zero_no_offset",
-  /*  386 */  "prefetch_alloc",
-  /*  387 */  "prefetch_alloc_no_offset",
-  /*  388 */  "storeB",
-  /*  389 */  "storeC",
-  /*  390 */  "storeI",
-  /*  391 */  "storeI_convL2I",
-  /*  392 */  "storeL",
-  /*  393 */  "storeA8B",
-  /*  394 */  "storeV16",
-  /*  395 */  "storeN",
-  /*  396 */  "storeNKlass",
-  /*  397 */  "storeP",
-  /*  398 */  "storeF",
-  /*  399 */  "storeD",
-  /*  400 */  "storeCM_CMS",
-  /*  401 */  "storeCM_CMS_ExEx",
-  /*  402 */  "storeCM_G1",
-  /*  403 */  "encodeP_shift",
-  /*  404 */  "encodeP_sub",
-  /*  405 */  "cond_sub_base",
-  /*  406 */  "cond_set_0_oop",
-  /*  407 */  "encodeP_Disjoint",
-  /*  408 */  "encodeP_Ex",
-  /*  409 */  "encodeP_not_null_Ex",
-  /*  410 */  "encodeP_not_null_base_null",
-  /*  411 */  "encodeP_narrow_oop_shift_0",
-  /*  412 */  "decodeN_shift",
-  /*  413 */  "decodeN_add",
-  /*  414 */  "cond_add_base",
-  /*  415 */  "cond_set_0_ptr",
-  /*  416 */  "decodeN_Ex",
-  /*  417 */  "decodeN_nullBase",
-  /*  418 */  "decodeN_mergeDisjoint",
-  /*  419 */  "decodeN_Disjoint_notNull_Ex",
-  /*  420 */  "decodeN_Disjoint_isel_Ex",
-  /*  421 */  "decodeN_notNull_addBase_Ex",
-  /*  422 */  "decodeN_unscaled",
-  /*  423 */  "decodeN2I_unscaled",
-  /*  424 */  "encodePKlass_shift",
-  /*  425 */  "encodePKlass_sub_base",
-  /*  426 */  "encodePKlass_Disjoint",
-  /*  427 */  "encodePKlass_not_null_Ex",
-  /*  428 */  "encodePKlass_not_null_ExEx",
-  /*  429 */  "decodeNKlass_shift",
-  /*  430 */  "decodeNKlass_add_base",
-  /*  431 */  "decodeNKlass_notNull_addBase_Ex",
-  /*  432 */  "decodeNKlass_notNull_addBase_ExEx",
-  /*  433 */  "membar_acquire",
-  /*  434 */  "unnecessary_membar_acquire",
-  /*  435 */  "membar_acquire_lock",
-  /*  436 */  "membar_release",
-  /*  437 */  "membar_release_0",
-  /*  438 */  "membar_storestore",
-  /*  439 */  "membar_release_lock",
-  /*  440 */  "membar_volatile",
-  /*  441 */  "membar_CPUOrder",
-  /*  442 */  "cmovI_reg_isel",
-  /*  443 */  "cmovI_reg",
-  /*  444 */  "cmovI_imm",
-  /*  445 */  "cmovL_reg_isel",
-  /*  446 */  "cmovL_reg",
-  /*  447 */  "cmovL_imm",
-  /*  448 */  "cmovN_reg_isel",
-  /*  449 */  "cmovN_reg",
-  /*  450 */  "cmovN_imm",
-  /*  451 */  "cmovP_reg_isel",
-  /*  452 */  "cmovP_reg",
-  /*  453 */  "cmovP_imm",
-  /*  454 */  "cmovF_reg",
-  /*  455 */  "cmovD_reg",
-  /*  456 */  "loadPLocked",
-  /*  457 */  "compareAndSwapB_regP_regI_regI",
-  /*  458 */  "compareAndSwapB4_regP_regI_regI",
-  /*  459 */  "compareAndSwapS_regP_regI_regI",
-  /*  460 */  "compareAndSwapS4_regP_regI_regI",
-  /*  461 */  "compareAndSwapI_regP_regI_regI",
-  /*  462 */  "compareAndSwapN_regP_regN_regN",
-  /*  463 */  "compareAndSwapL_regP_regL_regL",
-  /*  464 */  "compareAndSwapP_regP_regP_regP",
-  /*  465 */  "weakCompareAndSwapB_regP_regI_regI",
-  /*  466 */  "weakCompareAndSwapB4_regP_regI_regI",
-  /*  467 */  "weakCompareAndSwapB_acq_regP_regI_regI",
-  /*  468 */  "weakCompareAndSwapB4_acq_regP_regI_regI",
-  /*  469 */  "weakCompareAndSwapS_regP_regI_regI",
-  /*  470 */  "weakCompareAndSwapS4_regP_regI_regI",
-  /*  471 */  "weakCompareAndSwapS_acq_regP_regI_regI",
-  /*  472 */  "weakCompareAndSwapS4_acq_regP_regI_regI",
-  /*  473 */  "weakCompareAndSwapI_regP_regI_regI",
-  /*  474 */  "weakCompareAndSwapI_acq_regP_regI_regI",
-  /*  475 */  "weakCompareAndSwapN_regP_regN_regN",
-  /*  476 */  "weakCompareAndSwapN_acq_regP_regN_regN",
-  /*  477 */  "weakCompareAndSwapL_regP_regL_regL",
-  /*  478 */  "weakCompareAndSwapL_acq_regP_regL_regL",
-  /*  479 */  "weakCompareAndSwapP_regP_regP_regP",
-  /*  480 */  "weakCompareAndSwapP_acq_regP_regP_regP",
-  /*  481 */  "compareAndExchangeB_regP_regI_regI",
-  /*  482 */  "compareAndExchangeB4_regP_regI_regI",
-  /*  483 */  "compareAndExchangeB_acq_regP_regI_regI",
-  /*  484 */  "compareAndExchangeB4_acq_regP_regI_regI",
-  /*  485 */  "compareAndExchangeS_regP_regI_regI",
-  /*  486 */  "compareAndExchangeS4_regP_regI_regI",
-  /*  487 */  "compareAndExchangeS_acq_regP_regI_regI",
-  /*  488 */  "compareAndExchangeS4_acq_regP_regI_regI",
-  /*  489 */  "compareAndExchangeI_regP_regI_regI",
-  /*  490 */  "compareAndExchangeI_acq_regP_regI_regI",
-  /*  491 */  "compareAndExchangeN_regP_regN_regN",
-  /*  492 */  "compareAndExchangeN_acq_regP_regN_regN",
-  /*  493 */  "compareAndExchangeL_regP_regL_regL",
-  /*  494 */  "compareAndExchangeL_acq_regP_regL_regL",
-  /*  495 */  "compareAndExchangeP_regP_regP_regP",
-  /*  496 */  "compareAndExchangeP_acq_regP_regP_regP",
-  /*  497 */  "getAndAddB",
-  /*  498 */  "getAndAddB4",
-  /*  499 */  "getAndAddS",
-  /*  500 */  "getAndAddS4",
-  /*  501 */  "getAndAddI",
-  /*  502 */  "getAndAddL",
-  /*  503 */  "getAndSetB",
-  /*  504 */  "getAndSetB4",
-  /*  505 */  "getAndSetS",
-  /*  506 */  "getAndSetS4",
-  /*  507 */  "getAndSetI",
-  /*  508 */  "getAndSetL",
-  /*  509 */  "getAndSetP",
-  /*  510 */  "getAndSetN",
-  /*  511 */  "addI_reg_reg",
-  /*  512 */  "addI_reg_reg_2",
-  /*  513 */  "tree_addI_addI_addI_reg_reg_Ex",
-  /*  514 */  "tree_addI_addI_addI_reg_reg_Ex_1",
-  /*  515 */  "tree_addI_addI_addI_reg_reg_Ex_0",
-  /*  516 */  "tree_addI_addI_addI_reg_reg_Ex_2",
-  /*  517 */  "addI_reg_imm16",
-  /*  518 */  "addI_reg_immhi16",
-  /*  519 */  "addL_reg_reg",
-  /*  520 */  "addL_reg_reg_2",
-  /*  521 */  "tree_addL_addL_addL_reg_reg_Ex",
-  /*  522 */  "tree_addL_addL_addL_reg_reg_Ex_1",
-  /*  523 */  "tree_addL_addL_addL_reg_reg_Ex_0",
-  /*  524 */  "tree_addL_addL_addL_reg_reg_Ex_2",
-  /*  525 */  "addI_regL_regL",
-  /*  526 */  "addL_reg_imm16",
-  /*  527 */  "addL_reg_immhi16",
-  /*  528 */  "addP_reg_reg",
-  /*  529 */  "addP_reg_imm16",
-  /*  530 */  "addP_reg_immhi16",
-  /*  531 */  "subI_reg_reg",
-  /*  532 */  "subI_imm16_reg",
-  /*  533 */  "negI_regI",
-  /*  534 */  "subL_reg_reg",
-  /*  535 */  "subI_regL_regL",
-  /*  536 */  "negL_reg_reg",
-  /*  537 */  "negI_con0_regL",
-  /*  538 */  "mulI_reg_reg",
-  /*  539 */  "mulI_reg_imm16",
-  /*  540 */  "mulL_reg_reg",
-  /*  541 */  "mulHighL_reg_reg",
-  /*  542 */  "mulL_reg_imm16",
-  /*  543 */  "divI_reg_immIvalueMinus1",
-  /*  544 */  "divI_reg_regnotMinus1",
-  /*  545 */  "cmovI_bne_negI_reg",
-  /*  546 */  "divI_reg_reg_Ex",
-  /*  547 */  "divL_reg_immLvalueMinus1",
-  /*  548 */  "divL_reg_regnotMinus1",
-  /*  549 */  "cmovL_bne_negL_reg",
-  /*  550 */  "divL_reg_reg_Ex",
-  /*  551 */  "modI_reg_reg_Ex",
-  /*  552 */  "modL_reg_reg_Ex",
-  /*  553 */  "maskI_reg_imm",
-  /*  554 */  "lShiftI_reg_reg",
-  /*  555 */  "lShiftI_reg_reg_Ex",
-  /*  556 */  "lShiftI_reg_imm",
-  /*  557 */  "lShiftI_andI_immInegpow2_imm5",
-  /*  558 */  "lShiftI_andI_immInegpow2_rShiftI_imm5",
-  /*  559 */  "lShiftL_regL_regI",
-  /*  560 */  "lShiftL_regL_regI_Ex",
-  /*  561 */  "lshiftL_regL_immI",
-  /*  562 */  "lShiftL_regI_immGE32",
-  /*  563 */  "scaledPositiveI2L_lShiftL_convI2L_reg_imm6",
-  /*  564 */  "arShiftI_reg_reg",
-  /*  565 */  "arShiftI_reg_reg_Ex",
-  /*  566 */  "arShiftI_reg_imm",
-  /*  567 */  "arShiftL_regL_regI",
-  /*  568 */  "arShiftL_regL_regI_Ex",
-  /*  569 */  "arShiftL_regL_immI",
-  /*  570 */  "convL2I_arShiftL_regL_immI",
-  /*  571 */  "urShiftI_reg_reg",
-  /*  572 */  "urShiftI_reg_reg_Ex",
-  /*  573 */  "urShiftI_reg_imm",
-  /*  574 */  "urShiftL_regL_regI",
-  /*  575 */  "urShiftL_regL_regI_Ex",
-  /*  576 */  "urShiftL_regL_immI",
-  /*  577 */  "convL2I_urShiftL_regL_immI",
-  /*  578 */  "shrP_convP2X_reg_imm6",
-  /*  579 */  "andI_urShiftI_regI_immI_immIpow2minus1",
-  /*  580 */  "andL_urShiftL_regL_immI_immLpow2minus1",
-  /*  581 */  "sxtI_reg",
-  /*  582 */  "rotlI_reg_immi8",
-  /*  583 */  "rotlI_reg_immi8_0",
-  /*  584 */  "rotrI_reg_immi8",
-  /*  585 */  "rotrI_reg_immi8_0",
-  /*  586 */  "addF_reg_reg",
-  /*  587 */  "addD_reg_reg",
-  /*  588 */  "subF_reg_reg",
-  /*  589 */  "subD_reg_reg",
-  /*  590 */  "mulF_reg_reg",
-  /*  591 */  "mulD_reg_reg",
-  /*  592 */  "divF_reg_reg",
-  /*  593 */  "divD_reg_reg",
-  /*  594 */  "sqrtD_reg",
-  /*  595 */  "sqrtF_reg",
-  /*  596 */  "maddF_reg_reg",
-  /*  597 */  "maddD_reg_reg",
-  /*  598 */  "mnsubF_reg_reg",
-  /*  599 */  "mnsubF_reg_reg_0",
-  /*  600 */  "mnsubD_reg_reg",
-  /*  601 */  "mnsubD_reg_reg_0",
-  /*  602 */  "mnaddF_reg_reg",
-  /*  603 */  "mnaddF_reg_reg_0",
-  /*  604 */  "mnaddD_reg_reg",
-  /*  605 */  "mnaddD_reg_reg_0",
-  /*  606 */  "msubF_reg_reg",
-  /*  607 */  "msubD_reg_reg",
-  /*  608 */  "andI_reg_reg",
-  /*  609 */  "andI_reg_immIhi16",
-  /*  610 */  "andI_reg_uimm16",
-  /*  611 */  "andI_reg_immInegpow2",
-  /*  612 */  "andI_reg_immIpow2minus1",
-  /*  613 */  "andI_reg_immIpowerOf2",
-  /*  614 */  "andL_reg_reg",
-  /*  615 */  "andL_reg_uimm16",
-  /*  616 */  "andL_reg_immLnegpow2",
-  /*  617 */  "andL_reg_immLpow2minus1",
-  /*  618 */  "convL2I_andL_reg_immLpow2minus1",
-  /*  619 */  "orI_reg_reg",
-  /*  620 */  "orI_reg_reg_2",
-  /*  621 */  "tree_orI_orI_orI_reg_reg_Ex",
-  /*  622 */  "tree_orI_orI_orI_reg_reg_Ex_1",
-  /*  623 */  "tree_orI_orI_orI_reg_reg_Ex_0",
-  /*  624 */  "tree_orI_orI_orI_reg_reg_Ex_2",
-  /*  625 */  "orI_reg_uimm16",
-  /*  626 */  "orL_reg_reg",
-  /*  627 */  "orI_regL_regL",
-  /*  628 */  "orL_reg_uimm16",
-  /*  629 */  "xorI_reg_reg",
-  /*  630 */  "xorI_reg_reg_2",
-  /*  631 */  "tree_xorI_xorI_xorI_reg_reg_Ex",
-  /*  632 */  "tree_xorI_xorI_xorI_reg_reg_Ex_1",
-  /*  633 */  "tree_xorI_xorI_xorI_reg_reg_Ex_0",
-  /*  634 */  "tree_xorI_xorI_xorI_reg_reg_Ex_2",
-  /*  635 */  "xorI_reg_uimm16",
-  /*  636 */  "xorL_reg_reg",
-  /*  637 */  "xorI_regL_regL",
-  /*  638 */  "xorL_reg_uimm16",
-  /*  639 */  "notI_reg",
-  /*  640 */  "notL_reg",
-  /*  641 */  "andcI_reg_reg",
-  /*  642 */  "andcI_reg_reg_0",
-  /*  643 */  "andcL_reg_reg",
-  /*  644 */  "moveF2I_reg_stack",
-  /*  645 */  "moveI2F_reg_stack",
-  /*  646 */  "moveF2L_reg_stack",
-  /*  647 */  "moveD2L_reg_stack",
-  /*  648 */  "moveL2D_reg_stack",
-  /*  649 */  "convI2Bool_reg__cmove",
-  /*  650 */  "xorI_convI2Bool_reg_immIvalue1__cntlz_Ex",
-  /*  651 */  "xorI_convI2Bool_reg_immIvalue1__cmove",
-  /*  652 */  "convI2Bool_andI_reg_immIpowerOf2",
-  /*  653 */  "convP2Bool_reg__cmove",
-  /*  654 */  "xorI_convP2Bool_reg__cntlz_Ex",
-  /*  655 */  "xorI_convP2Bool_reg_immIvalue1__cmove",
-  /*  656 */  "cmpLTMask_reg_reg_Ex",
-  /*  657 */  "cmpLTMask_reg_immI0",
-  /*  658 */  "convB2I_reg",
-  /*  659 */  "convS2I_reg",
-  /*  660 */  "sxtI_L2L_reg",
-  /*  661 */  "convL2I_reg",
-  /*  662 */  "cmovI_bso_stackSlotL",
-  /*  663 */  "cmovI_bso_reg",
-  /*  664 */  "cmovI_bso_stackSlotL_conLvalue0_Ex",
-  /*  665 */  "cmovI_bso_reg_conLvalue0_Ex",
-  /*  666 */  "convD2I_reg_ExEx",
-  /*  667 */  "convD2I_reg_mffprd_ExEx",
-  /*  668 */  "convF2I_regF_ExEx",
-  /*  669 */  "convF2I_regF_mffprd_ExEx",
-  /*  670 */  "convI2L_reg",
-  /*  671 */  "zeroExtendL_regI",
-  /*  672 */  "zeroExtendL_regL",
-  /*  673 */  "cmovL_bso_stackSlotL",
-  /*  674 */  "cmovL_bso_reg",
-  /*  675 */  "cmovL_bso_stackSlotL_conLvalue0_Ex",
-  /*  676 */  "cmovL_bso_reg_conLvalue0_Ex",
-  /*  677 */  "convF2L_reg_ExEx",
-  /*  678 */  "convF2L_reg_mffprd_ExEx",
-  /*  679 */  "convD2L_reg_ExEx",
-  /*  680 */  "convD2L_reg_mffprd_ExEx",
-  /*  681 */  "convD2F_reg",
-  /*  682 */  "convI2F_ireg_Ex",
-  /*  683 */  "convI2F_ireg_fcfids_Ex",
-  /*  684 */  "convI2F_ireg_mtfprd_Ex",
-  /*  685 */  "convL2F_ireg_fcfids_Ex",
-  /*  686 */  "convL2F_ireg_mtfprd_Ex",
-  /*  687 */  "convI2D_reg_Ex",
-  /*  688 */  "convI2D_reg_mtfprd_Ex",
-  /*  689 */  "convL2D_reg_Ex",
-  /*  690 */  "convL2D_reg_mtfprd_Ex",
-  /*  691 */  "convF2D_reg",
-  /*  692 */  "cmpL3_reg_reg_ExEx",
-  /*  693 */  "rangeCheck_iReg_uimm15",
-  /*  694 */  "rangeCheck_iReg_iReg",
-  /*  695 */  "rangeCheck_uimm15_iReg",
-  /*  696 */  "zeroCheckN_iReg_imm0",
-  /*  697 */  "zeroCheckP_reg_imm0",
-  /*  698 */  "cmpF3_reg_reg_ExEx",
-  /*  699 */  "cmpD3_reg_reg_ExEx",
-  /*  700 */  "branch",
-  /*  701 */  "branchCon",
-  /*  702 */  "branchConFar",
-  /*  703 */  "branchConSched",
-  /*  704 */  "branchLoopEnd",
-  /*  705 */  "branchLoopEndFar",
-  /*  706 */  "branchLoopEndSched",
-  /*  707 */  "partialSubtypeCheck",
-  /*  708 */  "align_addr",
-  /*  709 */  "array_size",
-  /*  710 */  "inlineCallClearArrayShort",
-  /*  711 */  "inlineCallClearArrayLarge",
-  /*  712 */  "inlineCallClearArray",
-  /*  713 */  "string_compareL",
-  /*  714 */  "string_compareU",
-  /*  715 */  "string_compareLU",
-  /*  716 */  "string_compareUL",
-  /*  717 */  "string_equalsL",
-  /*  718 */  "string_equalsU",
-  /*  719 */  "array_equalsB",
-  /*  720 */  "array_equalsC",
-  /*  721 */  "indexOf_imm1_char_U",
-  /*  722 */  "indexOf_imm1_char_L",
-  /*  723 */  "indexOf_imm1_char_UL",
-  /*  724 */  "indexOf_imm1_U",
-  /*  725 */  "indexOf_imm1_L",
-  /*  726 */  "indexOf_imm1_UL",
-  /*  727 */  "indexOfChar_U",
-  /*  728 */  "indexOf_imm_U",
-  /*  729 */  "indexOf_imm_L",
-  /*  730 */  "indexOf_imm_UL",
-  /*  731 */  "indexOf_U",
-  /*  732 */  "indexOf_L",
-  /*  733 */  "indexOf_UL",
-  /*  734 */  "string_compress",
-  /*  735 */  "string_inflate",
-  /*  736 */  "has_negatives",
-  /*  737 */  "encode_iso_array",
-  /*  738 */  "minI_reg_reg_Ex",
-  /*  739 */  "minI_reg_reg_isel",
-  /*  740 */  "maxI_reg_reg_Ex",
-  /*  741 */  "maxI_reg_reg_isel",
-  /*  742 */  "insrwi_a",
-  /*  743 */  "insrwi",
-  /*  744 */  "bytes_reverse_int_Ex",
-  /*  745 */  "bytes_reverse_long_Ex",
-  /*  746 */  "bytes_reverse_ushort_Ex",
-  /*  747 */  "bytes_reverse_short_Ex",
-  /*  748 */  "loadI_reversed",
-  /*  749 */  "loadL_reversed",
-  /*  750 */  "loadUS_reversed",
-  /*  751 */  "loadS_reversed",
-  /*  752 */  "storeI_reversed",
-  /*  753 */  "storeL_reversed",
-  /*  754 */  "storeUS_reversed",
-  /*  755 */  "storeS_reversed",
-  /*  756 */  "xxspltw",
-  /*  757 */  "repl8B_reg_Ex",
-  /*  758 */  "repl8B_immI0",
-  /*  759 */  "repl8B_immIminus1",
-  /*  760 */  "repl16B_reg_Ex",
-  /*  761 */  "repl16B_immI0",
-  /*  762 */  "repl16B_immIminus1",
-  /*  763 */  "repl4S_reg_Ex",
-  /*  764 */  "repl4S_immI0",
-  /*  765 */  "repl4S_immIminus1",
-  /*  766 */  "repl8S_reg_Ex",
-  /*  767 */  "repl8S_immI0",
-  /*  768 */  "repl8S_immIminus1",
-  /*  769 */  "repl2I_reg_Ex",
-  /*  770 */  "repl2I_immI0",
-  /*  771 */  "repl2I_immIminus1",
-  /*  772 */  "repl4I_reg_Ex",
-  /*  773 */  "repl4I_immI0",
-  /*  774 */  "repl4I_immIminus1",
-  /*  775 */  "repl2F_reg_Ex",
-  /*  776 */  "repl2F_immF_Ex",
-  /*  777 */  "repl2F_immF0",
-  /*  778 */  "repl4F_reg_Ex",
-  /*  779 */  "repl4F_immF_Ex",
-  /*  780 */  "repl4F_immF0",
-  /*  781 */  "repl2D_reg_Ex",
-  /*  782 */  "repl2D_immI0",
-  /*  783 */  "repl2D_immIminus1",
-  /*  784 */  "xxspltd",
-  /*  785 */  "xxpermdi",
-  /*  786 */  "repl2L_reg_Ex",
-  /*  787 */  "repl2L_immI0",
-  /*  788 */  "repl2L_immIminus1",
-  /*  789 */  "safePoint_poll",
-  /*  790 */  "CallStaticJavaDirect",
-  /*  791 */  "CallDynamicJavaDirectSched",
-  /*  792 */  "CallDynamicJavaDirectSched_Ex",
-  /*  793 */  "CallDynamicJavaDirect",
-  /*  794 */  "CallRuntimeDirect",
-  /*  795 */  "CallLeafDirect",
-  /*  796 */  "CallLeafDirect_Ex",
-  /*  797 */  "CallLeafNoFPDirect_Ex",
-  /*  798 */  "TailCalljmpInd",
-  /*  799 */  "Ret",
-  /*  800 */  "tailjmpInd",
-  /*  801 */  "CreateException",
-  /*  802 */  "RethrowException",
-  /*  803 */  "ShouldNotReachHere",
-  /*  804 */  "endGroup",
-  /*  805 */  "fxNop",
-  /*  806 */  "fpNop0",
-  /*  807 */  "fpNop1",
-  /*  808 */  "brNop0",
-  /*  809 */  "brNop1",
-  /*  810 */  "brNop2",
+  /*  225 */  "regI_to_stkI",
+  /*  226 */  "regL_to_stkL",
+  /*  227 */  "loadConI16",
+  /*  228 */  "loadConIhi16",
+  /*  229 */  "loadConI32",
+  /*  230 */  "loadConI_Ex",
+  /*  231 */  "loadConL16",
+  /*  232 */  "loadConL32hi16",
+  /*  233 */  "loadConL32_Ex",
+  /*  234 */  "loadConL34",
+  /*  235 */  "loadConLhighest16_Ex",
+  /*  236 */  "loadConL_Ex",
+  /*  237 */  "loadConN0",
+  /*  238 */  "loadConN_Ex",
+  /*  239 */  "loadConNKlass_hi",
+  /*  240 */  "loadConNKlass_mask",
+  /*  241 */  "loadConNKlass_lo",
+  /*  242 */  "loadConNKlass_Ex",
+  /*  243 */  "loadConP0or1",
+  /*  244 */  "loadConP",
+  /*  245 */  "loadConP_lo",
+  /*  246 */  "loadConP_Ex",
+  /*  247 */  "loadConF_Ex",
+  /*  248 */  "loadConD_Ex",
+  /*  249 */  "stkI_to_regI",
+  /*  250 */  "stkL_to_regL",
+  /*  251 */  "convB2I_reg_2",
+  /*  252 */  "loadP2X",
+  /*  253 */  "loadToc_lo",
+  /*  254 */  "loadConN_hi",
+  /*  255 */  "clearMs32b",
+  /*  256 */  "reinterpretL",
+  /*  257 */  "reinterpretX",
+  /*  258 */  "signmask32I_regI",
+  /*  259 */  "absI_reg_Ex",
+  /*  260 */  "signmask64I_regL",
+  /*  261 */  "signmask64L_regL",
+  /*  262 */  "absL_reg_Ex",
+  /*  263 */  "absF_reg",
+  /*  264 */  "absD_reg",
+  /*  265 */  "negF_reg",
+  /*  266 */  "negD_reg",
+  /*  267 */  "negF_absF_reg",
+  /*  268 */  "negD_absD_reg",
+  /*  269 */  "roundDouble_nop",
+  /*  270 */  "roundFloat_nop",
+  /*  271 */  "moveL2D_reg",
+  /*  272 */  "moveI2D_reg",
+  /*  273 */  "moveF2I_stack_reg",
+  /*  274 */  "moveI2F_stack_reg",
+  /*  275 */  "moveD2L_stack_reg",
+  /*  276 */  "moveL2D_stack_reg",
+  /*  277 */  "moveReg",
+  /*  278 */  "castX2P",
+  /*  279 */  "castP2X",
+  /*  280 */  "castPP",
+  /*  281 */  "castII",
+  /*  282 */  "castLL",
+  /*  283 */  "castFF",
+  /*  284 */  "castDD",
+  /*  285 */  "castVV8",
+  /*  286 */  "castVV16",
+  /*  287 */  "checkCastPP",
+  /*  288 */  "convI2Bool_reg__cntlz_Ex",
+  /*  289 */  "convP2Bool_reg__cntlz_Ex",
+  /*  290 */  "extsh",
+  /*  291 */  "convD2IRaw_regD",
+  /*  292 */  "convF2IRaw_regF",
+  /*  293 */  "convF2LRaw_regF",
+  /*  294 */  "convD2LRaw_regD",
+  /*  295 */  "convL2DRaw_regD",
+  /*  296 */  "convL2FRaw_regF",
+  /*  297 */  "cmpI_reg_reg",
+  /*  298 */  "cmpI_reg_imm16",
+  /*  299 */  "testI_reg_imm",
+  /*  300 */  "cmpL_reg_reg",
+  /*  301 */  "cmpL_reg_imm16",
+  /*  302 */  "cmpUL_reg_reg",
+  /*  303 */  "cmpUL_reg_imm16",
+  /*  304 */  "testL_reg_reg",
+  /*  305 */  "testL_reg_imm",
+  /*  306 */  "compU_reg_reg",
+  /*  307 */  "compU_reg_uimm16",
+  /*  308 */  "cmpN_reg_reg",
+  /*  309 */  "cmpN_reg_imm0",
+  /*  310 */  "cmpP_reg_reg",
+  /*  311 */  "cmpP_reg_null",
+  /*  312 */  "cmpP_reg_imm16",
+  /*  313 */  "cmpFUnordered_reg_reg",
+  /*  314 */  "cmov_bns_less",
+  /*  315 */  "cmpF_reg_reg_Ex",
+  /*  316 */  "cmpDUnordered_reg_reg",
+  /*  317 */  "cmpD_reg_reg_Ex",
+  /*  318 */  "cmpFastLock",
+  /*  319 */  "cmpFastLock_tm",
+  /*  320 */  "cmpFastUnlock",
+  /*  321 */  "cmpFastUnlock_tm",
+  /*  322 */  "popCountI",
+  /*  323 */  "popCountL",
+  /*  324 */  "countLeadingZerosI",
+  /*  325 */  "countLeadingZerosL",
+  /*  326 */  "countLeadingZerosP",
+  /*  327 */  "countTrailingZerosI_Ex",
+  /*  328 */  "countTrailingZerosI_cnttzw",
+  /*  329 */  "countTrailingZerosL_Ex",
+  /*  330 */  "countTrailingZerosL_cnttzd",
+  /*  331 */  "mtvsrwz",
+  /*  332 */  "xscvdpspn_regF",
+  /*  333 */  "repl32",
+  /*  334 */  "repl48",
+  /*  335 */  "repl56",
+  /*  336 */  "repl8B_reg_Ex",
+  /*  337 */  "repl8B_immI0",
+  /*  338 */  "repl8B_immIminus1",
+  /*  339 */  "repl16B_reg_Ex",
+  /*  340 */  "repl16B_immI0",
+  /*  341 */  "repl16B_immIminus1",
+  /*  342 */  "repl4S_reg_Ex",
+  /*  343 */  "repl4S_immI0",
+  /*  344 */  "repl4S_immIminus1",
+  /*  345 */  "repl8S_reg_Ex",
+  /*  346 */  "repl8S_immI0",
+  /*  347 */  "repl8S_immIminus1",
+  /*  348 */  "repl2I_reg_Ex",
+  /*  349 */  "repl2I_immI0",
+  /*  350 */  "repl2I_immIminus1",
+  /*  351 */  "repl4I_reg_Ex",
+  /*  352 */  "repl4I_immI0",
+  /*  353 */  "repl4I_immIminus1",
+  /*  354 */  "repl2F_reg_Ex",
+  /*  355 */  "repl2F_immF_Ex",
+  /*  356 */  "repl2F_immF0",
+  /*  357 */  "vabs4F_reg",
+  /*  358 */  "vabs2D_reg",
+  /*  359 */  "vneg4F_reg",
+  /*  360 */  "vneg2D_reg",
+  /*  361 */  "vsqrt4F_reg",
+  /*  362 */  "vsqrt2D_reg",
+  /*  363 */  "vpopcnt_reg",
+  /*  364 */  "overflowAddL_reg_reg",
+  /*  365 */  "overflowSubL_reg_reg",
+  /*  366 */  "overflowNegL_reg",
+  /*  367 */  "overflowMulL_reg_reg",
+  /*  368 */  "repl4F_reg_Ex",
+  /*  369 */  "repl4F_immF0",
+  /*  370 */  "repl2D_reg_Ex",
+  /*  371 */  "repl2D_immD0",
+  /*  372 */  "mtvsrd",
+  /*  373 */  "repl2L_reg_Ex",
+  /*  374 */  "repl2L_immI0",
+  /*  375 */  "repl2L_immIminus1",
+  /*  376 */  "CallLeafDirect_mtctr",
+  /*  377 */  "tlsLoadP",
+  /*  378 */  "loadUB_indirect",
+  /*  379 */  "loadUB_indirect_ac",
+  /*  380 */  "loadB_indirect_Ex",
+  /*  381 */  "loadB_indirect_ac_Ex",
+  /*  382 */  "loadUB_indOffset16",
+  /*  383 */  "loadUB_indOffset16_ac",
+  /*  384 */  "loadB_indOffset16_Ex",
+  /*  385 */  "loadB_indOffset16_ac_Ex",
+  /*  386 */  "loadUB",
+  /*  387 */  "loadUB_ac",
+  /*  388 */  "loadUB2L",
+  /*  389 */  "loadUB2L_ac",
+  /*  390 */  "loadS",
+  /*  391 */  "loadS_ac",
+  /*  392 */  "loadUS",
+  /*  393 */  "loadUS_ac",
+  /*  394 */  "loadUS2L",
+  /*  395 */  "loadUS2L_ac",
+  /*  396 */  "loadI",
+  /*  397 */  "loadI_ac",
+  /*  398 */  "loadUI2L",
+  /*  399 */  "loadI2L",
+  /*  400 */  "loadI2L_ac",
+  /*  401 */  "loadL",
+  /*  402 */  "loadL_ac",
+  /*  403 */  "loadL_unaligned",
+  /*  404 */  "loadV8",
+  /*  405 */  "loadV16",
+  /*  406 */  "loadRange",
+  /*  407 */  "loadN",
+  /*  408 */  "loadN_ac",
+  /*  409 */  "loadN2P_unscaled",
+  /*  410 */  "loadN2P_klass_unscaled",
+  /*  411 */  "loadP",
+  /*  412 */  "loadP_ac",
+  /*  413 */  "loadNKlass",
+  /*  414 */  "loadKlass",
+  /*  415 */  "loadF",
+  /*  416 */  "loadF_ac",
+  /*  417 */  "loadD",
+  /*  418 */  "loadD_ac",
+  /*  419 */  "loadD_unaligned",
+  /*  420 */  "loadToc_hi",
+  /*  421 */  "loadConI32_lo16",
+  /*  422 */  "loadConL32_lo16",
+  /*  423 */  "loadConL",
+  /*  424 */  "loadConL_hi",
+  /*  425 */  "loadConL_lo",
+  /*  426 */  "loadConN_lo",
+  /*  427 */  "rldicl",
+  /*  428 */  "loadBase",
+  /*  429 */  "loadConP_hi",
+  /*  430 */  "loadConF",
+  /*  431 */  "loadConFComp",
+  /*  432 */  "loadConD",
+  /*  433 */  "loadConDComp",
+  /*  434 */  "prefetch_alloc_zero",
+  /*  435 */  "prefetch_alloc_zero_no_offset",
+  /*  436 */  "prefetch_alloc",
+  /*  437 */  "prefetch_alloc_no_offset",
+  /*  438 */  "storeB",
+  /*  439 */  "storeC",
+  /*  440 */  "storeI",
+  /*  441 */  "storeI_convL2I",
+  /*  442 */  "storeL",
+  /*  443 */  "storeA8B",
+  /*  444 */  "storeV16",
+  /*  445 */  "storeN",
+  /*  446 */  "storeNKlass",
+  /*  447 */  "storeP",
+  /*  448 */  "storeF",
+  /*  449 */  "storeD",
+  /*  450 */  "storeCM",
+  /*  451 */  "encodeP_shift",
+  /*  452 */  "encodeP_sub",
+  /*  453 */  "cond_sub_base",
+  /*  454 */  "cond_set_0_oop",
+  /*  455 */  "encodeP_Disjoint",
+  /*  456 */  "encodeP_Ex",
+  /*  457 */  "encodeP_not_null_Ex",
+  /*  458 */  "encodeP_not_null_base_null",
+  /*  459 */  "encodeP_narrow_oop_shift_0",
+  /*  460 */  "decodeN_shift",
+  /*  461 */  "decodeN_add",
+  /*  462 */  "cond_add_base",
+  /*  463 */  "cond_set_0_ptr",
+  /*  464 */  "decodeN_Ex",
+  /*  465 */  "decodeN_nullBase",
+  /*  466 */  "decodeN_mergeDisjoint",
+  /*  467 */  "decodeN_Disjoint_notNull_Ex",
+  /*  468 */  "decodeN_Disjoint_isel_Ex",
+  /*  469 */  "decodeN_notNull_addBase_Ex",
+  /*  470 */  "decodeN_unscaled",
+  /*  471 */  "decodeN2I_unscaled",
+  /*  472 */  "encodePKlass_shift",
+  /*  473 */  "encodePKlass_sub_base",
+  /*  474 */  "encodePKlass_Disjoint",
+  /*  475 */  "encodePKlass_not_null_Ex",
+  /*  476 */  "encodePKlass_not_null_ExEx",
+  /*  477 */  "decodeNKlass_shift",
+  /*  478 */  "decodeNKlass_add_base",
+  /*  479 */  "decodeNKlass_notNull_addBase_Ex",
+  /*  480 */  "decodeNKlass_notNull_addBase_ExEx",
+  /*  481 */  "membar_acquire",
+  /*  482 */  "unnecessary_membar_acquire",
+  /*  483 */  "membar_acquire_lock",
+  /*  484 */  "membar_release",
+  /*  485 */  "membar_release_0",
+  /*  486 */  "membar_storestore",
+  /*  487 */  "membar_storestore_0",
+  /*  488 */  "membar_release_lock",
+  /*  489 */  "membar_volatile",
+  /*  490 */  "membar_CPUOrder",
+  /*  491 */  "cmovI_reg_isel",
+  /*  492 */  "cmovI_reg",
+  /*  493 */  "cmovI_imm",
+  /*  494 */  "cmovL_reg_isel",
+  /*  495 */  "cmovL_reg",
+  /*  496 */  "cmovL_imm",
+  /*  497 */  "cmovN_reg_isel",
+  /*  498 */  "cmovN_reg",
+  /*  499 */  "cmovN_imm",
+  /*  500 */  "cmovP_reg_isel",
+  /*  501 */  "cmovP_reg",
+  /*  502 */  "cmovP_imm",
+  /*  503 */  "cmovF_reg",
+  /*  504 */  "cmovD_reg",
+  /*  505 */  "compareAndSwapB_regP_regI_regI",
+  /*  506 */  "compareAndSwapB4_regP_regI_regI",
+  /*  507 */  "compareAndSwapS_regP_regI_regI",
+  /*  508 */  "compareAndSwapS4_regP_regI_regI",
+  /*  509 */  "compareAndSwapI_regP_regI_regI",
+  /*  510 */  "compareAndSwapN_regP_regN_regN",
+  /*  511 */  "compareAndSwapL_regP_regL_regL",
+  /*  512 */  "compareAndSwapP_regP_regP_regP",
+  /*  513 */  "weakCompareAndSwapB_regP_regI_regI",
+  /*  514 */  "weakCompareAndSwapB4_regP_regI_regI",
+  /*  515 */  "weakCompareAndSwapB_acq_regP_regI_regI",
+  /*  516 */  "weakCompareAndSwapB4_acq_regP_regI_regI",
+  /*  517 */  "weakCompareAndSwapS_regP_regI_regI",
+  /*  518 */  "weakCompareAndSwapS4_regP_regI_regI",
+  /*  519 */  "weakCompareAndSwapS_acq_regP_regI_regI",
+  /*  520 */  "weakCompareAndSwapS4_acq_regP_regI_regI",
+  /*  521 */  "weakCompareAndSwapI_regP_regI_regI",
+  /*  522 */  "weakCompareAndSwapI_acq_regP_regI_regI",
+  /*  523 */  "weakCompareAndSwapN_regP_regN_regN",
+  /*  524 */  "weakCompareAndSwapN_acq_regP_regN_regN",
+  /*  525 */  "weakCompareAndSwapL_regP_regL_regL",
+  /*  526 */  "weakCompareAndSwapL_acq_regP_regL_regL",
+  /*  527 */  "weakCompareAndSwapP_regP_regP_regP",
+  /*  528 */  "weakCompareAndSwapP_acq_regP_regP_regP",
+  /*  529 */  "compareAndExchangeB_regP_regI_regI",
+  /*  530 */  "compareAndExchangeB4_regP_regI_regI",
+  /*  531 */  "compareAndExchangeB_acq_regP_regI_regI",
+  /*  532 */  "compareAndExchangeB4_acq_regP_regI_regI",
+  /*  533 */  "compareAndExchangeS_regP_regI_regI",
+  /*  534 */  "compareAndExchangeS4_regP_regI_regI",
+  /*  535 */  "compareAndExchangeS_acq_regP_regI_regI",
+  /*  536 */  "compareAndExchangeS4_acq_regP_regI_regI",
+  /*  537 */  "compareAndExchangeI_regP_regI_regI",
+  /*  538 */  "compareAndExchangeI_acq_regP_regI_regI",
+  /*  539 */  "compareAndExchangeN_regP_regN_regN",
+  /*  540 */  "compareAndExchangeN_acq_regP_regN_regN",
+  /*  541 */  "compareAndExchangeL_regP_regL_regL",
+  /*  542 */  "compareAndExchangeL_acq_regP_regL_regL",
+  /*  543 */  "compareAndExchangeP_regP_regP_regP",
+  /*  544 */  "compareAndExchangeP_acq_regP_regP_regP",
+  /*  545 */  "getAndAddB",
+  /*  546 */  "getAndAddB4",
+  /*  547 */  "getAndAddS",
+  /*  548 */  "getAndAddS4",
+  /*  549 */  "getAndAddI",
+  /*  550 */  "getAndAddL",
+  /*  551 */  "getAndSetB",
+  /*  552 */  "getAndSetB4",
+  /*  553 */  "getAndSetS",
+  /*  554 */  "getAndSetS4",
+  /*  555 */  "getAndSetI",
+  /*  556 */  "getAndSetL",
+  /*  557 */  "getAndSetP",
+  /*  558 */  "getAndSetN",
+  /*  559 */  "addI_reg_reg",
+  /*  560 */  "addI_reg_reg_2",
+  /*  561 */  "tree_addI_addI_addI_reg_reg_Ex",
+  /*  562 */  "tree_addI_addI_addI_reg_reg_Ex_1",
+  /*  563 */  "tree_addI_addI_addI_reg_reg_Ex_0",
+  /*  564 */  "tree_addI_addI_addI_reg_reg_Ex_2",
+  /*  565 */  "addI_reg_imm16",
+  /*  566 */  "addI_reg_immhi16",
+  /*  567 */  "addI_reg_imm32",
+  /*  568 */  "addL_reg_reg",
+  /*  569 */  "addL_reg_reg_2",
+  /*  570 */  "tree_addL_addL_addL_reg_reg_Ex",
+  /*  571 */  "tree_addL_addL_addL_reg_reg_Ex_1",
+  /*  572 */  "tree_addL_addL_addL_reg_reg_Ex_0",
+  /*  573 */  "tree_addL_addL_addL_reg_reg_Ex_2",
+  /*  574 */  "addI_regL_regL",
+  /*  575 */  "addL_reg_imm16",
+  /*  576 */  "addL_reg_immhi16",
+  /*  577 */  "addL_reg_imm34",
+  /*  578 */  "addP_reg_reg",
+  /*  579 */  "addP_reg_imm16",
+  /*  580 */  "addP_reg_immhi16",
+  /*  581 */  "addP_reg_imm34",
+  /*  582 */  "subI_reg_reg",
+  /*  583 */  "subI_imm16_reg",
+  /*  584 */  "negI_regI",
+  /*  585 */  "subL_reg_reg",
+  /*  586 */  "subI_regL_regL",
+  /*  587 */  "negL_reg_reg",
+  /*  588 */  "negI_con0_regL",
+  /*  589 */  "mulI_reg_reg",
+  /*  590 */  "mulI_reg_imm16",
+  /*  591 */  "mulL_reg_reg",
+  /*  592 */  "mulHighL_reg_reg",
+  /*  593 */  "mulL_reg_imm16",
+  /*  594 */  "divI_reg_immIvalueMinus1",
+  /*  595 */  "divI_reg_regnotMinus1",
+  /*  596 */  "cmovI_bne_negI_reg",
+  /*  597 */  "divI_reg_reg_Ex",
+  /*  598 */  "divL_reg_immLvalueMinus1",
+  /*  599 */  "divL_reg_regnotMinus1",
+  /*  600 */  "cmovL_bne_negL_reg",
+  /*  601 */  "divL_reg_reg_Ex",
+  /*  602 */  "modI_reg_reg_Ex",
+  /*  603 */  "modL_reg_reg_Ex",
+  /*  604 */  "udivI_reg_reg",
+  /*  605 */  "umodI_reg_reg",
+  /*  606 */  "udivL_reg_reg",
+  /*  607 */  "umodL_reg_reg",
+  /*  608 */  "maskI_reg_imm",
+  /*  609 */  "lShiftI_reg_reg",
+  /*  610 */  "lShiftI_reg_reg_Ex",
+  /*  611 */  "lShiftI_reg_imm",
+  /*  612 */  "lShiftI_andI_immInegpow2_imm5",
+  /*  613 */  "lShiftI_andI_immInegpow2_rShiftI_imm5",
+  /*  614 */  "lShiftL_regL_regI",
+  /*  615 */  "lShiftL_regL_regI_Ex",
+  /*  616 */  "lshiftL_regL_immI",
+  /*  617 */  "lShiftL_regI_immGE32",
+  /*  618 */  "scaledPositiveI2L_lShiftL_convI2L_reg_imm6",
+  /*  619 */  "arShiftI_reg_reg",
+  /*  620 */  "arShiftI_reg_reg_Ex",
+  /*  621 */  "arShiftI_reg_imm",
+  /*  622 */  "arShiftL_regL_regI",
+  /*  623 */  "arShiftL_regL_regI_Ex",
+  /*  624 */  "arShiftL_regL_immI",
+  /*  625 */  "convL2I_arShiftL_regL_immI",
+  /*  626 */  "urShiftI_reg_reg",
+  /*  627 */  "urShiftI_reg_reg_Ex",
+  /*  628 */  "urShiftI_reg_imm",
+  /*  629 */  "urShiftL_regL_regI",
+  /*  630 */  "urShiftL_regL_regI_Ex",
+  /*  631 */  "urShiftL_regL_immI",
+  /*  632 */  "convL2I_urShiftL_regL_immI",
+  /*  633 */  "shrP_convP2X_reg_imm6",
+  /*  634 */  "andI_urShiftI_regI_immI_immIpow2minus1",
+  /*  635 */  "andL_urShiftL_regL_immI_immLpow2minus1",
+  /*  636 */  "sxtI_reg",
+  /*  637 */  "rotlI_reg_immi8",
+  /*  638 */  "rotlI_reg_immi8_0",
+  /*  639 */  "rotrI_reg_immi8",
+  /*  640 */  "rotrI_reg_immi8_0",
+  /*  641 */  "addF_reg_reg",
+  /*  642 */  "addD_reg_reg",
+  /*  643 */  "subF_reg_reg",
+  /*  644 */  "subD_reg_reg",
+  /*  645 */  "mulF_reg_reg",
+  /*  646 */  "mulD_reg_reg",
+  /*  647 */  "divF_reg_reg",
+  /*  648 */  "divD_reg_reg",
+  /*  649 */  "sqrtD_reg",
+  /*  650 */  "sqrtF_reg",
+  /*  651 */  "maddF_reg_reg",
+  /*  652 */  "maddD_reg_reg",
+  /*  653 */  "mnsubF_reg_reg",
+  /*  654 */  "mnsubF_reg_reg_0",
+  /*  655 */  "mnsubD_reg_reg",
+  /*  656 */  "mnsubD_reg_reg_0",
+  /*  657 */  "mnaddF_reg_reg",
+  /*  658 */  "mnaddF_reg_reg_0",
+  /*  659 */  "mnaddD_reg_reg",
+  /*  660 */  "mnaddD_reg_reg_0",
+  /*  661 */  "msubF_reg_reg",
+  /*  662 */  "msubD_reg_reg",
+  /*  663 */  "andI_reg_reg",
+  /*  664 */  "andI_reg_immIhi16",
+  /*  665 */  "andI_reg_uimm16",
+  /*  666 */  "andI_reg_immInegpow2",
+  /*  667 */  "andI_reg_immIpow2minus1",
+  /*  668 */  "andI_reg_immIpowerOf2",
+  /*  669 */  "andL_reg_reg",
+  /*  670 */  "andL_reg_uimm16",
+  /*  671 */  "andL_reg_immLnegpow2",
+  /*  672 */  "andL_reg_immLpow2minus1",
+  /*  673 */  "convL2I_andL_reg_immLpow2minus1",
+  /*  674 */  "orI_reg_reg",
+  /*  675 */  "orI_reg_reg_2",
+  /*  676 */  "tree_orI_orI_orI_reg_reg_Ex",
+  /*  677 */  "tree_orI_orI_orI_reg_reg_Ex_1",
+  /*  678 */  "tree_orI_orI_orI_reg_reg_Ex_0",
+  /*  679 */  "tree_orI_orI_orI_reg_reg_Ex_2",
+  /*  680 */  "orI_reg_uimm16",
+  /*  681 */  "orL_reg_reg",
+  /*  682 */  "orI_regL_regL",
+  /*  683 */  "orL_reg_uimm16",
+  /*  684 */  "xorI_reg_reg",
+  /*  685 */  "xorI_reg_reg_2",
+  /*  686 */  "tree_xorI_xorI_xorI_reg_reg_Ex",
+  /*  687 */  "tree_xorI_xorI_xorI_reg_reg_Ex_1",
+  /*  688 */  "tree_xorI_xorI_xorI_reg_reg_Ex_0",
+  /*  689 */  "tree_xorI_xorI_xorI_reg_reg_Ex_2",
+  /*  690 */  "xorI_reg_uimm16",
+  /*  691 */  "xorL_reg_reg",
+  /*  692 */  "xorI_regL_regL",
+  /*  693 */  "xorL_reg_uimm16",
+  /*  694 */  "notI_reg",
+  /*  695 */  "notL_reg",
+  /*  696 */  "andcI_reg_reg",
+  /*  697 */  "andcI_reg_reg_0",
+  /*  698 */  "andcL_reg_reg",
+  /*  699 */  "moveF2I_reg_stack",
+  /*  700 */  "moveI2F_reg_stack",
+  /*  701 */  "moveF2L_reg_stack",
+  /*  702 */  "moveD2L_reg_stack",
+  /*  703 */  "moveL2D_reg_stack",
+  /*  704 */  "convI2Bool_reg__cmove",
+  /*  705 */  "xorI_convI2Bool_reg_immIvalue1__cntlz_Ex",
+  /*  706 */  "xorI_convI2Bool_reg_immIvalue1__cmove",
+  /*  707 */  "convI2Bool_andI_reg_immIpowerOf2",
+  /*  708 */  "convP2Bool_reg__cmove",
+  /*  709 */  "xorI_convP2Bool_reg__cntlz_Ex",
+  /*  710 */  "xorI_convP2Bool_reg_immIvalue1__cmove",
+  /*  711 */  "cmpLTMask_reg_reg_Ex",
+  /*  712 */  "cmpLTMask_reg_immI0",
+  /*  713 */  "convB2I_reg",
+  /*  714 */  "convS2I_reg",
+  /*  715 */  "sxtI_L2L_reg",
+  /*  716 */  "convL2I_reg",
+  /*  717 */  "cmovI_bso_stackSlotL",
+  /*  718 */  "cmovI_bso_reg",
+  /*  719 */  "cmovI_bso_stackSlotL_conLvalue0_Ex",
+  /*  720 */  "cmovI_bso_reg_conLvalue0_Ex",
+  /*  721 */  "convD2I_reg_ExEx",
+  /*  722 */  "convD2I_reg_mffprd_ExEx",
+  /*  723 */  "convF2I_regF_ExEx",
+  /*  724 */  "convF2I_regF_mffprd_ExEx",
+  /*  725 */  "convI2L_reg",
+  /*  726 */  "zeroExtendL_regI",
+  /*  727 */  "zeroExtendL_regL",
+  /*  728 */  "cmovL_bso_stackSlotL",
+  /*  729 */  "cmovL_bso_reg",
+  /*  730 */  "cmovL_bso_stackSlotL_conLvalue0_Ex",
+  /*  731 */  "cmovL_bso_reg_conLvalue0_Ex",
+  /*  732 */  "convF2L_reg_ExEx",
+  /*  733 */  "convF2L_reg_mffprd_ExEx",
+  /*  734 */  "convD2L_reg_ExEx",
+  /*  735 */  "convD2L_reg_mffprd_ExEx",
+  /*  736 */  "convD2F_reg",
+  /*  737 */  "convI2F_ireg_Ex",
+  /*  738 */  "convI2F_ireg_fcfids_Ex",
+  /*  739 */  "convI2F_ireg_mtfprd_Ex",
+  /*  740 */  "convL2F_ireg_fcfids_Ex",
+  /*  741 */  "convL2F_ireg_mtfprd_Ex",
+  /*  742 */  "convI2D_reg_Ex",
+  /*  743 */  "convI2D_reg_mtfprd_Ex",
+  /*  744 */  "convL2D_reg_Ex",
+  /*  745 */  "convL2D_reg_mtfprd_Ex",
+  /*  746 */  "convF2D_reg",
+  /*  747 */  "cmpL3_reg_reg",
+  /*  748 */  "rangeCheck_iReg_uimm15",
+  /*  749 */  "rangeCheck_iReg_iReg",
+  /*  750 */  "rangeCheck_uimm15_iReg",
+  /*  751 */  "zeroCheckN_iReg_imm0",
+  /*  752 */  "zeroCheckP_reg_imm0",
+  /*  753 */  "cmpF3_reg_reg",
+  /*  754 */  "cmpD3_reg_reg",
+  /*  755 */  "cmprb_Digit_reg_reg",
+  /*  756 */  "cmprb_LowerCase_reg_reg",
+  /*  757 */  "cmprb_UpperCase_reg_reg",
+  /*  758 */  "cmprb_Whitespace_reg_reg",
+  /*  759 */  "cmprb_Whitespace_reg_reg_prefixed",
+  /*  760 */  "branch",
+  /*  761 */  "branchCon",
+  /*  762 */  "branchConFar",
+  /*  763 */  "branchLoopEnd",
+  /*  764 */  "branchLoopEndFar",
+  /*  765 */  "partialSubtypeCheck",
+  /*  766 */  "align_addr",
+  /*  767 */  "array_size",
+  /*  768 */  "inlineCallClearArrayShort",
+  /*  769 */  "inlineCallClearArrayLarge",
+  /*  770 */  "inlineCallClearArray",
+  /*  771 */  "string_compareL",
+  /*  772 */  "string_compareU",
+  /*  773 */  "string_compareLU",
+  /*  774 */  "string_compareUL",
+  /*  775 */  "string_equalsL",
+  /*  776 */  "string_equalsU",
+  /*  777 */  "array_equalsB",
+  /*  778 */  "array_equalsC",
+  /*  779 */  "indexOf_imm1_char_U",
+  /*  780 */  "indexOf_imm1_char_L",
+  /*  781 */  "indexOf_imm1_char_UL",
+  /*  782 */  "indexOf_imm1_U",
+  /*  783 */  "indexOf_imm1_L",
+  /*  784 */  "indexOf_imm1_UL",
+  /*  785 */  "indexOfChar_U",
+  /*  786 */  "indexOfChar_L",
+  /*  787 */  "indexOf_imm_U",
+  /*  788 */  "indexOf_imm_L",
+  /*  789 */  "indexOf_imm_UL",
+  /*  790 */  "indexOf_U",
+  /*  791 */  "indexOf_L",
+  /*  792 */  "indexOf_UL",
+  /*  793 */  "string_compress",
+  /*  794 */  "string_inflate",
+  /*  795 */  "count_positives",
+  /*  796 */  "encode_iso_array",
+  /*  797 */  "encode_ascii_array",
+  /*  798 */  "minI_reg_reg_Ex",
+  /*  799 */  "minI_reg_reg_isel",
+  /*  800 */  "maxI_reg_reg_Ex",
+  /*  801 */  "maxI_reg_reg_isel",
+  /*  802 */  "insrwi_a",
+  /*  803 */  "insrwi",
+  /*  804 */  "bytes_reverse_int_Ex",
+  /*  805 */  "bytes_reverse_int_vec",
+  /*  806 */  "bytes_reverse_int",
+  /*  807 */  "bytes_reverse_long_Ex",
+  /*  808 */  "bytes_reverse_long_vec",
+  /*  809 */  "bytes_reverse_long",
+  /*  810 */  "bytes_reverse_ushort_Ex",
+  /*  811 */  "bytes_reverse_ushort",
+  /*  812 */  "bytes_reverse_short_Ex",
+  /*  813 */  "bytes_reverse_short",
+  /*  814 */  "loadI_reversed",
+  /*  815 */  "loadI_reversed_acquire",
+  /*  816 */  "loadL_reversed",
+  /*  817 */  "loadL_reversed_acquire",
+  /*  818 */  "loadUS_reversed",
+  /*  819 */  "loadUS_reversed_acquire",
+  /*  820 */  "loadS_reversed",
+  /*  821 */  "loadS_reversed_acquire",
+  /*  822 */  "storeI_reversed",
+  /*  823 */  "storeL_reversed",
+  /*  824 */  "storeUS_reversed",
+  /*  825 */  "storeS_reversed",
+  /*  826 */  "xxspltw",
+  /*  827 */  "vadd16B_reg",
+  /*  828 */  "vadd8S_reg",
+  /*  829 */  "vadd4I_reg",
+  /*  830 */  "vadd4F_reg",
+  /*  831 */  "vadd2L_reg",
+  /*  832 */  "vadd2D_reg",
+  /*  833 */  "vsub16B_reg",
+  /*  834 */  "vsub8S_reg",
+  /*  835 */  "vsub4I_reg",
+  /*  836 */  "vsub4F_reg",
+  /*  837 */  "vsub2L_reg",
+  /*  838 */  "vsub2D_reg",
+  /*  839 */  "vmul8S_reg",
+  /*  840 */  "vmul4I_reg",
+  /*  841 */  "vmul4F_reg",
+  /*  842 */  "vmul2D_reg",
+  /*  843 */  "vdiv4F_reg",
+  /*  844 */  "vdiv2D_reg",
+  /*  845 */  "roundD_reg",
+  /*  846 */  "vround2D_reg",
+  /*  847 */  "vfma4F",
+  /*  848 */  "vfma4F_neg1",
+  /*  849 */  "vfma4F_neg1_0",
+  /*  850 */  "vfma4F_neg2",
+  /*  851 */  "vfma2D",
+  /*  852 */  "vfma2D_neg1",
+  /*  853 */  "vfma2D_neg1_0",
+  /*  854 */  "vfma2D_neg2",
+  /*  855 */  "repl4F_immF_Ex",
+  /*  856 */  "xxspltd",
+  /*  857 */  "xxpermdi",
+  /*  858 */  "safePoint_poll",
+  /*  859 */  "CallStaticJavaDirect",
+  /*  860 */  "CallDynamicJavaDirectSched",
+  /*  861 */  "CallDynamicJavaDirectSched_Ex",
+  /*  862 */  "CallDynamicJavaDirect",
+  /*  863 */  "CallRuntimeDirect",
+  /*  864 */  "CallLeafDirect",
+  /*  865 */  "CallLeafDirect_Ex",
+  /*  866 */  "CallLeafNoFPDirect_Ex",
+  /*  867 */  "TailCalljmpInd",
+  /*  868 */  "Ret",
+  /*  869 */  "tailjmpInd",
+  /*  870 */  "CreateException",
+  /*  871 */  "RethrowException",
+  /*  872 */  "ShouldNotReachHere",
+  /*  873 */  "endGroup",
+  /*  874 */  "fxNop",
+  /*  875 */  "fpNop0",
+  /*  876 */  "fpNop1",
+  /*  877 */  "brNop0",
+  /*  878 */  "brNop1",
+  /*  879 */  "brNop2",
+  /*  880 */  "cacheWB",
+  /*  881 */  "cacheWBPreSync",
+  /*  882 */  "cacheWBPostSync",
+  /*  883 */  "compareAndSwapP_shenandoah",
+  /*  884 */  "compareAndSwapP_shenandoah_0",
+  /*  885 */  "compareAndSwapN_shenandoah",
+  /*  886 */  "compareAndSwapN_shenandoah_0",
+  /*  887 */  "compareAndSwapP_acq_shenandoah",
+  /*  888 */  "compareAndSwapP_acq_shenandoah_0",
+  /*  889 */  "compareAndSwapN_acq_shenandoah",
+  /*  890 */  "compareAndSwapN_acq_shenandoah_0",
+  /*  891 */  "compareAndExchangeP_shenandoah",
+  /*  892 */  "compareAndExchangeN_shenandoah",
+  /*  893 */  "compareAndExchangePAcq_shenandoah",
+  /*  894 */  "compareAndExchangeNAcq_shenandoah",
+  /*  895 */  "zLoadP",
+  /*  896 */  "zLoadP_acq",
+  /*  897 */  "zCompareAndSwapP",
+  /*  898 */  "zCompareAndSwapP_acq",
+  /*  899 */  "zCompareAndSwapPWeak",
+  /*  900 */  "zCompareAndSwapPWeak_acq",
+  /*  901 */  "zCompareAndExchangeP",
+  /*  902 */  "zCompareAndExchangeP_acq",
+  /*  903 */  "zGetAndSetP",
   // last instruction
   "invalid rule name" // no trailing comma
 };
@@ -5748,9 +6092,9 @@ const        bool  swallowed[] = {
   /*   47 */  true,
   /*   48 */  true,
   /*   49 */  true,
-  /*   50 */  false,
-  /*   51 */  false,
-  /*   52 */  false,
+  /*   50 */  true,
+  /*   51 */  true,
+  /*   52 */  true,
   /*   53 */  false,
   /*   54 */  false,
   /*   55 */  false,
@@ -5805,16 +6149,16 @@ const        bool  swallowed[] = {
   /*  104 */  false,
   /*  105 */  false,
   /*  106 */  false,
-  /*  107 */  true,
+  /*  107 */  false,
+  /*  108 */  true,
   // last operand
-  /*  108 */  false,
   /*  109 */  false,
   /*  110 */  false,
   /*  111 */  false,
   /*  112 */  false,
   /*  113 */  false,
-  // last operand class
   /*  114 */  false,
+  // last operand class
   /*  115 */  false,
   /*  116 */  false,
   /*  117 */  false,
@@ -5919,13 +6263,13 @@ const        bool  swallowed[] = {
   /*  216 */  false,
   /*  217 */  false,
   /*  218 */  false,
-  // last internally defined operand
   /*  219 */  false,
   /*  220 */  false,
   /*  221 */  false,
   /*  222 */  false,
   /*  223 */  false,
   /*  224 */  false,
+  // last internally defined operand
   /*  225 */  false,
   /*  226 */  false,
   /*  227 */  false,
@@ -6512,6 +6856,99 @@ const        bool  swallowed[] = {
   /*  808 */  false,
   /*  809 */  false,
   /*  810 */  false,
+  /*  811 */  false,
+  /*  812 */  false,
+  /*  813 */  false,
+  /*  814 */  false,
+  /*  815 */  false,
+  /*  816 */  false,
+  /*  817 */  false,
+  /*  818 */  false,
+  /*  819 */  false,
+  /*  820 */  false,
+  /*  821 */  false,
+  /*  822 */  false,
+  /*  823 */  false,
+  /*  824 */  false,
+  /*  825 */  false,
+  /*  826 */  false,
+  /*  827 */  false,
+  /*  828 */  false,
+  /*  829 */  false,
+  /*  830 */  false,
+  /*  831 */  false,
+  /*  832 */  false,
+  /*  833 */  false,
+  /*  834 */  false,
+  /*  835 */  false,
+  /*  836 */  false,
+  /*  837 */  false,
+  /*  838 */  false,
+  /*  839 */  false,
+  /*  840 */  false,
+  /*  841 */  false,
+  /*  842 */  false,
+  /*  843 */  false,
+  /*  844 */  false,
+  /*  845 */  false,
+  /*  846 */  false,
+  /*  847 */  false,
+  /*  848 */  false,
+  /*  849 */  false,
+  /*  850 */  false,
+  /*  851 */  false,
+  /*  852 */  false,
+  /*  853 */  false,
+  /*  854 */  false,
+  /*  855 */  false,
+  /*  856 */  false,
+  /*  857 */  false,
+  /*  858 */  false,
+  /*  859 */  false,
+  /*  860 */  false,
+  /*  861 */  false,
+  /*  862 */  false,
+  /*  863 */  false,
+  /*  864 */  false,
+  /*  865 */  false,
+  /*  866 */  false,
+  /*  867 */  false,
+  /*  868 */  false,
+  /*  869 */  false,
+  /*  870 */  false,
+  /*  871 */  false,
+  /*  872 */  false,
+  /*  873 */  false,
+  /*  874 */  false,
+  /*  875 */  false,
+  /*  876 */  false,
+  /*  877 */  false,
+  /*  878 */  false,
+  /*  879 */  false,
+  /*  880 */  false,
+  /*  881 */  false,
+  /*  882 */  false,
+  /*  883 */  false,
+  /*  884 */  false,
+  /*  885 */  false,
+  /*  886 */  false,
+  /*  887 */  false,
+  /*  888 */  false,
+  /*  889 */  false,
+  /*  890 */  false,
+  /*  891 */  false,
+  /*  892 */  false,
+  /*  893 */  false,
+  /*  894 */  false,
+  /*  895 */  false,
+  /*  896 */  false,
+  /*  897 */  false,
+  /*  898 */  false,
+  /*  899 */  false,
+  /*  900 */  false,
+  /*  901 */  false,
+  /*  902 */  false,
+  /*  903 */  false,
   // last instruction
   false // no trailing comma
 };
@@ -6526,360 +6963,500 @@ const        char must_clone[] = {
   0, // RegF: 5
   0, // RegD: 6
   0, // RegL: 7
-  0, // RegFlags: 8
+  0, // VecA: 8
   0, // VecS: 9
   0, // VecD: 10
   0, // VecX: 11
   0, // VecY: 12
   0, // VecZ: 13
-  0, // _last_machine_leaf: 14
-  0, // AbsD: 15
-  0, // AbsF: 16
-  0, // AbsI: 17
-  0, // AddD: 18
-  0, // AddF: 19
-  0, // AddI: 20
-  0, // AddL: 21
-  0, // AddP: 22
-  0, // Allocate: 23
-  0, // AllocateArray: 24
-  0, // AndI: 25
-  0, // AndL: 26
-  0, // ArrayCopy: 27
-  0, // AryEq: 28
-  0, // AtanD: 29
-  1, // Binary: 30
-  1, // Bool: 31
-  0, // BoxLock: 32
-  0, // ReverseBytesI: 33
-  0, // ReverseBytesL: 34
-  0, // ReverseBytesUS: 35
-  0, // ReverseBytesS: 36
-  0, // CProj: 37
-  0, // CallDynamicJava: 38
-  0, // CallJava: 39
-  0, // CallLeaf: 40
-  0, // CallLeafNoFP: 41
-  0, // CallRuntime: 42
-  0, // CallStaticJava: 43
-  0, // CastII: 44
-  0, // CastX2P: 45
-  0, // CastP2X: 46
-  0, // CastPP: 47
-  0, // Catch: 48
-  0, // CatchProj: 49
-  0, // CheckCastPP: 50
-  0, // ClearArray: 51
-  0, // ConstraintCast: 52
-  0, // CMoveD: 53
-  0, // CMoveVD: 54
-  0, // CMoveF: 55
-  0, // CMoveVF: 56
-  0, // CMoveI: 57
-  0, // CMoveL: 58
-  0, // CMoveP: 59
-  0, // CMoveN: 60
-  1, // CmpN: 61
-  1, // CmpD: 62
-  0, // CmpD3: 63
-  1, // CmpF: 64
-  0, // CmpF3: 65
-  1, // CmpI: 66
-  1, // CmpL: 67
-  0, // CmpL3: 68
-  0, // CmpLTMask: 69
-  1, // CmpP: 70
-  1, // CmpU: 71
-  1, // CmpUL: 72
-  0, // CompareAndSwapB: 73
-  0, // CompareAndSwapS: 74
-  0, // CompareAndSwapI: 75
-  0, // CompareAndSwapL: 76
-  0, // CompareAndSwapP: 77
-  0, // CompareAndSwapN: 78
-  0, // WeakCompareAndSwapB: 79
-  0, // WeakCompareAndSwapS: 80
-  0, // WeakCompareAndSwapI: 81
-  0, // WeakCompareAndSwapL: 82
-  0, // WeakCompareAndSwapP: 83
-  0, // WeakCompareAndSwapN: 84
-  0, // CompareAndExchangeB: 85
-  0, // CompareAndExchangeS: 86
-  0, // CompareAndExchangeI: 87
-  0, // CompareAndExchangeL: 88
-  0, // CompareAndExchangeP: 89
-  0, // CompareAndExchangeN: 90
-  0, // GetAndAddB: 91
-  0, // GetAndAddS: 92
-  0, // GetAndAddI: 93
-  0, // GetAndAddL: 94
-  0, // GetAndSetB: 95
-  0, // GetAndSetS: 96
-  0, // GetAndSetI: 97
-  0, // GetAndSetL: 98
-  0, // GetAndSetP: 99
-  0, // GetAndSetN: 100
-  0, // Con: 101
-  0, // ConN: 102
-  0, // ConNKlass: 103
-  0, // ConD: 104
-  0, // ConF: 105
-  0, // ConI: 106
-  0, // ConL: 107
-  0, // ConP: 108
-  0, // Conv2B: 109
-  0, // ConvD2F: 110
-  0, // ConvD2I: 111
-  0, // ConvD2L: 112
-  0, // ConvF2D: 113
-  0, // ConvF2I: 114
-  0, // ConvF2L: 115
-  0, // ConvI2D: 116
-  0, // ConvI2F: 117
-  0, // ConvI2L: 118
-  0, // ConvL2D: 119
-  0, // ConvL2F: 120
-  0, // ConvL2I: 121
-  0, // CountedLoop: 122
-  0, // CountedLoopEnd: 123
-  0, // OuterStripMinedLoop: 124
-  0, // OuterStripMinedLoopEnd: 125
-  0, // CountLeadingZerosI: 126
-  0, // CountLeadingZerosL: 127
-  0, // CountTrailingZerosI: 128
-  0, // CountTrailingZerosL: 129
-  0, // CreateEx: 130
-  0, // DecodeN: 131
-  0, // DecodeNKlass: 132
-  0, // DivD: 133
-  0, // DivF: 134
-  0, // DivI: 135
-  0, // DivL: 136
-  0, // DivMod: 137
-  0, // DivModI: 138
-  0, // DivModL: 139
-  0, // EncodeISOArray: 140
-  0, // EncodeP: 141
-  0, // EncodePKlass: 142
-  1, // FastLock: 143
-  1, // FastUnlock: 144
-  0, // FmaD: 145
-  0, // FmaF: 146
-  0, // Goto: 147
-  0, // Halt: 148
-  0, // HasNegatives: 149
-  0, // If: 150
-  0, // RangeCheck: 151
-  0, // IfFalse: 152
-  0, // IfTrue: 153
-  0, // Initialize: 154
-  0, // JProj: 155
-  0, // Jump: 156
-  0, // JumpProj: 157
-  0, // LShiftI: 158
-  0, // LShiftL: 159
-  0, // LoadB: 160
-  0, // LoadUB: 161
-  0, // LoadUS: 162
-  0, // LoadD: 163
-  0, // LoadD_unaligned: 164
-  0, // LoadF: 165
-  0, // LoadI: 166
-  0, // LoadKlass: 167
-  0, // LoadNKlass: 168
-  0, // LoadL: 169
-  0, // LoadL_unaligned: 170
-  0, // LoadPLocked: 171
-  0, // LoadP: 172
-  0, // LoadN: 173
-  0, // LoadRange: 174
-  0, // LoadS: 175
-  0, // LoadBarrier: 176
-  0, // LoadBarrierSlowReg: 177
-  0, // LoadBarrierWeakSlowReg: 178
-  0, // Lock: 179
-  0, // Loop: 180
-  0, // LoopLimit: 181
-  0, // Mach: 182
-  0, // MachProj: 183
-  0, // MaxI: 184
-  0, // MemBarAcquire: 185
-  0, // LoadFence: 186
-  0, // SetVectMaskI: 187
-  0, // MemBarAcquireLock: 188
-  0, // MemBarCPUOrder: 189
-  0, // MemBarRelease: 190
-  0, // StoreFence: 191
-  0, // MemBarReleaseLock: 192
-  0, // MemBarVolatile: 193
-  0, // MemBarStoreStore: 194
-  0, // MergeMem: 195
-  0, // MinI: 196
-  0, // ModD: 197
-  0, // ModF: 198
-  0, // ModI: 199
-  0, // ModL: 200
-  0, // MoveI2F: 201
-  0, // MoveF2I: 202
-  0, // MoveL2D: 203
-  0, // MoveD2L: 204
-  0, // MulD: 205
-  0, // MulF: 206
-  0, // MulHiL: 207
-  0, // MulI: 208
-  0, // MulL: 209
-  0, // Multi: 210
-  0, // NegD: 211
-  0, // NegF: 212
-  0, // NeverBranch: 213
-  0, // OnSpinWait: 214
-  0, // Opaque1: 215
-  0, // Opaque2: 216
-  0, // Opaque3: 217
-  0, // Opaque4: 218
-  0, // ProfileBoolean: 219
-  0, // OrI: 220
-  0, // OrL: 221
-  1, // OverflowAddI: 222
-  1, // OverflowSubI: 223
-  1, // OverflowMulI: 224
-  1, // OverflowAddL: 225
-  1, // OverflowSubL: 226
-  1, // OverflowMulL: 227
-  0, // PCTable: 228
-  0, // Parm: 229
-  0, // PartialSubtypeCheck: 230
-  0, // Phi: 231
-  0, // PopCountI: 232
-  0, // PopCountL: 233
-  0, // PopCountVI: 234
-  0, // PrefetchAllocation: 235
-  0, // Proj: 236
-  0, // RShiftI: 237
-  0, // RShiftL: 238
-  0, // Region: 239
-  0, // Rethrow: 240
-  0, // Return: 241
-  0, // Root: 242
-  0, // RoundDouble: 243
-  0, // RoundFloat: 244
-  0, // SafePoint: 245
-  0, // SafePointScalarObject: 246
-  0, // SCMemProj: 247
-  0, // SqrtD: 248
-  0, // SqrtF: 249
-  0, // Start: 250
-  0, // StartOSR: 251
-  0, // StoreB: 252
-  0, // StoreC: 253
-  0, // StoreCM: 254
-  0, // StorePConditional: 255
-  0, // StoreIConditional: 256
-  0, // StoreLConditional: 257
-  0, // StoreD: 258
-  0, // StoreF: 259
-  0, // StoreI: 260
-  0, // StoreL: 261
-  0, // StoreP: 262
-  0, // StoreN: 263
-  0, // StoreNKlass: 264
-  0, // StrComp: 265
-  0, // StrCompressedCopy: 266
-  0, // StrEquals: 267
-  0, // StrIndexOf: 268
-  0, // StrIndexOfChar: 269
-  0, // StrInflatedCopy: 270
-  0, // SubD: 271
-  0, // SubF: 272
-  0, // SubI: 273
-  0, // SubL: 274
-  0, // TailCall: 275
-  0, // TailJump: 276
-  0, // ThreadLocal: 277
-  0, // Unlock: 278
-  0, // URShiftI: 279
-  0, // URShiftL: 280
-  0, // XorI: 281
-  0, // XorL: 282
-  0, // Vector: 283
-  0, // AddVB: 284
-  0, // AddVS: 285
-  0, // AddVI: 286
-  0, // AddReductionVI: 287
-  0, // AddVL: 288
-  0, // AddReductionVL: 289
-  0, // AddVF: 290
-  0, // AddReductionVF: 291
-  0, // AddVD: 292
-  0, // AddReductionVD: 293
-  0, // SubVB: 294
-  0, // SubVS: 295
-  0, // SubVI: 296
-  0, // SubVL: 297
-  0, // SubVF: 298
-  0, // SubVD: 299
-  0, // MulVS: 300
-  0, // MulVI: 301
-  0, // MulReductionVI: 302
-  0, // MulVL: 303
-  0, // MulReductionVL: 304
-  0, // MulVF: 305
-  0, // MulReductionVF: 306
-  0, // MulVD: 307
-  0, // MulReductionVD: 308
-  0, // FmaVD: 309
-  0, // FmaVF: 310
-  0, // DivVF: 311
-  0, // DivVD: 312
-  0, // AbsVF: 313
-  0, // AbsVD: 314
-  0, // NegVF: 315
-  0, // NegVD: 316
-  0, // SqrtVD: 317
-  0, // SqrtVF: 318
-  0, // LShiftCntV: 319
-  0, // RShiftCntV: 320
-  0, // LShiftVB: 321
-  0, // LShiftVS: 322
-  0, // LShiftVI: 323
-  0, // LShiftVL: 324
-  0, // RShiftVB: 325
-  0, // RShiftVS: 326
-  0, // RShiftVI: 327
-  0, // RShiftVL: 328
-  0, // URShiftVB: 329
-  0, // URShiftVS: 330
-  0, // URShiftVI: 331
-  0, // URShiftVL: 332
-  0, // AndV: 333
-  0, // OrV: 334
-  0, // XorV: 335
-  0, // LoadVector: 336
-  0, // StoreVector: 337
-  0, // Pack: 338
-  0, // PackB: 339
-  0, // PackS: 340
-  0, // PackI: 341
-  0, // PackL: 342
-  0, // PackF: 343
-  0, // PackD: 344
-  0, // Pack2L: 345
-  0, // Pack2D: 346
-  0, // ReplicateB: 347
-  0, // ReplicateS: 348
-  0, // ReplicateI: 349
-  0, // ReplicateL: 350
-  0, // ReplicateF: 351
-  0, // ReplicateD: 352
-  0, // Extract: 353
-  0, // ExtractB: 354
-  0, // ExtractUB: 355
-  0, // ExtractC: 356
-  0, // ExtractS: 357
-  0, // ExtractI: 358
-  0, // ExtractL: 359
-  0, // ExtractF: 360
-  0 // no trailing comma // ExtractD: 361
+  0, // RegVectMask: 14
+  0, // RegFlags: 15
+  0, // _last_machine_leaf: 16
+  0, // AbsD: 17
+  0, // AbsF: 18
+  0, // AbsI: 19
+  0, // AbsL: 20
+  0, // AddD: 21
+  0, // AddF: 22
+  0, // AddI: 23
+  0, // AddL: 24
+  0, // AddP: 25
+  0, // Allocate: 26
+  0, // AllocateArray: 27
+  0, // AndI: 28
+  0, // AndL: 29
+  0, // ArrayCopy: 30
+  0, // AryEq: 31
+  0, // AtanD: 32
+  1, // Binary: 33
+  0, // Blackhole: 34
+  1, // Bool: 35
+  0, // BoxLock: 36
+  0, // ReverseBytesI: 37
+  0, // ReverseBytesL: 38
+  0, // ReverseBytesUS: 39
+  0, // ReverseBytesS: 40
+  0, // ReverseBytesV: 41
+  0, // CProj: 42
+  0, // CacheWB: 43
+  0, // CacheWBPreSync: 44
+  0, // CacheWBPostSync: 45
+  0, // CallDynamicJava: 46
+  0, // CallJava: 47
+  0, // CallLeaf: 48
+  0, // CallLeafNoFP: 49
+  0, // CallLeafVector: 50
+  0, // CallRuntime: 51
+  0, // CallStaticJava: 52
+  0, // CastDD: 53
+  0, // CastFF: 54
+  0, // CastII: 55
+  0, // CastLL: 56
+  0, // CastVV: 57
+  0, // CastX2P: 58
+  0, // CastP2X: 59
+  0, // CastPP: 60
+  0, // Catch: 61
+  0, // CatchProj: 62
+  0, // CheckCastPP: 63
+  0, // ClearArray: 64
+  0, // CompressBits: 65
+  0, // ExpandBits: 66
+  0, // ConstraintCast: 67
+  0, // CMoveD: 68
+  0, // CMoveVD: 69
+  0, // CMoveF: 70
+  0, // CMoveVF: 71
+  0, // CMoveI: 72
+  0, // CMoveL: 73
+  0, // CMoveP: 74
+  0, // CMoveN: 75
+  1, // CmpN: 76
+  1, // CmpD: 77
+  0, // CmpD3: 78
+  1, // CmpF: 79
+  0, // CmpF3: 80
+  1, // CmpI: 81
+  1, // CmpL: 82
+  0, // CmpL3: 83
+  0, // CmpLTMask: 84
+  1, // CmpP: 85
+  1, // CmpU: 86
+  0, // CmpU3: 87
+  1, // CmpUL: 88
+  0, // CmpUL3: 89
+  0, // CompareAndSwapB: 90
+  0, // CompareAndSwapS: 91
+  0, // CompareAndSwapI: 92
+  0, // CompareAndSwapL: 93
+  0, // CompareAndSwapP: 94
+  0, // CompareAndSwapN: 95
+  0, // WeakCompareAndSwapB: 96
+  0, // WeakCompareAndSwapS: 97
+  0, // WeakCompareAndSwapI: 98
+  0, // WeakCompareAndSwapL: 99
+  0, // WeakCompareAndSwapP: 100
+  0, // WeakCompareAndSwapN: 101
+  0, // CompareAndExchangeB: 102
+  0, // CompareAndExchangeS: 103
+  0, // CompareAndExchangeI: 104
+  0, // CompareAndExchangeL: 105
+  0, // CompareAndExchangeP: 106
+  0, // CompareAndExchangeN: 107
+  0, // GetAndAddB: 108
+  0, // GetAndAddS: 109
+  0, // GetAndAddI: 110
+  0, // GetAndAddL: 111
+  0, // GetAndSetB: 112
+  0, // GetAndSetS: 113
+  0, // GetAndSetI: 114
+  0, // GetAndSetL: 115
+  0, // GetAndSetP: 116
+  0, // GetAndSetN: 117
+  0, // Con: 118
+  0, // ConN: 119
+  0, // ConNKlass: 120
+  0, // ConD: 121
+  0, // ConF: 122
+  0, // ConI: 123
+  0, // ConL: 124
+  0, // ConP: 125
+  0, // Conv2B: 126
+  0, // ConvD2F: 127
+  0, // ConvD2I: 128
+  0, // ConvD2L: 129
+  0, // ConvF2D: 130
+  0, // ConvF2I: 131
+  0, // ConvF2L: 132
+  0, // ConvI2D: 133
+  0, // ConvI2F: 134
+  0, // ConvI2L: 135
+  0, // ConvL2D: 136
+  0, // ConvL2F: 137
+  0, // ConvL2I: 138
+  0, // ConvF2HF: 139
+  0, // ConvHF2F: 140
+  0, // CountedLoop: 141
+  0, // CountedLoopEnd: 142
+  0, // OuterStripMinedLoop: 143
+  0, // OuterStripMinedLoopEnd: 144
+  0, // LongCountedLoop: 145
+  0, // LongCountedLoopEnd: 146
+  0, // CountLeadingZerosI: 147
+  0, // CountLeadingZerosL: 148
+  0, // CountLeadingZerosV: 149
+  0, // CountTrailingZerosI: 150
+  0, // CountTrailingZerosL: 151
+  0, // CountTrailingZerosV: 152
+  0, // CreateEx: 153
+  0, // DecodeN: 154
+  0, // DecodeNKlass: 155
+  0, // DivD: 156
+  0, // DivF: 157
+  0, // DivI: 158
+  0, // DivL: 159
+  0, // UDivI: 160
+  0, // UDivL: 161
+  0, // DivMod: 162
+  0, // DivModI: 163
+  0, // DivModL: 164
+  0, // UDivModI: 165
+  0, // UDivModL: 166
+  0, // EncodeISOArray: 167
+  0, // EncodeP: 168
+  0, // EncodePKlass: 169
+  1, // FastLock: 170
+  1, // FastUnlock: 171
+  0, // FmaD: 172
+  0, // FmaF: 173
+  0, // Goto: 174
+  0, // Halt: 175
+  0, // CountPositives: 176
+  0, // If: 177
+  0, // RangeCheck: 178
+  0, // IfFalse: 179
+  0, // IfTrue: 180
+  0, // Initialize: 181
+  0, // JProj: 182
+  0, // Jump: 183
+  0, // JumpProj: 184
+  0, // LShiftI: 185
+  0, // LShiftL: 186
+  0, // LoadB: 187
+  0, // LoadUB: 188
+  0, // LoadUS: 189
+  0, // LoadD: 190
+  0, // LoadD_unaligned: 191
+  0, // LoadF: 192
+  0, // LoadI: 193
+  0, // LoadKlass: 194
+  0, // LoadNKlass: 195
+  0, // LoadL: 196
+  0, // LoadL_unaligned: 197
+  0, // LoadP: 198
+  0, // LoadN: 199
+  0, // LoadRange: 200
+  0, // LoadS: 201
+  0, // Lock: 202
+  0, // Loop: 203
+  0, // LoopLimit: 204
+  0, // Mach: 205
+  0, // MachNullCheck: 206
+  0, // MachProj: 207
+  0, // MulAddS2I: 208
+  0, // MaxI: 209
+  0, // MaxL: 210
+  0, // MaxD: 211
+  0, // MaxF: 212
+  0, // MemBarAcquire: 213
+  0, // LoadFence: 214
+  0, // MemBarAcquireLock: 215
+  0, // MemBarCPUOrder: 216
+  0, // MemBarRelease: 217
+  0, // StoreFence: 218
+  0, // StoreStoreFence: 219
+  0, // MemBarReleaseLock: 220
+  0, // MemBarVolatile: 221
+  0, // MemBarStoreStore: 222
+  0, // MergeMem: 223
+  0, // MinI: 224
+  0, // MinL: 225
+  0, // MinF: 226
+  0, // MinD: 227
+  0, // ModD: 228
+  0, // ModF: 229
+  0, // ModI: 230
+  0, // ModL: 231
+  0, // UModI: 232
+  0, // UModL: 233
+  0, // MoveI2F: 234
+  0, // MoveF2I: 235
+  0, // MoveL2D: 236
+  0, // MoveD2L: 237
+  0, // IsInfiniteF: 238
+  0, // IsFiniteF: 239
+  0, // IsInfiniteD: 240
+  0, // IsFiniteD: 241
+  0, // MulD: 242
+  0, // MulF: 243
+  0, // MulHiL: 244
+  0, // UMulHiL: 245
+  0, // MulI: 246
+  0, // MulL: 247
+  0, // Multi: 248
+  0, // NegI: 249
+  0, // NegL: 250
+  0, // NegD: 251
+  0, // NegF: 252
+  0, // NeverBranch: 253
+  0, // OnSpinWait: 254
+  0, // Opaque1: 255
+  0, // OpaqueLoopInit: 256
+  0, // OpaqueLoopStride: 257
+  0, // OpaqueZeroTripGuard: 258
+  0, // Opaque3: 259
+  0, // Opaque4: 260
+  0, // ProfileBoolean: 261
+  0, // OrI: 262
+  0, // OrL: 263
+  1, // OverflowAddI: 264
+  1, // OverflowSubI: 265
+  1, // OverflowMulI: 266
+  1, // OverflowAddL: 267
+  1, // OverflowSubL: 268
+  1, // OverflowMulL: 269
+  0, // PCTable: 270
+  0, // Parm: 271
+  0, // PartialSubtypeCheck: 272
+  0, // SubTypeCheck: 273
+  0, // Phi: 274
+  0, // PopCountI: 275
+  0, // PopCountL: 276
+  0, // PopCountVI: 277
+  0, // PopCountVL: 278
+  0, // PopulateIndex: 279
+  0, // PrefetchAllocation: 280
+  0, // Proj: 281
+  0, // RShiftI: 282
+  0, // RShiftL: 283
+  0, // Region: 284
+  0, // Rethrow: 285
+  0, // Return: 286
+  0, // ReverseI: 287
+  0, // ReverseL: 288
+  0, // ReverseV: 289
+  0, // Root: 290
+  0, // RoundDouble: 291
+  0, // RoundDoubleMode: 292
+  0, // RoundDoubleModeV: 293
+  0, // RoundFloat: 294
+  0, // RotateLeft: 295
+  0, // RotateLeftV: 296
+  0, // RotateRight: 297
+  0, // RotateRightV: 298
+  0, // SafePoint: 299
+  0, // SafePointScalarObject: 300
+  0, // ShenandoahCompareAndExchangeP: 301
+  0, // ShenandoahCompareAndExchangeN: 302
+  0, // ShenandoahCompareAndSwapN: 303
+  0, // ShenandoahCompareAndSwapP: 304
+  0, // ShenandoahWeakCompareAndSwapN: 305
+  0, // ShenandoahWeakCompareAndSwapP: 306
+  0, // ShenandoahIUBarrier: 307
+  0, // ShenandoahLoadReferenceBarrier: 308
+  0, // SCMemProj: 309
+  0, // CopySignD: 310
+  0, // CopySignF: 311
+  0, // SignumD: 312
+  0, // SignumF: 313
+  0, // SignumVF: 314
+  0, // SignumVD: 315
+  0, // SqrtD: 316
+  0, // SqrtF: 317
+  0, // RoundF: 318
+  0, // RoundD: 319
+  0, // Start: 320
+  0, // StartOSR: 321
+  0, // StoreB: 322
+  0, // StoreC: 323
+  0, // StoreCM: 324
+  0, // StoreD: 325
+  0, // StoreF: 326
+  0, // StoreI: 327
+  0, // StoreL: 328
+  0, // StoreP: 329
+  0, // StoreN: 330
+  0, // StoreNKlass: 331
+  0, // StrComp: 332
+  0, // StrCompressedCopy: 333
+  0, // StrEquals: 334
+  0, // StrIndexOf: 335
+  0, // StrIndexOfChar: 336
+  0, // StrInflatedCopy: 337
+  0, // SubD: 338
+  0, // SubF: 339
+  0, // SubI: 340
+  0, // SubL: 341
+  0, // TailCall: 342
+  0, // TailJump: 343
+  0, // MacroLogicV: 344
+  0, // ThreadLocal: 345
+  0, // Unlock: 346
+  0, // URShiftB: 347
+  0, // URShiftS: 348
+  0, // URShiftI: 349
+  0, // URShiftL: 350
+  0, // XorI: 351
+  0, // XorL: 352
+  0, // Vector: 353
+  0, // AddVB: 354
+  0, // AddVS: 355
+  0, // AddVI: 356
+  0, // AddReductionVI: 357
+  0, // AddVL: 358
+  0, // AddReductionVL: 359
+  0, // AddVF: 360
+  0, // AddReductionVF: 361
+  0, // AddVD: 362
+  0, // AddReductionVD: 363
+  0, // SubVB: 364
+  0, // SubVS: 365
+  0, // SubVI: 366
+  0, // SubVL: 367
+  0, // SubVF: 368
+  0, // SubVD: 369
+  0, // MulVB: 370
+  0, // MulVS: 371
+  0, // MulVI: 372
+  0, // MulReductionVI: 373
+  0, // MulVL: 374
+  0, // MulReductionVL: 375
+  0, // MulVF: 376
+  0, // MulReductionVF: 377
+  0, // MulVD: 378
+  0, // MulReductionVD: 379
+  0, // MulAddVS2VI: 380
+  0, // FmaVD: 381
+  0, // FmaVF: 382
+  0, // DivVF: 383
+  0, // DivVD: 384
+  0, // AbsVB: 385
+  0, // AbsVS: 386
+  0, // AbsVI: 387
+  0, // AbsVL: 388
+  0, // AbsVF: 389
+  0, // AbsVD: 390
+  0, // NegVI: 391
+  0, // NegVL: 392
+  0, // NegVF: 393
+  0, // NegVD: 394
+  0, // SqrtVD: 395
+  0, // SqrtVF: 396
+  0, // LShiftCntV: 397
+  0, // RShiftCntV: 398
+  0, // LShiftVB: 399
+  0, // LShiftVS: 400
+  0, // LShiftVI: 401
+  0, // LShiftVL: 402
+  0, // RShiftVB: 403
+  0, // RShiftVS: 404
+  0, // RShiftVI: 405
+  0, // RShiftVL: 406
+  0, // URShiftVB: 407
+  0, // URShiftVS: 408
+  0, // URShiftVI: 409
+  0, // URShiftVL: 410
+  0, // AndV: 411
+  0, // AndReductionV: 412
+  0, // OrV: 413
+  0, // OrReductionV: 414
+  0, // XorV: 415
+  0, // XorReductionV: 416
+  0, // MinV: 417
+  0, // MaxV: 418
+  0, // MinReductionV: 419
+  0, // MaxReductionV: 420
+  0, // CompressV: 421
+  0, // CompressM: 422
+  0, // ExpandV: 423
+  0, // LoadVector: 424
+  0, // LoadVectorGather: 425
+  0, // LoadVectorGatherMasked: 426
+  0, // StoreVector: 427
+  0, // StoreVectorScatter: 428
+  0, // StoreVectorScatterMasked: 429
+  0, // LoadVectorMasked: 430
+  0, // StoreVectorMasked: 431
+  0, // VectorCmpMasked: 432
+  0, // VectorMaskGen: 433
+  0, // VectorMaskOp: 434
+  0, // VectorMaskTrueCount: 435
+  0, // VectorMaskFirstTrue: 436
+  0, // VectorMaskLastTrue: 437
+  0, // VectorMaskToLong: 438
+  0, // VectorLongToMask: 439
+  0, // Pack: 440
+  0, // PackB: 441
+  0, // PackS: 442
+  0, // PackI: 443
+  0, // PackL: 444
+  0, // PackF: 445
+  0, // PackD: 446
+  0, // Pack2L: 447
+  0, // Pack2D: 448
+  0, // ReplicateB: 449
+  0, // ReplicateS: 450
+  0, // ReplicateI: 451
+  0, // ReplicateL: 452
+  0, // ReplicateF: 453
+  0, // ReplicateD: 454
+  0, // RoundVF: 455
+  0, // RoundVD: 456
+  0, // Extract: 457
+  0, // ExtractB: 458
+  0, // ExtractUB: 459
+  0, // ExtractC: 460
+  0, // ExtractS: 461
+  0, // ExtractI: 462
+  0, // ExtractL: 463
+  0, // ExtractF: 464
+  0, // ExtractD: 465
+  0, // Digit: 466
+  0, // LowerCase: 467
+  0, // UpperCase: 468
+  0, // Whitespace: 469
+  0, // VectorBox: 470
+  0, // VectorBoxAllocate: 471
+  0, // VectorUnbox: 472
+  0, // VectorMaskWrapper: 473
+  0, // VectorMaskCmp: 474
+  0, // VectorMaskCast: 475
+  0, // VectorTest: 476
+  0, // VectorBlend: 477
+  0, // VectorRearrange: 478
+  0, // VectorLoadMask: 479
+  0, // VectorLoadShuffle: 480
+  0, // VectorLoadConst: 481
+  0, // VectorStoreMask: 482
+  0, // VectorReinterpret: 483
+  0, // VectorCast: 484
+  0, // VectorCastB2X: 485
+  0, // VectorCastS2X: 486
+  0, // VectorCastI2X: 487
+  0, // VectorCastL2X: 488
+  0, // VectorCastF2X: 489
+  0, // VectorCastD2X: 490
+  0, // VectorCastF2HF: 491
+  0, // VectorCastHF2F: 492
+  0, // VectorUCastB2X: 493
+  0, // VectorUCastS2X: 494
+  0, // VectorUCastI2X: 495
+  0, // VectorizedHashCode: 496
+  0, // VectorInsert: 497
+  0, // MaskAll: 498
+  0, // AndVMask: 499
+  0, // OrVMask: 500
+  0 // no trailing comma // XorVMask: 501
 };
 //  The following instructions can cisc-spill
 
@@ -7233,70 +7810,70 @@ const VMReg OptoReg::opto2vm[REG_COUNT] = {
 	CCR5->as_VMReg(),
 	CCR6->as_VMReg(),
 	CCR7->as_VMReg(),
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VMRegImpl::Bad(),
+	VSR32->as_VMReg(),
+	VSR33->as_VMReg(),
+	VSR34->as_VMReg(),
+	VSR35->as_VMReg(),
+	VSR36->as_VMReg(),
+	VSR37->as_VMReg(),
+	VSR38->as_VMReg(),
+	VSR39->as_VMReg(),
+	VSR40->as_VMReg(),
+	VSR41->as_VMReg(),
+	VSR42->as_VMReg(),
+	VSR43->as_VMReg(),
+	VSR44->as_VMReg(),
+	VSR45->as_VMReg(),
+	VSR46->as_VMReg(),
+	VSR47->as_VMReg(),
+	VSR48->as_VMReg(),
+	VSR49->as_VMReg(),
+	VSR50->as_VMReg(),
+	VSR51->as_VMReg(),
+	VSR52->as_VMReg(),
+	VSR53->as_VMReg(),
+	VSR54->as_VMReg(),
+	VSR55->as_VMReg(),
+	VSR56->as_VMReg(),
+	VSR57->as_VMReg(),
+	VSR58->as_VMReg(),
+	VSR59->as_VMReg(),
+	VSR60->as_VMReg(),
+	VSR61->as_VMReg(),
+	VSR62->as_VMReg(),
+	VSR63->as_VMReg(),
 	SR_XER->as_VMReg(),
 	SR_LR->as_VMReg(),
 	SR_CTR->as_VMReg(),
@@ -7749,16 +8326,6 @@ const RegMask *inline_cache_regPOper::in_RegMask(int index) const {
   return &R19_BITS64_REG_mask();
 }
 
-const RegMask *compiler_method_oop_regPOper::in_RegMask(int index) const {
-  assert(0 <= index && index < 1, "index out of range");
-  return &RSCRATCH1_BITS64_REG_mask();
-}
-
-const RegMask *interpreter_method_oop_regPOper::in_RegMask(int index) const {
-  assert(0 <= index && index < 1, "index out of range");
-  return &R19_BITS64_REG_mask();
-}
-
 const RegMask *iRegP2NOper::in_RegMask(int index) const {
   assert(0 <= index && index < 1, "index out of range");
   return &BITS64_REG_RO_mask();
@@ -7857,29 +8424,7 @@ MachNode *branchConFarNode::short_branch_version() {
 }
 
 // Build short branch version of this instruction
-MachNode *branchConSchedNode::short_branch_version() {
-  branchConNode *node = new branchConNode();
-  node->_prob = _prob;
-  node->_fcnt = _fcnt;
-
-  // Copy _idx, inputs and operands to new node
-  fill_new_machnode(node);
-  return node;
-}
-
-// Build short branch version of this instruction
 MachNode *branchLoopEndFarNode::short_branch_version() {
-  branchLoopEndNode *node = new branchLoopEndNode();
-  node->_prob = _prob;
-  node->_fcnt = _fcnt;
-
-  // Copy _idx, inputs and operands to new node
-  fill_new_machnode(node);
-  return node;
-}
-
-// Build short branch version of this instruction
-MachNode *branchLoopEndSchedNode::short_branch_version() {
   branchLoopEndNode *node = new branchLoopEndNode();
   node->_prob = _prob;
   node->_fcnt = _fcnt;
@@ -7988,16 +8533,6 @@ void branchConFarNode::save_label( Label** label, uint* block_num ) {
   *label = oper->_label;
   *block_num = oper->_block_num;
 }
-void branchConSchedNode::label_set( Label* label, uint block_num ) {
-  labelOper* oper  = (labelOper*)(opnd_array(3));
-  oper->_label     = label;
-  oper->_block_num = block_num;
-}
-void branchConSchedNode::save_label( Label** label, uint* block_num ) {
-  labelOper* oper  = (labelOper*)(opnd_array(3));
-  *label = oper->_label;
-  *block_num = oper->_block_num;
-}
 void branchLoopEndNode::label_set( Label* label, uint block_num ) {
   labelOper* oper  = (labelOper*)(opnd_array(3));
   oper->_label     = label;
@@ -8014,16 +8549,6 @@ void branchLoopEndFarNode::label_set( Label* label, uint block_num ) {
   oper->_block_num = block_num;
 }
 void branchLoopEndFarNode::save_label( Label** label, uint* block_num ) {
-  labelOper* oper  = (labelOper*)(opnd_array(3));
-  *label = oper->_label;
-  *block_num = oper->_block_num;
-}
-void branchLoopEndSchedNode::label_set( Label* label, uint block_num ) {
-  labelOper* oper  = (labelOper*)(opnd_array(3));
-  oper->_label     = label;
-  oper->_block_num = block_num;
-}
-void branchLoopEndSchedNode::save_label( Label** label, uint* block_num ) {
   labelOper* oper  = (labelOper*)(opnd_array(3));
   *label = oper->_label;
   *block_num = oper->_block_num;
@@ -8312,15 +8837,7 @@ int storeDNode::reloc() const {
   return 2;
 }
 
-int storeCM_CMSNode::reloc() const {
-  return 2;
-}
-
-int storeCM_CMS_ExExNode::reloc() const {
-  return 2;
-}
-
-int storeCM_G1Node::reloc() const {
+int storeCMNode::reloc() const {
   return 2;
 }
 
@@ -8329,10 +8846,6 @@ int cmovP_regNode::reloc() const {
 }
 
 int cmovP_immNode::reloc() const {
-  return 1;
-}
-
-int loadPLockedNode::reloc() const {
   return 1;
 }
 
@@ -8349,6 +8862,10 @@ int addP_reg_imm16Node::reloc() const {
 }
 
 int addP_reg_immhi16Node::reloc() const {
+  return 1;
+}
+
+int addP_reg_imm34Node::reloc() const {
   return 1;
 }
 
@@ -8420,6 +8937,10 @@ int repl4F_immF0Node::reloc() const {
   return 1;
 }
 
+int repl2D_immD0Node::reloc() const {
+  return 1;
+}
+
 int safePoint_pollNode::reloc() const {
   return 1;
 }
@@ -8472,6 +8993,14 @@ int RethrowExceptionNode::reloc() const {
   return 1;
 }
 
+int zLoadPNode::reloc() const {
+  return 1;
+}
+
+int zLoadP_acqNode::reloc() const {
+  return 1;
+}
+
 
 void convB2I_reg_2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
@@ -8479,14 +9008,13 @@ void convB2I_reg_2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5411 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5119 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_extsb);
     __ extsb(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 8489 "ad_ppc.cpp"
+#line 9017 "ad_ppc.cpp"
   }
 }
 
@@ -8502,14 +9030,13 @@ void loadUB_indirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2601 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2458 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lbz);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8512 "ad_ppc.cpp"
+#line 9039 "ad_ppc.cpp"
   }
 }
 
@@ -8525,16 +9052,15 @@ void loadUB_indirect_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2609 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2465 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8537 "ad_ppc.cpp"
+#line 9063 "ad_ppc.cpp"
   }
 }
 
@@ -8550,14 +9076,13 @@ void loadUB_indOffset16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2601 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2458 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lbz);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8560 "ad_ppc.cpp"
+#line 9085 "ad_ppc.cpp"
   }
 }
 
@@ -8573,16 +9098,15 @@ void loadUB_indOffset16_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2609 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2465 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8585 "ad_ppc.cpp"
+#line 9109 "ad_ppc.cpp"
   }
 }
 
@@ -8598,14 +9122,13 @@ void loadUBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2601 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2458 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lbz);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8608 "ad_ppc.cpp"
+#line 9131 "ad_ppc.cpp"
   }
 }
 
@@ -8621,16 +9144,15 @@ void loadUB_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2609 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2465 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8633 "ad_ppc.cpp"
+#line 9155 "ad_ppc.cpp"
   }
 }
 
@@ -8646,14 +9168,13 @@ void loadUB2LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2601 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2458 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lbz);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8656 "ad_ppc.cpp"
+#line 9177 "ad_ppc.cpp"
   }
 }
 
@@ -8669,16 +9190,15 @@ void loadUB2L_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2609 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2465 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lbz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8681 "ad_ppc.cpp"
+#line 9201 "ad_ppc.cpp"
   }
 }
 
@@ -8693,15 +9213,14 @@ void loadSNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5569 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5276 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lha);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lha(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8704 "ad_ppc.cpp"
+#line 9223 "ad_ppc.cpp"
   }
 }
 
@@ -8716,17 +9235,16 @@ void loadS_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5586 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5292 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lha(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8729 "ad_ppc.cpp"
+#line 9247 "ad_ppc.cpp"
   }
 }
 
@@ -8742,15 +9260,14 @@ void loadUSNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2618 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2473 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lhz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lhz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8753 "ad_ppc.cpp"
+#line 9270 "ad_ppc.cpp"
   }
 }
 
@@ -8766,17 +9283,16 @@ void loadUS_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2627 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2481 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lhz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8779 "ad_ppc.cpp"
+#line 9295 "ad_ppc.cpp"
   }
 }
 
@@ -8792,15 +9308,14 @@ void loadUS2LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2618 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2473 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lhz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lhz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8803 "ad_ppc.cpp"
+#line 9318 "ad_ppc.cpp"
   }
 }
 
@@ -8816,17 +9331,16 @@ void loadUS2L_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2627 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2481 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lhz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8829 "ad_ppc.cpp"
+#line 9343 "ad_ppc.cpp"
   }
 }
 
@@ -8842,15 +9356,14 @@ void loadINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8853 "ad_ppc.cpp"
+#line 9366 "ad_ppc.cpp"
   }
 }
 
@@ -8866,17 +9379,16 @@ void loadI_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2646 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2498 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8879 "ad_ppc.cpp"
+#line 9391 "ad_ppc.cpp"
   }
 }
 
@@ -8893,15 +9405,14 @@ void loadUI2LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// mask
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8904 "ad_ppc.cpp"
+#line 9415 "ad_ppc.cpp"
   }
 }
 
@@ -8916,15 +9427,14 @@ void loadI2LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5693 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5398 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwa);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwa(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8927 "ad_ppc.cpp"
+#line 9437 "ad_ppc.cpp"
   }
 }
 
@@ -8939,17 +9449,16 @@ void loadI2L_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5710 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5414 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwa);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwa(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 8952 "ad_ppc.cpp"
+#line 9461 "ad_ppc.cpp"
   }
 }
 
@@ -8965,16 +9474,15 @@ void loadLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 8977 "ad_ppc.cpp"
+#line 9485 "ad_ppc.cpp"
   }
 }
 
@@ -8990,10 +9498,9 @@ void loadL_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2666 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2516 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
@@ -9001,7 +9508,7 @@ void loadL_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 9004 "ad_ppc.cpp"
+#line 9511 "ad_ppc.cpp"
   }
 }
 
@@ -9017,16 +9524,15 @@ void loadL_unalignedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9029 "ad_ppc.cpp"
+#line 9535 "ad_ppc.cpp"
   }
 }
 
@@ -9042,16 +9548,15 @@ void loadV8Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9054 "ad_ppc.cpp"
+#line 9559 "ad_ppc.cpp"
   }
 }
 
@@ -9066,13 +9571,13 @@ void loadV16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5779 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5482 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ lxvd2x(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 9075 "ad_ppc.cpp"
+#line 9580 "ad_ppc.cpp"
   }
 }
 
@@ -9088,15 +9593,14 @@ void loadRangeNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9099 "ad_ppc.cpp"
+#line 9603 "ad_ppc.cpp"
   }
 }
 
@@ -9112,15 +9616,14 @@ void loadNNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9123 "ad_ppc.cpp"
+#line 9626 "ad_ppc.cpp"
   }
 }
 
@@ -9136,17 +9639,16 @@ void loadN_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2646 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2498 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 9149 "ad_ppc.cpp"
+#line 9651 "ad_ppc.cpp"
   }
 }
 
@@ -9162,15 +9664,14 @@ void loadN2P_unscaledNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9173 "ad_ppc.cpp"
+#line 9674 "ad_ppc.cpp"
   }
 }
 
@@ -9186,15 +9687,14 @@ void loadN2P_klass_unscaledNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) cons
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9197 "ad_ppc.cpp"
+#line 9697 "ad_ppc.cpp"
   }
 }
 
@@ -9210,16 +9710,15 @@ void loadPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9222 "ad_ppc.cpp"
+#line 9721 "ad_ppc.cpp"
   }
 }
 
@@ -9235,10 +9734,9 @@ void loadP_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2666 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2516 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
@@ -9246,7 +9744,7 @@ void loadP_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
     __ isync();
   
-#line 9249 "ad_ppc.cpp"
+#line 9747 "ad_ppc.cpp"
   }
 }
 
@@ -9262,16 +9760,15 @@ void loadP2XNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9274 "ad_ppc.cpp"
+#line 9771 "ad_ppc.cpp"
   }
 }
 
@@ -9287,15 +9784,14 @@ void loadNKlassNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9298 "ad_ppc.cpp"
+#line 9794 "ad_ppc.cpp"
   }
 }
 
@@ -9311,16 +9807,15 @@ void loadKlassNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9323 "ad_ppc.cpp"
+#line 9818 "ad_ppc.cpp"
   }
 }
 
@@ -9335,15 +9830,14 @@ void loadFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5912 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5617 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lfs);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lfs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9346 "ad_ppc.cpp"
+#line 9840 "ad_ppc.cpp"
   }
 }
 
@@ -9359,11 +9853,10 @@ void loadF_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5932 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5636 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     Label next;
     __ lfs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
@@ -9372,7 +9865,7 @@ void loadF_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ bind(next);
     __ isync();
   
-#line 9375 "ad_ppc.cpp"
+#line 9868 "ad_ppc.cpp"
   }
 }
 
@@ -9388,14 +9881,13 @@ void loadDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2677 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2526 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lfd);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lfd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9398 "ad_ppc.cpp"
+#line 9890 "ad_ppc.cpp"
   }
 }
 
@@ -9411,11 +9903,10 @@ void loadD_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 5969 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5672 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     Label next;
     __ lfd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
@@ -9424,7 +9915,7 @@ void loadD_acNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ bind(next);
     __ isync();
   
-#line 9427 "ad_ppc.cpp"
+#line 9918 "ad_ppc.cpp"
   }
 }
 
@@ -9440,14 +9931,13 @@ void loadD_unalignedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   {
 
-#line 2677 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2526 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lfd);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lfd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 9450 "ad_ppc.cpp"
+#line 9940 "ad_ppc.cpp"
   }
 }
 
@@ -9462,14 +9952,13 @@ void loadToc_hiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6004 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5706 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
     __ calculate_address_from_global_toc_hi16only(opnd_array(0)->as_Register(ra_,this)/* dst */, __ method_toc());
   
-#line 9472 "ad_ppc.cpp"
+#line 9961 "ad_ppc.cpp"
   }
 }
 
@@ -9484,14 +9973,13 @@ void loadToc_loNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6018 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5719 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ori);
     __ calculate_address_from_global_toc_lo16only(opnd_array(0)->as_Register(ra_,this)/* dst */, __ method_toc());
   
-#line 9494 "ad_ppc.cpp"
+#line 9982 "ad_ppc.cpp"
   }
 }
 
@@ -9506,14 +9994,13 @@ void loadConI16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6031 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5731 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 9516 "ad_ppc.cpp"
+#line 10003 "ad_ppc.cpp"
   }
 }
 
@@ -9528,15 +10015,14 @@ void loadConIhi16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6045 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5744 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
     // Lis sign extends 16-bit src then shifts it 16 bit to the left.
     __ lis(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)((opnd_array(1)->constant()& 0xFFFF0000) >> 16)));
   
-#line 9539 "ad_ppc.cpp"
+#line 10025 "ad_ppc.cpp"
   }
 }
 
@@ -9552,14 +10038,13 @@ void loadConI32_lo16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6062 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5760 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ori);
     __ ori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0xFFFF);
   
-#line 9562 "ad_ppc.cpp"
+#line 10047 "ad_ppc.cpp"
   }
 }
 
@@ -9568,20 +10053,41 @@ uint loadConI32_lo16Node::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
+void loadConI32Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 5775 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    assert( ((intptr_t)(__ pc()) & 0x3c) != 0x3c, "Bad alignment for prefixed instruction at " INTPTR_FORMAT, (intptr_t)(__ pc()));
+    __ pli(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->constant());
+  
+#line 10069 "ad_ppc.cpp"
+  }
+}
+
+uint loadConI32Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
+}
+
 void loadConL16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6090 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5804 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short) (opnd_array(1)->constantL()& 0xFFFF)));
   
-#line 9584 "ad_ppc.cpp"
+#line 10090 "ad_ppc.cpp"
   }
 }
 
@@ -9596,14 +10102,13 @@ void loadConL32hi16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6104 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5817 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
     __ lis(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)((opnd_array(1)->constantL()& 0xFFFF0000) >> 16)));
   
-#line 9606 "ad_ppc.cpp"
+#line 10111 "ad_ppc.cpp"
   }
 }
 
@@ -9619,20 +10124,41 @@ void loadConL32_lo16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6120 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5832 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ori);
     __ ori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constantL()) & 0xFFFF);
   
-#line 9629 "ad_ppc.cpp"
+#line 10133 "ad_ppc.cpp"
   }
 }
 
 uint loadConL32_lo16Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void loadConL34Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 5864 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    assert( ((intptr_t)(__ pc()) & 0x3c) != 0x3c, "Bad alignment for prefixed instruction at " INTPTR_FORMAT, (intptr_t)(__ pc()));
+    __ pli(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->constantL());
+  
+#line 10155 "ad_ppc.cpp"
+  }
+}
+
+uint loadConL34Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void loadConLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -9643,11 +10169,10 @@ void loadConLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
 
-#line 2684 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2532 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int toc_offset = 0;
 
     address const_toc_addr;
@@ -9667,7 +10192,7 @@ void loadConLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
 
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, toc_offset, opnd_array(2)->as_Register(ra_,this,idx2)/* toc */);
   
-#line 9670 "ad_ppc.cpp"
+#line 10195 "ad_ppc.cpp"
   }
 }
 
@@ -9684,13 +10209,12 @@ void loadConL_hiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
 
-#line 2708 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2555 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-    if (!ra_->C->in_scratch_emit_size()) {
+    if (!ra_->C->output()->in_scratch_emit_size()) {
       address const_toc_addr;
       // Create a non-oop constant, no relocation needed.
       // If it is an IC, it has a virtual_call_Relocation.
@@ -9711,7 +10235,7 @@ void loadConL_hiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
 
     __ addis(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* toc */, MacroAssembler::largeoffset_si16_si16_hi(_const_toc_offset));
   
-#line 9714 "ad_ppc.cpp"
+#line 10238 "ad_ppc.cpp"
   }
 }
 
@@ -9727,15 +10251,14 @@ void loadConL_loNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// base
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6200 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5929 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    int offset = ra_->C->in_scratch_emit_size() ? 0 : _const_toc_offset_hi_node->_const_toc_offset;
+    int offset = ra_->C->output()->in_scratch_emit_size() ? 0 : _const_toc_offset_hi_node->_const_toc_offset;
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, MacroAssembler::largeoffset_si16_si16_lo(offset), opnd_array(2)->as_Register(ra_,this,idx2)/* base */);
   
-#line 9738 "ad_ppc.cpp"
+#line 10261 "ad_ppc.cpp"
   }
 }
 
@@ -9760,7 +10283,7 @@ void  loadConL_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
   immLOper *op_src = (immLOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 2928 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2774 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // Create new nodes.
     loadConLNodesTuple loadConLNodes =
@@ -9775,7 +10298,7 @@ void  loadConL_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
     assert(nodes->length() >= 1, "must have created at least 1 node");
     assert(loadConLNodes._last->bottom_type()->isa_long(), "must be long");
   
-#line 9778 "ad_ppc.cpp"
+#line 10301 "ad_ppc.cpp"
   }
 }
 
@@ -9788,14 +10311,13 @@ void loadConN0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6227 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5955 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, 0);
   
-#line 9798 "ad_ppc.cpp"
+#line 10320 "ad_ppc.cpp"
   }
 }
 
@@ -9810,14 +10332,13 @@ void loadConN_hiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6241 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5968 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
-    __ lis(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)(short)((opnd_array(1)->constant()>> 16) & 0xffff));
+    __ lis(opnd_array(0)->as_Register(ra_,this)/* dst */, 0); // Will get patched.
   
-#line 9820 "ad_ppc.cpp"
+#line 10341 "ad_ppc.cpp"
   }
 }
 
@@ -9833,18 +10354,15 @@ void loadConN_loNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6255 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5981 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
-    assert(__ oop_recorder() != NULL, "this assembler needs an OopRecorder");
-    int oop_index = __ oop_recorder()->find_index((jobject)opnd_array(2)->constant());
-    RelocationHolder rspec = oop_Relocation::spec(oop_index);
-    __ relocate(rspec, 1);
-    __ ori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant()& 0xffff);
+    AddressLiteral addrlit = __ constant_oop_address((jobject)opnd_array(2)->constant());
+    __ relocate(addrlit.rspec(), /*compressed format*/ 1);
+    __ ori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 0); // Will get patched.
   
-#line 9847 "ad_ppc.cpp"
+#line 10365 "ad_ppc.cpp"
   }
 }
 
@@ -9861,13 +10379,13 @@ void rldiclNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// shift
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// mask_begin
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6270 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 5993 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ rldicl(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->constant(), opnd_array(3)->constant());
   
-#line 9870 "ad_ppc.cpp"
+#line 10388 "ad_ppc.cpp"
   }
 }
 
@@ -9882,14 +10400,13 @@ void clearMs32bNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6286 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6009 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0x20);
   
-#line 9892 "ad_ppc.cpp"
+#line 10409 "ad_ppc.cpp"
   }
 }
 
@@ -9904,14 +10421,13 @@ void loadBaseNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6299 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6021 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    __ load_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, Universe::narrow_oop_base(), R0);
+    __ load_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, CompressedOops::base(), R0);
   
-#line 9914 "ad_ppc.cpp"
+#line 10430 "ad_ppc.cpp"
   }
 }
 
@@ -9929,7 +10445,7 @@ void  loadConN_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
   immNOper *op_src = (immNOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 6314 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6035 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     MachNode *m1 = new loadConN_hiNode();
     MachNode *m2 = new loadConN_loNode();
@@ -9951,7 +10467,7 @@ void  loadConN_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
     nodes->push(m2);
     nodes->push(m3);
   
-#line 9954 "ad_ppc.cpp"
+#line 10470 "ad_ppc.cpp"
   }
 }
 
@@ -9961,15 +10477,14 @@ void loadConNKlass_hiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6347 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6068 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
-    intptr_t Csrc = Klass::encode_klass((Klass *)opnd_array(1)->constant());
+    intptr_t Csrc = CompressedKlassPointers::encode((Klass *)opnd_array(1)->constant());
     __ lis(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)(short)((Csrc >> 16) & 0xffff));
   
-#line 9972 "ad_ppc.cpp"
+#line 10487 "ad_ppc.cpp"
   }
 }
 
@@ -9985,14 +10500,13 @@ void loadConNKlass_maskNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6363 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6083 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0x20);
   
-#line 9995 "ad_ppc.cpp"
+#line 10509 "ad_ppc.cpp"
   }
 }
 
@@ -10008,20 +10522,16 @@ void loadConNKlass_loNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6379 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6098 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ori);
-    intptr_t Csrc = Klass::encode_klass((Klass *)opnd_array(1)->constant());
-    assert(__ oop_recorder() != NULL, "this assembler needs an OopRecorder");
-    int klass_index = __ oop_recorder()->find_index((Klass *)opnd_array(1)->constant());
-    RelocationHolder rspec = metadata_Relocation::spec(klass_index);
-
-    __ relocate(rspec, 1);
+    // Notify OOP recorder (don't need the relocation)
+    AddressLiteral md = __ constant_metadata_address((Klass*)opnd_array(1)->constant());
+    intptr_t Csrc = CompressedKlassPointers::encode((Klass*)md.value());
     __ ori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, Csrc & 0xffff);
   
-#line 10024 "ad_ppc.cpp"
+#line 10534 "ad_ppc.cpp"
   }
 }
 
@@ -10044,7 +10554,7 @@ void  loadConNKlass_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Phas
   immNKlassOper *op_src = (immNKlassOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 6399 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6114 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // Load high bits into register. Sign extended.
     MachNode *m1 = new loadConNKlass_hiNode();
@@ -10055,7 +10565,7 @@ void  loadConNKlass_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Phas
     nodes->push(m1);
 
     MachNode *m2 = m1;
-    if (!Assembler::is_uimm((jlong)Klass::encode_klass((Klass *)op_src->constant()), 31)) {
+    if (!Assembler::is_uimm((jlong)CompressedKlassPointers::encode((Klass *)op_src->constant()), 31)) {
       // Value might be 1-extended. Mask out these bits.
       m2 = new loadConNKlass_maskNode();
       m2->add_req(NULL, m1);
@@ -10074,7 +10584,7 @@ void  loadConNKlass_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Phas
     ra_->set_pair(m3->_idx, ra_->get_reg_second(this), ra_->get_reg_first(this));
     nodes->push(m3);
   
-#line 10077 "ad_ppc.cpp"
+#line 10587 "ad_ppc.cpp"
   }
 }
 
@@ -10084,14 +10594,13 @@ void loadConP0or1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6437 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6152 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 10094 "ad_ppc.cpp"
+#line 10603 "ad_ppc.cpp"
   }
 }
 
@@ -10108,11 +10617,10 @@ void loadConPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
 
-#line 2943 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2789 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int toc_offset = 0;
 
     intptr_t val = opnd_array(1)->constant();
@@ -10141,7 +10649,7 @@ void loadConPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
 
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, toc_offset, opnd_array(2)->as_Register(ra_,this,idx2)/* toc */);
   
-#line 10144 "ad_ppc.cpp"
+#line 10652 "ad_ppc.cpp"
   }
 }
 
@@ -10158,12 +10666,11 @@ void loadConP_hiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
 
-#line 2976 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2821 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
 
-    MacroAssembler _masm(&cbuf);
-    if (!ra_->C->in_scratch_emit_size()) {
+    C2_MacroAssembler _masm(&cbuf);
+    if (!ra_->C->output()->in_scratch_emit_size()) {
       intptr_t val = opnd_array(1)->constant();
       relocInfo::relocType constant_reloc = opnd_array(1)->constant_reloc();  // src
       address const_toc_addr;
@@ -10193,7 +10700,7 @@ void loadConP_hiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
 
     __ addis(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* toc */, MacroAssembler::largeoffset_si16_si16_hi(_const_toc_offset));
   
-#line 10196 "ad_ppc.cpp"
+#line 10703 "ad_ppc.cpp"
   }
 }
 
@@ -10209,15 +10716,14 @@ void loadConP_loNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// base
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6485 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6199 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    int offset = ra_->C->in_scratch_emit_size() ? 0 : _const_toc_offset_hi_node->_const_toc_offset;
+    int offset = ra_->C->output()->in_scratch_emit_size() ? 0 : _const_toc_offset_hi_node->_const_toc_offset;
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, MacroAssembler::largeoffset_si16_si16_lo(offset), opnd_array(2)->as_Register(ra_,this,idx2)/* base */);
   
-#line 10220 "ad_ppc.cpp"
+#line 10726 "ad_ppc.cpp"
   }
 }
 
@@ -10242,7 +10748,7 @@ void  loadConP_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
   immPOper *op_src = (immPOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3014 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2858 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     const bool large_constant_pool = true; // TODO: PPC port C->cfg()->_consts_size > 4000;
     if (large_constant_pool) {
@@ -10291,7 +10797,7 @@ void  loadConP_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
       assert(m2->bottom_type()->isa_ptr(), "must be ptr");
     }
   
-#line 10294 "ad_ppc.cpp"
+#line 10800 "ad_ppc.cpp"
   }
 }
 
@@ -10305,11 +10811,10 @@ void loadConFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6522 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6235 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lfs);
     address float_address = __ float_constant(opnd_array(1)->constantF());
     if (float_address == NULL) {
       ciEnv::current()->record_out_of_memory_failure();
@@ -10317,7 +10822,7 @@ void loadConFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     }
     __ lfs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, __ offset_to_method_toc(float_address), opnd_array(2)->as_Register(ra_,this,idx2)/* toc */);
   
-#line 10320 "ad_ppc.cpp"
+#line 10825 "ad_ppc.cpp"
   }
 }
 
@@ -10333,11 +10838,10 @@ void loadConFCompNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6545 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6257 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     FloatRegister Rdst    = opnd_array(0)->as_FloatRegister(ra_,this)/* dst */;
     Register Rtoc         = opnd_array(2)->as_Register(ra_,this,idx2)/* toc */;
     address float_address = __ float_constant(opnd_array(1)->constantF());
@@ -10353,7 +10857,7 @@ void loadConFCompNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ lfs(Rdst, lo, Rtoc);
     __ addis(Rtoc, Rtoc, -hi);
   
-#line 10356 "ad_ppc.cpp"
+#line 10860 "ad_ppc.cpp"
   }
 }
 
@@ -10378,7 +10882,7 @@ void  loadConF_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
   immFOper *op_src = (immFOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3065 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2909 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     bool large_constant_pool = true; // TODO: PPC port C->cfg()->_consts_size > 4000;
 
@@ -10400,7 +10904,7 @@ void  loadConF_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
     ra_->set_pair(m2->_idx, ra_->get_reg_second(this), ra_->get_reg_first(this));
     nodes->push(m2);
   
-#line 10403 "ad_ppc.cpp"
+#line 10907 "ad_ppc.cpp"
   }
 }
 
@@ -10414,11 +10918,10 @@ void loadConDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6586 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6297 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lfd);
     address float_address = __ double_constant(opnd_array(1)->constantD());
     if (float_address == NULL) {
       ciEnv::current()->record_out_of_memory_failure();
@@ -10427,7 +10930,7 @@ void loadConDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     int offset =  __ offset_to_method_toc(float_address);
     __ lfd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, offset, opnd_array(2)->as_Register(ra_,this,idx2)/* toc */);
   
-#line 10430 "ad_ppc.cpp"
+#line 10933 "ad_ppc.cpp"
   }
 }
 
@@ -10443,11 +10946,10 @@ void loadConDCompNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// toc
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6610 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6320 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     FloatRegister Rdst    = opnd_array(0)->as_FloatRegister(ra_,this)/* dst */;
     Register      Rtoc    = opnd_array(2)->as_Register(ra_,this,idx2)/* toc */;
     address float_address = __ double_constant(opnd_array(1)->constantD());
@@ -10463,7 +10965,7 @@ void loadConDCompNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ lfd(Rdst, lo, Rtoc);
     __ addis(Rtoc, Rtoc, -hi);
   
-#line 10466 "ad_ppc.cpp"
+#line 10968 "ad_ppc.cpp"
   }
 }
 
@@ -10488,7 +10990,7 @@ void  loadConD_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
   immDOper *op_src = (immDOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3089 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2933 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     bool large_constant_pool = true; // TODO: PPC port C->cfg()->_consts_size > 4000;
 
@@ -10510,7 +11012,7 @@ void  loadConD_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegA
     ra_->set_pair(m2->_idx, ra_->get_reg_second(this), ra_->get_reg_first(this));
     nodes->push(m2);
   
-#line 10513 "ad_ppc.cpp"
+#line 11015 "ad_ppc.cpp"
   }
 }
 
@@ -10524,14 +11026,13 @@ void prefetch_alloc_zeroNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6653 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6362 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_dcbtst);
     __ dcbz(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10534 "ad_ppc.cpp"
+#line 11035 "ad_ppc.cpp"
   }
 }
 
@@ -10546,14 +11047,13 @@ void prefetch_alloc_zero_no_offsetNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6667 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6375 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_dcbtst);
     __ dcbz(as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10556 "ad_ppc.cpp"
+#line 11056 "ad_ppc.cpp"
   }
 }
 
@@ -10569,14 +11069,13 @@ void prefetch_allocNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6681 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6388 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_dcbtst);
     __ dcbtst(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10579 "ad_ppc.cpp"
+#line 11078 "ad_ppc.cpp"
   }
 }
 
@@ -10591,14 +11090,13 @@ void prefetch_alloc_no_offsetNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) co
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6695 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6401 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_dcbtst);
     __ dcbtst(as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10601 "ad_ppc.cpp"
+#line 11099 "ad_ppc.cpp"
   }
 }
 
@@ -10614,15 +11112,14 @@ void storeBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6711 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6416 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stb);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ stb(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10625 "ad_ppc.cpp"
+#line 11122 "ad_ppc.cpp"
   }
 }
 
@@ -10638,15 +11135,14 @@ void storeCNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6726 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6430 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sth);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ sth(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10649 "ad_ppc.cpp"
+#line 11145 "ad_ppc.cpp"
   }
 }
 
@@ -10663,14 +11159,13 @@ void storeINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3111 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2955 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stw);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ stw(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10673 "ad_ppc.cpp"
+#line 11168 "ad_ppc.cpp"
   }
 }
 
@@ -10687,14 +11182,13 @@ void storeI_convL2INode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3111 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2955 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stw);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ stw(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10697 "ad_ppc.cpp"
+#line 11191 "ad_ppc.cpp"
   }
 }
 
@@ -10711,16 +11205,15 @@ void storeLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3118 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2961 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_std);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ std(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10723 "ad_ppc.cpp"
+#line 11216 "ad_ppc.cpp"
   }
 }
 
@@ -10737,16 +11230,15 @@ void storeA8BNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3118 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2961 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_std);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ std(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10749 "ad_ppc.cpp"
+#line 11241 "ad_ppc.cpp"
   }
 }
 
@@ -10762,19 +11254,35 @@ void storeV16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6789 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6492 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ stxvd2x(opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 10771 "ad_ppc.cpp"
+#line 11263 "ad_ppc.cpp"
   }
 }
 
 uint storeV16Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void reinterpretLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  // User did not define which encode class to use.
+}
+
+void reinterpretXNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  // User did not define which encode class to use.
 }
 
 void storeNNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -10785,14 +11293,13 @@ void storeNNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3111 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2955 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stw);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ stw(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10795 "ad_ppc.cpp"
+#line 11302 "ad_ppc.cpp"
   }
 }
 
@@ -10809,14 +11316,13 @@ void storeNKlassNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3111 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2955 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stw);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ stw(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10819 "ad_ppc.cpp"
+#line 11325 "ad_ppc.cpp"
   }
 }
 
@@ -10833,16 +11339,15 @@ void storePNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3118 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2961 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_std);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ std(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10845 "ad_ppc.cpp"
+#line 11350 "ad_ppc.cpp"
   }
 }
 
@@ -10859,14 +11364,13 @@ void storeFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3127 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2969 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stfs);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ stfs(opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10869 "ad_ppc.cpp"
+#line 11373 "ad_ppc.cpp"
   }
 }
 
@@ -10883,14 +11387,13 @@ void storeDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3134 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2975 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stfd);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ stfd(opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10893 "ad_ppc.cpp"
+#line 11396 "ad_ppc.cpp"
   }
 }
 
@@ -10899,80 +11402,27 @@ uint storeDNode::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
-void storeCM_CMSNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  cbuf.set_insts_mark();
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// releaseFieldAddr
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
-  {
-
-#line 3143 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    // FIXME: Implement this as a cmove and use a fixed condition code
-    // register which is written on every transition to compiled code,
-    // e.g. in call-stub and when returning from runtime stubs.
-    //
-    // Proposed code sequence for the cmove implementation:
-    //
-    // Label skip_release;
-    // __ beq(CCRfixed, skip_release);
-    // __ release();
-    // __ bind(skip_release);
-    // __ stb(card mark);
-
-    MacroAssembler _masm(&cbuf);
-    Label skip_storestore;
-
-#if 0 // TODO: PPC port
-    // Check CMSCollectorCardTableBarrierSetBSExt::_requires_release and do the
-    // StoreStore barrier conditionally.
-    __ lwz(R0, 0, opnd_array(2)->as_Register(ra_,this,idx2)/* releaseFieldAddr */);
-    __ cmpwi(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, R0, 0);
-    __ beq_predict_taken(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, skip_storestore);
-#endif
-    __ li(R0, 0);
-    __ membar(Assembler::StoreStore);
-#if 0 // TODO: PPC port
-    __ bind(skip_storestore);
-#endif
-
-    // Do the store.
-    if (opnd_array(1)->index(ra_,this,idx1) == 0) {
-      __ stb(R0, opnd_array(1)->disp(ra_,this,idx1), as_Register(opnd_array(1)->base(ra_,this,idx1)));
-    } else {
-      assert(0 == opnd_array(1)->disp(ra_,this,idx1), "no displacement possible with indexed load/stores on ppc");
-      __ stbx(R0, as_Register(opnd_array(1)->base(ra_,this,idx1)), as_Register(opnd_array(1)->index(ra_,this,idx1)));
-    }
-  
-#line 10950 "ad_ppc.cpp"
-  }
-}
-
-void storeCM_G1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+void storeCMNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6899 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6579 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ li(R0, 0);
-    //__ release(); // G1: oops are allowed to get visible after dirty marking
+    // No release barrier: Oops are allowed to get visible after marking.
     guarantee(as_Register(opnd_array(1)->base(ra_,this,idx1))!= R1_SP, "use frame_slots_bias");
     __ stb(R0, opnd_array(1)->disp(ra_,this,idx1), as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 10971 "ad_ppc.cpp"
+#line 11421 "ad_ppc.cpp"
   }
 }
 
-uint storeCM_G1Node::size(PhaseRegAlloc *ra_) const {
+uint storeCMNode::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 8);
 }
@@ -10983,14 +11433,13 @@ void encodeP_shiftNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6921 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6600 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_oop_shift() & 0x3f);
+    __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedOops::shift() & 0x3f);
   
-#line 10993 "ad_ppc.cpp"
+#line 11442 "ad_ppc.cpp"
   }
 }
 
@@ -11005,14 +11454,13 @@ void encodeP_subNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6935 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6613 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    __ sub_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_oop_base(), R0);
+    __ sub_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedOops::base(), R0);
   
-#line 11015 "ad_ppc.cpp"
+#line 11463 "ad_ppc.cpp"
   }
 }
 
@@ -11023,17 +11471,16 @@ void cond_sub_baseNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// crx
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6951 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6628 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Label done;
     __ beq(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
-    __ sub_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, Universe::narrow_oop_base(), R0);
+    __ sub_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, CompressedOops::base(), R0);
     __ bind(done);
   
-#line 11036 "ad_ppc.cpp"
+#line 11483 "ad_ppc.cpp"
   }
 }
 
@@ -11044,15 +11491,14 @@ void cond_set_0_oopNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// crx
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6969 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6645 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // This is a Power7 instruction for which no machine description exists.
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ isel_0(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, Assembler::equal, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */);
   
-#line 11055 "ad_ppc.cpp"
+#line 11501 "ad_ppc.cpp"
   }
 }
 
@@ -11067,14 +11513,13 @@ void encodeP_DisjointNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 6984 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6659 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ rldicl(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 64-Universe::narrow_oop_shift(), 32);
+    __ rldicl(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 64-CompressedOops::shift(), 32);
   
-#line 11077 "ad_ppc.cpp"
+#line 11522 "ad_ppc.cpp"
   }
 }
 
@@ -11101,7 +11546,7 @@ void  encodeP_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAl
   flagsRegOper *op_crx = (flagsRegOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 3182 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2981 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
     if (VM_Version::has_isel()) {
@@ -11185,7 +11630,7 @@ void  encodeP_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAl
 
     assert(!(ra_->is_oop(this)), "sanity"); // This is not supposed to be GC'ed.
   
-#line 11188 "ad_ppc.cpp"
+#line 11633 "ad_ppc.cpp"
   }
 }
 
@@ -11203,7 +11648,7 @@ void  encodeP_not_null_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, P
   iRegPdstOper *op_src = (iRegPdstOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3266 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3065 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
     encodeP_subNode *n1 = new encodeP_subNode();
@@ -11224,7 +11669,7 @@ void  encodeP_not_null_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, P
     nodes->push(n2);
     assert(!(ra_->is_oop(this)), "sanity"); // This is not supposed to be GC'ed.
   
-#line 11227 "ad_ppc.cpp"
+#line 11672 "ad_ppc.cpp"
   }
 }
 
@@ -11234,14 +11679,13 @@ void encodeP_not_null_base_nullNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) 
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7023 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6697 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_oop_shift() & 0x3f);
+    __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedOops::shift() & 0x3f);
   
-#line 11244 "ad_ppc.cpp"
+#line 11688 "ad_ppc.cpp"
   }
 }
 
@@ -11256,14 +11700,13 @@ void encodeP_narrow_oop_shift_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) 
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7038 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6711 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ mr_if_needed(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 11266 "ad_ppc.cpp"
+#line 11709 "ad_ppc.cpp"
   }
 }
 
@@ -11273,14 +11716,13 @@ void decodeN_shiftNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7055 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6727 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
-    __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_oop_shift());
+    __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedOops::shift());
   
-#line 11283 "ad_ppc.cpp"
+#line 11725 "ad_ppc.cpp"
   }
 }
 
@@ -11295,14 +11737,13 @@ void decodeN_addNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7069 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6740 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    __ add_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_oop_base(), R0);
+    __ add_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedOops::base(), R0);
   
-#line 11305 "ad_ppc.cpp"
+#line 11746 "ad_ppc.cpp"
   }
 }
 
@@ -11313,17 +11754,16 @@ void cond_add_baseNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// crx
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7088 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6758 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Label done;
     __ beq(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
-    __ add_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, Universe::narrow_oop_base(), R0);
+    __ add_const_optimized(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, CompressedOops::base(), R0);
     __ bind(done);
   
-#line 11326 "ad_ppc.cpp"
+#line 11766 "ad_ppc.cpp"
   }
 }
 
@@ -11334,15 +11774,14 @@ void cond_set_0_ptrNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// crx
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7108 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6777 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // This is a Power7 instruction for which no machine description exists.
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ isel_0(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, Assembler::equal, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */);
   
-#line 11345 "ad_ppc.cpp"
+#line 11784 "ad_ppc.cpp"
   }
 }
 
@@ -11369,7 +11808,7 @@ void  decodeN_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAl
   flagsRegOper *op_crx = (flagsRegOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 3287 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3086 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     decodeN_shiftNode *n_shift    = new decodeN_shiftNode();
     cmpN_reg_imm0Node *n_compare  = new cmpN_reg_imm0Node();
@@ -11435,7 +11874,7 @@ void  decodeN_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAl
       nodes->push(n_add_base);
     }
   
-#line 11438 "ad_ppc.cpp"
+#line 11877 "ad_ppc.cpp"
   }
 }
 
@@ -11445,14 +11884,13 @@ void decodeN_nullBaseNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7138 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6806 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
-    __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_oop_shift());
+    __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedOops::shift());
   
-#line 11455 "ad_ppc.cpp"
+#line 11893 "ad_ppc.cpp"
   }
 }
 
@@ -11468,14 +11906,13 @@ void decodeN_mergeDisjointNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// base
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7155 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6822 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldimi);
-    __ rldimi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_oop_shift(), 32-Universe::narrow_oop_shift());
+    __ rldimi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedOops::shift(), 32-CompressedOops::shift());
   
-#line 11478 "ad_ppc.cpp"
+#line 11915 "ad_ppc.cpp"
   }
 }
 
@@ -11499,7 +11936,7 @@ void  decodeN_Disjoint_notNull_ExNode::postalloc_expand(GrowableArray <Node *> *
   iRegNsrcOper *op_src = (iRegNsrcOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 7176 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6842 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     loadBaseNode *n1 = new loadBaseNode();
     n1->add_req(NULL);
@@ -11512,13 +11949,16 @@ void  decodeN_Disjoint_notNull_ExNode::postalloc_expand(GrowableArray <Node *> *
     n2->_opnds[2] = op_dst;
     n2->_bottom_type = _bottom_type;
 
+    assert(ra_->is_oop(this) == true, "A decodeN node must produce an oop!");
+    ra_->set_oop(n2, true);
+
     ra_->set_pair(n1->_idx, ra_->get_reg_second(this), ra_->get_reg_first(this));
     ra_->set_pair(n2->_idx, ra_->get_reg_second(this), ra_->get_reg_first(this));
 
     nodes->push(n1);
     nodes->push(n2);
   
-#line 11521 "ad_ppc.cpp"
+#line 11961 "ad_ppc.cpp"
   }
 }
 
@@ -11541,7 +11981,7 @@ void  decodeN_Disjoint_isel_ExNode::postalloc_expand(GrowableArray <Node *> *nod
   flagsRegOper *op_crx = (flagsRegOper *)opnd_array(3);
   Compile *C = ra_->C;
   {
-#line 7205 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6874 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     loadBaseNode *n1 = new loadBaseNode();
     n1->add_req(NULL);
@@ -11580,7 +12020,7 @@ void  decodeN_Disjoint_isel_ExNode::postalloc_expand(GrowableArray <Node *> *nod
     nodes->push(n2);
     nodes->push(n_cond_set);
   
-#line 11583 "ad_ppc.cpp"
+#line 12023 "ad_ppc.cpp"
   }
 }
 
@@ -11598,7 +12038,7 @@ void  decodeN_notNull_addBase_ExNode::postalloc_expand(GrowableArray <Node *> *n
   iRegNsrcOper *op_src = (iRegNsrcOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3353 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3152 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     decodeN_shiftNode *n1 = new decodeN_shiftNode();
     n1->add_req(n_region, n_src);
@@ -11620,7 +12060,7 @@ void  decodeN_notNull_addBase_ExNode::postalloc_expand(GrowableArray <Node *> *n
     nodes->push(n1);
     nodes->push(n2);
   
-#line 11623 "ad_ppc.cpp"
+#line 12063 "ad_ppc.cpp"
   }
 }
 
@@ -11630,14 +12070,13 @@ void decodeN_unscaledNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7266 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6935 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ mr_if_needed(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 11640 "ad_ppc.cpp"
+#line 12079 "ad_ppc.cpp"
   }
 }
 
@@ -11647,14 +12086,13 @@ void decodeN2I_unscaledNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7281 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6949 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ mr_if_needed(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 11657 "ad_ppc.cpp"
+#line 12095 "ad_ppc.cpp"
   }
 }
 
@@ -11664,14 +12102,13 @@ void encodePKlass_shiftNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7300 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6967 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_klass_shift());
+    __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedKlassPointers::shift());
   
-#line 11674 "ad_ppc.cpp"
+#line 12111 "ad_ppc.cpp"
   }
 }
 
@@ -11687,14 +12124,13 @@ void encodePKlass_sub_baseNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// base
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7315 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6981 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_subf);
     __ subf(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* base */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */);
   
-#line 11697 "ad_ppc.cpp"
+#line 12133 "ad_ppc.cpp"
   }
 }
 
@@ -11709,14 +12145,13 @@ void encodePKlass_DisjointNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7329 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 6994 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ rldicl(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 64-Universe::narrow_klass_shift(), 32);
+    __ rldicl(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 64-CompressedKlassPointers::shift(), 32);
   
-#line 11719 "ad_ppc.cpp"
+#line 12154 "ad_ppc.cpp"
   }
 }
 
@@ -11743,7 +12178,7 @@ void  encodePKlass_not_null_ExNode::postalloc_expand(GrowableArray <Node *> *nod
   iRegPsrcOper *op_src = (iRegPsrcOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 7342 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7006 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     encodePKlass_sub_baseNode *n1 = new encodePKlass_sub_baseNode();
     n1->add_req(n_region, n_base, n_src);
@@ -11763,7 +12198,7 @@ void  encodePKlass_not_null_ExNode::postalloc_expand(GrowableArray <Node *> *nod
     nodes->push(n1);
     nodes->push(n2);
   
-#line 11766 "ad_ppc.cpp"
+#line 12201 "ad_ppc.cpp"
   }
 }
 
@@ -11773,14 +12208,13 @@ void decodeNKlass_shiftNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7389 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7053 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
-    __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Universe::narrow_klass_shift());
+    __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, CompressedKlassPointers::shift());
   
-#line 11783 "ad_ppc.cpp"
+#line 12217 "ad_ppc.cpp"
   }
 }
 
@@ -11796,14 +12230,13 @@ void decodeNKlass_add_baseNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// base
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7405 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7068 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_add);
     __ add(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* base */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */);
   
-#line 11806 "ad_ppc.cpp"
+#line 12239 "ad_ppc.cpp"
   }
 }
 
@@ -11830,7 +12263,7 @@ void  decodeNKlass_notNull_addBase_ExNode::postalloc_expand(GrowableArray <Node 
   iRegNsrcOper *op_src = (iRegNsrcOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 7419 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7081 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     decodeNKlass_add_baseNode *n1 = new decodeNKlass_add_baseNode();
     n1->add_req(n_region, n_base, n_src);
@@ -11851,7 +12284,7 @@ void  decodeNKlass_notNull_addBase_ExNode::postalloc_expand(GrowableArray <Node 
     nodes->push(n1);
     nodes->push(n2);
   
-#line 11854 "ad_ppc.cpp"
+#line 12287 "ad_ppc.cpp"
   }
 }
 
@@ -11861,14 +12294,13 @@ void membar_acquireNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7469 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7131 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwsync);
     __ acquire();
   
-#line 11871 "ad_ppc.cpp"
+#line 12303 "ad_ppc.cpp"
   }
 }
 
@@ -11909,14 +12341,13 @@ void membar_releaseNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7503 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7164 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwsync);
     __ release();
   
-#line 11919 "ad_ppc.cpp"
+#line 12350 "ad_ppc.cpp"
   }
 }
 
@@ -11931,14 +12362,13 @@ void membar_release_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7503 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7164 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwsync);
     __ release();
   
-#line 11941 "ad_ppc.cpp"
+#line 12371 "ad_ppc.cpp"
   }
 }
 
@@ -11953,18 +12383,38 @@ void membar_storestoreNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7516 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7177 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwsync);
     __ membar(Assembler::StoreStore);
   
-#line 11963 "ad_ppc.cpp"
+#line 12392 "ad_ppc.cpp"
   }
 }
 
 uint membar_storestoreNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void membar_storestore_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// 
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 7177 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ membar(Assembler::StoreStore);
+  
+#line 12413 "ad_ppc.cpp"
+  }
+}
+
+uint membar_storestore_0Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
@@ -11988,14 +12438,13 @@ void membar_volatileNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7539 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7199 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sync);
     __ fence();
   
-#line 11998 "ad_ppc.cpp"
+#line 12447 "ad_ppc.cpp"
   }
 }
 
@@ -12026,18 +12475,17 @@ void cmovI_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// dst
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7596 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7255 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // This is a Power7 instruction for which no machine description
     // exists. Anyways, the scheduler should be off on Power7.
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     int cc        = opnd_array(1)->ccode();
     __ isel(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */,
             (Assembler::Condition)(cc & 3), /*invert*/((~cc) & 8), opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
   
-#line 12040 "ad_ppc.cpp"
+#line 12488 "ad_ppc.cpp"
   }
 }
 
@@ -12056,11 +12504,10 @@ void cmovI_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3375 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3174 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int cc        = opnd_array(1)->ccode();
     int flags_reg = opnd_array(2)->reg(ra_,this,idx2)/* crx */;
     Label done;
@@ -12068,16 +12515,15 @@ void cmovI_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(cc), cc_to_biint(cc, flags_reg), done);
     __ mr(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12074 "ad_ppc.cpp"
+#line 12520 "ad_ppc.cpp"
   }
 }
 
 uint cmovI_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovI_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12090,26 +12536,24 @@ void cmovI_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3390 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3187 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label done;
     assert((Assembler::bcondCRbiIs1 & ~Assembler::bcondCRbiIs0) == 8, "check encoding");
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(opnd_array(1)->ccode()), cc_to_biint(opnd_array(1)->ccode(), opnd_array(2)->reg(ra_,this,idx2)/* crx */), done);
     __ li(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->constant());
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12106 "ad_ppc.cpp"
+#line 12550 "ad_ppc.cpp"
   }
 }
 
 uint cmovI_immNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovL_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12121,18 +12565,17 @@ void cmovL_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// dst
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7642 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7300 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // This is a Power7 instruction for which no machine description
     // exists. Anyways, the scheduler should be off on Power7.
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     int cc        = opnd_array(1)->ccode();
     __ isel(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */,
             (Assembler::Condition)(cc & 3), /*invert*/((~cc) & 8), opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
   
-#line 12135 "ad_ppc.cpp"
+#line 12578 "ad_ppc.cpp"
   }
 }
 
@@ -12151,11 +12594,10 @@ void cmovL_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3375 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3174 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int cc        = opnd_array(1)->ccode();
     int flags_reg = opnd_array(2)->reg(ra_,this,idx2)/* crx */;
     Label done;
@@ -12163,16 +12605,15 @@ void cmovL_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(cc), cc_to_biint(cc, flags_reg), done);
     __ mr(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12169 "ad_ppc.cpp"
+#line 12610 "ad_ppc.cpp"
   }
 }
 
 uint cmovL_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovL_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12185,26 +12626,24 @@ void cmovL_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3390 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3187 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label done;
     assert((Assembler::bcondCRbiIs1 & ~Assembler::bcondCRbiIs0) == 8, "check encoding");
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(opnd_array(1)->ccode()), cc_to_biint(opnd_array(1)->ccode(), opnd_array(2)->reg(ra_,this,idx2)/* crx */), done);
     __ li(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->constantL());
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12201 "ad_ppc.cpp"
+#line 12640 "ad_ppc.cpp"
   }
 }
 
 uint cmovL_immNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovN_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12216,18 +12655,17 @@ void cmovN_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// dst
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7688 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7345 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // This is a Power7 instruction for which no machine description
     // exists. Anyways, the scheduler should be off on Power7.
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     int cc        = opnd_array(1)->ccode();
     __ isel(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */,
             (Assembler::Condition)(cc & 3), /*invert*/((~cc) & 8), opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
   
-#line 12230 "ad_ppc.cpp"
+#line 12668 "ad_ppc.cpp"
   }
 }
 
@@ -12246,11 +12684,10 @@ void cmovN_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3375 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3174 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int cc        = opnd_array(1)->ccode();
     int flags_reg = opnd_array(2)->reg(ra_,this,idx2)/* crx */;
     Label done;
@@ -12258,16 +12695,15 @@ void cmovN_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(cc), cc_to_biint(cc, flags_reg), done);
     __ mr(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12264 "ad_ppc.cpp"
+#line 12700 "ad_ppc.cpp"
   }
 }
 
 uint cmovN_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovN_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12280,26 +12716,24 @@ void cmovN_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3390 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3187 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label done;
     assert((Assembler::bcondCRbiIs1 & ~Assembler::bcondCRbiIs0) == 8, "check encoding");
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(opnd_array(1)->ccode()), cc_to_biint(opnd_array(1)->ccode(), opnd_array(2)->reg(ra_,this,idx2)/* crx */), done);
     __ li(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->constant());
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12296 "ad_ppc.cpp"
+#line 12730 "ad_ppc.cpp"
   }
 }
 
 uint cmovN_immNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovP_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12311,18 +12745,17 @@ void cmovP_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// dst
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7735 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7391 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // This is a Power7 instruction for which no machine description
     // exists. Anyways, the scheduler should be off on Power7.
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     int cc        = opnd_array(1)->ccode();
     __ isel(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */,
             (Assembler::Condition)(cc & 3), /*invert*/((~cc) & 8), opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
   
-#line 12325 "ad_ppc.cpp"
+#line 12758 "ad_ppc.cpp"
   }
 }
 
@@ -12341,11 +12774,10 @@ void cmovP_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3375 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3174 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int cc        = opnd_array(1)->ccode();
     int flags_reg = opnd_array(2)->reg(ra_,this,idx2)/* crx */;
     Label done;
@@ -12353,16 +12785,15 @@ void cmovP_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(cc), cc_to_biint(cc, flags_reg), done);
     __ mr(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->as_Register(ra_,this,idx4)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12359 "ad_ppc.cpp"
+#line 12790 "ad_ppc.cpp"
   }
 }
 
 uint cmovP_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovP_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12375,26 +12806,24 @@ void cmovP_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
 
-#line 3390 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3187 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label done;
     assert((Assembler::bcondCRbiIs1 & ~Assembler::bcondCRbiIs0) == 8, "check encoding");
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(opnd_array(1)->ccode()), cc_to_biint(opnd_array(1)->ccode(), opnd_array(2)->reg(ra_,this,idx2)/* crx */), done);
     __ li(opnd_array(3)->as_Register(ra_,this,idx3)/* dst */, opnd_array(4)->constant());
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12391 "ad_ppc.cpp"
+#line 12820 "ad_ppc.cpp"
   }
 }
 
 uint cmovP_immNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovF_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12406,26 +12835,24 @@ void cmovF_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// dst
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7782 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7437 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmovef);
     Label done;
     assert((Assembler::bcondCRbiIs1 & ~Assembler::bcondCRbiIs0) == 8, "check encoding");
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(opnd_array(1)->ccode()), cc_to_biint(opnd_array(1)->ccode(), opnd_array(2)->reg(ra_,this,idx2)/* crx */), done);
     __ fmr(opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* dst */, opnd_array(4)->as_FloatRegister(ra_,this,idx4)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12422 "ad_ppc.cpp"
+#line 12849 "ad_ppc.cpp"
   }
 }
 
 uint cmovF_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovD_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12437,89 +12864,24 @@ void cmovD_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// dst
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7804 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7457 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmovef);
     Label done;
     assert((Assembler::bcondCRbiIs1 & ~Assembler::bcondCRbiIs0) == 8, "check encoding");
     // Branch if not (cmp crx).
     __ bc(cc_to_inverse_boint(opnd_array(1)->ccode()), cc_to_biint(opnd_array(1)->ccode(), opnd_array(2)->reg(ra_,this,idx2)/* crx */), done);
     __ fmr(opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* dst */, opnd_array(4)->as_FloatRegister(ra_,this,idx4)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 12453 "ad_ppc.cpp"
+#line 12878 "ad_ppc.cpp"
   }
 }
 
 uint cmovD_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8);
-}
-
-void storeLConditional_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  cbuf.set_insts_mark();
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem_ptr
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldVal
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newVal
-  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
-  {
-    MacroAssembler _masm(&cbuf);
-
-#line 7832 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    __ cmpxchgd(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* oldVal */, opnd_array(3)->as_Register(ra_,this,idx3)/* newVal */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
-                MacroAssembler::MemBarAcq, MacroAssembler::cmpxchgx_hint_atomic_update(),
-                noreg, NULL, true);
-  
-#line 12480 "ad_ppc.cpp"
-  }
-}
-
-void storePConditional_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  cbuf.set_insts_mark();
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem_ptr
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldVal
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newVal
-  {
-    MacroAssembler _masm(&cbuf);
-
-#line 7852 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // TODO: PPC port $archOpcode(ppc64Opcode_stdcx_);
-    __ stdcx_(opnd_array(3)->as_Register(ra_,this,idx3)/* newVal */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */);
-  
-#line 12499 "ad_ppc.cpp"
-  }
-}
-
-void loadPLockedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  cbuf.set_insts_mark();
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem
-  {
-    MacroAssembler _masm(&cbuf);
-
-#line 7868 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // TODO: PPC port $archOpcode(ppc64Opcode_ldarx);
-    __ ldarx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, MacroAssembler::cmpxchgx_hint_atomic_update());
-  
-#line 12516 "ad_ppc.cpp"
-  }
-}
-
-uint loadPLockedNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 4);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void compareAndSwapB_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -12532,11 +12894,10 @@ void compareAndSwapB_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7888 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7481 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12547,7 +12908,7 @@ void compareAndSwapB_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
       __ sync();
     }
   
-#line 12550 "ad_ppc.cpp"
+#line 12911 "ad_ppc.cpp"
   }
 }
 
@@ -12563,11 +12924,10 @@ void compareAndSwapB4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* 
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7908 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7500 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12578,7 +12938,7 @@ void compareAndSwapB4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* 
       __ sync();
     }
   
-#line 12581 "ad_ppc.cpp"
+#line 12941 "ad_ppc.cpp"
   }
 }
 
@@ -12592,11 +12952,10 @@ void compareAndSwapS_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7928 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7519 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12607,7 +12966,7 @@ void compareAndSwapS_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
       __ sync();
     }
   
-#line 12610 "ad_ppc.cpp"
+#line 12969 "ad_ppc.cpp"
   }
 }
 
@@ -12623,11 +12982,10 @@ void compareAndSwapS4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* 
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7948 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7538 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12638,7 +12996,7 @@ void compareAndSwapS4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* 
       __ sync();
     }
   
-#line 12641 "ad_ppc.cpp"
+#line 12999 "ad_ppc.cpp"
   }
 }
 
@@ -12652,11 +13010,10 @@ void compareAndSwapI_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7967 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7556 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12667,7 +13024,7 @@ void compareAndSwapI_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
       __ sync();
     }
   
-#line 12670 "ad_ppc.cpp"
+#line 13027 "ad_ppc.cpp"
   }
 }
 
@@ -12681,11 +13038,10 @@ void compareAndSwapN_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 7986 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7574 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12696,7 +13052,7 @@ void compareAndSwapN_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
       __ sync();
     }
   
-#line 12699 "ad_ppc.cpp"
+#line 13055 "ad_ppc.cpp"
   }
 }
 
@@ -12710,11 +13066,10 @@ void compareAndSwapL_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8005 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7592 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgd(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12725,7 +13080,7 @@ void compareAndSwapL_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
       __ sync();
     }
   
-#line 12728 "ad_ppc.cpp"
+#line 13083 "ad_ppc.cpp"
   }
 }
 
@@ -12739,11 +13094,10 @@ void compareAndSwapP_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8024 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7611 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgd(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -12754,7 +13108,7 @@ void compareAndSwapP_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* r
       __ sync();
     }
   
-#line 12757 "ad_ppc.cpp"
+#line 13111 "ad_ppc.cpp"
   }
 }
 
@@ -12768,17 +13122,16 @@ void weakCompareAndSwapB_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8046 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7632 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12781 "ad_ppc.cpp"
+#line 13134 "ad_ppc.cpp"
   }
 }
 
@@ -12794,17 +13147,16 @@ void weakCompareAndSwapB4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAll
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8061 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7646 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12807 "ad_ppc.cpp"
+#line 13159 "ad_ppc.cpp"
   }
 }
 
@@ -12818,17 +13170,16 @@ void weakCompareAndSwapB_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8076 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7660 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12831 "ad_ppc.cpp"
+#line 13182 "ad_ppc.cpp"
   }
 }
 
@@ -12844,17 +13195,16 @@ void weakCompareAndSwapB4_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRe
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8091 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7674 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12857 "ad_ppc.cpp"
+#line 13207 "ad_ppc.cpp"
   }
 }
 
@@ -12868,17 +13218,16 @@ void weakCompareAndSwapS_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8106 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7688 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12881 "ad_ppc.cpp"
+#line 13230 "ad_ppc.cpp"
   }
 }
 
@@ -12894,17 +13243,16 @@ void weakCompareAndSwapS4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAll
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8121 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7702 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12907 "ad_ppc.cpp"
+#line 13255 "ad_ppc.cpp"
   }
 }
 
@@ -12918,17 +13266,16 @@ void weakCompareAndSwapS_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8136 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7716 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12931 "ad_ppc.cpp"
+#line 13278 "ad_ppc.cpp"
   }
 }
 
@@ -12944,17 +13291,16 @@ void weakCompareAndSwapS4_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRe
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8151 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7730 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12957 "ad_ppc.cpp"
+#line 13303 "ad_ppc.cpp"
   }
 }
 
@@ -12968,17 +13314,16 @@ void weakCompareAndSwapI_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8166 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7744 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 12981 "ad_ppc.cpp"
+#line 13326 "ad_ppc.cpp"
   }
 }
 
@@ -12992,11 +13337,10 @@ void weakCompareAndSwapI_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8181 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7758 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     // Acquire only needed in successful case. Weak node is allowed to report unsuccessful in additional rare cases and
     // value is never passed to caller.
@@ -13004,7 +13348,7 @@ void weakCompareAndSwapI_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 13007 "ad_ppc.cpp"
+#line 13351 "ad_ppc.cpp"
   }
 }
 
@@ -13018,17 +13362,16 @@ void weakCompareAndSwapN_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8198 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7774 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 13031 "ad_ppc.cpp"
+#line 13374 "ad_ppc.cpp"
   }
 }
 
@@ -13042,11 +13385,10 @@ void weakCompareAndSwapN_acq_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8213 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7788 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     // Acquire only needed in successful case. Weak node is allowed to report unsuccessful in additional rare cases and
     // value is never passed to caller.
@@ -13054,7 +13396,7 @@ void weakCompareAndSwapN_acq_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseReg
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, true, /*weak*/ true);
   
-#line 13057 "ad_ppc.cpp"
+#line 13399 "ad_ppc.cpp"
   }
 }
 
@@ -13068,18 +13410,17 @@ void weakCompareAndSwapL_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8230 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7804 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     // value is never passed to caller.
     __ cmpxchgd(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, NULL, true, /*weak*/ true);
   
-#line 13082 "ad_ppc.cpp"
+#line 13423 "ad_ppc.cpp"
   }
 }
 
@@ -13093,11 +13434,10 @@ void weakCompareAndSwapL_acq_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8246 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7819 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     // Acquire only needed in successful case. Weak node is allowed to report unsuccessful in additional rare cases and
     // value is never passed to caller.
@@ -13105,7 +13445,7 @@ void weakCompareAndSwapL_acq_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseReg
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, NULL, true, /*weak*/ true);
   
-#line 13108 "ad_ppc.cpp"
+#line 13448 "ad_ppc.cpp"
   }
 }
 
@@ -13119,17 +13459,16 @@ void weakCompareAndSwapP_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8263 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7835 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgd(CCR0, R0, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, NULL, true, /*weak*/ true);
   
-#line 13132 "ad_ppc.cpp"
+#line 13471 "ad_ppc.cpp"
   }
 }
 
@@ -13143,11 +13482,10 @@ void weakCompareAndSwapP_acq_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8278 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7849 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     // Acquire only needed in successful case. Weak node is allowed to report unsuccessful in additional rare cases and
     // value is never passed to caller.
@@ -13155,7 +13493,7 @@ void weakCompareAndSwapP_acq_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseReg
                 support_IRIW_for_not_multiple_copy_atomic_cpu ? MacroAssembler::MemBarAcq : MacroAssembler::MemBarFenceAfter,
                 MacroAssembler::cmpxchgx_hint_atomic_update(), opnd_array(4)->as_Register(ra_,this,idx4)/* res */, NULL, true, /*weak*/ true);
   
-#line 13158 "ad_ppc.cpp"
+#line 13496 "ad_ppc.cpp"
   }
 }
 
@@ -13169,17 +13507,16 @@ void compareAndExchangeB_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8297 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7867 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, true);
   
-#line 13182 "ad_ppc.cpp"
+#line 13519 "ad_ppc.cpp"
   }
 }
 
@@ -13194,17 +13531,16 @@ void compareAndExchangeB4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAll
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8312 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7881 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, R0,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, true);
   
-#line 13207 "ad_ppc.cpp"
+#line 13543 "ad_ppc.cpp"
   }
 }
 
@@ -13218,11 +13554,10 @@ void compareAndExchangeB_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8327 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7895 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13234,7 +13569,7 @@ void compareAndExchangeB_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
       __ sync();
     }
   
-#line 13237 "ad_ppc.cpp"
+#line 13572 "ad_ppc.cpp"
   }
 }
 
@@ -13249,11 +13584,10 @@ void compareAndExchangeB4_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRe
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8348 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7915 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgb(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, R0,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13265,7 +13599,7 @@ void compareAndExchangeB4_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRe
       __ sync();
     }
   
-#line 13268 "ad_ppc.cpp"
+#line 13602 "ad_ppc.cpp"
   }
 }
 
@@ -13279,17 +13613,16 @@ void compareAndExchangeS_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8369 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7935 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, true);
   
-#line 13292 "ad_ppc.cpp"
+#line 13625 "ad_ppc.cpp"
   }
 }
 
@@ -13304,17 +13637,16 @@ void compareAndExchangeS4_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAll
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8384 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7949 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, R0,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, true);
   
-#line 13317 "ad_ppc.cpp"
+#line 13649 "ad_ppc.cpp"
   }
 }
 
@@ -13328,11 +13660,10 @@ void compareAndExchangeS_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8399 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7963 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, noreg, noreg,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13344,7 +13675,7 @@ void compareAndExchangeS_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
       __ sync();
     }
   
-#line 13347 "ad_ppc.cpp"
+#line 13678 "ad_ppc.cpp"
   }
 }
 
@@ -13359,11 +13690,10 @@ void compareAndExchangeS4_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRe
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8420 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 7983 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgh(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, R0,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13375,7 +13705,7 @@ void compareAndExchangeS4_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRe
       __ sync();
     }
   
-#line 13378 "ad_ppc.cpp"
+#line 13708 "ad_ppc.cpp"
   }
 }
 
@@ -13389,17 +13719,16 @@ void compareAndExchangeI_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8441 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8003 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, true);
   
-#line 13402 "ad_ppc.cpp"
+#line 13731 "ad_ppc.cpp"
   }
 }
 
@@ -13413,11 +13742,10 @@ void compareAndExchangeI_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8456 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8017 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13429,7 +13757,7 @@ void compareAndExchangeI_acq_regP_regI_regINode::emit(CodeBuffer& cbuf, PhaseReg
       __ sync();
     }
   
-#line 13432 "ad_ppc.cpp"
+#line 13760 "ad_ppc.cpp"
   }
 }
 
@@ -13443,17 +13771,16 @@ void compareAndExchangeN_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8477 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8037 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, true);
   
-#line 13456 "ad_ppc.cpp"
+#line 13783 "ad_ppc.cpp"
   }
 }
 
@@ -13467,11 +13794,10 @@ void compareAndExchangeN_acq_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8492 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8051 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgw(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13483,7 +13809,7 @@ void compareAndExchangeN_acq_regP_regN_regNNode::emit(CodeBuffer& cbuf, PhaseReg
       __ sync();
     }
   
-#line 13486 "ad_ppc.cpp"
+#line 13812 "ad_ppc.cpp"
   }
 }
 
@@ -13497,17 +13823,16 @@ void compareAndExchangeL_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8513 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8071 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgd(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, NULL, true);
   
-#line 13510 "ad_ppc.cpp"
+#line 13835 "ad_ppc.cpp"
   }
 }
 
@@ -13521,11 +13846,10 @@ void compareAndExchangeL_acq_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8528 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8085 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgd(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13537,7 +13861,7 @@ void compareAndExchangeL_acq_regP_regL_regLNode::emit(CodeBuffer& cbuf, PhaseReg
       __ sync();
     }
   
-#line 13540 "ad_ppc.cpp"
+#line 13864 "ad_ppc.cpp"
   }
 }
 
@@ -13551,17 +13875,16 @@ void compareAndExchangeP_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseRegAllo
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8549 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8106 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgd(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
                 noreg, NULL, true);
   
-#line 13564 "ad_ppc.cpp"
+#line 13887 "ad_ppc.cpp"
   }
 }
 
@@ -13575,11 +13898,10 @@ void compareAndExchangeP_acq_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8564 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8121 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     // CmpxchgX sets CCR0 to cmpX(src1, src2) and Rres to 'true'/'false'.
     __ cmpxchgd(CCR0, opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                 MacroAssembler::MemBarNone, MacroAssembler::cmpxchgx_hint_atomic_update(),
@@ -13591,7 +13913,7 @@ void compareAndExchangeP_acq_regP_regP_regPNode::emit(CodeBuffer& cbuf, PhaseReg
       __ sync();
     }
   
-#line 13594 "ad_ppc.cpp"
+#line 13916 "ad_ppc.cpp"
   }
 }
 
@@ -13604,9 +13926,9 @@ void getAndAddBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8587 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8143 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandaddb(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, noreg, noreg, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13616,7 +13938,7 @@ void getAndAddBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13619 "ad_ppc.cpp"
+#line 13941 "ad_ppc.cpp"
   }
 }
 
@@ -13631,9 +13953,9 @@ void getAndAddB4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8604 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8160 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandaddb(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13643,7 +13965,7 @@ void getAndAddB4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13646 "ad_ppc.cpp"
+#line 13968 "ad_ppc.cpp"
   }
 }
 
@@ -13656,9 +13978,9 @@ void getAndAddSNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8621 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8177 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandaddh(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, noreg, noreg, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13668,7 +13990,7 @@ void getAndAddSNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13671 "ad_ppc.cpp"
+#line 13993 "ad_ppc.cpp"
   }
 }
 
@@ -13683,9 +14005,9 @@ void getAndAddS4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8638 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8194 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandaddh(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13695,7 +14017,7 @@ void getAndAddS4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13698 "ad_ppc.cpp"
+#line 14020 "ad_ppc.cpp"
   }
 }
 
@@ -13708,9 +14030,9 @@ void getAndAddINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8654 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8210 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandaddw(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13720,7 +14042,7 @@ void getAndAddINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13723 "ad_ppc.cpp"
+#line 14045 "ad_ppc.cpp"
   }
 }
 
@@ -13733,9 +14055,9 @@ void getAndAddLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8670 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8226 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandaddd(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13745,7 +14067,7 @@ void getAndAddLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13748 "ad_ppc.cpp"
+#line 14070 "ad_ppc.cpp"
   }
 }
 
@@ -13758,9 +14080,9 @@ void getAndSetBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8687 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8243 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandsetb(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   noreg, noreg, noreg, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13770,7 +14092,7 @@ void getAndSetBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13773 "ad_ppc.cpp"
+#line 14095 "ad_ppc.cpp"
   }
 }
 
@@ -13785,9 +14107,9 @@ void getAndSetB4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8704 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8260 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandsetb(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13797,7 +14119,7 @@ void getAndSetB4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13800 "ad_ppc.cpp"
+#line 14122 "ad_ppc.cpp"
   }
 }
 
@@ -13810,9 +14132,9 @@ void getAndSetSNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8721 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8277 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandseth(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   noreg, noreg, noreg, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13822,7 +14144,7 @@ void getAndSetSNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13825 "ad_ppc.cpp"
+#line 14147 "ad_ppc.cpp"
   }
 }
 
@@ -13837,9 +14159,9 @@ void getAndSetS4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8738 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8294 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandseth(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   R0, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */, MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13849,7 +14171,7 @@ void getAndSetS4Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13852 "ad_ppc.cpp"
+#line 14174 "ad_ppc.cpp"
   }
 }
 
@@ -13862,9 +14184,9 @@ void getAndSetINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8754 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8310 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandsetw(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13874,7 +14196,7 @@ void getAndSetINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13877 "ad_ppc.cpp"
+#line 14199 "ad_ppc.cpp"
   }
 }
 
@@ -13887,9 +14209,9 @@ void getAndSetLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8770 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8326 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandsetd(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13899,7 +14221,7 @@ void getAndSetLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13902 "ad_ppc.cpp"
+#line 14224 "ad_ppc.cpp"
   }
 }
 
@@ -13912,9 +14234,9 @@ void getAndSetPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8786 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8343 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandsetd(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13924,7 +14246,7 @@ void getAndSetPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13927 "ad_ppc.cpp"
+#line 14249 "ad_ppc.cpp"
   }
 }
 
@@ -13937,9 +14259,9 @@ void getAndSetNNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8802 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8359 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ getandsetw(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem_ptr */,
                   MacroAssembler::cmpxchgx_hint_atomic_update());
@@ -13949,7 +14271,7 @@ void getAndSetNNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ sync();
     }
   
-#line 13952 "ad_ppc.cpp"
+#line 14274 "ad_ppc.cpp"
   }
 }
 
@@ -13960,14 +14282,13 @@ void addI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8822 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8379 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_add);
     __ add(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 13970 "ad_ppc.cpp"
+#line 14291 "ad_ppc.cpp"
   }
 }
 
@@ -13983,14 +14304,13 @@ void addI_reg_reg_2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8835 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8391 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_add);
     __ add(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 13993 "ad_ppc.cpp"
+#line 14313 "ad_ppc.cpp"
   }
 }
 
@@ -14006,14 +14326,13 @@ void addI_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8861 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8416 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ addi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 14016 "ad_ppc.cpp"
+#line 14335 "ad_ppc.cpp"
   }
 }
 
@@ -14029,20 +14348,42 @@ void addI_reg_immhi16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8873 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8427 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
     __ addis(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant())>>16);
   
-#line 14039 "ad_ppc.cpp"
+#line 14357 "ad_ppc.cpp"
   }
 }
 
 uint addI_reg_immhi16Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void addI_reg_imm32Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 8440 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    assert( ((intptr_t)(__ pc()) & 0x3c) != 0x3c, "Bad alignment for prefixed instruction at " INTPTR_FORMAT, (intptr_t)(__ pc()));
+    __ paddi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
+  
+#line 14380 "ad_ppc.cpp"
+  }
+}
+
+uint addI_reg_imm32Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void addL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -14052,14 +14393,13 @@ void addL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8885 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8453 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_add);
     __ add(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14062 "ad_ppc.cpp"
+#line 14402 "ad_ppc.cpp"
   }
 }
 
@@ -14075,14 +14415,13 @@ void addL_reg_reg_2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8898 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8465 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_add);
     __ add(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14085 "ad_ppc.cpp"
+#line 14424 "ad_ppc.cpp"
   }
 }
 
@@ -14098,14 +14437,13 @@ void addI_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8925 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8491 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_add);
     __ add(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14108 "ad_ppc.cpp"
+#line 14446 "ad_ppc.cpp"
   }
 }
 
@@ -14121,14 +14459,13 @@ void addL_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8938 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8503 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ addi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 14131 "ad_ppc.cpp"
+#line 14468 "ad_ppc.cpp"
   }
 }
 
@@ -14144,20 +14481,42 @@ void addL_reg_immhi16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8952 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8516 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
     __ addis(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constantL())>>16);
   
-#line 14154 "ad_ppc.cpp"
+#line 14490 "ad_ppc.cpp"
   }
 }
 
 uint addL_reg_immhi16Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void addL_reg_imm34Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 8531 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    assert( ((intptr_t)(__ pc()) & 0x3c) != 0x3c, "Bad alignment for prefixed instruction at " INTPTR_FORMAT, (intptr_t)(__ pc()));
+    __ paddi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
+  
+#line 14513 "ad_ppc.cpp"
+  }
+}
+
+uint addL_reg_imm34Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void addP_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -14167,14 +14526,13 @@ void addP_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8964 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8544 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_add);
     __ add(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14177 "ad_ppc.cpp"
+#line 14535 "ad_ppc.cpp"
   }
 }
 
@@ -14190,14 +14548,13 @@ void addP_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8978 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8557 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ addi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 14200 "ad_ppc.cpp"
+#line 14557 "ad_ppc.cpp"
   }
 }
 
@@ -14213,20 +14570,42 @@ void addP_reg_immhi16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 8992 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8570 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addis);
     __ addis(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constantL())>>16);
   
-#line 14223 "ad_ppc.cpp"
+#line 14579 "ad_ppc.cpp"
   }
 }
 
 uint addP_reg_immhi16Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void addP_reg_imm34Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 8585 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    assert( ((intptr_t)(__ pc()) & 0x3c) != 0x3c, "Bad alignment for prefixed instruction at " INTPTR_FORMAT, (intptr_t)(__ pc()));
+    __ paddi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
+  
+#line 14602 "ad_ppc.cpp"
+  }
+}
+
+uint addP_reg_imm34Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void subI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -14236,14 +14615,13 @@ void subI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9007 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8601 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_subf);
     __ subf(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 14246 "ad_ppc.cpp"
+#line 14624 "ad_ppc.cpp"
   }
 }
 
@@ -14259,14 +14637,13 @@ void subI_imm16_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9024 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8617 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_subfic);
     __ subfic(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(1)->constant());
   
-#line 14269 "ad_ppc.cpp"
+#line 14646 "ad_ppc.cpp"
   }
 }
 
@@ -14281,14 +14658,13 @@ void signmask32I_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9040 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8632 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_srawi);
     __ srawi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0x1f);
   
-#line 14291 "ad_ppc.cpp"
+#line 14667 "ad_ppc.cpp"
   }
 }
 
@@ -14304,14 +14680,13 @@ void negI_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// zero
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9064 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8655 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_neg);
     __ neg(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14314 "ad_ppc.cpp"
+#line 14689 "ad_ppc.cpp"
   }
 }
 
@@ -14327,14 +14702,13 @@ void subL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9076 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8666 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_subf);
     __ subf(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 14337 "ad_ppc.cpp"
+#line 14711 "ad_ppc.cpp"
   }
 }
 
@@ -14350,14 +14724,13 @@ void subI_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9089 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8678 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_subf);
     __ subf(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 14360 "ad_ppc.cpp"
+#line 14733 "ad_ppc.cpp"
   }
 }
 
@@ -14372,14 +14745,13 @@ void signmask64I_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9105 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8693 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sradi);
     __ sradi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0x3f);
   
-#line 14382 "ad_ppc.cpp"
+#line 14754 "ad_ppc.cpp"
   }
 }
 
@@ -14394,14 +14766,13 @@ void signmask64L_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9121 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8708 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sradi);
     __ sradi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0x3f);
   
-#line 14404 "ad_ppc.cpp"
+#line 14775 "ad_ppc.cpp"
   }
 }
 
@@ -14417,14 +14788,13 @@ void negL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// zero
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9133 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8732 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_neg);
     __ neg(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14427 "ad_ppc.cpp"
+#line 14797 "ad_ppc.cpp"
   }
 }
 
@@ -14440,14 +14810,13 @@ void negI_con0_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// zero
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9146 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8744 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_neg);
     __ neg(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14450 "ad_ppc.cpp"
+#line 14819 "ad_ppc.cpp"
   }
 }
 
@@ -14463,14 +14832,13 @@ void mulI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9163 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8760 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mullw);
     __ mullw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14473 "ad_ppc.cpp"
+#line 14841 "ad_ppc.cpp"
   }
 }
 
@@ -14486,14 +14854,13 @@ void mulI_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9177 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8773 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mulli);
     __ mulli(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 14496 "ad_ppc.cpp"
+#line 14863 "ad_ppc.cpp"
   }
 }
 
@@ -14509,14 +14876,13 @@ void mulL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9190 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8785 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mulld);
     __ mulld(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14519 "ad_ppc.cpp"
+#line 14885 "ad_ppc.cpp"
   }
 }
 
@@ -14532,14 +14898,13 @@ void mulHighL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9204 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8798 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mulhd);
     __ mulhd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14542 "ad_ppc.cpp"
+#line 14907 "ad_ppc.cpp"
   }
 }
 
@@ -14555,14 +14920,13 @@ void mulL_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9218 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8811 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mulli);
     __ mulli(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 14565 "ad_ppc.cpp"
+#line 14929 "ad_ppc.cpp"
   }
 }
 
@@ -14578,14 +14942,13 @@ void divI_reg_immIvalueMinus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) co
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9232 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8824 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_neg);
     __ neg(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 14588 "ad_ppc.cpp"
+#line 14951 "ad_ppc.cpp"
   }
 }
 
@@ -14601,14 +14964,13 @@ void divI_reg_regnotMinus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9249 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8840 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_divw);
     __ divw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14611 "ad_ppc.cpp"
+#line 14973 "ad_ppc.cpp"
   }
 }
 
@@ -14625,24 +14987,22 @@ void cmovI_bne_negI_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9265 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8855 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
     Label done;
     __ bne(opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */, done);
     __ neg(opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* src1 */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 14639 "ad_ppc.cpp"
+#line 14999 "ad_ppc.cpp"
   }
 }
 
 uint cmovI_bne_negI_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void divL_reg_immLvalueMinus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -14652,14 +15012,13 @@ void divL_reg_immLvalueMinus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) co
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9297 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8885 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_neg);
     __ neg(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 14662 "ad_ppc.cpp"
+#line 15021 "ad_ppc.cpp"
   }
 }
 
@@ -14675,14 +15034,13 @@ void divL_reg_regnotMinus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9312 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8899 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_divd);
     __ divd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14685 "ad_ppc.cpp"
+#line 15043 "ad_ppc.cpp"
   }
 }
 
@@ -14699,24 +15057,66 @@ void cmovL_bne_negL_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9328 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 8914 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
     Label done;
     __ bne(opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */, done);
     __ neg(opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* src1 */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 14713 "ad_ppc.cpp"
+#line 15069 "ad_ppc.cpp"
   }
 }
 
 uint cmovL_bne_negL_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT (InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
+}
+
+void udivI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 8977 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ divwu(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+  
+#line 15091 "ad_ppc.cpp"
+  }
+}
+
+uint udivI_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void udivL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 9000 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ divdu(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+  
+#line 15113 "ad_ppc.cpp"
+  }
+}
+
+uint udivL_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
 void maskI_reg_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -14726,14 +15126,13 @@ void maskI_reg_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// mask
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9402 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9030 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->constant());
   
-#line 14736 "ad_ppc.cpp"
+#line 15135 "ad_ppc.cpp"
   }
 }
 
@@ -14749,14 +15148,13 @@ void lShiftI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9416 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9043 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_slw);
     __ slw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14759 "ad_ppc.cpp"
+#line 15157 "ad_ppc.cpp"
   }
 }
 
@@ -14772,14 +15170,13 @@ void lShiftI_reg_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9440 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9066 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
     __ slwi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x1f);
   
-#line 14782 "ad_ppc.cpp"
+#line 15179 "ad_ppc.cpp"
   }
 }
 
@@ -14796,21 +15193,19 @@ void lShiftI_andI_immInegpow2_imm5Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src3
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9454 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9079 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm); // FIXME: assert that rlwinm is equal to addi
-    long src2      = opnd_array(2)->constant();
     long src3      = opnd_array(3)->constant();
-    long maskbits  = src3 + log2_long((jlong) (julong) (juint) -src2);
+    long maskbits  = src3 + log2i_exact(-(juint)opnd_array(2)->constant());
     if (maskbits >= 32) {
       __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, 0); // addi
     } else {
       __ rlwinm(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, src3 & 0x1f, 0, (31-maskbits) & 0x1f);
     }
   
-#line 14813 "ad_ppc.cpp"
+#line 15208 "ad_ppc.cpp"
   }
 }
 
@@ -14827,21 +15222,19 @@ void lShiftI_andI_immInegpow2_rShiftI_imm5Node::emit(CodeBuffer& cbuf, PhaseRegA
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src3
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9475 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9098 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm); // FIXME: assert that rlwinm is equal to addi
-    long src2      = opnd_array(3)->constant();
     long src3      = opnd_array(2)->constant();
-    long maskbits  = src3 + log2_long((jlong) (julong) (juint) -src2);
+    long maskbits  = src3 + log2i_exact(-(juint)opnd_array(3)->constant());
     if (maskbits >= 32) {
       __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, 0); // addi
     } else {
       __ rlwinm(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 0, 0, (31-maskbits) & 0x1f);
     }
   
-#line 14844 "ad_ppc.cpp"
+#line 15237 "ad_ppc.cpp"
   }
 }
 
@@ -14857,14 +15250,13 @@ void lShiftL_regL_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9496 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9117 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sld);
     __ sld(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14867 "ad_ppc.cpp"
+#line 15259 "ad_ppc.cpp"
   }
 }
 
@@ -14880,14 +15272,13 @@ void lshiftL_regL_immINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9520 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9140 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
     __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x3f);
   
-#line 14890 "ad_ppc.cpp"
+#line 15281 "ad_ppc.cpp"
   }
 }
 
@@ -14903,14 +15294,13 @@ void lShiftL_regI_immGE32Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9534 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9153 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
     __ sldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x3f);
   
-#line 14913 "ad_ppc.cpp"
+#line 15303 "ad_ppc.cpp"
   }
 }
 
@@ -14926,14 +15316,13 @@ void scaledPositiveI2L_lShiftL_convI2L_reg_imm6Node::emit(CodeBuffer& cbuf, Phas
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9549 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9167 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldic);
     __ clrlsldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 0x20, opnd_array(2)->constant());
   
-#line 14936 "ad_ppc.cpp"
+#line 15325 "ad_ppc.cpp"
   }
 }
 
@@ -14949,14 +15338,13 @@ void arShiftI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9563 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9180 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sraw);
     __ sraw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 14959 "ad_ppc.cpp"
+#line 15347 "ad_ppc.cpp"
   }
 }
 
@@ -14972,14 +15360,13 @@ void arShiftI_reg_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9588 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9204 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_srawi);
     __ srawi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x1f);
   
-#line 14982 "ad_ppc.cpp"
+#line 15369 "ad_ppc.cpp"
   }
 }
 
@@ -14995,14 +15382,13 @@ void arShiftL_regL_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9602 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9217 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_srad);
     __ srad(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 15005 "ad_ppc.cpp"
+#line 15391 "ad_ppc.cpp"
   }
 }
 
@@ -15018,14 +15404,13 @@ void arShiftL_regL_immINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9628 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9242 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sradi);
     __ sradi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x3f);
   
-#line 15028 "ad_ppc.cpp"
+#line 15413 "ad_ppc.cpp"
   }
 }
 
@@ -15041,14 +15426,13 @@ void convL2I_arShiftL_regL_immINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) 
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9641 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9254 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_sradi);
     __ sradi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x3f);
   
-#line 15051 "ad_ppc.cpp"
+#line 15435 "ad_ppc.cpp"
   }
 }
 
@@ -15064,14 +15448,13 @@ void urShiftI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9655 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9267 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_srw);
     __ srw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 15074 "ad_ppc.cpp"
+#line 15457 "ad_ppc.cpp"
   }
 }
 
@@ -15087,14 +15470,13 @@ void urShiftI_reg_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9681 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9292 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
     __ srwi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x1f);
   
-#line 15097 "ad_ppc.cpp"
+#line 15479 "ad_ppc.cpp"
   }
 }
 
@@ -15110,14 +15492,13 @@ void urShiftL_regL_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9695 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9305 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_srd);
     __ srd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 15120 "ad_ppc.cpp"
+#line 15501 "ad_ppc.cpp"
   }
 }
 
@@ -15133,14 +15514,13 @@ void urShiftL_regL_immINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9721 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9330 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x3f);
   
-#line 15143 "ad_ppc.cpp"
+#line 15523 "ad_ppc.cpp"
   }
 }
 
@@ -15156,14 +15536,13 @@ void convL2I_urShiftL_regL_immINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) 
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9734 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9342 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x3f);
   
-#line 15166 "ad_ppc.cpp"
+#line 15545 "ad_ppc.cpp"
   }
 }
 
@@ -15179,14 +15558,13 @@ void shrP_convP2X_reg_imm6Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9747 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9354 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ srdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0x3f);
   
-#line 15189 "ad_ppc.cpp"
+#line 15567 "ad_ppc.cpp"
   }
 }
 
@@ -15203,20 +15581,19 @@ void andI_urShiftI_regI_immI_immIpow2minus1Node::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src3
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9760 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9366 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     int rshift = (opnd_array(2)->constant()) & 0x1f;
-    int length = log2_long(((jlong) opnd_array(3)->constant()) + 1);
+    int length = log2i_exact((juint)opnd_array(3)->constant()+ 1u);
     if (rshift + length > 32) {
       // if necessary, adjust mask to omit rotated bits.
       length = 32 - rshift;
     }
     __ extrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, length, 64 - (rshift + length));
   
-#line 15219 "ad_ppc.cpp"
+#line 15596 "ad_ppc.cpp"
   }
 }
 
@@ -15233,20 +15610,19 @@ void andL_urShiftL_regL_immI_immLpow2minus1Node::emit(CodeBuffer& cbuf, PhaseReg
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src3
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9779 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9384 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     int rshift  = (opnd_array(2)->constant()) & 0x3f;
-    int length = log2_long(((jlong) opnd_array(3)->constantL()) + 1);
+    int length = log2i_exact((julong)opnd_array(3)->constantL()+ 1ull);
     if (rshift + length > 64) {
       // if necessary, adjust mask to omit rotated bits.
       length = 64 - rshift;
     }
     __ extrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, length, 64 - (rshift + length));
   
-#line 15249 "ad_ppc.cpp"
+#line 15625 "ad_ppc.cpp"
   }
 }
 
@@ -15261,14 +15637,13 @@ void sxtI_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9797 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9401 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_extsw);
     __ extsw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 15271 "ad_ppc.cpp"
+#line 15646 "ad_ppc.cpp"
   }
 }
 
@@ -15285,14 +15660,13 @@ void rotlI_reg_immi8Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// lshift
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// rshift
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9813 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9416 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
     __ rotlwi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->constant());
   
-#line 15295 "ad_ppc.cpp"
+#line 15669 "ad_ppc.cpp"
   }
 }
 
@@ -15309,14 +15683,13 @@ void rotlI_reg_immi8_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// rshift
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// lshift
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9813 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9416 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
     __ rotlwi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(3)->constant());
   
-#line 15319 "ad_ppc.cpp"
+#line 15692 "ad_ppc.cpp"
   }
 }
 
@@ -15333,14 +15706,13 @@ void rotrI_reg_immi8Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// rshift
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// lshift
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9827 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9429 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
     __ rotrwi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->constant());
   
-#line 15343 "ad_ppc.cpp"
+#line 15715 "ad_ppc.cpp"
   }
 }
 
@@ -15357,14 +15729,13 @@ void rotrI_reg_immi8_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// lshift
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// rshift
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9827 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9429 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
     __ rotrwi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(3)->constant());
   
-#line 15367 "ad_ppc.cpp"
+#line 15738 "ad_ppc.cpp"
   }
 }
 
@@ -15380,14 +15751,13 @@ void addF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9842 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9443 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fadds);
     __ fadds(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15390 "ad_ppc.cpp"
+#line 15760 "ad_ppc.cpp"
   }
 }
 
@@ -15403,14 +15773,13 @@ void addD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9855 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9455 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fadd);
     __ fadd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15413 "ad_ppc.cpp"
+#line 15782 "ad_ppc.cpp"
   }
 }
 
@@ -15426,14 +15795,13 @@ void subF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9868 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9467 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fsubs);
     __ fsubs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15436 "ad_ppc.cpp"
+#line 15804 "ad_ppc.cpp"
   }
 }
 
@@ -15449,14 +15817,13 @@ void subD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9880 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9478 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fsub);
     __ fsub(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15459 "ad_ppc.cpp"
+#line 15826 "ad_ppc.cpp"
   }
 }
 
@@ -15472,14 +15839,13 @@ void mulF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9892 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9489 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmuls);
     __ fmuls(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15482 "ad_ppc.cpp"
+#line 15848 "ad_ppc.cpp"
   }
 }
 
@@ -15495,14 +15861,13 @@ void mulD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9904 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9500 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmul);
     __ fmul(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15505 "ad_ppc.cpp"
+#line 15870 "ad_ppc.cpp"
   }
 }
 
@@ -15518,14 +15883,13 @@ void divF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9916 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9511 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fdivs);
     __ fdivs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15528 "ad_ppc.cpp"
+#line 15892 "ad_ppc.cpp"
   }
 }
 
@@ -15541,14 +15905,13 @@ void divD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9928 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9522 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fdiv);
     __ fdiv(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 15551 "ad_ppc.cpp"
+#line 15914 "ad_ppc.cpp"
   }
 }
 
@@ -15563,14 +15926,13 @@ void absF_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9940 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9533 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fabs);
     __ fabs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15573 "ad_ppc.cpp"
+#line 15935 "ad_ppc.cpp"
   }
 }
 
@@ -15585,14 +15947,13 @@ void absD_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9952 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9544 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fabs);
     __ fabs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15595 "ad_ppc.cpp"
+#line 15956 "ad_ppc.cpp"
   }
 }
 
@@ -15607,14 +15968,13 @@ void negF_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9963 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9554 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fneg);
     __ fneg(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15617 "ad_ppc.cpp"
+#line 15977 "ad_ppc.cpp"
   }
 }
 
@@ -15629,14 +15989,13 @@ void negD_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9974 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9564 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fneg);
     __ fneg(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15639 "ad_ppc.cpp"
+#line 15998 "ad_ppc.cpp"
   }
 }
 
@@ -15651,14 +16010,13 @@ void negF_absF_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9986 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9575 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnabs);
     __ fnabs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15661 "ad_ppc.cpp"
+#line 16019 "ad_ppc.cpp"
   }
 }
 
@@ -15673,14 +16031,13 @@ void negD_absD_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 9998 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9586 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnabs);
     __ fnabs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15683 "ad_ppc.cpp"
+#line 16040 "ad_ppc.cpp"
   }
 }
 
@@ -15695,14 +16052,13 @@ void sqrtD_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10011 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9598 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fsqrt);
     __ fsqrt(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15705 "ad_ppc.cpp"
+#line 16061 "ad_ppc.cpp"
   }
 }
 
@@ -15717,14 +16073,13 @@ void sqrtF_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10026 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9612 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fsqrts);
     __ fsqrts(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 15727 "ad_ppc.cpp"
+#line 16082 "ad_ppc.cpp"
   }
 }
 
@@ -15767,14 +16122,13 @@ void maddF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10063 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9648 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmadds);
     __ fmadds(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15777 "ad_ppc.cpp"
+#line 16131 "ad_ppc.cpp"
   }
 }
 
@@ -15791,14 +16145,13 @@ void maddD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10076 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9660 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmadd);
     __ fmadd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15801 "ad_ppc.cpp"
+#line 16154 "ad_ppc.cpp"
   }
 }
 
@@ -15815,14 +16168,13 @@ void mnsubF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10090 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9673 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmsubs);
     __ fnmsubs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15825 "ad_ppc.cpp"
+#line 16177 "ad_ppc.cpp"
   }
 }
 
@@ -15839,14 +16191,13 @@ void mnsubF_reg_reg_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10090 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9673 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmsubs);
     __ fnmsubs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15849 "ad_ppc.cpp"
+#line 16200 "ad_ppc.cpp"
   }
 }
 
@@ -15863,14 +16214,13 @@ void mnsubD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10104 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9686 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmsub);
     __ fnmsub(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15873 "ad_ppc.cpp"
+#line 16223 "ad_ppc.cpp"
   }
 }
 
@@ -15887,14 +16237,13 @@ void mnsubD_reg_reg_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10104 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9686 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmsub);
     __ fnmsub(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15897 "ad_ppc.cpp"
+#line 16246 "ad_ppc.cpp"
   }
 }
 
@@ -15911,14 +16260,13 @@ void mnaddF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10118 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9699 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmadds);
     __ fnmadds(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15921 "ad_ppc.cpp"
+#line 16269 "ad_ppc.cpp"
   }
 }
 
@@ -15935,14 +16283,13 @@ void mnaddF_reg_reg_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10118 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9699 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmadds);
     __ fnmadds(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15945 "ad_ppc.cpp"
+#line 16292 "ad_ppc.cpp"
   }
 }
 
@@ -15959,14 +16306,13 @@ void mnaddD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10132 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9712 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmadd);
     __ fnmadd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15969 "ad_ppc.cpp"
+#line 16315 "ad_ppc.cpp"
   }
 }
 
@@ -15983,14 +16329,13 @@ void mnaddD_reg_reg_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10132 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9712 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fnmadd);
     __ fnmadd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 15993 "ad_ppc.cpp"
+#line 16338 "ad_ppc.cpp"
   }
 }
 
@@ -16007,14 +16352,13 @@ void msubF_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10145 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9724 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmsubs);
     __ fmsubs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 16017 "ad_ppc.cpp"
+#line 16361 "ad_ppc.cpp"
   }
 }
 
@@ -16031,14 +16375,13 @@ void msubD_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10158 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9736 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmsub);
     __ fmsub(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_FloatRegister(ra_,this,idx3)/* src2 */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src3 */);
   
-#line 16041 "ad_ppc.cpp"
+#line 16384 "ad_ppc.cpp"
   }
 }
 
@@ -16054,14 +16397,13 @@ void andI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10175 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9752 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_and);
     __ andr(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16064 "ad_ppc.cpp"
+#line 16406 "ad_ppc.cpp"
   }
 }
 
@@ -16077,14 +16419,13 @@ void andI_reg_immIhi16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10188 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9764 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andis_);
     __ andis_(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (int)((unsigned short)((opnd_array(2)->constant()& 0xFFFF0000) >> 16)));
   
-#line 16087 "ad_ppc.cpp"
+#line 16428 "ad_ppc.cpp"
   }
 }
 
@@ -16100,15 +16441,14 @@ void andI_reg_uimm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10202 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9777 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andi_);
     // FIXME: avoid andi_ ?
     __ andi_(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 16111 "ad_ppc.cpp"
+#line 16451 "ad_ppc.cpp"
   }
 }
 
@@ -16124,14 +16464,13 @@ void andI_reg_immInegpow2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10215 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9789 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
-    __ clrrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, log2_long((jlong)(julong)(juint)-(opnd_array(2)->constant())));
+    __ clrrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, log2i_exact(-(juint)opnd_array(2)->constant()));
   
-#line 16134 "ad_ppc.cpp"
+#line 16473 "ad_ppc.cpp"
   }
 }
 
@@ -16147,14 +16486,13 @@ void andI_reg_immIpow2minus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) con
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10226 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9799 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 64-log2_long((((jlong) opnd_array(2)->constant())+1)));
+    __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 64 - log2i_exact((juint)opnd_array(2)->constant()+ 1u));
   
-#line 16157 "ad_ppc.cpp"
+#line 16495 "ad_ppc.cpp"
   }
 }
 
@@ -16170,15 +16508,14 @@ void andI_reg_immIpowerOf2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10238 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9810 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
-    __ rlwinm(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 0,
-              (31-log2_long((jlong) opnd_array(2)->constant())) & 0x1f, (31-log2_long((jlong) opnd_array(2)->constant())) & 0x1f);
+    int bitpos = 31 - log2i_exact((juint)opnd_array(2)->constant());
+    __ rlwinm(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 0, bitpos, bitpos);
   
-#line 16181 "ad_ppc.cpp"
+#line 16518 "ad_ppc.cpp"
   }
 }
 
@@ -16194,14 +16531,13 @@ void andL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10253 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9824 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_and);
     __ andr(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16204 "ad_ppc.cpp"
+#line 16540 "ad_ppc.cpp"
   }
 }
 
@@ -16217,15 +16553,14 @@ void andL_reg_uimm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10267 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9837 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andi_);
     // FIXME: avoid andi_ ?
     __ andi_(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 16228 "ad_ppc.cpp"
+#line 16563 "ad_ppc.cpp"
   }
 }
 
@@ -16241,14 +16576,13 @@ void andL_reg_immLnegpow2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10280 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9849 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
-    __ clrrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, log2_long((jlong)-opnd_array(2)->constantL()));
+    __ clrrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, log2i_exact(-(julong)opnd_array(2)->constantL()));
   
-#line 16251 "ad_ppc.cpp"
+#line 16585 "ad_ppc.cpp"
   }
 }
 
@@ -16264,14 +16598,13 @@ void andL_reg_immLpow2minus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) con
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10291 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9859 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 64-log2_long((((jlong) opnd_array(2)->constantL())+1)));
+    __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 64 - log2i_exact((julong)opnd_array(2)->constantL()+ 1ull));
   
-#line 16274 "ad_ppc.cpp"
+#line 16607 "ad_ppc.cpp"
   }
 }
 
@@ -16287,14 +16620,13 @@ void convL2I_andL_reg_immLpow2minus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* 
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10305 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9872 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
-    __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 64-log2_long((((jlong) opnd_array(2)->constantL())+1)));
+    __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 64 - log2i_exact((julong)opnd_array(2)->constantL()+ 1ull));
   
-#line 16297 "ad_ppc.cpp"
+#line 16629 "ad_ppc.cpp"
   }
 }
 
@@ -16310,14 +16642,13 @@ void orI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10319 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9885 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ or_unchecked(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16320 "ad_ppc.cpp"
+#line 16651 "ad_ppc.cpp"
   }
 }
 
@@ -16333,14 +16664,13 @@ void orI_reg_reg_2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10332 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9897 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ or_unchecked(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16343 "ad_ppc.cpp"
+#line 16673 "ad_ppc.cpp"
   }
 }
 
@@ -16356,14 +16686,13 @@ void orI_reg_uimm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10358 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9922 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ori);
     __ ori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constant()) & 0xFFFF);
   
-#line 16366 "ad_ppc.cpp"
+#line 16695 "ad_ppc.cpp"
   }
 }
 
@@ -16379,14 +16708,13 @@ void orL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10372 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9935 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ or_unchecked(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16389 "ad_ppc.cpp"
+#line 16717 "ad_ppc.cpp"
   }
 }
 
@@ -16402,14 +16730,13 @@ void orI_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10386 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9948 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ or_unchecked(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16412 "ad_ppc.cpp"
+#line 16739 "ad_ppc.cpp"
   }
 }
 
@@ -16425,14 +16752,13 @@ void orL_reg_uimm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// con
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10400 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9961 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ori);
     __ ori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (opnd_array(2)->constantL()) & 0xFFFF);
   
-#line 16435 "ad_ppc.cpp"
+#line 16761 "ad_ppc.cpp"
   }
 }
 
@@ -16448,14 +16774,13 @@ void xorI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10414 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9974 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_xor);
     __ xorr(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16458 "ad_ppc.cpp"
+#line 16783 "ad_ppc.cpp"
   }
 }
 
@@ -16471,14 +16796,13 @@ void xorI_reg_reg_2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10427 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 9986 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_xor);
     __ xorr(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16481 "ad_ppc.cpp"
+#line 16805 "ad_ppc.cpp"
   }
 }
 
@@ -16494,14 +16818,13 @@ void xorI_reg_uimm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10453 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10011 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_xori);
     __ xori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 16504 "ad_ppc.cpp"
+#line 16827 "ad_ppc.cpp"
   }
 }
 
@@ -16517,14 +16840,13 @@ void xorL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10467 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10024 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_xor);
     __ xorr(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16527 "ad_ppc.cpp"
+#line 16849 "ad_ppc.cpp"
   }
 }
 
@@ -16540,14 +16862,13 @@ void xorI_regL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10481 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10037 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_xor);
     __ xorr(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16550 "ad_ppc.cpp"
+#line 16871 "ad_ppc.cpp"
   }
 }
 
@@ -16563,14 +16884,13 @@ void xorL_reg_uimm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10495 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10050 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_xori);
     __ xori(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 16573 "ad_ppc.cpp"
+#line 16893 "ad_ppc.cpp"
   }
 }
 
@@ -16586,14 +16906,13 @@ void notI_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10508 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10062 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_nor);
     __ nor(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 16596 "ad_ppc.cpp"
+#line 16915 "ad_ppc.cpp"
   }
 }
 
@@ -16609,14 +16928,13 @@ void notL_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10521 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10074 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_nor);
     __ nor(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 16619 "ad_ppc.cpp"
+#line 16937 "ad_ppc.cpp"
   }
 }
 
@@ -16634,13 +16952,12 @@ void andcI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src3
   {
 
-#line 3405 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3200 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andc);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     __ andc(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* src3 */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */);
   
-#line 16643 "ad_ppc.cpp"
+#line 16960 "ad_ppc.cpp"
   }
 }
 
@@ -16658,13 +16975,12 @@ void andcI_reg_reg_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
   {
 
-#line 3405 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3200 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andc);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     __ andc(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src3 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src1 */);
   
-#line 16667 "ad_ppc.cpp"
+#line 16983 "ad_ppc.cpp"
   }
 }
 
@@ -16680,14 +16996,13 @@ void andcL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10547 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10099 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andc);
     __ andc(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 16690 "ad_ppc.cpp"
+#line 17005 "ad_ppc.cpp"
   }
 }
 
@@ -16702,13 +17017,13 @@ void moveL2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10576 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10127 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ mtfprd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 16711 "ad_ppc.cpp"
+#line 17026 "ad_ppc.cpp"
   }
 }
 
@@ -16723,13 +17038,13 @@ void moveI2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10589 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10140 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ mtfprwa(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 16732 "ad_ppc.cpp"
+#line 17047 "ad_ppc.cpp"
   }
 }
 
@@ -16745,15 +17060,14 @@ void stkI_to_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 16756 "ad_ppc.cpp"
+#line 17070 "ad_ppc.cpp"
   }
 }
 
@@ -16769,14 +17083,13 @@ void regI_to_stkINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 3111 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2955 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stw);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(0)->disp(ra_,this,0) + frame_slots_bias(opnd_array(0)->base(ra_,this,idx0), ra_);
     __ stw(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Idisp, as_Register(opnd_array(0)->base(ra_,this,idx0)));
   
-#line 16779 "ad_ppc.cpp"
+#line 17092 "ad_ppc.cpp"
   }
 }
 
@@ -16792,16 +17105,15 @@ void stkL_to_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 16804 "ad_ppc.cpp"
+#line 17116 "ad_ppc.cpp"
   }
 }
 
@@ -16817,16 +17129,15 @@ void regL_to_stkLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 3118 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2961 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_std);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(0)->disp(ra_,this,0) + frame_slots_bias(opnd_array(0)->base(ra_,this,idx0), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ std(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Idisp, as_Register(opnd_array(0)->base(ra_,this,idx0)));
   
-#line 16829 "ad_ppc.cpp"
+#line 17140 "ad_ppc.cpp"
   }
 }
 
@@ -16842,15 +17153,14 @@ void moveF2I_stack_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 2637 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2490 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lwz);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lwz(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 16853 "ad_ppc.cpp"
+#line 17163 "ad_ppc.cpp"
   }
 }
 
@@ -16866,14 +17176,13 @@ void moveF2I_reg_stackNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 3127 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2969 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stfs);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(0)->disp(ra_,this,0) + frame_slots_bias(opnd_array(0)->base(ra_,this,idx0), ra_);
     __ stfs(opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */, Idisp, as_Register(opnd_array(0)->base(ra_,this,idx0)));
   
-#line 16876 "ad_ppc.cpp"
+#line 17185 "ad_ppc.cpp"
   }
 }
 
@@ -16888,15 +17197,14 @@ void moveI2F_stack_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10674 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10225 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lfs);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1)+ frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lfs(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 16899 "ad_ppc.cpp"
+#line 17207 "ad_ppc.cpp"
   }
 }
 
@@ -16912,14 +17220,13 @@ void moveI2F_reg_stackNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 3111 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2955 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stw);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(0)->disp(ra_,this,0) + frame_slots_bias(opnd_array(0)->base(ra_,this,idx0), ra_);
     __ stw(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Idisp, as_Register(opnd_array(0)->base(ra_,this,idx0)));
   
-#line 16922 "ad_ppc.cpp"
+#line 17229 "ad_ppc.cpp"
   }
 }
 
@@ -16935,14 +17242,13 @@ void moveF2L_reg_stackNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 3134 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2975 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stfd);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(0)->disp(ra_,this,0) + frame_slots_bias(opnd_array(0)->base(ra_,this,idx0), ra_);
     __ stfd(opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */, Idisp, as_Register(opnd_array(0)->base(ra_,this,idx0)));
   
-#line 16945 "ad_ppc.cpp"
+#line 17251 "ad_ppc.cpp"
   }
 }
 
@@ -16958,16 +17264,15 @@ void moveD2L_stack_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 2656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 16970 "ad_ppc.cpp"
+#line 17275 "ad_ppc.cpp"
   }
 }
 
@@ -16983,14 +17288,13 @@ void moveD2L_reg_stackNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 3134 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2975 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_stfd);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(0)->disp(ra_,this,0) + frame_slots_bias(opnd_array(0)->base(ra_,this,idx0), ra_);
     __ stfd(opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */, Idisp, as_Register(opnd_array(0)->base(ra_,this,idx0)));
   
-#line 16993 "ad_ppc.cpp"
+#line 17297 "ad_ppc.cpp"
   }
 }
 
@@ -17006,14 +17310,13 @@ void moveL2D_stack_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 2677 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2526 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_lfd);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(1)->disp(ra_,this,idx1) + frame_slots_bias(opnd_array(1)->base(ra_,this,idx1), ra_);
     __ lfd(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, Idisp, as_Register(opnd_array(1)->base(ra_,this,idx1)));
   
-#line 17016 "ad_ppc.cpp"
+#line 17319 "ad_ppc.cpp"
   }
 }
 
@@ -17029,16 +17332,15 @@ void moveL2D_reg_stackNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   {
 
-#line 3118 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 2961 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_std);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(0)->disp(ra_,this,0) + frame_slots_bias(opnd_array(0)->base(ra_,this,idx0), ra_);
     // Operand 'ds' requires 4-alignment.
     assert((Idisp & 0x3) == 0, "unaligned offset");
     __ std(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, Idisp, as_Register(opnd_array(0)->base(ra_,this,idx0)));
   
-#line 17041 "ad_ppc.cpp"
+#line 17343 "ad_ppc.cpp"
   }
 }
 
@@ -17053,14 +17355,13 @@ void moveRegNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10762 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10312 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ mr_if_needed(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17063 "ad_ppc.cpp"
+#line 17364 "ad_ppc.cpp"
   }
 }
 
@@ -17070,14 +17371,13 @@ void castX2PNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10777 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10326 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ mr_if_needed(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17080 "ad_ppc.cpp"
+#line 17380 "ad_ppc.cpp"
   }
 }
 
@@ -17087,14 +17387,13 @@ void castP2XNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10790 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10338 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ mr_if_needed(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17097 "ad_ppc.cpp"
+#line 17396 "ad_ppc.cpp"
   }
 }
 
@@ -17124,6 +17423,71 @@ uint castIINode::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 0);
 }
 
+void castLLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  // User did not define which encode class to use.
+}
+
+uint castLLNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 0, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 0);
+}
+
+void castFFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  // User did not define which encode class to use.
+}
+
+uint castFFNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 0, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 0);
+}
+
+void castDDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  // User did not define which encode class to use.
+}
+
+uint castDDNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 0, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 0);
+}
+
+void castVV8Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  // User did not define which encode class to use.
+}
+
+uint castVV8Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 0, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 0);
+}
+
+void castVV16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  // User did not define which encode class to use.
+}
+
+uint castVV16Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 0, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 0);
+}
+
 void checkCastPPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
@@ -17145,11 +17509,10 @@ void convI2Bool_reg__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// crx
   {
 
-#line 3411 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3205 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
     Label done;
     __ cmpwi(opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0);
@@ -17158,7 +17521,7 @@ void convI2Bool_reg__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (0x1));
     __ bind(done);
   
-#line 17161 "ad_ppc.cpp"
+#line 17524 "ad_ppc.cpp"
   }
 }
 
@@ -17176,11 +17539,10 @@ void xorI_convI2Bool_reg_immIvalue1__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegA
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
   {
 
-#line 3411 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3205 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
     Label done;
     __ cmpwi(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0);
@@ -17189,7 +17551,7 @@ void xorI_convI2Bool_reg_immIvalue1__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegA
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (0x0));
     __ bind(done);
   
-#line 17192 "ad_ppc.cpp"
+#line 17554 "ad_ppc.cpp"
   }
 }
 
@@ -17205,14 +17567,13 @@ void convI2Bool_andI_reg_immIpowerOf2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc*
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// mask
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 10905 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10492 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwinm);
-    __ rlwinm(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, (32-log2_long((jlong)opnd_array(2)->constant())) & 0x1f, 31, 31);
+    __ rlwinm(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 32 - log2i_exact((juint)(opnd_array(2)->constant())), 31, 31);
   
-#line 17215 "ad_ppc.cpp"
+#line 17576 "ad_ppc.cpp"
   }
 }
 
@@ -17229,11 +17590,10 @@ void convP2Bool_reg__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// crx
   {
 
-#line 3424 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3217 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
     Label done;
     __ cmpdi(opnd_array(2)->as_ConditionRegister(ra_,this,idx2)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0);
@@ -17242,7 +17602,7 @@ void convP2Bool_reg__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (0x1));
     __ bind(done);
   
-#line 17245 "ad_ppc.cpp"
+#line 17605 "ad_ppc.cpp"
   }
 }
 
@@ -17260,11 +17620,10 @@ void xorI_convP2Bool_reg_immIvalue1__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegA
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
   {
 
-#line 3424 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3217 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
     Label done;
     __ cmpdi(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 0);
@@ -17273,7 +17632,7 @@ void xorI_convP2Bool_reg_immIvalue1__cmoveNode::emit(CodeBuffer& cbuf, PhaseRegA
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (0x0));
     __ bind(done);
   
-#line 17276 "ad_ppc.cpp"
+#line 17635 "ad_ppc.cpp"
   }
 }
 
@@ -17289,14 +17648,13 @@ void cmpLTMask_reg_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11007 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10593 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_srawi);
     __ srawi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, 0x1f);
   
-#line 17299 "ad_ppc.cpp"
+#line 17657 "ad_ppc.cpp"
   }
 }
 
@@ -17312,14 +17670,13 @@ void convB2I_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// amount
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11025 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10610 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_extsb);
     __ extsb(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17322 "ad_ppc.cpp"
+#line 17679 "ad_ppc.cpp"
   }
 }
 
@@ -17334,13 +17691,13 @@ void extshNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11036 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10620 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ extsh(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17343 "ad_ppc.cpp"
+#line 17700 "ad_ppc.cpp"
   }
 }
 
@@ -17356,14 +17713,13 @@ void convS2I_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// amount
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11047 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10631 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_extsh);
     __ extsh(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17366 "ad_ppc.cpp"
+#line 17722 "ad_ppc.cpp"
   }
 }
 
@@ -17378,14 +17734,13 @@ void sxtI_L2L_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11060 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10643 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_extsw);
     __ extsw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17388 "ad_ppc.cpp"
+#line 17743 "ad_ppc.cpp"
   }
 }
 
@@ -17400,14 +17755,13 @@ void convL2I_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11071 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10653 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_or);
     __ mr_if_needed(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17410 "ad_ppc.cpp"
+#line 17764 "ad_ppc.cpp"
   }
 }
 
@@ -17417,14 +17771,13 @@ void convD2IRaw_regDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11085 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10666 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fctiwz);;
     __ fctiwz(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 17427 "ad_ppc.cpp"
+#line 17780 "ad_ppc.cpp"
   }
 }
 
@@ -17441,25 +17794,23 @@ void cmovI_bso_stackSlotLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3437 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3229 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(2)->disp(ra_,this,idx2) + frame_slots_bias(opnd_array(2)->base(ra_,this,idx2), ra_);
     Label done;
     __ bso(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(2)->base(ra_,this,idx2)));
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 17456 "ad_ppc.cpp"
+#line 17807 "ad_ppc.cpp"
   }
 }
 
 uint cmovI_bso_stackSlotLNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT(InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT(InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovI_bso_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -17470,24 +17821,22 @@ void cmovI_bso_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3449 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3239 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label done;
     __ bso(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
     __ mffprd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 17484 "ad_ppc.cpp"
+#line 17833 "ad_ppc.cpp"
   }
 }
 
 uint cmovI_bso_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT(InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT(InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void  cmovI_bso_stackSlotL_conLvalue0_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_) {
@@ -17508,7 +17857,7 @@ void  cmovI_bso_stackSlotL_conLvalue0_ExNode::postalloc_expand(GrowableArray <No
   stackSlotLOper *op_mem = (stackSlotLOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 11126 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10706 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     //
     // replaces
@@ -17555,7 +17904,7 @@ void  cmovI_bso_stackSlotL_conLvalue0_ExNode::postalloc_expand(GrowableArray <No
     nodes->push(m1);
     nodes->push(m2);
   
-#line 17558 "ad_ppc.cpp"
+#line 17907 "ad_ppc.cpp"
   }
 }
 
@@ -17577,7 +17926,7 @@ void  cmovI_bso_reg_conLvalue0_ExNode::postalloc_expand(GrowableArray <Node *> *
   regDOper *op_src = (regDOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 11180 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10760 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     //
     // replaces
@@ -17624,7 +17973,7 @@ void  cmovI_bso_reg_conLvalue0_ExNode::postalloc_expand(GrowableArray <Node *> *
     nodes->push(m1);
     nodes->push(m2);
   
-#line 17627 "ad_ppc.cpp"
+#line 17976 "ad_ppc.cpp"
   }
 }
 
@@ -17634,14 +17983,13 @@ void convF2IRaw_regFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11267 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10847 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fctiwz);
     __ fctiwz(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 17644 "ad_ppc.cpp"
+#line 17992 "ad_ppc.cpp"
   }
 }
 
@@ -17656,14 +18004,13 @@ void convI2L_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11312 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10891 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_extsw);
     __ extsw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 17666 "ad_ppc.cpp"
+#line 18013 "ad_ppc.cpp"
   }
 }
 
@@ -17679,14 +18026,13 @@ void zeroExtendL_regINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// mask
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11326 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10904 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 32);
   
-#line 17689 "ad_ppc.cpp"
+#line 18035 "ad_ppc.cpp"
   }
 }
 
@@ -17702,14 +18048,13 @@ void zeroExtendL_regLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// mask
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11340 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10917 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicl);
     __ clrldi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, 32);
   
-#line 17712 "ad_ppc.cpp"
+#line 18057 "ad_ppc.cpp"
   }
 }
 
@@ -17724,14 +18069,13 @@ void convF2LRaw_regFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11354 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10930 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fctiwz);
     __ fctidz(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 17734 "ad_ppc.cpp"
+#line 18078 "ad_ppc.cpp"
   }
 }
 
@@ -17748,25 +18092,23 @@ void cmovL_bso_stackSlotLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3437 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3229 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int Idisp = opnd_array(2)->disp(ra_,this,idx2) + frame_slots_bias(opnd_array(2)->base(ra_,this,idx2), ra_);
     Label done;
     __ bso(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
     __ ld(opnd_array(0)->as_Register(ra_,this)/* dst */, Idisp, as_Register(opnd_array(2)->base(ra_,this,idx2)));
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 17763 "ad_ppc.cpp"
+#line 18105 "ad_ppc.cpp"
   }
 }
 
 uint cmovL_bso_stackSlotLNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void cmovL_bso_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -17777,24 +18119,22 @@ void cmovL_bso_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
 
-#line 3449 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3239 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label done;
     __ bso(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
     __ mffprd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src */);
-    // TODO PPC port __ endgroup_if_needed(_size == 12);
     __ bind(done);
   
-#line 17791 "ad_ppc.cpp"
+#line 18131 "ad_ppc.cpp"
   }
 }
 
 uint cmovL_bso_regNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT Compile::current()->do_hb_scheduling()*/ ? 12 : 8);
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
 }
 
 void  cmovL_bso_stackSlotL_conLvalue0_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_) {
@@ -17815,7 +18155,7 @@ void  cmovL_bso_stackSlotL_conLvalue0_ExNode::postalloc_expand(GrowableArray <No
   stackSlotLOper *op_mem = (stackSlotLOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 11395 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 10970 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     //
     // replaces
@@ -17859,7 +18199,7 @@ void  cmovL_bso_stackSlotL_conLvalue0_ExNode::postalloc_expand(GrowableArray <No
     nodes->push(m1);
     nodes->push(m2);
   
-#line 17862 "ad_ppc.cpp"
+#line 18202 "ad_ppc.cpp"
   }
 }
 
@@ -17881,7 +18221,7 @@ void  cmovL_bso_reg_conLvalue0_ExNode::postalloc_expand(GrowableArray <Node *> *
   regDOper *op_src = (regDOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 11446 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11021 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     //
     // replaces
@@ -17925,7 +18265,7 @@ void  cmovL_bso_reg_conLvalue0_ExNode::postalloc_expand(GrowableArray <Node *> *
     nodes->push(m1);
     nodes->push(m2);
   
-#line 17928 "ad_ppc.cpp"
+#line 18268 "ad_ppc.cpp"
   }
 }
 
@@ -17935,14 +18275,13 @@ void convD2LRaw_regDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11530 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11105 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fctiwz);
     __ fctidz(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 17945 "ad_ppc.cpp"
+#line 18284 "ad_ppc.cpp"
   }
 }
 
@@ -17957,14 +18296,13 @@ void convL2DRaw_regDNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11579 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11153 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fcfid);
     __ fcfid(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 17967 "ad_ppc.cpp"
+#line 18305 "ad_ppc.cpp"
   }
 }
 
@@ -17979,14 +18317,13 @@ void convD2F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11591 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11164 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_frsp);
     __ frsp(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 17989 "ad_ppc.cpp"
+#line 18326 "ad_ppc.cpp"
   }
 }
 
@@ -18001,14 +18338,13 @@ void convL2FRaw_regFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11624 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11196 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fcfid);
     __ fcfids(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 18011 "ad_ppc.cpp"
+#line 18347 "ad_ppc.cpp"
   }
 }
 
@@ -18023,14 +18359,13 @@ void convF2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11753 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11324 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmr);
     __ fmr_if_needed(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
   
-#line 18033 "ad_ppc.cpp"
+#line 18368 "ad_ppc.cpp"
   }
 }
 
@@ -18041,14 +18376,13 @@ void cmpI_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11768 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11338 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmp);
     __ cmpw(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 18051 "ad_ppc.cpp"
+#line 18385 "ad_ppc.cpp"
   }
 }
 
@@ -18064,14 +18398,13 @@ void cmpI_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11779 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11348 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpi);
     __ cmpwi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 18074 "ad_ppc.cpp"
+#line 18407 "ad_ppc.cpp"
   }
 }
 
@@ -18088,14 +18421,13 @@ void testI_reg_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11792 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11360 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andi_);
     __ andi_(R0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 18098 "ad_ppc.cpp"
+#line 18430 "ad_ppc.cpp"
   }
 }
 
@@ -18111,14 +18443,13 @@ void cmpL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11803 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11370 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmp);
     __ cmpd(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 18121 "ad_ppc.cpp"
+#line 18452 "ad_ppc.cpp"
   }
 }
 
@@ -18134,14 +18465,13 @@ void cmpL_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11814 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11380 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpi);
     __ cmpdi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 18144 "ad_ppc.cpp"
+#line 18474 "ad_ppc.cpp"
   }
 }
 
@@ -18157,14 +18487,13 @@ void cmpUL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11826 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11391 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpl);
     __ cmpld(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 18167 "ad_ppc.cpp"
+#line 18496 "ad_ppc.cpp"
   }
 }
 
@@ -18180,14 +18509,13 @@ void cmpUL_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11837 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11401 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpli);
     __ cmpldi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 18190 "ad_ppc.cpp"
+#line 18518 "ad_ppc.cpp"
   }
 }
 
@@ -18204,14 +18532,13 @@ void testL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11849 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11412 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_and_);
     __ and_(R0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 18214 "ad_ppc.cpp"
+#line 18541 "ad_ppc.cpp"
   }
 }
 
@@ -18228,14 +18555,13 @@ void testL_reg_immNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11861 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11423 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_andi_);
     __ andi_(R0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 18238 "ad_ppc.cpp"
+#line 18564 "ad_ppc.cpp"
   }
 }
 
@@ -18244,94 +18570,27 @@ uint testL_reg_immNode::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
-void cmovI_conIvalueMinus1_conIvalue1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+void cmpL3_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11878 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11438 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmove);
-    Label done;
-    // li(Rdst, 0);              // equal -> 0
-    __ beq(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
-    __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, 1);    // greater -> +1
-    __ bgt(opnd_array(1)->as_ConditionRegister(ra_,this,idx1)/* crx */, done);
-    __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, -1);   // unordered or less -> -1
-    // TODO: PPC port__ endgroup_if_needed(_size == 20);
-    __ bind(done);
+    __ cmpd(CCR0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+    __ set_cmp3(opnd_array(0)->as_Register(ra_,this)/* dst */);
   
-#line 18267 "ad_ppc.cpp"
+#line 18587 "ad_ppc.cpp"
   }
 }
 
-uint cmovI_conIvalueMinus1_conIvalue1Node::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORTInsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 20 : 16, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORTInsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 20 : 16);
-}
-
-void  cmovI_conIvalueMinus1_conIvalue0_conIvalue1_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_) {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
-  // Access to ins and operands for postalloc expand.
-  unsigned idx_dst   = idx0; 	// iRegIdst, 	dst
-  unsigned idx_crx   = idx1; 	// flagsRegSrc, 	crx
-  Node    *n_region  = lookup(0);
-  Node    *n_dst     = lookup(idx_dst);
-  Node    *n_crx     = lookup(idx_crx);
-  iRegIdstOper *op_dst = (iRegIdstOper *)opnd_array(0);
-  flagsRegSrcOper *op_crx = (flagsRegSrcOper *)opnd_array(1);
-  Compile *C = ra_->C;
-  {
-#line 11898 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    //
-    // replaces
-    //
-    //   region  crx
-    //    \       |
-    //     dst=cmovI_conIvalueMinus1_conIvalue0_conIvalue1
-    //
-    // with
-    //
-    //   region
-    //    \
-    //     dst=loadConI16(0)
-    //      |
-    //      ^  region  crx
-    //      |   \       |
-    //      dst=cmovI_conIvalueMinus1_conIvalue1
-    //
-
-    // Create new nodes.
-    MachNode *m1 = new loadConI16Node();
-    MachNode *m2 = new cmovI_conIvalueMinus1_conIvalue1Node();
-
-    // inputs for new nodes
-    m1->add_req(n_region);
-    m2->add_req(n_region, n_crx);
-    m2->add_prec(m1);
-
-    // operands for new nodes
-    m1->_opnds[0] = op_dst;
-    m1->_opnds[1] = new immI16Oper(0);
-    m2->_opnds[0] = op_dst;
-    m2->_opnds[1] = op_crx;
-
-    // registers for new nodes
-    ra_->set_pair(m1->_idx, ra_->get_reg_second(this), ra_->get_reg_first(this)); // dst
-    ra_->set_pair(m2->_idx, ra_->get_reg_second(this), ra_->get_reg_first(this)); // dst
-
-    // Insert new nodes.
-    nodes->push(m1);
-    nodes->push(m2);
-  
-#line 18333 "ad_ppc.cpp"
-  }
+uint cmpL3_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= VM_Version::has_brw() ? 16 : 20, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : VM_Version::has_brw() ? 16 : 20);
 }
 
 void rangeCheck_iReg_uimm15Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -18343,11 +18602,10 @@ void rangeCheck_iReg_uimm15Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) cons
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// labl
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 11974 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11463 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_twi);
     if (opnd_array(1)->ccode()== 0x1 /* less_equal */) {
       __ trap_range_check_le(opnd_array(2)->as_Register(ra_,this,idx2)/* src_length */, opnd_array(3)->constant());
     } else {
@@ -18357,7 +18615,7 @@ void rangeCheck_iReg_uimm15Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) cons
       __ trap_range_check_g(opnd_array(2)->as_Register(ra_,this,idx2)/* src_length */, opnd_array(3)->constant());
     }
   
-#line 18360 "ad_ppc.cpp"
+#line 18618 "ad_ppc.cpp"
   }
 }
 
@@ -18375,11 +18633,10 @@ void rangeCheck_iReg_iRegNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// labl
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12001 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11489 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_tw);
     if (opnd_array(1)->ccode()== 0x0 /* greater_equal */) {
       __ trap_range_check_ge(opnd_array(2)->as_Register(ra_,this,idx2)/* src_index */, opnd_array(3)->as_Register(ra_,this,idx3)/* src_length */);
     } else {
@@ -18389,7 +18646,7 @@ void rangeCheck_iReg_iRegNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
       __ trap_range_check_l(opnd_array(2)->as_Register(ra_,this,idx2)/* src_index */, opnd_array(3)->as_Register(ra_,this,idx3)/* src_length */);
     }
   
-#line 18392 "ad_ppc.cpp"
+#line 18649 "ad_ppc.cpp"
   }
 }
 
@@ -18407,11 +18664,10 @@ void rangeCheck_uimm15_iRegNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) cons
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// labl
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12028 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11515 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_twi);
     if (opnd_array(1)->ccode()== 0x0 /* greater_equal */) {
       __ trap_range_check_ge(opnd_array(2)->as_Register(ra_,this,idx2)/* src_index */, opnd_array(3)->constant());
     } else {
@@ -18421,7 +18677,7 @@ void rangeCheck_uimm15_iRegNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) cons
       __ trap_range_check_l(opnd_array(2)->as_Register(ra_,this,idx2)/* src_index */, opnd_array(3)->constant());
     }
   
-#line 18424 "ad_ppc.cpp"
+#line 18680 "ad_ppc.cpp"
   }
 }
 
@@ -18437,14 +18693,13 @@ void compU_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12046 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11532 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpl);
     __ cmplw(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 18447 "ad_ppc.cpp"
+#line 18702 "ad_ppc.cpp"
   }
 }
 
@@ -18460,14 +18715,13 @@ void compU_reg_uimm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12057 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11542 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpli);
     __ cmplwi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 18470 "ad_ppc.cpp"
+#line 18724 "ad_ppc.cpp"
   }
 }
 
@@ -18485,11 +18739,10 @@ void zeroCheckN_iReg_imm0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// labl
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12079 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11563 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_tdi);
     if (opnd_array(1)->ccode()== 0xA) {
       __ trap_null_check(opnd_array(2)->as_Register(ra_,this,idx2)/* value */);
     } else {
@@ -18499,7 +18752,7 @@ void zeroCheckN_iReg_imm0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
       __ trap_null_check(opnd_array(2)->as_Register(ra_,this,idx2)/* value */, Assembler::traptoGreaterThanUnsigned);
     }
   
-#line 18502 "ad_ppc.cpp"
+#line 18755 "ad_ppc.cpp"
   }
 }
 
@@ -18515,14 +18768,13 @@ void cmpN_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12100 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11583 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpl);
     __ cmplw(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 18525 "ad_ppc.cpp"
+#line 18777 "ad_ppc.cpp"
   }
 }
 
@@ -18538,14 +18790,13 @@ void cmpN_reg_imm0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12114 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11596 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpli);
     __ cmplwi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constant());
   
-#line 18548 "ad_ppc.cpp"
+#line 18799 "ad_ppc.cpp"
   }
 }
 
@@ -18563,11 +18814,10 @@ void zeroCheckP_reg_imm0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// labl
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12136 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11617 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_tdi);
     if (opnd_array(1)->ccode()== 0xA) {
       __ trap_null_check(opnd_array(2)->as_Register(ra_,this,idx2)/* value */);
     } else {
@@ -18577,7 +18827,7 @@ void zeroCheckP_reg_imm0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       __ trap_null_check(opnd_array(2)->as_Register(ra_,this,idx2)/* value */, Assembler::traptoGreaterThanUnsigned);
     }
   
-#line 18580 "ad_ppc.cpp"
+#line 18830 "ad_ppc.cpp"
   }
 }
 
@@ -18593,14 +18843,13 @@ void cmpP_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12155 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11635 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpl);
     __ cmpld(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 18603 "ad_ppc.cpp"
+#line 18852 "ad_ppc.cpp"
   }
 }
 
@@ -18616,14 +18865,13 @@ void cmpP_reg_nullNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12166 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11645 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpl);
     __ cmpldi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, (int)((short)(opnd_array(2)->constant()& 0xFFFF)));
   
-#line 18626 "ad_ppc.cpp"
+#line 18874 "ad_ppc.cpp"
   }
 }
 
@@ -18639,14 +18887,13 @@ void cmpP_reg_imm16Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12183 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11661 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmpi);
     __ cmpdi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->constantL());
   
-#line 18649 "ad_ppc.cpp"
+#line 18896 "ad_ppc.cpp"
   }
 }
 
@@ -18662,14 +18909,13 @@ void cmpFUnordered_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12200 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11677 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fcmpu);
     __ fcmpu(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 18672 "ad_ppc.cpp"
+#line 18918 "ad_ppc.cpp"
   }
 }
 
@@ -18684,25 +18930,23 @@ void cmov_bns_lessNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12217 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11693 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cmovecr);
     Label done;
     __ bns(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, done);        // not unordered -> keep crx
     __ li(R0, 0);
     __ cmpwi(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, R0, 1);     // unordered -> set crx to 'less'
-    // TODO PPC port __ endgroup_if_needed(_size == 16);
     __ bind(done);
   
-#line 18699 "ad_ppc.cpp"
+#line 18943 "ad_ppc.cpp"
   }
 }
 
 uint cmov_bns_lessNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= false /* TODO: PPC PORT(InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 16 : 12, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : false /* TODO: PPC PORT(InsertEndGroupPPC64 && Compile::current()->do_hb_scheduling())*/ ? 16 : 12);
+  assert(VerifyOops || MachNode::size(ra_) <= 12, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 12);
 }
 
 void  cmpF_reg_reg_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_) {
@@ -18723,7 +18967,7 @@ void  cmpF_reg_reg_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Phase
   regFOper *op_src2 = (regFOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 12246 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11720 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     //
     // replaces
@@ -18766,8 +19010,31 @@ void  cmpF_reg_reg_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Phase
     nodes->push(m1);
     nodes->push(m2);
   
-#line 18769 "ad_ppc.cpp"
+#line 19013 "ad_ppc.cpp"
   }
+}
+
+void cmpF3_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 11773 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ fcmpu(CCR0, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
+    __ set_cmpu3(opnd_array(0)->as_Register(ra_,this)/* dst */, true); // C2 requires unordered to get treated like less
+  
+#line 19031 "ad_ppc.cpp"
+  }
+}
+
+uint cmpF3_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= VM_Version::has_brw() ? 20 : 24, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : VM_Version::has_brw() ? 20 : 24);
 }
 
 void cmpDUnordered_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -18777,14 +19044,13 @@ void cmpDUnordered_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12315 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11793 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fcmpu);
     __ fcmpu(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
   
-#line 18787 "ad_ppc.cpp"
+#line 19053 "ad_ppc.cpp"
   }
 }
 
@@ -18811,7 +19077,7 @@ void  cmpD_reg_reg_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Phase
   regDOper *op_src2 = (regDOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 12327 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 11804 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     //
     // replaces
@@ -18854,8 +19120,198 @@ void  cmpD_reg_reg_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Phase
     nodes->push(m1);
     nodes->push(m2);
   
-#line 18857 "ad_ppc.cpp"
+#line 19123 "ad_ppc.cpp"
   }
+}
+
+void cmpD3_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 11857 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ fcmpu(CCR0, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_FloatRegister(ra_,this,idx2)/* src2 */);
+    __ set_cmpu3(opnd_array(0)->as_Register(ra_,this)/* dst */, true); // C2 requires unordered to get treated like less
+  
+#line 19141 "ad_ppc.cpp"
+  }
+}
+
+uint cmpD3_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= VM_Version::has_brw() ? 20 : 24, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : VM_Version::has_brw() ? 20 : 24);
+}
+
+void cmprb_Digit_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 11874 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    // 0x30: 0, 0x39: 9
+    __ li(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0x3930);
+    // compare src1 with ranges 0x30 to 0x39
+    __ cmprb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, 0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+    __ setb(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */);
+  
+#line 19168 "ad_ppc.cpp"
+  }
+}
+
+uint cmprb_Digit_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 12, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 12);
+}
+
+void cmprb_LowerCase_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 11904 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    Label done;
+    // 0x61: a, 0x7A: z
+    __ li(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0x7A61);
+    // compare src1 with ranges 0x61 to 0x7A
+    __ cmprb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, 0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+    __ bgt(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, done);
+
+    // 0xDF: sharp s, 0xFF: y with diaeresis, 0xF7 is not the lower case
+    __ lis(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, (signed short)0xF6DF);
+    __ ori(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0xFFF8);
+    // compare src1 with ranges 0xDF to 0xF6 and 0xF8 to 0xFF
+    __ cmprb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, 1, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+    __ bgt(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, done);
+
+    // 0xAA: feminine ordinal indicator
+    // 0xB5: micro sign
+    // 0xBA: masculine ordinal indicator
+    __ lis(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, (signed short)0xAAB5);
+    __ ori(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0xBABA);
+    __ insrdi(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 32, 0);
+    // compare src1 with 0xAA, 0xB5, and 0xBA
+    __ cmpeqb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+
+    __ bind(done);
+    __ setb(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */);
+  
+#line 19215 "ad_ppc.cpp"
+  }
+}
+
+uint cmprb_LowerCase_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 48, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 48);
+}
+
+void cmprb_UpperCase_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 11949 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    Label done;
+    // 0x41: A, 0x5A: Z
+    __ li(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0x5A41);
+    // compare src1 with a range 0x41 to 0x5A
+    __ cmprb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, 0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+    __ bgt(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, done);
+
+    // 0xC0: a with grave, 0xDE: thorn, 0xD7 is not the upper case
+    __ lis(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, (signed short)0xD6C0);
+    __ ori(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0xDED8);
+    // compare src1 with ranges 0xC0 to 0xD6 and 0xD8 to 0xDE
+    __ cmprb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, 1, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+
+    __ bind(done);
+    __ setb(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */);
+  
+#line 19252 "ad_ppc.cpp"
+  }
+}
+
+uint cmprb_UpperCase_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 28, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 28);
+}
+
+void cmprb_Whitespace_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 11980 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    // 0x09 to 0x0D, 0x1C to 0x20
+    __ li(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0x0D09);
+    __ addis(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0x0201C);
+    // compare src with ranges 0x09 to 0x0D and 0x1C to 0x20
+    __ cmprb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, 1, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+    __ setb(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */);
+  
+#line 19280 "ad_ppc.cpp"
+  }
+}
+
+uint cmprb_Whitespace_reg_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 16, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 16);
+}
+
+void cmprb_Whitespace_reg_reg_prefixedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 12002 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    // 0x09 to 0x0D, 0x1C to 0x20
+    assert( ((intptr_t)(__ pc()) & 0x3c) != 0x3c, "Bad alignment for prefixed instruction at " INTPTR_FORMAT, (intptr_t)(__ pc()));
+    __ pli(opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */, 0x201C0D09);
+    // compare src with ranges 0x09 to 0x0D and 0x1C to 0x20
+    __ cmprb(opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */, 1, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
+    __ setb(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(3)->as_ConditionRegister(ra_,this,idx3)/* crx */);
+  
+#line 19308 "ad_ppc.cpp"
+  }
+}
+
+uint cmprb_Whitespace_reg_reg_prefixedNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 16, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 16);
 }
 
 void branchNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -18864,11 +19320,10 @@ void branchNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12394 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12025 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_b);
      Label d;    // dummy
      __ bind(d);
      Label* p = opnd_array(1)->label();
@@ -18877,7 +19332,7 @@ void branchNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
      Label& l = (NULL == p)? d : *(p);
      __ b(l);
   
-#line 18880 "ad_ppc.cpp"
+#line 19335 "ad_ppc.cpp"
   }
 }
 
@@ -18895,11 +19350,10 @@ void branchConNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
   {
 
-#line 3460 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3248 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_bc);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label d;   // dummy
     __ bind(d);
     Label* p = (opnd_array(3)->label());
@@ -18923,7 +19377,7 @@ void branchConNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
           cc_to_biint(cc, flags_reg),
           l);
   
-#line 18926 "ad_ppc.cpp"
+#line 19380 "ad_ppc.cpp"
   }
 }
 
@@ -18941,13 +19395,12 @@ void branchConFarNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
   {
 
-#line 3488 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3275 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // The scheduler doesn't know about branch shortening, so we set the opcode
     // to ppc64Opcode_bc in order to hide this detail from the scheduler.
-    // TODO: PPC port $archOpcode(ppc64Opcode_bc);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label d;    // dummy
     __ bind(d);
     Label* p = (opnd_array(3)->label());
@@ -18972,69 +19425,11 @@ void branchConFarNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                   l,
                   MacroAssembler::bc_far_optimize_on_relocate);
   
-#line 18975 "ad_ppc.cpp"
+#line 19428 "ad_ppc.cpp"
   }
 }
 
 uint branchConFarNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 8);
-}
-
-void branchConSchedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  cbuf.set_insts_mark();
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// lbl
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
-  {
-
-#line 3520 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // The scheduler doesn't know about branch shortening, so we set the opcode
-    // to ppc64Opcode_bc in order to hide this detail from the scheduler.
-    // TODO: PPC port $archOpcode(ppc64Opcode_bc);
-
-    MacroAssembler _masm(&cbuf);
-    Label d;   // dummy
-    __ bind(d);
-    Label* p = (opnd_array(3)->label());
-    // `p' is `NULL' when this encoding class is used only to
-    // determine the size of the encoded instruction.
-    Label& l = (NULL == p)? d : *(p);
-    int cc = opnd_array(1)->ccode();
-    int flags_reg = opnd_array(2)->reg(ra_,this,idx2)/* crx */;
-    int bhint = Assembler::bhintNoHint;
-
-    if (UseStaticBranchPredictionForUncommonPathsPPC64) {
-      if (_prob <= PROB_NEVER) {
-        bhint = Assembler::bhintIsNotTaken;
-      } else if (_prob >= PROB_ALWAYS) {
-        bhint = Assembler::bhintIsTaken;
-      }
-    }
-
-#if 0 // TODO: PPC port
-    if (_size == 8) {
-      // Tell the conditional far branch to optimize itself when being relocated.
-      __ bc_far(Assembler::add_bhint_to_boint(bhint, cc_to_boint(cc)),
-                    cc_to_biint(cc, flags_reg),
-                    l,
-                    MacroAssembler::bc_far_optimize_on_relocate);
-    } else {
-      __ bc    (Assembler::add_bhint_to_boint(bhint, cc_to_boint(cc)),
-                    cc_to_biint(cc, flags_reg),
-                    l);
-    }
-#endif
-    Unimplemented();
-  
-#line 19033 "ad_ppc.cpp"
-  }
-}
-
-uint branchConSchedNode::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 8);
 }
@@ -19048,11 +19443,10 @@ void branchLoopEndNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
   {
 
-#line 3460 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3248 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_bc);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label d;   // dummy
     __ bind(d);
     Label* p = (opnd_array(3)->label());
@@ -19076,7 +19470,7 @@ void branchLoopEndNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
           cc_to_biint(cc, flags_reg),
           l);
   
-#line 19079 "ad_ppc.cpp"
+#line 19473 "ad_ppc.cpp"
   }
 }
 
@@ -19094,13 +19488,12 @@ void branchLoopEndFarNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
   {
 
-#line 3488 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3275 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // The scheduler doesn't know about branch shortening, so we set the opcode
     // to ppc64Opcode_bc in order to hide this detail from the scheduler.
-    // TODO: PPC port $archOpcode(ppc64Opcode_bc);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     Label d;    // dummy
     __ bind(d);
     Label* p = (opnd_array(3)->label());
@@ -19125,69 +19518,11 @@ void branchLoopEndFarNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                   l,
                   MacroAssembler::bc_far_optimize_on_relocate);
   
-#line 19128 "ad_ppc.cpp"
+#line 19521 "ad_ppc.cpp"
   }
 }
 
 uint branchLoopEndFarNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 8);
-}
-
-void branchLoopEndSchedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  cbuf.set_insts_mark();
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// labl
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
-  {
-
-#line 3520 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // The scheduler doesn't know about branch shortening, so we set the opcode
-    // to ppc64Opcode_bc in order to hide this detail from the scheduler.
-    // TODO: PPC port $archOpcode(ppc64Opcode_bc);
-
-    MacroAssembler _masm(&cbuf);
-    Label d;   // dummy
-    __ bind(d);
-    Label* p = (opnd_array(3)->label());
-    // `p' is `NULL' when this encoding class is used only to
-    // determine the size of the encoded instruction.
-    Label& l = (NULL == p)? d : *(p);
-    int cc = opnd_array(1)->ccode();
-    int flags_reg = opnd_array(2)->reg(ra_,this,idx2)/* crx */;
-    int bhint = Assembler::bhintNoHint;
-
-    if (UseStaticBranchPredictionForUncommonPathsPPC64) {
-      if (_prob <= PROB_NEVER) {
-        bhint = Assembler::bhintIsNotTaken;
-      } else if (_prob >= PROB_ALWAYS) {
-        bhint = Assembler::bhintIsTaken;
-      }
-    }
-
-#if 0 // TODO: PPC port
-    if (_size == 8) {
-      // Tell the conditional far branch to optimize itself when being relocated.
-      __ bc_far(Assembler::add_bhint_to_boint(bhint, cc_to_boint(cc)),
-                    cc_to_biint(cc, flags_reg),
-                    l,
-                    MacroAssembler::bc_far_optimize_on_relocate);
-    } else {
-      __ bc    (Assembler::add_bhint_to_boint(bhint, cc_to_boint(cc)),
-                    cc_to_biint(cc, flags_reg),
-                    l);
-    }
-#endif
-    Unimplemented();
-  
-#line 19186 "ad_ppc.cpp"
-  }
-}
-
-uint branchLoopEndSchedNode::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 8);
 }
@@ -19202,15 +19537,14 @@ void partialSubtypeCheckNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp_klass
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_arrayptr
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12534 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12123 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ check_klass_subtype_slow_path(opnd_array(1)->as_Register(ra_,this,idx1)/* subklass */, opnd_array(2)->as_Register(ra_,this,idx2)/* superklass */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp_arrayptr */,
                                      opnd_array(4)->as_Register(ra_,this,idx4)/* tmp_klass */, NULL, opnd_array(3)->as_Register(ra_,this,idx3)/* result */);
   
-#line 19213 "ad_ppc.cpp"
+#line 19547 "ad_ppc.cpp"
   }
 }
 
@@ -19223,19 +19557,17 @@ void cmpFastLockNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp1
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12550 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12138 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ compiler_fast_lock_object(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* oop */, opnd_array(2)->as_Register(ra_,this,idx2)/* box */,
-                                 opnd_array(3)->as_Register(ra_,this,idx3)/* tmp1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp2 */, /*tmp3*/ R0,
-                                 UseBiasedLocking && !UseOptoBiasInlining);
-    // If locking was successfull, crx should indicate 'EQ'.
+                                 opnd_array(3)->as_Register(ra_,this,idx3)/* tmp1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp2 */, /*tmp3*/ R0);
+    // If locking was successful, crx should indicate 'EQ'.
     // The compiler generates a branch to the runtime call to
     // _complete_monitor_locking_Java for the case where crx is 'NE'.
   
-#line 19238 "ad_ppc.cpp"
+#line 19570 "ad_ppc.cpp"
   }
 }
 
@@ -19249,22 +19581,20 @@ void cmpFastLock_tmNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp2
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp3
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12569 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12155 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ compiler_fast_lock_object(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* oop */, opnd_array(2)->as_Register(ra_,this,idx2)/* box */,
                                  opnd_array(3)->as_Register(ra_,this,idx3)/* tmp1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp2 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp3 */,
-                                 /*Biased Locking*/ false,
                                  _rtm_counters, _stack_rtm_counters,
                                  ((Method*)(ra_->C->method()->constant_encoding()))->method_data(),
-                                 /*TM*/ true, ra_->C->profile_rtm());
-    // If locking was successfull, crx should indicate 'EQ'.
+                                 /*RTM*/ true, ra_->C->profile_rtm());
+    // If locking was successful, crx should indicate 'EQ'.
     // The compiler generates a branch to the runtime call to
     // _complete_monitor_locking_Java for the case where crx is 'NE'.
   
-#line 19267 "ad_ppc.cpp"
+#line 19597 "ad_ppc.cpp"
   }
 }
 
@@ -19278,20 +19608,18 @@ void cmpFastUnlockNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp2
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp3
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12590 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12174 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ compiler_fast_unlock_object(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* oop */, opnd_array(2)->as_Register(ra_,this,idx2)/* box */,
                                    opnd_array(3)->as_Register(ra_,this,idx3)/* tmp1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp2 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp3 */,
-                                   UseBiasedLocking && !UseOptoBiasInlining,
                                    false);
-    // If unlocking was successfull, crx should indicate 'EQ'.
+    // If unlocking was successful, crx should indicate 'EQ'.
     // The compiler generates a branch to the runtime call to
     // _complete_monitor_unlocking_Java for the case where crx is 'NE'.
   
-#line 19294 "ad_ppc.cpp"
+#line 19622 "ad_ppc.cpp"
   }
 }
 
@@ -19305,19 +19633,18 @@ void cmpFastUnlock_tmNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp2
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp3
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12609 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12191 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ compiler_fast_unlock_object(opnd_array(0)->as_ConditionRegister(ra_,this)/* crx */, opnd_array(1)->as_Register(ra_,this,idx1)/* oop */, opnd_array(2)->as_Register(ra_,this,idx2)/* box */,
                                    opnd_array(3)->as_Register(ra_,this,idx3)/* tmp1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp2 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp3 */,
-                                   /*Biased Locking*/ false, /*TM*/ true);
-    // If unlocking was successfull, crx should indicate 'EQ'.
+                                   /*RTM*/ true);
+    // If unlocking was successful, crx should indicate 'EQ'.
     // The compiler generates a branch to the runtime call to
     // _complete_monitor_unlocking_Java for the case where crx is 'NE'.
   
-#line 19320 "ad_ppc.cpp"
+#line 19647 "ad_ppc.cpp"
   }
 }
 
@@ -19328,14 +19655,13 @@ void align_addrNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// mask
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12627 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12208 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldicr);
-    __ clrrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, log2_long((jlong)-opnd_array(2)->constantL()));
+    __ clrrdi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, log2i_exact(-(julong)opnd_array(2)->constantL()));
   
-#line 19338 "ad_ppc.cpp"
+#line 19664 "ad_ppc.cpp"
   }
 }
 
@@ -19351,14 +19677,13 @@ void array_sizeNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// end
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// start
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12640 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12220 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_subf);
     __ subf(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* start */, opnd_array(1)->as_Register(ra_,this,idx1)/* end */);
   
-#line 19361 "ad_ppc.cpp"
+#line 19686 "ad_ppc.cpp"
   }
 }
 
@@ -19374,14 +19699,13 @@ void inlineCallClearArrayShortNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) c
   unsigned idx1 = 2; 	// cnt
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// base
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12654 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12233 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ clear_memory_constlen(opnd_array(2)->as_Register(ra_,this,idx2)/* base */, opnd_array(1)->constantL(), R0); // kills base, R0
   
-#line 19384 "ad_ppc.cpp"
+#line 19708 "ad_ppc.cpp"
   }
 }
 
@@ -19393,14 +19717,13 @@ void inlineCallClearArrayLargeNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) c
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// base
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12668 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12246 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ clear_memory_doubleword(opnd_array(2)->as_Register(ra_,this,idx2)/* base */, opnd_array(3)->as_Register(ra_,this,idx3)/* tmp */, R0, opnd_array(1)->constantL()); // kills base, R0
   
-#line 19403 "ad_ppc.cpp"
+#line 19726 "ad_ppc.cpp"
   }
 }
 
@@ -19411,14 +19734,13 @@ void inlineCallClearArrayNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 2; 	// cnt
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// base
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12682 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12259 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ clear_memory_doubleword(opnd_array(2)->as_Register(ra_,this,idx2)/* base */, opnd_array(1)->as_Register(ra_,this,idx1)/* cnt */, R0); // kills cnt, base, R0
   
-#line 19421 "ad_ppc.cpp"
+#line 19743 "ad_ppc.cpp"
   }
 }
 
@@ -19433,17 +19755,16 @@ void string_compareLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// result
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12696 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12272 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_compare(opnd_array(1)->as_Register(ra_,this,idx1)/* str1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* str2 */,
                       opnd_array(2)->as_Register(ra_,this,idx2)/* cnt1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* cnt2 */,
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp */,
                       opnd_array(5)->as_Register(ra_,this,idx5)/* result */, StrIntrinsicNode::LL);
   
-#line 19446 "ad_ppc.cpp"
+#line 19767 "ad_ppc.cpp"
   }
 }
 
@@ -19458,17 +19779,16 @@ void string_compareUNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// result
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12713 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12288 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_compare(opnd_array(1)->as_Register(ra_,this,idx1)/* str1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* str2 */,
                       opnd_array(2)->as_Register(ra_,this,idx2)/* cnt1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* cnt2 */,
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp */,
                       opnd_array(5)->as_Register(ra_,this,idx5)/* result */, StrIntrinsicNode::UU);
   
-#line 19471 "ad_ppc.cpp"
+#line 19791 "ad_ppc.cpp"
   }
 }
 
@@ -19483,17 +19803,16 @@ void string_compareLUNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// result
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12730 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12304 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_compare(opnd_array(1)->as_Register(ra_,this,idx1)/* str1 */, opnd_array(3)->as_Register(ra_,this,idx3)/* str2 */,
                       opnd_array(2)->as_Register(ra_,this,idx2)/* cnt1 */, opnd_array(4)->as_Register(ra_,this,idx4)/* cnt2 */,
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp */,
                       opnd_array(5)->as_Register(ra_,this,idx5)/* result */, StrIntrinsicNode::LU);
   
-#line 19496 "ad_ppc.cpp"
+#line 19815 "ad_ppc.cpp"
   }
 }
 
@@ -19508,17 +19827,16 @@ void string_compareULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// result
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12747 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12320 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_compare(opnd_array(3)->as_Register(ra_,this,idx3)/* str2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* str1 */,
                       opnd_array(4)->as_Register(ra_,this,idx4)/* cnt2 */, opnd_array(2)->as_Register(ra_,this,idx2)/* cnt1 */,
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp */,
                       opnd_array(5)->as_Register(ra_,this,idx5)/* result */, StrIntrinsicNode::UL);
   
-#line 19521 "ad_ppc.cpp"
+#line 19839 "ad_ppc.cpp"
   }
 }
 
@@ -19532,16 +19850,15 @@ void string_equalsLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// result
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12764 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12336 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ array_equals(false, opnd_array(1)->as_Register(ra_,this,idx1)/* str1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* str2 */,
                     opnd_array(3)->as_Register(ra_,this,idx3)/* cnt */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp */,
                     opnd_array(4)->as_Register(ra_,this,idx4)/* result */, true /* byte */);
   
-#line 19544 "ad_ppc.cpp"
+#line 19861 "ad_ppc.cpp"
   }
 }
 
@@ -19555,16 +19872,15 @@ void string_equalsUNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// result
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12780 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12351 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ array_equals(false, opnd_array(1)->as_Register(ra_,this,idx1)/* str1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* str2 */,
                     opnd_array(3)->as_Register(ra_,this,idx3)/* cnt */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp */,
                     opnd_array(4)->as_Register(ra_,this,idx4)/* result */, false /* byte */);
   
-#line 19567 "ad_ppc.cpp"
+#line 19883 "ad_ppc.cpp"
   }
 }
 
@@ -19578,16 +19894,15 @@ void array_equalsBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12796 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12366 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ array_equals(true, opnd_array(1)->as_Register(ra_,this,idx1)/* ary1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* ary2 */,
                     opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */,
                     opnd_array(3)->as_Register(ra_,this,idx3)/* result */, true /* byte */);
   
-#line 19590 "ad_ppc.cpp"
+#line 19905 "ad_ppc.cpp"
   }
 }
 
@@ -19601,16 +19916,15 @@ void array_equalsCNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12812 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12381 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ array_equals(true, opnd_array(1)->as_Register(ra_,this,idx1)/* ary1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* ary2 */,
                     opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */,
                     opnd_array(3)->as_Register(ra_,this,idx3)/* result */, false /* byte */);
   
-#line 19613 "ad_ppc.cpp"
+#line 19927 "ad_ppc.cpp"
   }
 }
 
@@ -19626,11 +19940,10 @@ void indexOf_imm1_char_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp1
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12834 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12402 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     immPOper *needleOper = (immPOper *)opnd_array(3);
     const TypeOopPtr *t = needleOper->type()->isa_oopptr();
     ciTypeArray* needle_values = t->const_oop()->as_type_array();  // Pointer to live char *
@@ -19647,7 +19960,7 @@ void indexOf_imm1_char_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                            R0, chr,
                            opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, false /*is_byte*/);
   
-#line 19650 "ad_ppc.cpp"
+#line 19963 "ad_ppc.cpp"
   }
 }
 
@@ -19663,11 +19976,10 @@ void indexOf_imm1_char_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp1
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12868 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12435 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     immPOper *needleOper = (immPOper *)opnd_array(3);
     const TypeOopPtr *t = needleOper->type()->isa_oopptr();
     ciTypeArray* needle_values = t->const_oop()->as_type_array();  // Pointer to live char *
@@ -19677,7 +19989,7 @@ void indexOf_imm1_char_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                            R0, chr,
                            opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, true /*is_byte*/);
   
-#line 19680 "ad_ppc.cpp"
+#line 19992 "ad_ppc.cpp"
   }
 }
 
@@ -19693,11 +20005,10 @@ void indexOf_imm1_char_ULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp1
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12895 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12461 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     immPOper *needleOper = (immPOper *)opnd_array(3);
     const TypeOopPtr *t = needleOper->type()->isa_oopptr();
     ciTypeArray* needle_values = t->const_oop()->as_type_array();  // Pointer to live char *
@@ -19707,7 +20018,7 @@ void indexOf_imm1_char_ULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
                            R0, chr,
                            opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, false /*is_byte*/);
   
-#line 19710 "ad_ppc.cpp"
+#line 20021 "ad_ppc.cpp"
   }
 }
 
@@ -19722,11 +20033,10 @@ void indexOf_imm1_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12923 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12488 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Node *ndl = in(operand_index(opnd_array(3)));  // The node that defines needle.
     ciTypeArray* needle_values = ndl->bottom_type()->is_aryptr()->const_oop()->as_type_array();
     guarantee(needle_values, "sanity");
@@ -19743,7 +20053,7 @@ void indexOf_imm1_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                            R0, chr,
                            opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */, false /*is_byte*/);
   
-#line 19746 "ad_ppc.cpp"
+#line 20056 "ad_ppc.cpp"
   }
 }
 
@@ -19758,11 +20068,10 @@ void indexOf_imm1_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12958 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12522 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Node *ndl = in(operand_index(opnd_array(3)));  // The node that defines needle.
     ciTypeArray* needle_values = ndl->bottom_type()->is_aryptr()->const_oop()->as_type_array();
     guarantee(needle_values, "sanity");
@@ -19772,7 +20081,7 @@ void indexOf_imm1_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                            R0, chr,
                            opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */, true /*is_byte*/);
   
-#line 19775 "ad_ppc.cpp"
+#line 20084 "ad_ppc.cpp"
   }
 }
 
@@ -19787,11 +20096,10 @@ void indexOf_imm1_ULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
   unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 12986 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12549 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Node *ndl = in(operand_index(opnd_array(3)));  // The node that defines needle.
     ciTypeArray* needle_values = ndl->bottom_type()->is_aryptr()->const_oop()->as_type_array();
     guarantee(needle_values, "sanity");
@@ -19801,7 +20109,7 @@ void indexOf_imm1_ULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                            R0, chr,
                            opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */, false /*is_byte*/);
   
-#line 19804 "ad_ppc.cpp"
+#line 20112 "ad_ppc.cpp"
   }
 }
 
@@ -19815,17 +20123,39 @@ void indexOfChar_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13009 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12572 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_indexof_char(opnd_array(0)->as_Register(ra_,this)/* result */,
                            opnd_array(1)->as_Register(ra_,this,idx1)/* haystack */, opnd_array(2)->as_Register(ra_,this,idx2)/* haycnt */,
                            opnd_array(3)->as_Register(ra_,this,idx3)/* ch */, 0 /* this is not used if the character is already in a register */,
                            opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */, false /*is_byte*/);
   
-#line 19828 "ad_ppc.cpp"
+#line 20135 "ad_ppc.cpp"
+  }
+}
+
+void indexOfChar_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// haystack
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// haycnt
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// ch
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 12591 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ string_indexof_char(opnd_array(0)->as_Register(ra_,this)/* result */,
+                           opnd_array(1)->as_Register(ra_,this,idx1)/* haystack */, opnd_array(2)->as_Register(ra_,this,idx2)/* haycnt */,
+                           opnd_array(3)->as_Register(ra_,this,idx3)/* ch */, 0 /* this is not used if the character is already in a register */,
+                           opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */, true /*is_byte*/);
+  
+#line 20158 "ad_ppc.cpp"
   }
 }
 
@@ -19844,11 +20174,10 @@ void indexOf_imm_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp4
   unsigned idx10 = idx9 + opnd_array(9)->num_edges(); 	// tmp5
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13034 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12615 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Node *ndl = in(operand_index(opnd_array(3)));  // The node that defines needle.
     ciTypeArray* needle_values = ndl->bottom_type()->is_aryptr()->const_oop()->as_type_array();
 
@@ -19857,7 +20186,7 @@ void indexOf_imm_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                       opnd_array(3)->as_Register(ra_,this,idx3)/* needle */, needle_values, opnd_array(10)->as_Register(ra_,this,idx10)/* tmp5 */, opnd_array(4)->constant(),
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp3 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp4 */, StrIntrinsicNode::UU);
   
-#line 19860 "ad_ppc.cpp"
+#line 20189 "ad_ppc.cpp"
   }
 }
 
@@ -19876,11 +20205,10 @@ void indexOf_imm_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp4
   unsigned idx10 = idx9 + opnd_array(9)->num_edges(); 	// tmp5
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13062 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12642 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Node *ndl = in(operand_index(opnd_array(3)));  // The node that defines needle.
     ciTypeArray* needle_values = ndl->bottom_type()->is_aryptr()->const_oop()->as_type_array();
 
@@ -19889,7 +20217,7 @@ void indexOf_imm_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                       opnd_array(3)->as_Register(ra_,this,idx3)/* needle */, needle_values, opnd_array(10)->as_Register(ra_,this,idx10)/* tmp5 */, opnd_array(4)->constant(),
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp3 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp4 */, StrIntrinsicNode::LL);
   
-#line 19892 "ad_ppc.cpp"
+#line 20220 "ad_ppc.cpp"
   }
 }
 
@@ -19908,11 +20236,10 @@ void indexOf_imm_ULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp4
   unsigned idx10 = idx9 + opnd_array(9)->num_edges(); 	// tmp5
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13090 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12669 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Node *ndl = in(operand_index(opnd_array(3)));  // The node that defines needle.
     ciTypeArray* needle_values = ndl->bottom_type()->is_aryptr()->const_oop()->as_type_array();
 
@@ -19921,7 +20248,7 @@ void indexOf_imm_ULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
                       opnd_array(3)->as_Register(ra_,this,idx3)/* needle */, needle_values, opnd_array(10)->as_Register(ra_,this,idx10)/* tmp5 */, opnd_array(4)->constant(),
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp3 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp4 */, StrIntrinsicNode::UL);
   
-#line 19924 "ad_ppc.cpp"
+#line 20251 "ad_ppc.cpp"
   }
 }
 
@@ -19939,17 +20266,16 @@ void indexOf_UNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp3
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp4
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13115 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12693 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_indexof(opnd_array(5)->as_Register(ra_,this,idx5)/* result */,
                       opnd_array(1)->as_Register(ra_,this,idx1)/* haystack */, opnd_array(2)->as_Register(ra_,this,idx2)/* haycnt */,
                       opnd_array(3)->as_Register(ra_,this,idx3)/* needle */, NULL, opnd_array(4)->as_Register(ra_,this,idx4)/* needlecnt */, 0,  // needlecnt not constant.
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp3 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp4 */, StrIntrinsicNode::UU);
   
-#line 19952 "ad_ppc.cpp"
+#line 20278 "ad_ppc.cpp"
   }
 }
 
@@ -19967,17 +20293,16 @@ void indexOf_LNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp3
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp4
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13137 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12714 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_indexof(opnd_array(5)->as_Register(ra_,this,idx5)/* result */,
                       opnd_array(1)->as_Register(ra_,this,idx1)/* haystack */, opnd_array(2)->as_Register(ra_,this,idx2)/* haycnt */,
                       opnd_array(3)->as_Register(ra_,this,idx3)/* needle */, NULL, opnd_array(4)->as_Register(ra_,this,idx4)/* needlecnt */, 0,  // needlecnt not constant.
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp3 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp4 */, StrIntrinsicNode::LL);
   
-#line 19980 "ad_ppc.cpp"
+#line 20305 "ad_ppc.cpp"
   }
 }
 
@@ -19995,17 +20320,16 @@ void indexOf_ULNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp3
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp4
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13159 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12735 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ string_indexof(opnd_array(5)->as_Register(ra_,this,idx5)/* result */,
                       opnd_array(1)->as_Register(ra_,this,idx1)/* haystack */, opnd_array(2)->as_Register(ra_,this,idx2)/* haycnt */,
                       opnd_array(3)->as_Register(ra_,this,idx3)/* needle */, NULL, opnd_array(4)->as_Register(ra_,this,idx4)/* needlecnt */, 0,  // needlecnt not constant.
                       opnd_array(6)->as_Register(ra_,this,idx6)/* tmp1 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp2 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp3 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp4 */, StrIntrinsicNode::UL);
   
-#line 20008 "ad_ppc.cpp"
+#line 20332 "ad_ppc.cpp"
   }
 }
 
@@ -20023,11 +20347,10 @@ void string_compressNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp4
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp5
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13177 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12752 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Label Lskip, Ldone;
     __ li(opnd_array(4)->as_Register(ra_,this,idx4)/* result */, 0);
     __ string_compress_16(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */,
@@ -20039,7 +20362,7 @@ void string_compressNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ mr(opnd_array(4)->as_Register(ra_,this,idx4)/* result */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */);
     __ bind(Ldone);
   
-#line 20042 "ad_ppc.cpp"
+#line 20365 "ad_ppc.cpp"
   }
 }
 
@@ -20056,11 +20379,10 @@ void string_inflateNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// tmp4
   unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp5
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13200 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12774 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     Label Ldone;
     __ string_inflate_16(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */,
                          opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp3 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp4 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp5 */);
@@ -20069,11 +20391,11 @@ void string_inflateNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
     __ string_inflate(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */);
     __ bind(Ldone);
   
-#line 20072 "ad_ppc.cpp"
+#line 20394 "ad_ppc.cpp"
   }
 }
 
-void has_negativesNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+void count_positivesNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
@@ -20083,15 +20405,14 @@ void has_negativesNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13221 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12794 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    __ has_negatives(opnd_array(1)->as_Register(ra_,this,idx1)/* ary1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* len */, opnd_array(3)->as_Register(ra_,this,idx3)/* result */,
-                     opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */);
+    __ count_positives(opnd_array(1)->as_Register(ra_,this,idx1)/* ary1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* len */, opnd_array(3)->as_Register(ra_,this,idx3)/* result */,
+                       opnd_array(4)->as_Register(ra_,this,idx4)/* tmp1 */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp2 */);
   
-#line 20094 "ad_ppc.cpp"
+#line 20415 "ad_ppc.cpp"
   }
 }
 
@@ -20109,35 +20430,39 @@ void encode_iso_arrayNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp4
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp5
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13237 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12810 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    Label Lslow, Lfailure1, Lfailure2, Ldone;
-    __ string_compress_16(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */,
-                          opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */, opnd_array(7)->as_Register(ra_,this,idx7)/* tmp3 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp4 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp5 */, Lfailure1);
-    __ rldicl_(opnd_array(4)->as_Register(ra_,this,idx4)/* result */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */, 0, 64-3); // Remaining characters.
-    __ beq(CCR0, Ldone);
-    __ bind(Lslow);
-    __ string_compress(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(4)->as_Register(ra_,this,idx4)/* result */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */, Lfailure2);
-    __ li(opnd_array(4)->as_Register(ra_,this,idx4)/* result */, 0);
-    __ b(Ldone);
-
-    __ bind(Lfailure1);
-    __ mr(opnd_array(4)->as_Register(ra_,this,idx4)/* result */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */);
-    __ mfctr(opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */);
-    __ rldimi_(opnd_array(4)->as_Register(ra_,this,idx4)/* result */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, 3, 0); // Remaining characters.
-    __ beq(CCR0, Ldone);
-    __ b(Lslow);
-
-    __ bind(Lfailure2);
-    __ mfctr(opnd_array(4)->as_Register(ra_,this,idx4)/* result */); // Remaining characters.
-
-    __ bind(Ldone);
-    __ subf(opnd_array(4)->as_Register(ra_,this,idx4)/* result */, opnd_array(4)->as_Register(ra_,this,idx4)/* result */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */);
+    __ encode_iso_array(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+                        opnd_array(7)->as_Register(ra_,this,idx7)/* tmp3 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp4 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp5 */, opnd_array(4)->as_Register(ra_,this,idx4)/* result */, false);
   
-#line 20140 "ad_ppc.cpp"
+#line 20440 "ad_ppc.cpp"
+  }
+}
+
+void encode_ascii_arrayNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// dst
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// len
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// result
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// tmp3
+  unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp4
+  unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp5
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 12826 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ encode_iso_array(opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* len */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+                        opnd_array(7)->as_Register(ra_,this,idx7)/* tmp3 */, opnd_array(8)->as_Register(ra_,this,idx8)/* tmp4 */, opnd_array(9)->as_Register(ra_,this,idx9)/* tmp5 */, opnd_array(4)->as_Register(ra_,this,idx4)/* result */, true);
+  
+#line 20465 "ad_ppc.cpp"
   }
 }
 
@@ -20148,15 +20473,14 @@ void minI_reg_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13294 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12862 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ cmpw(CCR0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
     __ isel(opnd_array(0)->as_Register(ra_,this)/* dst */, CCR0, Assembler::less, /*invert*/false, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 20159 "ad_ppc.cpp"
+#line 20483 "ad_ppc.cpp"
   }
 }
 
@@ -20167,15 +20491,14 @@ void maxI_reg_reg_iselNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13328 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12895 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ cmpw(CCR0, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
     __ isel(opnd_array(0)->as_Register(ra_,this)/* dst */, CCR0, Assembler::greater, /*invert*/false, opnd_array(1)->as_Register(ra_,this,idx1)/* src1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* src2 */);
   
-#line 20178 "ad_ppc.cpp"
+#line 20501 "ad_ppc.cpp"
   }
 }
 
@@ -20185,14 +20508,13 @@ void popCountINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13346 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12912 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_popcntb);
     __ popcntw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 20195 "ad_ppc.cpp"
+#line 20517 "ad_ppc.cpp"
   }
 }
 
@@ -20207,14 +20529,13 @@ void popCountLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13361 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12926 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_popcntb);
     __ popcntd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 20217 "ad_ppc.cpp"
+#line 20538 "ad_ppc.cpp"
   }
 }
 
@@ -20229,14 +20550,13 @@ void countLeadingZerosINode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13375 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12939 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cntlzw);
     __ cntlzw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 20239 "ad_ppc.cpp"
+#line 20559 "ad_ppc.cpp"
   }
 }
 
@@ -20251,14 +20571,13 @@ void countLeadingZerosLNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13389 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12952 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cntlzd);
     __ cntlzd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 20261 "ad_ppc.cpp"
+#line 20580 "ad_ppc.cpp"
   }
 }
 
@@ -20273,18 +20592,59 @@ void countLeadingZerosPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13403 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 12965 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_cntlzd);
     __ cntlzd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 20283 "ad_ppc.cpp"
+#line 20601 "ad_ppc.cpp"
   }
 }
 
 uint countLeadingZerosPNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void countTrailingZerosI_cnttzwNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 12997 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ cnttzw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+  
+#line 20622 "ad_ppc.cpp"
+  }
+}
+
+uint countTrailingZerosI_cnttzwNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void countTrailingZerosL_cnttzdNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13028 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ cnttzd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+  
+#line 20643 "ad_ppc.cpp"
+  }
+}
+
+uint countTrailingZerosL_cnttzdNode::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
@@ -20297,14 +20657,13 @@ void insrwi_aNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// pos
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// shift
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13454 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13041 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwimi);
     __ insrwi(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */, opnd_array(3)->constant(), opnd_array(2)->constant());
   
-#line 20307 "ad_ppc.cpp"
+#line 20666 "ad_ppc.cpp"
   }
 }
 
@@ -20322,14 +20681,13 @@ void insrwiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// shift
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13468 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13054 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rlwimi);
     __ insrwi(opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(4)->constant(), opnd_array(3)->constant());
   
-#line 20332 "ad_ppc.cpp"
+#line 20690 "ad_ppc.cpp"
   }
 }
 
@@ -20338,19 +20696,152 @@ uint insrwiNode::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
+void bytes_reverse_int_vecNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// tmpV
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13096 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ mtvsrwz(opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+    __ xxbrw(opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */);
+    __ mfvsrwz(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */);
+  
+#line 20714 "ad_ppc.cpp"
+  }
+}
+
+uint bytes_reverse_int_vecNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 12, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 12);
+}
+
+void bytes_reverse_intNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13112 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ brw(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+  
+#line 20735 "ad_ppc.cpp"
+  }
+}
+
+uint bytes_reverse_intNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void bytes_reverse_long_vecNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// tmpV
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13168 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ mtvsrd(opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+    __ xxbrd(opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */);
+    __ mfvsrd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* tmpV */);
+  
+#line 20759 "ad_ppc.cpp"
+  }
+}
+
+uint bytes_reverse_long_vecNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 12, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 12);
+}
+
+void bytes_reverse_longNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13184 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ brd(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+  
+#line 20780 "ad_ppc.cpp"
+  }
+}
+
+uint bytes_reverse_longNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void bytes_reverse_ushortNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13212 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ brh(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+  
+#line 20801 "ad_ppc.cpp"
+  }
+}
+
+uint bytes_reverse_ushortNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void bytes_reverse_shortNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13243 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ brh(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
+    __ extsh(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(0)->as_Register(ra_,this)/* dst */);
+  
+#line 20823 "ad_ppc.cpp"
+  }
+}
+
+uint bytes_reverse_shortNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
+}
+
 void loadI_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13573 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13257 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ lwbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 20353 "ad_ppc.cpp"
+#line 20844 "ad_ppc.cpp"
   }
 }
 
@@ -20359,19 +20850,42 @@ uint loadI_reversedNode::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
+void loadI_reversed_acquireNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13268 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ lwbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
+    __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
+    __ isync();
+  
+#line 20867 "ad_ppc.cpp"
+  }
+}
+
+uint loadI_reversed_acquireNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 12, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 12);
+}
+
 void loadL_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13586 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13283 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ ldbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 20374 "ad_ppc.cpp"
+#line 20888 "ad_ppc.cpp"
   }
 }
 
@@ -20380,19 +20894,42 @@ uint loadL_reversedNode::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
+void loadL_reversed_acquireNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13295 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ ldbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
+    __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
+    __ isync();
+  
+#line 20911 "ad_ppc.cpp"
+  }
+}
+
+uint loadL_reversed_acquireNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 12, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 12);
+}
+
 void loadUS_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13598 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13310 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ lhbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 20395 "ad_ppc.cpp"
+#line 20932 "ad_ppc.cpp"
   }
 }
 
@@ -20401,26 +20938,73 @@ uint loadUS_reversedNode::size(PhaseRegAlloc *ra_) const {
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
+void loadUS_reversed_acquireNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13321 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ lhbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
+    __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
+    __ isync();
+  
+#line 20955 "ad_ppc.cpp"
+  }
+}
+
+uint loadUS_reversed_acquireNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 12, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 12);
+}
+
 void loadS_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13610 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13336 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ lhbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
     __ extsh(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(0)->as_Register(ra_,this)/* dst */);
   
-#line 20417 "ad_ppc.cpp"
+#line 20977 "ad_ppc.cpp"
   }
 }
 
 uint loadS_reversedNode::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 8);
+}
+
+void loadS_reversed_acquireNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13348 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ lhbrx(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
+    __ twi_0(opnd_array(0)->as_Register(ra_,this)/* dst */);
+    __ extsh(opnd_array(0)->as_Register(ra_,this)/* dst */, opnd_array(0)->as_Register(ra_,this)/* dst */);
+    __ isync();
+  
+#line 21001 "ad_ppc.cpp"
+  }
+}
+
+uint loadS_reversed_acquireNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 16, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 16);
 }
 
 void storeI_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -20430,13 +21014,13 @@ void storeI_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13623 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13363 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ stwbrx(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 20439 "ad_ppc.cpp"
+#line 21023 "ad_ppc.cpp"
   }
 }
 
@@ -20452,13 +21036,13 @@ void storeL_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13636 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13376 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ stdbrx(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 20461 "ad_ppc.cpp"
+#line 21045 "ad_ppc.cpp"
   }
 }
 
@@ -20474,13 +21058,13 @@ void storeUS_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13648 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13388 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ sthbrx(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 20483 "ad_ppc.cpp"
+#line 21067 "ad_ppc.cpp"
   }
 }
 
@@ -20496,13 +21080,13 @@ void storeS_reversedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13660 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13400 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ sthbrx(opnd_array(2)->as_Register(ra_,this,idx2)/* src */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */);
   
-#line 20505 "ad_ppc.cpp"
+#line 21089 "ad_ppc.cpp"
   }
 }
 
@@ -20517,13 +21101,13 @@ void mtvsrwzNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13670 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13411 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ mtvsrwz(opnd_array(0)->as_VectorSRegister(ra_,this)/* temp1 */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 20526 "ad_ppc.cpp"
+#line 21110 "ad_ppc.cpp"
   }
 }
 
@@ -20539,17 +21123,38 @@ void xxspltwNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// imm1
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13680 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13422 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxspltw(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */, opnd_array(2)->constant());
   
-#line 20548 "ad_ppc.cpp"
+#line 21132 "ad_ppc.cpp"
   }
 }
 
 uint xxspltwNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void xscvdpspn_regFNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13433 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xscvdpspn(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */->to_vsr());
+  
+#line 21153 "ad_ppc.cpp"
+  }
+}
+
+uint xscvdpspn_regFNode::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
@@ -20560,14 +21165,13 @@ void repl32Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13695 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13448 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldimi);
     __ insrdi(opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, 32, 0);
   
-#line 20570 "ad_ppc.cpp"
+#line 21174 "ad_ppc.cpp"
   }
 }
 
@@ -20582,14 +21186,13 @@ void repl48Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13709 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13461 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldimi);
     __ insrdi(opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, 48, 0);
   
-#line 20592 "ad_ppc.cpp"
+#line 21195 "ad_ppc.cpp"
   }
 }
 
@@ -20604,14 +21207,13 @@ void repl56Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13723 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13474 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_rldimi);
     __ insrdi(opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* dst */, 56, 0);
   
-#line 20614 "ad_ppc.cpp"
+#line 21216 "ad_ppc.cpp"
   }
 }
 
@@ -20626,14 +21228,13 @@ void repl8B_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13746 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13496 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 20636 "ad_ppc.cpp"
+#line 21237 "ad_ppc.cpp"
   }
 }
 
@@ -20648,14 +21249,13 @@ void repl8B_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13758 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13507 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 20658 "ad_ppc.cpp"
+#line 21258 "ad_ppc.cpp"
   }
 }
 
@@ -20670,13 +21270,13 @@ void repl16B_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13787 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13535 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxlxor(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 20679 "ad_ppc.cpp"
+#line 21279 "ad_ppc.cpp"
   }
 }
 
@@ -20691,13 +21291,13 @@ void repl16B_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13799 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13547 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxleqv(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 20700 "ad_ppc.cpp"
+#line 21300 "ad_ppc.cpp"
   }
 }
 
@@ -20712,14 +21312,13 @@ void repl4S_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13820 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13568 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 20722 "ad_ppc.cpp"
+#line 21321 "ad_ppc.cpp"
   }
 }
 
@@ -20734,14 +21333,13 @@ void repl4S_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13832 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13579 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 20744 "ad_ppc.cpp"
+#line 21342 "ad_ppc.cpp"
   }
 }
 
@@ -20756,13 +21354,13 @@ void repl8S_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13861 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13607 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxlxor(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 20765 "ad_ppc.cpp"
+#line 21363 "ad_ppc.cpp"
   }
 }
 
@@ -20777,13 +21375,13 @@ void repl8S_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13873 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13619 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxleqv(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 20786 "ad_ppc.cpp"
+#line 21384 "ad_ppc.cpp"
   }
 }
 
@@ -20798,14 +21396,13 @@ void repl2I_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13894 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13640 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 20808 "ad_ppc.cpp"
+#line 21405 "ad_ppc.cpp"
   }
 }
 
@@ -20820,14 +21417,13 @@ void repl2I_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13906 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13651 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, (int)((short)(opnd_array(1)->constant()& 0xFFFF)));
   
-#line 20830 "ad_ppc.cpp"
+#line 21426 "ad_ppc.cpp"
   }
 }
 
@@ -20842,13 +21438,13 @@ void repl4I_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13935 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13679 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxlxor(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 20851 "ad_ppc.cpp"
+#line 21447 "ad_ppc.cpp"
   }
 }
 
@@ -20863,13 +21459,13 @@ void repl4I_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13947 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13691 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxleqv(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 20872 "ad_ppc.cpp"
+#line 21468 "ad_ppc.cpp"
   }
 }
 
@@ -20894,7 +21490,7 @@ void  repl2F_immF_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseR
   immFOper *op_src = (immFOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3564 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3309 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // Create new nodes.
 
@@ -20912,7 +21508,7 @@ void  repl2F_immF_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseR
     assert(nodes->length() >= 1, "must have created at least 1 node");
     assert(loadConLNodes._last->bottom_type()->isa_long(), "must be long");
   
-#line 20915 "ad_ppc.cpp"
+#line 21511 "ad_ppc.cpp"
   }
 }
 
@@ -20925,15 +21521,827 @@ void repl2F_immF0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 13984 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 13728 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_addi);
     __ li(opnd_array(0)->as_Register(ra_,this)/* dst */, 0x0);
   
-#line 20935 "ad_ppc.cpp"
+#line 21530 "ad_ppc.cpp"
   }
+}
+
+void vadd16B_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13744 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vaddubm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21547 "ad_ppc.cpp"
+  }
+}
+
+uint vadd16B_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vadd8S_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13755 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vadduhm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21569 "ad_ppc.cpp"
+  }
+}
+
+uint vadd8S_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vadd4I_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13766 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vadduwm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21591 "ad_ppc.cpp"
+  }
+}
+
+uint vadd4I_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vadd4F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13777 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vaddfp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21613 "ad_ppc.cpp"
+  }
+}
+
+uint vadd4F_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vadd2L_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13788 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vaddudm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21635 "ad_ppc.cpp"
+  }
+}
+
+uint vadd2L_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vadd2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13799 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvadddp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */);
+  
+#line 21657 "ad_ppc.cpp"
+  }
+}
+
+uint vadd2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsub16B_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13812 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vsububm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21679 "ad_ppc.cpp"
+  }
+}
+
+uint vsub16B_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsub8S_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13823 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vsubuhm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21701 "ad_ppc.cpp"
+  }
+}
+
+uint vsub8S_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsub4I_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13834 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vsubuwm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21723 "ad_ppc.cpp"
+  }
+}
+
+uint vsub4I_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsub4F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13845 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vsubfp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21745 "ad_ppc.cpp"
+  }
+}
+
+uint vsub4F_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsub2L_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13856 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vsubudm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21767 "ad_ppc.cpp"
+  }
+}
+
+uint vsub2L_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsub2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13867 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvsubdp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */);
+  
+#line 21789 "ad_ppc.cpp"
+  }
+}
+
+uint vsub2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vmul8S_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13882 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vspltish(opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* tmp */->to_vr(), 0);
+    __ vmladduhm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr(), opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* tmp */->to_vr());
+  
+#line 21813 "ad_ppc.cpp"
+  }
+}
+
+uint vmul8S_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 8, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 8);
+}
+
+void vmul4I_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13894 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ vmuluwm(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */->to_vr(), opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */->to_vr());
+  
+#line 21835 "ad_ppc.cpp"
+  }
+}
+
+uint vmul4I_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vmul4F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13905 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvmulsp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */);
+  
+#line 21857 "ad_ppc.cpp"
+  }
+}
+
+uint vmul4F_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vmul2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13916 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvmuldp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */);
+  
+#line 21879 "ad_ppc.cpp"
+  }
+}
+
+uint vmul2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vdiv4F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13929 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvdivsp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */);
+  
+#line 21901 "ad_ppc.cpp"
+  }
+}
+
+uint vdiv4F_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vdiv2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13940 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvdivdp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */);
+  
+#line 21923 "ad_ppc.cpp"
+  }
+}
+
+uint vdiv2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vabs4F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13953 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvabssp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+  
+#line 21944 "ad_ppc.cpp"
+  }
+}
+
+uint vabs4F_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vabs2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13964 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvabsdp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+  
+#line 21965 "ad_ppc.cpp"
+  }
+}
+
+uint vabs2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void roundD_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// rmode
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13975 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    switch (opnd_array(2)->constant()) {
+      case RoundDoubleModeNode::rmode_rint:
+        __ xvrdpic(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */->to_vsr(), opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */->to_vsr());
+        break;
+      case RoundDoubleModeNode::rmode_floor:
+        __ frim(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
+        break;
+      case RoundDoubleModeNode::rmode_ceil:
+        __ frip(opnd_array(0)->as_FloatRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */);
+        break;
+      default:
+        ShouldNotReachHere();
+    }
+  
+#line 21999 "ad_ppc.cpp"
+  }
+}
+
+uint roundD_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vround2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// rmode
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 13999 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    switch (opnd_array(2)->constant()) {
+      case RoundDoubleModeNode::rmode_rint:
+        __ xvrdpic(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+        break;
+      case RoundDoubleModeNode::rmode_floor:
+        __ xvrdpim(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+        break;
+      case RoundDoubleModeNode::rmode_ceil:
+        __ xvrdpip(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+        break;
+      default:
+        ShouldNotReachHere();
+    }
+  
+#line 22033 "ad_ppc.cpp"
+  }
+}
+
+uint vround2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vneg4F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14024 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvnegsp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+  
+#line 22054 "ad_ppc.cpp"
+  }
+}
+
+uint vneg4F_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vneg2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14035 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvnegdp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+  
+#line 22075 "ad_ppc.cpp"
+  }
+}
+
+uint vneg2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsqrt4F_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14048 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvsqrtsp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+  
+#line 22096 "ad_ppc.cpp"
+  }
+}
+
+uint vsqrt4F_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vsqrt2D_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14059 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvsqrtdp(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */);
+  
+#line 22117 "ad_ppc.cpp"
+  }
+}
+
+uint vsqrt2D_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vpopcnt_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14071 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    BasicType bt = Matcher::vector_element_basic_type(this);
+    switch (bt) {
+      case T_BYTE:
+        __ vpopcntb(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */->to_vr());
+        break;
+      case T_SHORT:
+        __ vpopcnth(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */->to_vr());
+        break;
+      case T_INT:
+        __ vpopcntw(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */->to_vr());
+        break;
+      case T_LONG:
+        __ vpopcntd(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */->to_vr(), opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */->to_vr());
+        break;
+      default:
+        ShouldNotReachHere();
+    }
+  
+#line 22154 "ad_ppc.cpp"
+  }
+}
+
+uint vpopcnt_regNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma4FNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14102 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvmaddasp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22177 "ad_ppc.cpp"
+  }
+}
+
+uint vfma4FNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma4F_neg1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14117 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvnmsubasp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22200 "ad_ppc.cpp"
+  }
+}
+
+uint vfma4F_neg1Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma4F_neg1_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14117 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvnmsubasp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22223 "ad_ppc.cpp"
+  }
+}
+
+uint vfma4F_neg1_0Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma4F_neg2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14131 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvmsubasp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22246 "ad_ppc.cpp"
+  }
+}
+
+uint vfma4F_neg2Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma2DNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14145 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvmaddadp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22269 "ad_ppc.cpp"
+  }
+}
+
+uint vfma2DNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma2D_neg1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14160 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvnmsubadp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22292 "ad_ppc.cpp"
+  }
+}
+
+uint vfma2D_neg1Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma2D_neg1_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14160 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvnmsubadp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22315 "ad_ppc.cpp"
+  }
+}
+
+uint vfma2D_neg1_0Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void vfma2D_neg2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14174 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xvmsubadp(opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* dst */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src1 */, opnd_array(3)->as_VectorSRegister(ra_,this,idx3)/* src2 */);
+  
+#line 22338 "ad_ppc.cpp"
+  }
+}
+
+uint vfma2D_neg2Node::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
 void overflowAddL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -20943,16 +22351,15 @@ void overflowAddL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// op1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// op2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14002 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14190 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ li(R0, 0);
     __ mtxer(R0); // clear XER.SO
     __ addo_(R0, opnd_array(1)->as_Register(ra_,this,idx1)/* op1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* op2 */);
   
-#line 20955 "ad_ppc.cpp"
+#line 22362 "ad_ppc.cpp"
   }
 }
 
@@ -20963,16 +22370,15 @@ void overflowSubL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// op1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// op2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14015 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14202 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ li(R0, 0);
     __ mtxer(R0); // clear XER.SO
     __ subfo_(R0, opnd_array(2)->as_Register(ra_,this,idx2)/* op2 */, opnd_array(1)->as_Register(ra_,this,idx1)/* op1 */);
   
-#line 20975 "ad_ppc.cpp"
+#line 22381 "ad_ppc.cpp"
   }
 }
 
@@ -20983,16 +22389,15 @@ void overflowNegL_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// zero
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// op2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14028 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14214 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ li(R0, 0);
     __ mtxer(R0); // clear XER.SO
     __ nego_(R0, opnd_array(2)->as_Register(ra_,this,idx2)/* op2 */);
   
-#line 20995 "ad_ppc.cpp"
+#line 22400 "ad_ppc.cpp"
   }
 }
 
@@ -21003,16 +22408,15 @@ void overflowMulL_reg_regNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// op1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// op2
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14041 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14226 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ li(R0, 0);
     __ mtxer(R0); // clear XER.SO
     __ mulldo_(R0, opnd_array(1)->as_Register(ra_,this,idx1)/* op1 */, opnd_array(2)->as_Register(ra_,this,idx2)/* op2 */);
   
-#line 21015 "ad_ppc.cpp"
+#line 22419 "ad_ppc.cpp"
   }
 }
 
@@ -21036,7 +22440,7 @@ void  repl4F_immF_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseR
   iRegLdstOper *op_tmp = (iRegLdstOper *)opnd_array(2);
   Compile *C = ra_->C;
   {
-#line 3582 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3327 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     // Create new nodes.
 
@@ -21057,7 +22461,7 @@ void  repl4F_immF_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseR
 
     assert(nodes->length() >= 1, "must have created at least 1 node");
   
-#line 21060 "ad_ppc.cpp"
+#line 22464 "ad_ppc.cpp"
   }
 }
 
@@ -21070,54 +22474,54 @@ void repl4F_immF0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14085 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    __ xxlxor(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
-  
-#line 21079 "ad_ppc.cpp"
-  }
-}
-
-void repl2D_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
-  cbuf.set_insts_mark();
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// zero
-  {
-    MacroAssembler _masm(&cbuf);
-
-#line 14113 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14261 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxlxor(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 21095 "ad_ppc.cpp"
+#line 22483 "ad_ppc.cpp"
   }
 }
 
-uint repl2D_immI0Node::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 4);
-}
-
-void repl2D_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+void repl2D_reg_ExNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14125 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14273 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    __ xxleqv(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
+    __ xxpermdi(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */->to_vsr(), opnd_array(1)->as_FloatRegister(ra_,this,idx1)/* src */->to_vsr(), 0);
   
-#line 21116 "ad_ppc.cpp"
+#line 22499 "ad_ppc.cpp"
   }
 }
 
-uint repl2D_immIminus1Node::size(PhaseRegAlloc *ra_) const {
+uint repl2D_reg_ExNode::size(PhaseRegAlloc *ra_) const {
+  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void repl2D_immD0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// zero
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14285 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ xxlxor(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
+  
+#line 22520 "ad_ppc.cpp"
+  }
+}
+
+uint repl2D_immD0Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
 }
@@ -21128,13 +22532,13 @@ void mtvsrdNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14137 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14297 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ mtvsrd(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 21137 "ad_ppc.cpp"
+#line 22541 "ad_ppc.cpp"
   }
 }
 
@@ -21150,13 +22554,13 @@ void xxspltdNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// src
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14148 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14308 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxpermdi(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src */, opnd_array(2)->constant());
   
-#line 21159 "ad_ppc.cpp"
+#line 22563 "ad_ppc.cpp"
   }
 }
 
@@ -21173,13 +22577,13 @@ void xxpermdiNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14159 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14319 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxpermdi(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(1)->as_VectorSRegister(ra_,this,idx1)/* src1 */, opnd_array(2)->as_VectorSRegister(ra_,this,idx2)/* src2 */, opnd_array(3)->constant());
   
-#line 21182 "ad_ppc.cpp"
+#line 22586 "ad_ppc.cpp"
   }
 }
 
@@ -21194,13 +22598,13 @@ void repl2L_immI0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14182 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14342 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxlxor(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 21203 "ad_ppc.cpp"
+#line 22607 "ad_ppc.cpp"
   }
 }
 
@@ -21215,13 +22619,13 @@ void repl2L_immIminus1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// src
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14194 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14354 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     __ xxleqv(opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */, opnd_array(0)->as_VectorSRegister(ra_,this)/* dst */);
   
-#line 21224 "ad_ppc.cpp"
+#line 22628 "ad_ppc.cpp"
   }
 }
 
@@ -21237,19 +22641,18 @@ void safePoint_pollNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 5; 	// 
   {
 
-#line 3605 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3350 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_ld);
     // Fake operand dst needed for PPC scheduler.
     assert((0x0) == 0x0, "dst must be 0x0");
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     // Mark the code position where the load from the safepoint
     // polling page was emitted as relocInfo::poll_type.
     __ relocate(relocInfo::poll_type);
     __ load_from_polling_page(opnd_array(1)->as_Register(ra_,this,idx1)/* poll */);
   
-#line 21252 "ad_ppc.cpp"
+#line 22655 "ad_ppc.cpp"
   }
 }
 
@@ -21265,11 +22668,10 @@ void CallStaticJavaDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// 
   {
 
-#line 3663 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3407 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_bl);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     address entry_point = (address)opnd_array(1)->method();
 
     if (!_method) {
@@ -21313,14 +22715,15 @@ void CallStaticJavaDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
         return;
       }
     }
+    __ post_call_nop();
   
-#line 21317 "ad_ppc.cpp"
+#line 22720 "ad_ppc.cpp"
   }
 }
 
 uint CallStaticJavaDirectNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 4);
+  assert(VerifyOops || MachNode::size(ra_) <= (Continuations::enabled() ? 8 : 4), "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : (Continuations::enabled() ? 8 : 4));
 }
 
 void CallDynamicJavaDirectSchedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -21330,13 +22733,12 @@ void CallDynamicJavaDirectSchedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) 
   unsigned idx1 = 1; 	// 
   {
 
-#line 3713 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3457 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_bl);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-    if (!ra_->C->in_scratch_emit_size()) {
+    if (!ra_->C->output()->in_scratch_emit_size()) {
       // Create a call trampoline stub for the given method.
       const address entry_point = !(opnd_array(1)->method()) ? 0 : (address)opnd_array(1)->method();
       const address entry_point_const = __ address_constant(entry_point, RelocationHolder::none);
@@ -21369,14 +22771,15 @@ void CallDynamicJavaDirectSchedNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) 
     // and the entry point might be too far away for bl. Pc() serves
     // as dummy and bl will be patched later.
     __ bl((address) __ pc());
+    __ post_call_nop();
   
-#line 21373 "ad_ppc.cpp"
+#line 22776 "ad_ppc.cpp"
   }
 }
 
 uint CallDynamicJavaDirectSchedNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 4);
+  assert(VerifyOops || MachNode::size(ra_) <= (Continuations::enabled() ? 8 : 4), "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : (Continuations::enabled() ? 8 : 4));
 }
 
 void  CallDynamicJavaDirectSched_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_) {
@@ -21392,7 +22795,7 @@ void  CallDynamicJavaDirectSched_ExNode::postalloc_expand(GrowableArray <Node *>
   methodOper *op_meth = (methodOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3754 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3498 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
 
     // Create the nodes for loading the IC from the TOC.
@@ -21405,12 +22808,11 @@ void  CallDynamicJavaDirectSched_ExNode::postalloc_expand(GrowableArray <Node *>
     call->_method_handle_invoke = _method_handle_invoke;
     call->_vtable_index      = _vtable_index;
     call->_method            = _method;
-    call->_bci               = _bci;
     call->_optimized_virtual = _optimized_virtual;
     call->_tf                = _tf;
     call->_entry_point       = _entry_point;
     call->_cnt               = _cnt;
-    call->_argsize           = _argsize;
+    call->_guaranteed_safepoint = true;
     call->_oop_map           = _oop_map;
     call->_jvms              = _jvms;
     call->_jvmadj            = _jvmadj;
@@ -21452,7 +22854,7 @@ void  CallDynamicJavaDirectSched_ExNode::postalloc_expand(GrowableArray <Node *>
     if (loadConLNodes_IC._last)     nodes->push(loadConLNodes_IC._last);
     nodes->push(call);
   
-#line 21455 "ad_ppc.cpp"
+#line 22857 "ad_ppc.cpp"
   }
 }
 
@@ -21463,18 +22865,17 @@ void CallDynamicJavaDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
   unsigned idx1 = 1; 	// 
   {
 
-#line 3817 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3560 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     int start_offset = __ offset();
 
     Register Rtoc = (ra_) ? as_Register(ra_->get_encode(in(mach_constant_base_node_input()))) : R2_TOC;
-#if 0
+
     int vtable_index = this->_vtable_index;
-    if (_vtable_index < 0) {
+    if (vtable_index < 0) {
       // Must be invalid_vtable_index, not nonvirtual_vtable_index.
-      assert(_vtable_index == Method::invalid_vtable_index, "correct sentinel value");
+      assert(vtable_index == Method::invalid_vtable_index, "correct sentinel value");
       Register ic_reg = as_Register(Matcher::inline_cache_reg_encode());
 
       // Virtual call relocation will point to ic load.
@@ -21491,7 +22892,7 @@ void CallDynamicJavaDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
       __ relocate(virtual_call_Relocation::spec(virtual_call_meta_addr));
       emit_call_with_trampoline_stub(_masm, (address)opnd_array(1)->method(), relocInfo::none);
       assert(((MachCallDynamicJavaNode*)this)->ret_addr_offset() == __ offset() - start_offset,
-             "Fix constant in ret_addr_offset()");
+             "Fix constant in ret_addr_offset(), expected %d", __ offset() - start_offset);
     } else {
       assert(!UseInlineCaches, "expect vtable calls only if not using ICs");
       // Go thru the vtable. Get receiver klass. Receiver already
@@ -21500,10 +22901,10 @@ void CallDynamicJavaDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
 
       __ load_klass(R11_scratch1, R3);
 
-      int entry_offset = in_bytes(Klass::vtable_start_offset()) + _vtable_index * vtableEntry::size_in_bytes();
+      int entry_offset = in_bytes(Klass::vtable_start_offset()) + vtable_index * vtableEntry::size_in_bytes();
       int v_off = entry_offset + vtableEntry::method_offset_in_bytes();
       __ li(R19_method, v_off);
-      __ ldx(R19_method/*method oop*/, R19_method/*method offset*/, R11_scratch1/*class*/);
+      __ ldx(R19_method/*method*/, R19_method/*method offset*/, R11_scratch1/*class*/);
       // NOTE: for vtable dispatches, the vtable entry will never be
       // null. However it may very well end up in handle_wrong_method
       // if the method is abstract for the particular class.
@@ -21511,16 +22912,12 @@ void CallDynamicJavaDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const
       // Call target. Either compiled code or C2I adapter.
       __ mtctr(R11_scratch1);
       __ bctrl();
-      if (((MachCallDynamicJavaNode*)this)->ret_addr_offset() != __ offset() - start_offset) {
-        tty->print(" %d, %d\n", ((MachCallDynamicJavaNode*)this)->ret_addr_offset(),__ offset() - start_offset);
-      }
       assert(((MachCallDynamicJavaNode*)this)->ret_addr_offset() == __ offset() - start_offset,
-             "Fix constant in ret_addr_offset()");
+             "Fix constant in ret_addr_offset(), expected %d", __ offset() - start_offset);
     }
-#endif
-    Unimplemented();  // ret_addr_offset not yet fixed. Depends on compressed oops (load klass!).
+    __ post_call_nop();
   
-#line 21523 "ad_ppc.cpp"
+#line 22920 "ad_ppc.cpp"
   }
 }
 
@@ -21531,16 +22928,16 @@ void CallRuntimeDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 1; 	// 
   {
 
-#line 3875 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3613 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
 
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     const address start_pc = __ pc();
 
 #if defined(ABI_ELFv2)
     address entry= !(opnd_array(1)->method()) ? NULL : (address)opnd_array(1)->method();
     __ call_c(entry, relocInfo::runtime_call_type);
+    __ post_call_nop();
 #else
     // The function we're going to call.
     FunctionDescriptor fdtemp;
@@ -21556,13 +22953,14 @@ void CallRuntimeDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
       ciEnv::current()->record_out_of_memory_failure();
       return;
     }
+    __ post_call_nop();
 #endif
 
     // Check the ret_addr_offset.
     assert(((MachCallRuntimeNode*)this)->ret_addr_offset() ==  __ last_calls_return_pc() - start_pc,
            "Fix constant in ret_addr_offset()");
   
-#line 21565 "ad_ppc.cpp"
+#line 22963 "ad_ppc.cpp"
   }
 }
 
@@ -21573,13 +22971,12 @@ void CallLeafDirect_mtctrNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const 
   unsigned idx1 = 1; 	// src
   {
 
-#line 3909 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3648 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mtctr);
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
     __ mtctr(opnd_array(1)->as_Register(ra_,this,idx1)/* src */);
   
-#line 21582 "ad_ppc.cpp"
+#line 22979 "ad_ppc.cpp"
   }
 }
 
@@ -21594,20 +22991,20 @@ void CallLeafDirectNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14330 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14496 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_bctrl);
     __ bctrl();
+    __ post_call_nop();
   
-#line 21604 "ad_ppc.cpp"
+#line 23001 "ad_ppc.cpp"
   }
 }
 
 uint CallLeafDirectNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 4);
+  assert(VerifyOops || MachNode::size(ra_) <= (Continuations::enabled() ? 8 : 4), "bad fixed size");
+  return (VerifyOops ? MachNode::size(ra_) : (Continuations::enabled() ? 8 : 4));
 }
 
 void  CallLeafDirect_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, PhaseRegAlloc *ra_) {
@@ -21623,7 +23020,7 @@ void  CallLeafDirect_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Pha
   methodOper *op_meth = (methodOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3916 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3654 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     loadConLNodesTuple loadConLNodes_Entry;
 #if defined(ABI_ELFv2)
@@ -21683,14 +23080,13 @@ void  CallLeafDirect_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Pha
     call->_tf          = _tf;
     call->_entry_point = _entry_point;
     call->_cnt         = _cnt;
-    call->_argsize     = _argsize;
+    call->_guaranteed_safepoint = false;
     call->_oop_map     = _oop_map;
     guarantee(!_jvms, "You must clone the jvms and adapt the offsets by fix_jvms().");
     call->_jvms        = NULL;
     call->_jvmadj      = _jvmadj;
     call->_in_rms      = _in_rms;
     call->_nesting     = _nesting;
-
 
     // New call needs all inputs of old call.
     // Req...
@@ -21728,7 +23124,7 @@ void  CallLeafDirect_ExNode::postalloc_expand(GrowableArray <Node *> *nodes, Pha
     nodes->push(mtctr);
     nodes->push(call);
   
-#line 21731 "ad_ppc.cpp"
+#line 23127 "ad_ppc.cpp"
   }
 }
 
@@ -21745,7 +23141,7 @@ void  CallLeafNoFPDirect_ExNode::postalloc_expand(GrowableArray <Node *> *nodes,
   methodOper *op_meth = (methodOper *)opnd_array(1);
   Compile *C = ra_->C;
   {
-#line 3916 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3654 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     loadConLNodesTuple loadConLNodes_Entry;
 #if defined(ABI_ELFv2)
@@ -21805,14 +23201,13 @@ void  CallLeafNoFPDirect_ExNode::postalloc_expand(GrowableArray <Node *> *nodes,
     call->_tf          = _tf;
     call->_entry_point = _entry_point;
     call->_cnt         = _cnt;
-    call->_argsize     = _argsize;
+    call->_guaranteed_safepoint = false;
     call->_oop_map     = _oop_map;
     guarantee(!_jvms, "You must clone the jvms and adapt the offsets by fix_jvms().");
     call->_jvms        = NULL;
     call->_jvmadj      = _jvmadj;
     call->_in_rms      = _in_rms;
     call->_nesting     = _nesting;
-
 
     // New call needs all inputs of old call.
     // Req...
@@ -21850,7 +23245,7 @@ void  CallLeafNoFPDirect_ExNode::postalloc_expand(GrowableArray <Node *> *nodes,
     nodes->push(mtctr);
     nodes->push(call);
   
-#line 21853 "ad_ppc.cpp"
+#line 23248 "ad_ppc.cpp"
   }
 }
 
@@ -21858,18 +23253,17 @@ void TailCalljmpIndNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   cbuf.set_insts_mark();
   // Start at oper_input_base() and count operands
   unsigned idx0 = 5;
-  unsigned idx1 = 5; 	// method_oop
+  unsigned idx1 = 5; 	// method_ptr
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14379 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14545 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     __ mtctr(opnd_array(1)->as_Register(ra_,this,idx1)/* jump_target */);
     __ bctr();
   
-#line 21872 "ad_ppc.cpp"
+#line 23266 "ad_ppc.cpp"
   }
 }
 
@@ -21884,15 +23278,14 @@ void RetNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 5;
   unsigned idx1 = 5; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14392 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14557 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_blr);
     // LR is restored in MachEpilogNode. Just do the RET here.
     __ blr();
   
-#line 21895 "ad_ppc.cpp"
+#line 23288 "ad_ppc.cpp"
   }
 }
 
@@ -21908,16 +23301,15 @@ void tailjmpIndNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx1 = 5; 	// ex_oop
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14414 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14578 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
-    __ ld(R4_ARG2/* issuing pc */, _abi(lr), R1_SP);
+    __ ld(R4_ARG2/* issuing pc */, _abi0(lr), R1_SP);
     __ mtctr(opnd_array(1)->as_Register(ra_,this,idx1)/* jump_target */);
     __ bctr();
   
-#line 21920 "ad_ppc.cpp"
+#line 23312 "ad_ppc.cpp"
   }
 }
 
@@ -21945,15 +23337,14 @@ void RethrowExceptionNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 5;
   unsigned idx1 = 5; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14443 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14606 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_compound);
     cbuf.set_insts_mark();
     __ b64_patchable((address)OptoRuntime::rethrow_stub(), relocInfo::runtime_call_type);
   
-#line 21956 "ad_ppc.cpp"
+#line 23347 "ad_ppc.cpp"
   }
 }
 
@@ -21963,20 +23354,16 @@ void ShouldNotReachHereNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 5;
   unsigned idx1 = 5; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14458 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14619 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_tdi);
-    __ trap_should_not_reach_here();
+    if (is_reachable()) {
+      __ stop(_halt_reason);
+    }
   
-#line 21973 "ad_ppc.cpp"
+#line 23365 "ad_ppc.cpp"
   }
-}
-
-uint ShouldNotReachHereNode::size(PhaseRegAlloc *ra_) const {
-  assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
-  return (VerifyOops ? MachNode::size(ra_) : 4);
 }
 
 void tlsLoadPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
@@ -21998,14 +23385,13 @@ void endGroupNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14491 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14653 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_endgroup);
     __ endgroup();
   
-#line 22008 "ad_ppc.cpp"
+#line 23394 "ad_ppc.cpp"
   }
 }
 
@@ -22020,14 +23406,13 @@ void fxNopNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14507 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14668 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmr);
     __ nop();
   
-#line 22030 "ad_ppc.cpp"
+#line 23415 "ad_ppc.cpp"
   }
 }
 
@@ -22042,14 +23427,13 @@ void fpNop0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14521 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14681 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmr);
     __ fpnop0();
   
-#line 22052 "ad_ppc.cpp"
+#line 23436 "ad_ppc.cpp"
   }
 }
 
@@ -22064,14 +23448,13 @@ void fpNop1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14535 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14694 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_fmr);
     __ fpnop1();
   
-#line 22074 "ad_ppc.cpp"
+#line 23457 "ad_ppc.cpp"
   }
 }
 
@@ -22086,14 +23469,13 @@ void brNop0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14546 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14704 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mcrf);
     __ brnop0();
   
-#line 22096 "ad_ppc.cpp"
+#line 23478 "ad_ppc.cpp"
   }
 }
 
@@ -22108,14 +23490,13 @@ void brNop1Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14561 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14718 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mcrf);
     __ brnop1();
   
-#line 22118 "ad_ppc.cpp"
+#line 23499 "ad_ppc.cpp"
   }
 }
 
@@ -22130,20 +23511,608 @@ void brNop2Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// 
   {
-    MacroAssembler _masm(&cbuf);
+    C2_MacroAssembler _masm(&cbuf);
 
-#line 14575 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 14731 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
-    // TODO: PPC port $archOpcode(ppc64Opcode_mcrf);
     __ brnop2();
   
-#line 22140 "ad_ppc.cpp"
+#line 23520 "ad_ppc.cpp"
   }
 }
 
 uint brNop2Node::size(PhaseRegAlloc *ra_) const {
   assert(VerifyOops || MachNode::size(ra_) <= 4, "bad fixed size");
   return (VerifyOops ? MachNode::size(ra_) : 4);
+}
+
+void cacheWBNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// 
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14743 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    assert(opnd_array(1)->index_position() < 0, "should be");
+    assert(opnd_array(1)->disp(ra_,this,idx1)== 0, "should be");
+    __ cache_wb(Address(as_Register(opnd_array(1)->base(ra_,this,idx1))));
+  
+#line 23543 "ad_ppc.cpp"
+  }
+}
+
+void cacheWBPreSyncNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// 
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14757 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ cache_wbsync(true);
+  
+#line 23559 "ad_ppc.cpp"
+  }
+}
+
+void cacheWBPostSyncNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// 
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 14769 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
+
+    __ cache_wbsync(false);
+  
+#line 23575 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapP_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 45 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+  
+#line 23600 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapP_shenandoah_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 45 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+  
+#line 23625 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapN_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 66 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+  
+#line 23650 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapN_shenandoah_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 66 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+  
+#line 23675 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapP_acq_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 87 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      __ isync();
+    } else {
+      __ sync();
+    }
+  
+#line 23705 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapP_acq_shenandoah_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 87 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      __ isync();
+    } else {
+      __ sync();
+    }
+  
+#line 23735 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapN_acq_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 113 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      __ isync();
+    } else {
+      __ sync();
+    }
+  
+#line 23765 "ad_ppc.cpp"
+  }
+}
+
+void compareAndSwapN_acq_shenandoah_0Node::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 113 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        false, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      __ isync();
+    } else {
+      __ sync();
+    }
+  
+#line 23795 "ad_ppc.cpp"
+  }
+}
+
+void compareAndExchangeP_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 138 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        true, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+  
+#line 23820 "ad_ppc.cpp"
+  }
+}
+
+void compareAndExchangeN_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 158 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        true, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+  
+#line 23845 "ad_ppc.cpp"
+  }
+}
+
+void compareAndExchangePAcq_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 178 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        true, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      __ isync();
+    } else {
+      __ sync();
+    }
+  
+#line 23875 "ad_ppc.cpp"
+  }
+}
+
+void compareAndExchangeNAcq_shenandoahNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 203 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/shenandoah/shenandoah_ppc.ad"
+
+    ShenandoahBarrierSet::assembler()->cmpxchg_oop(
+        &_masm,
+        opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+        opnd_array(5)->as_Register(ra_,this,idx5)/* tmp1 */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp2 */,
+        true, opnd_array(4)->as_Register(ra_,this,idx4)/* res */);
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      __ isync();
+    } else {
+      __ sync();
+    }
+  
+#line 23905 "ad_ppc.cpp"
+  }
+}
+
+void zLoadPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// dst
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 138 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    assert(opnd_array(1)->index(ra_,this,idx1)== 0, "sanity");
+    __ ld(opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(1)->disp(ra_,this,idx1), as_Register(opnd_array(1)->base(ra_,this,idx1)));
+    z_load_barrier(_masm, this, Address(as_Register(opnd_array(1)->base(ra_,this,idx1)), opnd_array(1)->disp(ra_,this,idx1)), opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* tmp */, barrier_data());
+  
+#line 23925 "ad_ppc.cpp"
+  }
+}
+
+void zLoadP_acqNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// dst
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 157 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    __ ld(opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(1)->disp(ra_,this,idx1), as_Register(opnd_array(1)->base(ra_,this,idx1)));
+    z_load_barrier(_masm, this, Address(as_Register(opnd_array(1)->base(ra_,this,idx1)), opnd_array(1)->disp(ra_,this,idx1)), opnd_array(2)->as_Register(ra_,this,idx2)/* dst */, opnd_array(3)->as_Register(ra_,this,idx3)/* tmp */, barrier_data());
+
+    // Uses the isync instruction as an acquire barrier.
+    // This exploits the compare and the branch in the z load barrier (load, compare and branch, isync).
+    __ isync();
+  
+#line 23948 "ad_ppc.cpp"
+  }
+}
+
+void zCompareAndSwapPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 177 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    z_compare_and_swap(_masm, this,
+                       opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+                       opnd_array(5)->as_Register(ra_,this,idx5)/* tmp_xchg */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp_mask */,
+                       false /* weak */, false /* acquire */);
+  
+#line 23972 "ad_ppc.cpp"
+  }
+}
+
+void zCompareAndSwapP_acqNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 195 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    z_compare_and_swap(_masm, this,
+                       opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+                       opnd_array(5)->as_Register(ra_,this,idx5)/* tmp_xchg */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp_mask */,
+                       false /* weak */, true /* acquire */);
+  
+#line 23996 "ad_ppc.cpp"
+  }
+}
+
+void zCompareAndSwapPWeakNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 213 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    z_compare_and_swap(_masm, this,
+                       opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+                       opnd_array(5)->as_Register(ra_,this,idx5)/* tmp_xchg */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp_mask */,
+                       true /* weak */, false /* acquire */);
+  
+#line 24020 "ad_ppc.cpp"
+  }
+}
+
+void zCompareAndSwapPWeak_acqNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 231 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    z_compare_and_swap(_masm, this,
+                       opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */,
+                       opnd_array(5)->as_Register(ra_,this,idx5)/* tmp_xchg */, opnd_array(6)->as_Register(ra_,this,idx6)/* tmp_mask */,
+                       true /* weak */, true /* acquire */);
+  
+#line 24044 "ad_ppc.cpp"
+  }
+}
+
+void zCompareAndExchangePNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 252 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    z_compare_and_exchange(_masm, this,
+                           opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp */,
+                           false /* weak */, false /* acquire */);
+  
+#line 24066 "ad_ppc.cpp"
+  }
+}
+
+void zCompareAndExchangeP_acqNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 272 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    z_compare_and_exchange(_masm, this,
+                           opnd_array(4)->as_Register(ra_,this,idx4)/* res */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, opnd_array(2)->as_Register(ra_,this,idx2)/* oldval */, opnd_array(3)->as_Register(ra_,this,idx3)/* newval */, opnd_array(5)->as_Register(ra_,this,idx5)/* tmp */,
+                           false /* weak */, true /* acquire */);
+  
+#line 24088 "ad_ppc.cpp"
+  }
+}
+
+void zGetAndSetPNode::emit(CodeBuffer& cbuf, PhaseRegAlloc* ra_) const {
+  cbuf.set_insts_mark();
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// newval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp
+  {
+    C2_MacroAssembler _masm(&cbuf);
+
+#line 287 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/gc/z/z_ppc.ad"
+
+    __ getandsetd(opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(2)->as_Register(ra_,this,idx2)/* newval */, opnd_array(1)->as_Register(ra_,this,idx1)/* mem */, MacroAssembler::cmpxchgx_hint_atomic_update());
+    z_load_barrier(_masm, this, Address(noreg, (intptr_t) 0), opnd_array(3)->as_Register(ra_,this,idx3)/* res */, opnd_array(4)->as_Register(ra_,this,idx4)/* tmp */, barrier_data());
+
+    if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
+      __ isync();
+    } else {
+      __ sync();
+    }
+  
+#line 24114 "ad_ppc.cpp"
+  }
 }
 
 const MachOper* loadUB_indirectNode::memory_operand() const { return _opnds[1]; }
@@ -22205,36 +24174,34 @@ const MachOper* storeNKlassNode::memory_operand() const { return _opnds[1]; }
 const MachOper* storePNode::memory_operand() const { return _opnds[1]; }
 const MachOper* storeFNode::memory_operand() const { return _opnds[1]; }
 const MachOper* storeDNode::memory_operand() const { return _opnds[1]; }
-const MachOper* storeCM_CMSNode::memory_operand() const { return _opnds[1]; }
-const MachOper* storeCM_CMS_ExExNode::memory_operand() const { return _opnds[1]; }
-const MachOper* storeCM_G1Node::memory_operand() const { return _opnds[1]; }
-const TypePtr *membar_acquireNode::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* membar_acquireNode::memory_operand() const { return (MachOper*)-1; }
-const TypePtr *unnecessary_membar_acquireNode::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* unnecessary_membar_acquireNode::memory_operand() const { return (MachOper*)-1; }
-const TypePtr *membar_acquire_lockNode::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* membar_acquire_lockNode::memory_operand() const { return (MachOper*)-1; }
-const TypePtr *membar_releaseNode::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* membar_releaseNode::memory_operand() const { return (MachOper*)-1; }
-const TypePtr *membar_release_0Node::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* membar_release_0Node::memory_operand() const { return (MachOper*)-1; }
-const TypePtr *membar_storestoreNode::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* membar_storestoreNode::memory_operand() const { return (MachOper*)-1; }
-const TypePtr *membar_release_lockNode::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* membar_release_lockNode::memory_operand() const { return (MachOper*)-1; }
-const TypePtr *membar_volatileNode::adr_type() const { return TypePtr::BOTTOM; }
-const MachOper* membar_volatileNode::memory_operand() const { return (MachOper*)-1; }
-const MachOper* storeLConditional_regP_regL_regLNode::memory_operand() const { return _opnds[1]; }
-const MachOper* storePConditional_regP_regP_regPNode::memory_operand() const { return _opnds[1]; }
-const MachOper* loadPLockedNode::memory_operand() const { return _opnds[1]; }
+const MachOper* storeCMNode::memory_operand() const { return _opnds[1]; }
 const MachOper* loadI_reversedNode::memory_operand() const { return _opnds[1]; }
+const MachOper* loadI_reversed_acquireNode::memory_operand() const { return _opnds[1]; }
 const MachOper* loadL_reversedNode::memory_operand() const { return _opnds[1]; }
+const MachOper* loadL_reversed_acquireNode::memory_operand() const { return _opnds[1]; }
 const MachOper* loadUS_reversedNode::memory_operand() const { return _opnds[1]; }
+const MachOper* loadUS_reversed_acquireNode::memory_operand() const { return _opnds[1]; }
 const MachOper* loadS_reversedNode::memory_operand() const { return _opnds[1]; }
+const MachOper* loadS_reversed_acquireNode::memory_operand() const { return _opnds[1]; }
 const MachOper* storeI_reversedNode::memory_operand() const { return _opnds[1]; }
 const MachOper* storeL_reversedNode::memory_operand() const { return _opnds[1]; }
 const MachOper* storeUS_reversedNode::memory_operand() const { return _opnds[1]; }
 const MachOper* storeS_reversedNode::memory_operand() const { return _opnds[1]; }
+const MachOper* cacheWBNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapP_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapP_shenandoah_0Node::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapN_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapN_shenandoah_0Node::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapP_acq_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapP_acq_shenandoah_0Node::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapN_acq_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndSwapN_acq_shenandoah_0Node::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndExchangeP_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndExchangeN_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndExchangePAcq_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* compareAndExchangeNAcq_shenandoahNode::memory_operand() const { return _opnds[1]; }
+const MachOper* zLoadPNode::memory_operand() const { return _opnds[1]; }
+const MachOper* zLoadP_acqNode::memory_operand() const { return _opnds[1]; }
 
 
 const bool Matcher::has_match_rule(int opcode) {
@@ -22251,16 +24218,19 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     false,  // RegF
     false,  // RegD
     false,  // RegL
-    false,  // RegFlags
+    false,  // VecA
     false,  // VecS
     false,  // VecD
     false,  // VecX
     false,  // VecY
     false,  // VecZ
+    false,  // RegVectMask
+    false,  // RegFlags
     false,  // _last_machine_leaf
     true ,  // AbsD
     true ,  // AbsF
     true ,  // AbsI
+    true ,  // AbsL
     true ,  // AddD
     true ,  // AddF
     true ,  // AddI
@@ -22274,20 +24244,30 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // AryEq
     false,  // AtanD
     true ,  // Binary
+    false,  // Blackhole
     true ,  // Bool
     false,  // BoxLock
     true ,  // ReverseBytesI
     true ,  // ReverseBytesL
     true ,  // ReverseBytesUS
     true ,  // ReverseBytesS
+    false,  // ReverseBytesV
     false,  // CProj
+    true ,  // CacheWB
+    true ,  // CacheWBPreSync
+    true ,  // CacheWBPostSync
     true ,  // CallDynamicJava
     false,  // CallJava
     true ,  // CallLeaf
     true ,  // CallLeafNoFP
+    false,  // CallLeafVector
     true ,  // CallRuntime
     true ,  // CallStaticJava
+    true ,  // CastDD
+    true ,  // CastFF
     true ,  // CastII
+    true ,  // CastLL
+    true ,  // CastVV
     true ,  // CastX2P
     true ,  // CastP2X
     true ,  // CastPP
@@ -22295,6 +24275,8 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     false,  // CatchProj
     true ,  // CheckCastPP
     true ,  // ClearArray
+    false,  // CompressBits
+    false,  // ExpandBits
     false,  // ConstraintCast
     true ,  // CMoveD
     false,  // CMoveVD
@@ -22315,7 +24297,9 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // CmpLTMask
     true ,  // CmpP
     true ,  // CmpU
+    false,  // CmpU3
     true ,  // CmpUL
+    false,  // CmpUL3
     true ,  // CompareAndSwapB
     true ,  // CompareAndSwapS
     true ,  // CompareAndSwapI
@@ -22365,14 +24349,20 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // ConvL2D
     true ,  // ConvL2F
     true ,  // ConvL2I
+    false,  // ConvF2HF
+    false,  // ConvHF2F
     false,  // CountedLoop
     true ,  // CountedLoopEnd
     false,  // OuterStripMinedLoop
     false,  // OuterStripMinedLoopEnd
+    false,  // LongCountedLoop
+    false,  // LongCountedLoopEnd
     true ,  // CountLeadingZerosI
     true ,  // CountLeadingZerosL
+    false,  // CountLeadingZerosV
     true ,  // CountTrailingZerosI
     true ,  // CountTrailingZerosL
+    false,  // CountTrailingZerosV
     true ,  // CreateEx
     true ,  // DecodeN
     true ,  // DecodeNKlass
@@ -22380,9 +24370,13 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // DivF
     true ,  // DivI
     true ,  // DivL
+    true ,  // UDivI
+    true ,  // UDivL
     false,  // DivMod
     false,  // DivModI
     false,  // DivModL
+    false,  // UDivModI
+    false,  // UDivModL
     true ,  // EncodeISOArray
     true ,  // EncodeP
     true ,  // EncodePKlass
@@ -22392,7 +24386,7 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // FmaF
     true ,  // Goto
     true ,  // Halt
-    true ,  // HasNegatives
+    true ,  // CountPositives
     true ,  // If
     false,  // RangeCheck
     false,  // IfFalse
@@ -22414,52 +24408,67 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // LoadNKlass
     true ,  // LoadL
     true ,  // LoadL_unaligned
-    true ,  // LoadPLocked
     true ,  // LoadP
     true ,  // LoadN
     true ,  // LoadRange
     true ,  // LoadS
-    false,  // LoadBarrier
-    false,  // LoadBarrierSlowReg
-    false,  // LoadBarrierWeakSlowReg
     false,  // Lock
     false,  // Loop
     false,  // LoopLimit
     false,  // Mach
+    false,  // MachNullCheck
     false,  // MachProj
+    false,  // MulAddS2I
     true ,  // MaxI
+    false,  // MaxL
+    false,  // MaxD
+    false,  // MaxF
     true ,  // MemBarAcquire
     true ,  // LoadFence
-    false,  // SetVectMaskI
     true ,  // MemBarAcquireLock
     true ,  // MemBarCPUOrder
     true ,  // MemBarRelease
     true ,  // StoreFence
+    true ,  // StoreStoreFence
     true ,  // MemBarReleaseLock
     true ,  // MemBarVolatile
     true ,  // MemBarStoreStore
     false,  // MergeMem
     true ,  // MinI
+    false,  // MinL
+    false,  // MinF
+    false,  // MinD
     false,  // ModD
     false,  // ModF
     true ,  // ModI
     true ,  // ModL
+    true ,  // UModI
+    true ,  // UModL
     true ,  // MoveI2F
     true ,  // MoveF2I
     true ,  // MoveL2D
     true ,  // MoveD2L
+    false,  // IsInfiniteF
+    false,  // IsFiniteF
+    false,  // IsInfiniteD
+    false,  // IsFiniteD
     true ,  // MulD
     true ,  // MulF
     true ,  // MulHiL
+    false,  // UMulHiL
     true ,  // MulI
     true ,  // MulL
     false,  // Multi
+    false,  // NegI
+    false,  // NegL
     true ,  // NegD
     true ,  // NegF
     false,  // NeverBranch
     false,  // OnSpinWait
     false,  // Opaque1
-    false,  // Opaque2
+    false,  // OpaqueLoopInit
+    false,  // OpaqueLoopStride
+    false,  // OpaqueZeroTripGuard
     false,  // Opaque3
     false,  // Opaque4
     false,  // ProfileBoolean
@@ -22474,10 +24483,13 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     false,  // PCTable
     false,  // Parm
     true ,  // PartialSubtypeCheck
+    false,  // SubTypeCheck
     false,  // Phi
     true ,  // PopCountI
     true ,  // PopCountL
-    false,  // PopCountVI
+    true ,  // PopCountVI
+    false,  // PopCountVL
+    false,  // PopulateIndex
     true ,  // PrefetchAllocation
     false,  // Proj
     true ,  // RShiftI
@@ -22485,22 +24497,44 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     false,  // Region
     true ,  // Rethrow
     true ,  // Return
+    false,  // ReverseI
+    false,  // ReverseL
+    false,  // ReverseV
     false,  // Root
     true ,  // RoundDouble
+    true ,  // RoundDoubleMode
+    true ,  // RoundDoubleModeV
     true ,  // RoundFloat
+    false,  // RotateLeft
+    false,  // RotateLeftV
+    false,  // RotateRight
+    false,  // RotateRightV
     true ,  // SafePoint
     false,  // SafePointScalarObject
+    true ,  // ShenandoahCompareAndExchangeP
+    true ,  // ShenandoahCompareAndExchangeN
+    true ,  // ShenandoahCompareAndSwapN
+    true ,  // ShenandoahCompareAndSwapP
+    true ,  // ShenandoahWeakCompareAndSwapN
+    true ,  // ShenandoahWeakCompareAndSwapP
+    false,  // ShenandoahIUBarrier
+    false,  // ShenandoahLoadReferenceBarrier
     false,  // SCMemProj
+    false,  // CopySignD
+    false,  // CopySignF
+    false,  // SignumD
+    false,  // SignumF
+    false,  // SignumVF
+    false,  // SignumVD
     true ,  // SqrtD
-    false,  // SqrtF
+    true ,  // SqrtF
+    false,  // RoundF
+    false,  // RoundD
     false,  // Start
     false,  // StartOSR
     true ,  // StoreB
     true ,  // StoreC
     true ,  // StoreCM
-    true ,  // StorePConditional
-    false,  // StoreIConditional
-    true ,  // StoreLConditional
     true ,  // StoreD
     true ,  // StoreF
     true ,  // StoreI
@@ -22520,48 +24554,59 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // SubL
     true ,  // TailCall
     true ,  // TailJump
+    false,  // MacroLogicV
     true ,  // ThreadLocal
     false,  // Unlock
+    false,  // URShiftB
+    false,  // URShiftS
     true ,  // URShiftI
     true ,  // URShiftL
     true ,  // XorI
     true ,  // XorL
     false,  // Vector
-    false,  // AddVB
-    false,  // AddVS
-    false,  // AddVI
+    true ,  // AddVB
+    true ,  // AddVS
+    true ,  // AddVI
     false,  // AddReductionVI
-    false,  // AddVL
+    true ,  // AddVL
     false,  // AddReductionVL
-    false,  // AddVF
+    true ,  // AddVF
     false,  // AddReductionVF
-    false,  // AddVD
+    true ,  // AddVD
     false,  // AddReductionVD
-    false,  // SubVB
-    false,  // SubVS
-    false,  // SubVI
-    false,  // SubVL
-    false,  // SubVF
-    false,  // SubVD
-    false,  // MulVS
-    false,  // MulVI
+    true ,  // SubVB
+    true ,  // SubVS
+    true ,  // SubVI
+    true ,  // SubVL
+    true ,  // SubVF
+    true ,  // SubVD
+    false,  // MulVB
+    true ,  // MulVS
+    true ,  // MulVI
     false,  // MulReductionVI
     false,  // MulVL
     false,  // MulReductionVL
-    false,  // MulVF
+    true ,  // MulVF
     false,  // MulReductionVF
-    false,  // MulVD
+    true ,  // MulVD
     false,  // MulReductionVD
-    false,  // FmaVD
-    false,  // FmaVF
-    false,  // DivVF
-    false,  // DivVD
-    false,  // AbsVF
-    false,  // AbsVD
-    false,  // NegVF
-    false,  // NegVD
-    false,  // SqrtVD
-    false,  // SqrtVF
+    false,  // MulAddVS2VI
+    true ,  // FmaVD
+    true ,  // FmaVF
+    true ,  // DivVF
+    true ,  // DivVD
+    false,  // AbsVB
+    false,  // AbsVS
+    false,  // AbsVI
+    false,  // AbsVL
+    true ,  // AbsVF
+    true ,  // AbsVD
+    false,  // NegVI
+    false,  // NegVL
+    true ,  // NegVF
+    true ,  // NegVD
+    true ,  // SqrtVD
+    true ,  // SqrtVF
     false,  // LShiftCntV
     false,  // RShiftCntV
     false,  // LShiftVB
@@ -22577,10 +24622,34 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     false,  // URShiftVI
     false,  // URShiftVL
     false,  // AndV
+    false,  // AndReductionV
     false,  // OrV
+    false,  // OrReductionV
     false,  // XorV
+    false,  // XorReductionV
+    false,  // MinV
+    false,  // MaxV
+    false,  // MinReductionV
+    false,  // MaxReductionV
+    false,  // CompressV
+    false,  // CompressM
+    false,  // ExpandV
     true ,  // LoadVector
+    false,  // LoadVectorGather
+    false,  // LoadVectorGatherMasked
     true ,  // StoreVector
+    false,  // StoreVectorScatter
+    false,  // StoreVectorScatterMasked
+    false,  // LoadVectorMasked
+    false,  // StoreVectorMasked
+    false,  // VectorCmpMasked
+    false,  // VectorMaskGen
+    false,  // VectorMaskOp
+    false,  // VectorMaskTrueCount
+    false,  // VectorMaskFirstTrue
+    false,  // VectorMaskLastTrue
+    false,  // VectorMaskToLong
+    false,  // VectorLongToMask
     false,  // Pack
     false,  // PackB
     false,  // PackS
@@ -22596,6 +24665,8 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     true ,  // ReplicateL
     true ,  // ReplicateF
     true ,  // ReplicateD
+    false,  // RoundVF
+    false,  // RoundVD
     false,  // Extract
     false,  // ExtractB
     false,  // ExtractUB
@@ -22604,11 +24675,45 @@ const bool Matcher::_hasMatchRule[_last_opcode] = {
     false,  // ExtractI
     false,  // ExtractL
     false,  // ExtractF
-    false   // ExtractD
+    false,  // ExtractD
+    true ,  // Digit
+    true ,  // LowerCase
+    true ,  // UpperCase
+    true ,  // Whitespace
+    false,  // VectorBox
+    false,  // VectorBoxAllocate
+    false,  // VectorUnbox
+    false,  // VectorMaskWrapper
+    false,  // VectorMaskCmp
+    false,  // VectorMaskCast
+    false,  // VectorTest
+    false,  // VectorBlend
+    false,  // VectorRearrange
+    false,  // VectorLoadMask
+    false,  // VectorLoadShuffle
+    false,  // VectorLoadConst
+    false,  // VectorStoreMask
+    true ,  // VectorReinterpret
+    false,  // VectorCast
+    false,  // VectorCastB2X
+    false,  // VectorCastS2X
+    false,  // VectorCastI2X
+    false,  // VectorCastL2X
+    false,  // VectorCastF2X
+    false,  // VectorCastD2X
+    false,  // VectorCastF2HF
+    false,  // VectorCastHF2F
+    false,  // VectorUCastB2X
+    false,  // VectorUCastS2X
+    false,  // VectorUCastI2X
+    false,  // VectorizedHashCode
+    false,  // VectorInsert
+    false,  // MaskAll
+    false,  // AndVMask
+    false,  // OrVMask
+    false   // XorVMask
 };
 
-
-bool Matcher::stack_direction() const { return false; }
 
 int Compile::sync_stack_slots() const { return (frame::jit_monitor_size / VMRegImpl::stack_slot_size); }
 
@@ -22616,74 +24721,43 @@ uint Matcher::stack_alignment_in_bytes() { return frame::alignment_in_bytes; }
 
 OptoReg::Name Matcher::return_addr() const { return OptoReg::stack2reg(4); }
 
-uint Compile::in_preserve_stack_slots() { return (frame::jit_in_preserve_size / VMRegImpl::stack_slot_size); }
-
-uint Compile::out_preserve_stack_slots() { return SharedRuntime::out_preserve_stack_slots(); }
-
 uint Compile::varargs_C_out_slots_killed() const { return ((frame::abi_reg_args_size - frame::jit_out_preserve_size) / VMRegImpl::stack_slot_size); }
 
-void Matcher::calling_convention(BasicType *sig_bt, VMRegPair *regs, uint length, bool is_outgoing) {
+OptoRegPair Matcher::return_value(uint ideal_reg) {
 
-#line 4099 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // No difference between ingoing/outgoing. Just pass false.
-    SharedRuntime::java_calling_convention(sig_bt, regs, length, false);
-  
-#line 22632 "ad_ppc.cpp"
-
-}
-
-void Matcher::c_calling_convention(BasicType *sig_bt, VMRegPair *regs, uint length) {
-
-#line 4111 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
-
-    // This is obviously always outgoing.
-    // C argument in register AND stack slot.
-    (void) SharedRuntime::c_calling_convention(sig_bt, regs, /*regs2=*/NULL, length);
-  
-#line 22644 "ad_ppc.cpp"
-
-}
-
-OptoRegPair Matcher::return_value(uint ideal_reg, bool is_outgoing) {
-
-#line 4134 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3829 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     assert((ideal_reg >= Op_RegI && ideal_reg <= Op_RegL) ||
-            (ideal_reg == Op_RegN && Universe::narrow_oop_base() == NULL && Universe::narrow_oop_shift() == 0),
+            (ideal_reg == Op_RegN && CompressedOops::base() == NULL && CompressedOops::shift() == 0),
             "only return normal values");
     // enum names from opcodes.hpp:    Op_Node Op_Set Op_RegN       Op_RegI       Op_RegP       Op_RegF       Op_RegD       Op_RegL
     static int typeToRegLo[Op_RegL+1] = { 0,   0,     R3_num,   R3_num,   R3_num,   F1_num,   F1_num,   R3_num };
     static int typeToRegHi[Op_RegL+1] = { 0,   0,     OptoReg::Bad, R3_H_num, R3_H_num, OptoReg::Bad, F1_H_num, R3_H_num };
     return OptoRegPair(typeToRegHi[ideal_reg], typeToRegLo[ideal_reg]);
   
-#line 22660 "ad_ppc.cpp"
+#line 24738 "ad_ppc.cpp"
 
 }
 
-OptoRegPair Matcher::c_return_value(uint ideal_reg, bool is_outgoing) {
+OptoRegPair Matcher::c_return_value(uint ideal_reg) {
 
-#line 4123 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/ppc/ppc.ad"
+#line 3818 "/priv/d038402/git/reinrich/jdk3/src/hotspot/cpu/ppc/ppc.ad"
 
     assert((ideal_reg >= Op_RegI && ideal_reg <= Op_RegL) ||
-            (ideal_reg == Op_RegN && Universe::narrow_oop_base() == NULL && Universe::narrow_oop_shift() == 0),
+            (ideal_reg == Op_RegN && CompressedOops::base() == NULL && CompressedOops::shift() == 0),
             "only return normal values");
     // enum names from opcodes.hpp:    Op_Node Op_Set Op_RegN       Op_RegI       Op_RegP       Op_RegF       Op_RegD       Op_RegL
     static int typeToRegLo[Op_RegL+1] = { 0,   0,     R3_num,   R3_num,   R3_num,   F1_num,   F1_num,   R3_num };
     static int typeToRegHi[Op_RegL+1] = { 0,   0,     OptoReg::Bad, R3_H_num, R3_H_num, OptoReg::Bad, F1_H_num, R3_H_num };
     return OptoRegPair(typeToRegHi[ideal_reg], typeToRegLo[ideal_reg]);
   
-#line 22676 "ad_ppc.cpp"
+#line 24754 "ad_ppc.cpp"
 
 }
 
 OptoReg::Name Matcher::inline_cache_reg() { return OptoReg::Name(R19_num); }
 
 int Matcher::inline_cache_reg_encode() { return _regEncode[inline_cache_reg()]; }
-
-OptoReg::Name Matcher::interpreter_method_oop_reg() { return OptoReg::Name(R19_num); }
-
-int Matcher::interpreter_method_oop_reg_encode() { return _regEncode[interpreter_method_oop_reg()]; }
 
 OptoReg::Name Matcher::interpreter_frame_pointer_reg() { return OptoReg::Name(R14_num); }
 
@@ -22694,7 +24768,7 @@ int  Matcher::number_of_saved_registers() {
   return 0;
 };
 
-bool Compile::needs_clone_jvms() { return true; }
+bool Compile::needs_deep_clone_jvms() { return true; }
 
 // Check consistency of C++ compilation with ADLC options:
 // Check adlc -DLINUX=1

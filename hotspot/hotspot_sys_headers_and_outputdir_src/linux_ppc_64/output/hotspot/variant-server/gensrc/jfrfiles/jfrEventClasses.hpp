@@ -129,7 +129,9 @@ struct JfrStructG1EvacuationStatistics
   u8 _undoWaste;
   u8 _regionEndWaste;
   unsigned _regionsRefilled;
+  u8 _numPlabsFilled;
   u8 _directAllocated;
+  u8 _numDirectAllocated;
   u8 _failureUsed;
   u8 _failureWaste;
 
@@ -141,7 +143,9 @@ struct JfrStructG1EvacuationStatistics
   void set_undoWaste(u8 new_value) { this->_undoWaste = new_value; }
   void set_regionEndWaste(u8 new_value) { this->_regionEndWaste = new_value; }
   void set_regionsRefilled(unsigned new_value) { this->_regionsRefilled = new_value; }
+  void set_numPlabsFilled(u8 new_value) { this->_numPlabsFilled = new_value; }
   void set_directAllocated(u8 new_value) { this->_directAllocated = new_value; }
+  void set_numDirectAllocated(u8 new_value) { this->_numDirectAllocated = new_value; }
   void set_failureUsed(u8 new_value) { this->_failureUsed = new_value; }
   void set_failureWaste(u8 new_value) { this->_failureWaste = new_value; }
 
@@ -154,7 +158,9 @@ struct JfrStructG1EvacuationStatistics
     w.write(_undoWaste);
     w.write(_regionEndWaste);
     w.write(_regionsRefilled);
+    w.write(_numPlabsFilled);
     w.write(_directAllocated);
+    w.write(_numDirectAllocated);
     w.write(_failureUsed);
     w.write(_failureWaste);
   }
@@ -206,16 +212,260 @@ struct JfrStructStackFrame
 };
 
 
-class EventThreadStart : public JfrEvent<EventThreadStart>
+class EventDuration : public JfrEvent<EventDuration>
 {
  private:
-  u8 _thread;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrDurationEvent;
+
+  EventDuration(EventStartTime timing=TIMED) : JfrEvent<EventDuration>(timing) {}
+
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    JfrEventSetting::unhide_internal_types();
+  }
+
+  using JfrEvent<EventDuration>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventDuration(
+    ) : JfrEvent<EventDuration>(TIMED) {
+    if (should_commit()) {
+    }
+  }
+
+  void commit() {
+    if (should_commit()) {
+      commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+  }
+#endif
+};
+
+class EventInstant : public JfrEvent<EventInstant>
+{
+ private:
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrInstantEvent;
+
+  EventInstant(EventStartTime timing=TIMED) : JfrEvent<EventInstant>(timing) {}
+
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    JfrEventSetting::unhide_internal_types();
+  }
+
+  using JfrEvent<EventInstant>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+#ifdef ASSERT
+  void verify() const {
+  }
+#endif
+};
+
+class EventValue : public JfrEvent<EventValue>
+{
+ private:
+  u8 _value;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrValueEvent;
+
+  EventValue(EventStartTime timing=TIMED) : JfrEvent<EventValue>(timing) {}
+
+  void set_value(u8 new_value) {
+    this->_value = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    JfrEventSetting::unhide_internal_types();
+    w.write(_value);
+  }
+
+  using JfrEvent<EventValue>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 value) {
+    EventValue me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_value(value);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_value");
+  }
+#endif
+};
+
+class EventText : public JfrEvent<EventText>
+{
+ private:
+  const char* _text;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrTextEvent;
+
+  EventText(EventStartTime timing=TIMED) : JfrEvent<EventText>(timing) {}
+
+  void set_text(const char* new_value) {
+    this->_text = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    JfrEventSetting::unhide_internal_types();
+    w.write(_text);
+  }
+
+  using JfrEvent<EventText>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* text) {
+    EventText me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_text(text);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_text");
+  }
+#endif
+};
+
+class EventZThreadDebug : public JfrEvent<EventZThreadDebug>
+{
+ private:
+  unsigned _gcId;
+  const char* _name;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrZThreadDebugEvent;
+
+  EventZThreadDebug(EventStartTime timing=TIMED) : JfrEvent<EventZThreadDebug>(timing) {}
+
+  void set_gcId(unsigned new_value) {
+    this->_gcId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_name(const char* new_value) {
+    this->_name = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    JfrEventSetting::unhide_internal_types();
+    w.write(_gcId);
+    w.write(_name);
+  }
+
+  using JfrEvent<EventZThreadDebug>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZThreadDebug(
+    unsigned gcId,
+    const char* name) : JfrEvent<EventZThreadDebug>(TIMED) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_name(name);
+    }
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_name(name);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+    EventZThreadDebug me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_gcId(gcId);
+      me.set_name(name);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_gcId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_name");
+  }
+#endif
+};
+
+class EventThreadStart : public JfrEvent<EventThreadStart>
+{
+ private:
+  u8 _thread;
+  u8 _parentThread;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrThreadStartEvent;
 
@@ -225,21 +475,28 @@ class EventThreadStart : public JfrEvent<EventThreadStart>
     this->_thread = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
+  void set_parentThread(u8 new_value) {
+    this->_parentThread = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
 
   template <typename Writer>
   void writeData(Writer& w) {
     w.write(_thread);
+    w.write(_parentThread);
   }
 
   using JfrEvent<EventThreadStart>::commit; // else commit() is hidden by overloaded versions in this class
 
 
 
-  static void commit(u8 thread) {
+  static void commit(u8 thread,
+                     u8 parentThread) {
     EventThreadStart me(UNTIMED);
 
     if (me.should_commit()) {
       me.set_thread(thread);
+      me.set_parentThread(parentThread);
       me.commit();
     }
   }
@@ -247,6 +504,7 @@ class EventThreadStart : public JfrEvent<EventThreadStart>
 #ifdef ASSERT
   void verify() const {
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_thread");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_parentThread");
   }
 #endif
 };
@@ -261,6 +519,7 @@ class EventThreadEnd : public JfrEvent<EventThreadEnd>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrThreadEndEvent;
 
@@ -296,72 +555,12 @@ class EventThreadEnd : public JfrEvent<EventThreadEnd>
 #endif
 };
 
-class EventThreadSleep : public JfrEvent<EventThreadSleep>
-{
- private:
-  s8 _time;
-
- public:
-  static const bool hasThread = true;
-  static const bool hasStackTrace = true;
-  static const bool isInstant = false;
-  static const bool hasCutoff = false;
-  static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrThreadSleepEvent;
-
-  EventThreadSleep(EventStartTime timing=TIMED) : JfrEvent<EventThreadSleep>(timing) {}
-
-  void set_time(s8 new_value) {
-    this->_time = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_time);
-  }
-
-  using JfrEvent<EventThreadSleep>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventThreadSleep(
-    s8 time) : JfrEvent<EventThreadSleep>(TIMED) {
-    if (should_commit()) {
-      set_time(time);
-    }
-  }
-
-  void commit(s8 time) {
-    if (should_commit()) {
-      set_time(time);
-      commit();
-    }
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     s8 time) {
-    EventThreadSleep me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_time(time);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_time");
-  }
-#endif
-};
-
 class EventThreadPark : public JfrEvent<EventThreadPark>
 {
  private:
   const Klass* _parkedClass;
   s8 _timeout;
+  s8 _until;
   u8 _address;
 
  public:
@@ -369,6 +568,7 @@ class EventThreadPark : public JfrEvent<EventThreadPark>
   static const bool hasStackTrace = true;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrThreadParkEvent;
 
@@ -382,15 +582,20 @@ class EventThreadPark : public JfrEvent<EventThreadPark>
     this->_timeout = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
+  void set_until(s8 new_value) {
+    this->_until = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
   void set_address(u8 new_value) {
     this->_address = new_value;
-    DEBUG_ONLY(set_field_bit(2));
+    DEBUG_ONLY(set_field_bit(3));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
     w.write(_parkedClass);
     w.write(_timeout);
+    w.write(_until);
     w.write(_address);
   }
 
@@ -399,20 +604,24 @@ class EventThreadPark : public JfrEvent<EventThreadPark>
   EventThreadPark(
     const Klass* parkedClass,
     s8 timeout,
+    s8 until,
     u8 address) : JfrEvent<EventThreadPark>(TIMED) {
     if (should_commit()) {
       set_parkedClass(parkedClass);
       set_timeout(timeout);
+      set_until(until);
       set_address(address);
     }
   }
 
   void commit(const Klass* parkedClass,
               s8 timeout,
+              s8 until,
               u8 address) {
     if (should_commit()) {
       set_parkedClass(parkedClass);
       set_timeout(timeout);
+      set_until(until);
       set_address(address);
       commit();
     }
@@ -422,6 +631,7 @@ class EventThreadPark : public JfrEvent<EventThreadPark>
                      const Ticks& endTicks,
                      const Klass* parkedClass,
                      s8 timeout,
+                     s8 until,
                      u8 address) {
     EventThreadPark me(UNTIMED);
 
@@ -430,6 +640,7 @@ class EventThreadPark : public JfrEvent<EventThreadPark>
       me.set_endtime(endTicks);
       me.set_parkedClass(parkedClass);
       me.set_timeout(timeout);
+      me.set_until(until);
       me.set_address(address);
       me.commit();
     }
@@ -439,7 +650,8 @@ class EventThreadPark : public JfrEvent<EventThreadPark>
   void verify() const {
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_parkedClass");
     assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_timeout");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_address");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_until");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_address");
   }
 #endif
 };
@@ -456,6 +668,7 @@ class EventJavaMonitorEnter : public JfrEvent<EventJavaMonitorEnter>
   static const bool hasStackTrace = true;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrJavaMonitorEnterEvent;
 
@@ -545,6 +758,7 @@ class EventJavaMonitorWait : public JfrEvent<EventJavaMonitorWait>
   static const bool hasStackTrace = true;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrJavaMonitorWaitEvent;
 
@@ -656,6 +870,7 @@ class EventJavaMonitorInflate : public JfrEvent<EventJavaMonitorInflate>
   static const bool hasStackTrace = true;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrJavaMonitorInflateEvent;
 
@@ -731,237 +946,470 @@ class EventJavaMonitorInflate : public JfrEvent<EventJavaMonitorInflate>
 #endif
 };
 
-class EventBiasedLockRevocation : public JfrEvent<EventBiasedLockRevocation>
+class EventSyncOnValueBasedClass : public JfrEvent<EventSyncOnValueBasedClass>
 {
  private:
-  const Klass* _lockClass;
-  s4 _safepointId;
-  u8 _previousOwner;
+  const Klass* _valueBasedClass;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrSyncOnValueBasedClassEvent;
+
+  EventSyncOnValueBasedClass(EventStartTime timing=TIMED) : JfrEvent<EventSyncOnValueBasedClass>(timing) {}
+
+  void set_valueBasedClass(const Klass* new_value) {
+    this->_valueBasedClass = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_valueBasedClass);
+  }
+
+  using JfrEvent<EventSyncOnValueBasedClass>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* valueBasedClass) {
+    EventSyncOnValueBasedClass me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_valueBasedClass(valueBasedClass);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_valueBasedClass");
+  }
+#endif
+};
+
+class EventContinuationFreeze : public JfrEvent<EventContinuationFreeze>
+{
+ private:
+  u8 _carrierThread;
+  const Klass* _continuationClass;
+  u2 _interpretedFrames;
+  u2 _size;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = true;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrBiasedLockRevocationEvent;
+  static const JfrEventId eventId = JfrContinuationFreezeEvent;
 
-  EventBiasedLockRevocation(EventStartTime timing=TIMED) : JfrEvent<EventBiasedLockRevocation>(timing) {}
+  EventContinuationFreeze(EventStartTime timing=TIMED) : JfrEvent<EventContinuationFreeze>(timing) {}
 
-  void set_lockClass(const Klass* new_value) {
-    this->_lockClass = new_value;
+  void set_carrierThread(u8 new_value) {
+    this->_carrierThread = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_safepointId(s4 new_value) {
-    this->_safepointId = new_value;
+  void set_continuationClass(const Klass* new_value) {
+    this->_continuationClass = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
-  void set_previousOwner(u8 new_value) {
-    this->_previousOwner = new_value;
+  void set_interpretedFrames(u2 new_value) {
+    this->_interpretedFrames = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_size(u2 new_value) {
+    this->_size = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_carrierThread);
+    w.write(_continuationClass);
+    w.write(_interpretedFrames);
+    w.write(_size);
+  }
+
+  using JfrEvent<EventContinuationFreeze>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventContinuationFreeze(
+    u8 carrierThread,
+    const Klass* continuationClass,
+    u2 interpretedFrames,
+    u2 size) : JfrEvent<EventContinuationFreeze>(TIMED) {
+    if (should_commit()) {
+      set_carrierThread(carrierThread);
+      set_continuationClass(continuationClass);
+      set_interpretedFrames(interpretedFrames);
+      set_size(size);
+    }
+  }
+
+  void commit(u8 carrierThread,
+              const Klass* continuationClass,
+              u2 interpretedFrames,
+              u2 size) {
+    if (should_commit()) {
+      set_carrierThread(carrierThread);
+      set_continuationClass(continuationClass);
+      set_interpretedFrames(interpretedFrames);
+      set_size(size);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 carrierThread,
+                     const Klass* continuationClass,
+                     u2 interpretedFrames,
+                     u2 size) {
+    EventContinuationFreeze me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_carrierThread(carrierThread);
+      me.set_continuationClass(continuationClass);
+      me.set_interpretedFrames(interpretedFrames);
+      me.set_size(size);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_carrierThread");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_continuationClass");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_interpretedFrames");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_size");
+  }
+#endif
+};
+
+class EventContinuationThaw : public JfrEvent<EventContinuationThaw>
+{
+ private:
+  u8 _carrierThread;
+  const Klass* _continuationClass;
+  u2 _interpretedFrames;
+  u2 _size;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrContinuationThawEvent;
+
+  EventContinuationThaw(EventStartTime timing=TIMED) : JfrEvent<EventContinuationThaw>(timing) {}
+
+  void set_carrierThread(u8 new_value) {
+    this->_carrierThread = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_continuationClass(const Klass* new_value) {
+    this->_continuationClass = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_interpretedFrames(u2 new_value) {
+    this->_interpretedFrames = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_size(u2 new_value) {
+    this->_size = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_carrierThread);
+    w.write(_continuationClass);
+    w.write(_interpretedFrames);
+    w.write(_size);
+  }
+
+  using JfrEvent<EventContinuationThaw>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventContinuationThaw(
+    u8 carrierThread,
+    const Klass* continuationClass,
+    u2 interpretedFrames,
+    u2 size) : JfrEvent<EventContinuationThaw>(TIMED) {
+    if (should_commit()) {
+      set_carrierThread(carrierThread);
+      set_continuationClass(continuationClass);
+      set_interpretedFrames(interpretedFrames);
+      set_size(size);
+    }
+  }
+
+  void commit(u8 carrierThread,
+              const Klass* continuationClass,
+              u2 interpretedFrames,
+              u2 size) {
+    if (should_commit()) {
+      set_carrierThread(carrierThread);
+      set_continuationClass(continuationClass);
+      set_interpretedFrames(interpretedFrames);
+      set_size(size);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 carrierThread,
+                     const Klass* continuationClass,
+                     u2 interpretedFrames,
+                     u2 size) {
+    EventContinuationThaw me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_carrierThread(carrierThread);
+      me.set_continuationClass(continuationClass);
+      me.set_interpretedFrames(interpretedFrames);
+      me.set_size(size);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_carrierThread");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_continuationClass");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_interpretedFrames");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_size");
+  }
+#endif
+};
+
+class EventContinuationFreezeFast : public JfrEvent<EventContinuationFreezeFast>
+{
+ private:
+  u8 _id;
+  unsigned _size;
+  bool _allocate;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrContinuationFreezeFastEvent;
+
+  EventContinuationFreezeFast(EventStartTime timing=TIMED) : JfrEvent<EventContinuationFreezeFast>(timing) {}
+
+  void set_id(u8 new_value) {
+    this->_id = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_size(unsigned new_value) {
+    this->_size = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_allocate(bool new_value) {
+    this->_allocate = new_value;
     DEBUG_ONLY(set_field_bit(2));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
-    w.write(_lockClass);
-    w.write(_safepointId);
-    w.write(_previousOwner);
+    w.write(_id);
+    w.write(_size);
+    w.write(_allocate);
   }
 
-  using JfrEvent<EventBiasedLockRevocation>::commit; // else commit() is hidden by overloaded versions in this class
+  using JfrEvent<EventContinuationFreezeFast>::commit; // else commit() is hidden by overloaded versions in this class
 
-  EventBiasedLockRevocation(
-    const Klass* lockClass,
-    s4 safepointId,
-    u8 previousOwner) : JfrEvent<EventBiasedLockRevocation>(TIMED) {
-    if (should_commit()) {
-      set_lockClass(lockClass);
-      set_safepointId(safepointId);
-      set_previousOwner(previousOwner);
-    }
-  }
 
-  void commit(const Klass* lockClass,
-              s4 safepointId,
-              u8 previousOwner) {
-    if (should_commit()) {
-      set_lockClass(lockClass);
-      set_safepointId(safepointId);
-      set_previousOwner(previousOwner);
-      commit();
-    }
-  }
 
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     const Klass* lockClass,
-                     s4 safepointId,
-                     u8 previousOwner) {
-    EventBiasedLockRevocation me(UNTIMED);
+  static void commit(u8 id,
+                     unsigned size,
+                     bool allocate) {
+    EventContinuationFreezeFast me(UNTIMED);
 
     if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_lockClass(lockClass);
-      me.set_safepointId(safepointId);
-      me.set_previousOwner(previousOwner);
+      me.set_id(id);
+      me.set_size(size);
+      me.set_allocate(allocate);
       me.commit();
     }
   }
 
 #ifdef ASSERT
   void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_lockClass");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_safepointId");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_previousOwner");
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_id");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_size");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_allocate");
   }
 #endif
 };
 
-class EventBiasedLockSelfRevocation : public JfrEvent<EventBiasedLockSelfRevocation>
+class EventContinuationFreezeSlow : public JfrEvent<EventContinuationFreezeSlow>
 {
  private:
-  const Klass* _lockClass;
+  u8 _id;
 
  public:
   static const bool hasThread = true;
-  static const bool hasStackTrace = true;
-  static const bool isInstant = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrBiasedLockSelfRevocationEvent;
+  static const JfrEventId eventId = JfrContinuationFreezeSlowEvent;
 
-  EventBiasedLockSelfRevocation(EventStartTime timing=TIMED) : JfrEvent<EventBiasedLockSelfRevocation>(timing) {}
+  EventContinuationFreezeSlow(EventStartTime timing=TIMED) : JfrEvent<EventContinuationFreezeSlow>(timing) {}
 
-  void set_lockClass(const Klass* new_value) {
-    this->_lockClass = new_value;
+  void set_id(u8 new_value) {
+    this->_id = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
-    w.write(_lockClass);
+    w.write(_id);
   }
 
-  using JfrEvent<EventBiasedLockSelfRevocation>::commit; // else commit() is hidden by overloaded versions in this class
+  using JfrEvent<EventContinuationFreezeSlow>::commit; // else commit() is hidden by overloaded versions in this class
 
-  EventBiasedLockSelfRevocation(
-    const Klass* lockClass) : JfrEvent<EventBiasedLockSelfRevocation>(TIMED) {
-    if (should_commit()) {
-      set_lockClass(lockClass);
-    }
-  }
 
-  void commit(const Klass* lockClass) {
-    if (should_commit()) {
-      set_lockClass(lockClass);
-      commit();
-    }
-  }
 
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     const Klass* lockClass) {
-    EventBiasedLockSelfRevocation me(UNTIMED);
+  static void commit(u8 id) {
+    EventContinuationFreezeSlow me(UNTIMED);
 
     if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_lockClass(lockClass);
+      me.set_id(id);
       me.commit();
     }
   }
 
 #ifdef ASSERT
   void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_lockClass");
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_id");
   }
 #endif
 };
 
-class EventBiasedLockClassRevocation : public JfrEvent<EventBiasedLockClassRevocation>
+class EventContinuationThawFast : public JfrEvent<EventContinuationThawFast>
 {
  private:
-  const Klass* _revokedClass;
-  bool _disableBiasing;
-  s4 _safepointId;
+  u8 _id;
+  bool _full;
+  unsigned _size;
 
  public:
   static const bool hasThread = true;
-  static const bool hasStackTrace = true;
-  static const bool isInstant = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrBiasedLockClassRevocationEvent;
+  static const JfrEventId eventId = JfrContinuationThawFastEvent;
 
-  EventBiasedLockClassRevocation(EventStartTime timing=TIMED) : JfrEvent<EventBiasedLockClassRevocation>(timing) {}
+  EventContinuationThawFast(EventStartTime timing=TIMED) : JfrEvent<EventContinuationThawFast>(timing) {}
 
-  void set_revokedClass(const Klass* new_value) {
-    this->_revokedClass = new_value;
+  void set_id(u8 new_value) {
+    this->_id = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_disableBiasing(bool new_value) {
-    this->_disableBiasing = new_value;
+  void set_full(bool new_value) {
+    this->_full = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
-  void set_safepointId(s4 new_value) {
-    this->_safepointId = new_value;
+  void set_size(unsigned new_value) {
+    this->_size = new_value;
     DEBUG_ONLY(set_field_bit(2));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
-    w.write(_revokedClass);
-    w.write(_disableBiasing);
-    w.write(_safepointId);
+    w.write(_id);
+    w.write(_full);
+    w.write(_size);
   }
 
-  using JfrEvent<EventBiasedLockClassRevocation>::commit; // else commit() is hidden by overloaded versions in this class
+  using JfrEvent<EventContinuationThawFast>::commit; // else commit() is hidden by overloaded versions in this class
 
-  EventBiasedLockClassRevocation(
-    const Klass* revokedClass,
-    bool disableBiasing,
-    s4 safepointId) : JfrEvent<EventBiasedLockClassRevocation>(TIMED) {
-    if (should_commit()) {
-      set_revokedClass(revokedClass);
-      set_disableBiasing(disableBiasing);
-      set_safepointId(safepointId);
-    }
-  }
 
-  void commit(const Klass* revokedClass,
-              bool disableBiasing,
-              s4 safepointId) {
-    if (should_commit()) {
-      set_revokedClass(revokedClass);
-      set_disableBiasing(disableBiasing);
-      set_safepointId(safepointId);
-      commit();
-    }
-  }
 
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     const Klass* revokedClass,
-                     bool disableBiasing,
-                     s4 safepointId) {
-    EventBiasedLockClassRevocation me(UNTIMED);
+  static void commit(u8 id,
+                     bool full,
+                     unsigned size) {
+    EventContinuationThawFast me(UNTIMED);
 
     if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_revokedClass(revokedClass);
-      me.set_disableBiasing(disableBiasing);
-      me.set_safepointId(safepointId);
+      me.set_id(id);
+      me.set_full(full);
+      me.set_size(size);
       me.commit();
     }
   }
 
 #ifdef ASSERT
   void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_revokedClass");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_disableBiasing");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_safepointId");
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_id");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_full");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_size");
+  }
+#endif
+};
+
+class EventContinuationThawSlow : public JfrEvent<EventContinuationThawSlow>
+{
+ private:
+  u8 _id;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrContinuationThawSlowEvent;
+
+  EventContinuationThawSlow(EventStartTime timing=TIMED) : JfrEvent<EventContinuationThawSlow>(timing) {}
+
+  void set_id(u8 new_value) {
+    this->_id = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_id);
+  }
+
+  using JfrEvent<EventContinuationThawSlow>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 id) {
+    EventContinuationThawSlow me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_id(id);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_id");
   }
 #endif
 };
@@ -976,6 +1424,7 @@ class EventReservedStackActivation : public JfrEvent<EventReservedStackActivatio
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrReservedStackActivationEvent;
 
@@ -1023,6 +1472,7 @@ class EventClassLoad : public JfrEvent<EventClassLoad>
   static const bool hasStackTrace = true;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrClassLoadEvent;
 
@@ -1109,6 +1559,7 @@ class EventClassDefine : public JfrEvent<EventClassDefine>
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrClassDefineEvent;
 
@@ -1152,6 +1603,220 @@ class EventClassDefine : public JfrEvent<EventClassDefine>
 #endif
 };
 
+class EventClassRedefinition : public JfrEvent<EventClassRedefinition>
+{
+ private:
+  const Klass* _redefinedClass;
+  s4 _classModificationCount;
+  u8 _redefinitionId;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrClassRedefinitionEvent;
+
+  EventClassRedefinition(EventStartTime timing=TIMED) : JfrEvent<EventClassRedefinition>(timing) {}
+
+  void set_redefinedClass(const Klass* new_value) {
+    this->_redefinedClass = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_classModificationCount(s4 new_value) {
+    this->_classModificationCount = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_redefinitionId(u8 new_value) {
+    this->_redefinitionId = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_redefinedClass);
+    w.write(_classModificationCount);
+    w.write(_redefinitionId);
+  }
+
+  using JfrEvent<EventClassRedefinition>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* redefinedClass,
+                     s4 classModificationCount,
+                     u8 redefinitionId) {
+    EventClassRedefinition me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_redefinedClass(redefinedClass);
+      me.set_classModificationCount(classModificationCount);
+      me.set_redefinitionId(redefinitionId);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_redefinedClass");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_classModificationCount");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_redefinitionId");
+  }
+#endif
+};
+
+class EventRedefineClasses : public JfrEvent<EventRedefineClasses>
+{
+ private:
+  s4 _classCount;
+  u8 _redefinitionId;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrRedefineClassesEvent;
+
+  EventRedefineClasses(EventStartTime timing=TIMED) : JfrEvent<EventRedefineClasses>(timing) {}
+
+  void set_classCount(s4 new_value) {
+    this->_classCount = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_redefinitionId(u8 new_value) {
+    this->_redefinitionId = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_classCount);
+    w.write(_redefinitionId);
+  }
+
+  using JfrEvent<EventRedefineClasses>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventRedefineClasses(
+    s4 classCount,
+    u8 redefinitionId) : JfrEvent<EventRedefineClasses>(TIMED) {
+    if (should_commit()) {
+      set_classCount(classCount);
+      set_redefinitionId(redefinitionId);
+    }
+  }
+
+  void commit(s4 classCount,
+              u8 redefinitionId) {
+    if (should_commit()) {
+      set_classCount(classCount);
+      set_redefinitionId(redefinitionId);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     s4 classCount,
+                     u8 redefinitionId) {
+    EventRedefineClasses me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_classCount(classCount);
+      me.set_redefinitionId(redefinitionId);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_classCount");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_redefinitionId");
+  }
+#endif
+};
+
+class EventRetransformClasses : public JfrEvent<EventRetransformClasses>
+{
+ private:
+  s4 _classCount;
+  u8 _redefinitionId;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrRetransformClassesEvent;
+
+  EventRetransformClasses(EventStartTime timing=TIMED) : JfrEvent<EventRetransformClasses>(timing) {}
+
+  void set_classCount(s4 new_value) {
+    this->_classCount = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_redefinitionId(u8 new_value) {
+    this->_redefinitionId = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_classCount);
+    w.write(_redefinitionId);
+  }
+
+  using JfrEvent<EventRetransformClasses>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventRetransformClasses(
+    s4 classCount,
+    u8 redefinitionId) : JfrEvent<EventRetransformClasses>(TIMED) {
+    if (should_commit()) {
+      set_classCount(classCount);
+      set_redefinitionId(redefinitionId);
+    }
+  }
+
+  void commit(s4 classCount,
+              u8 redefinitionId) {
+    if (should_commit()) {
+      set_classCount(classCount);
+      set_redefinitionId(redefinitionId);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     s4 classCount,
+                     u8 redefinitionId) {
+    EventRetransformClasses me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_classCount(classCount);
+      me.set_redefinitionId(redefinitionId);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_classCount");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_redefinitionId");
+  }
+#endif
+};
+
 class EventClassUnload : public JfrEvent<EventClassUnload>
 {
  private:
@@ -1163,6 +1828,7 @@ class EventClassUnload : public JfrEvent<EventClassUnload>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrClassUnloadEvent;
 
@@ -1219,6 +1885,7 @@ class EventIntFlagChanged : public JfrEvent<EventIntFlagChanged>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrIntFlagChangedEvent;
 
@@ -1291,6 +1958,7 @@ class EventUnsignedIntFlagChanged : public JfrEvent<EventUnsignedIntFlagChanged>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrUnsignedIntFlagChangedEvent;
 
@@ -1363,6 +2031,7 @@ class EventLongFlagChanged : public JfrEvent<EventLongFlagChanged>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrLongFlagChangedEvent;
 
@@ -1435,6 +2104,7 @@ class EventUnsignedLongFlagChanged : public JfrEvent<EventUnsignedLongFlagChange
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrUnsignedLongFlagChangedEvent;
 
@@ -1507,6 +2177,7 @@ class EventDoubleFlagChanged : public JfrEvent<EventDoubleFlagChanged>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrDoubleFlagChangedEvent;
 
@@ -1579,6 +2250,7 @@ class EventBooleanFlagChanged : public JfrEvent<EventBooleanFlagChanged>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrBooleanFlagChangedEvent;
 
@@ -1651,6 +2323,7 @@ class EventStringFlagChanged : public JfrEvent<EventStringFlagChanged>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrStringFlagChangedEvent;
 
@@ -1723,6 +2396,7 @@ class EventGCHeapSummary : public JfrEvent<EventGCHeapSummary>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCHeapSummaryEvent;
 
@@ -1797,6 +2471,7 @@ class EventMetaspaceSummary : public JfrEvent<EventMetaspaceSummary>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrMetaspaceSummaryEvent;
 
@@ -1884,6 +2559,7 @@ class EventMetaspaceGCThreshold : public JfrEvent<EventMetaspaceGCThreshold>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrMetaspaceGCThresholdEvent;
 
@@ -1939,7 +2615,7 @@ class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocation
 {
  private:
   const ClassLoaderData* _classLoader;
-  bool _anonymousClassLoader;
+  bool _hiddenClassLoader;
   u8 _size;
   u8 _metadataType;
   u8 _metaspaceObjectType;
@@ -1949,6 +2625,7 @@ class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocation
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrMetaspaceAllocationFailureEvent;
 
@@ -1958,8 +2635,8 @@ class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocation
     this->_classLoader = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_anonymousClassLoader(bool new_value) {
-    this->_anonymousClassLoader = new_value;
+  void set_hiddenClassLoader(bool new_value) {
+    this->_hiddenClassLoader = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
   void set_size(u8 new_value) {
@@ -1978,7 +2655,7 @@ class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocation
   template <typename Writer>
   void writeData(Writer& w) {
     w.write(_classLoader);
-    w.write(_anonymousClassLoader);
+    w.write(_hiddenClassLoader);
     w.write(_size);
     w.write(_metadataType);
     w.write(_metaspaceObjectType);
@@ -1989,7 +2666,7 @@ class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocation
 
 
   static void commit(const ClassLoaderData* classLoader,
-                     bool anonymousClassLoader,
+                     bool hiddenClassLoader,
                      u8 size,
                      u8 metadataType,
                      u8 metaspaceObjectType) {
@@ -1997,7 +2674,7 @@ class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocation
 
     if (me.should_commit()) {
       me.set_classLoader(classLoader);
-      me.set_anonymousClassLoader(anonymousClassLoader);
+      me.set_hiddenClassLoader(hiddenClassLoader);
       me.set_size(size);
       me.set_metadataType(metadataType);
       me.set_metaspaceObjectType(metaspaceObjectType);
@@ -2008,7 +2685,7 @@ class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocation
 #ifdef ASSERT
   void verify() const {
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_classLoader");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_anonymousClassLoader");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_hiddenClassLoader");
     assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_size");
     assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_metadataType");
     assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_metaspaceObjectType");
@@ -2020,7 +2697,7 @@ class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
 {
  private:
   const ClassLoaderData* _classLoader;
-  bool _anonymousClassLoader;
+  bool _hiddenClassLoader;
   u8 _size;
   u8 _metadataType;
   u8 _metaspaceObjectType;
@@ -2030,6 +2707,7 @@ class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrMetaspaceOOMEvent;
 
@@ -2039,8 +2717,8 @@ class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
     this->_classLoader = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_anonymousClassLoader(bool new_value) {
-    this->_anonymousClassLoader = new_value;
+  void set_hiddenClassLoader(bool new_value) {
+    this->_hiddenClassLoader = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
   void set_size(u8 new_value) {
@@ -2059,7 +2737,7 @@ class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
   template <typename Writer>
   void writeData(Writer& w) {
     w.write(_classLoader);
-    w.write(_anonymousClassLoader);
+    w.write(_hiddenClassLoader);
     w.write(_size);
     w.write(_metadataType);
     w.write(_metaspaceObjectType);
@@ -2070,7 +2748,7 @@ class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
 
 
   static void commit(const ClassLoaderData* classLoader,
-                     bool anonymousClassLoader,
+                     bool hiddenClassLoader,
                      u8 size,
                      u8 metadataType,
                      u8 metaspaceObjectType) {
@@ -2078,7 +2756,7 @@ class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
 
     if (me.should_commit()) {
       me.set_classLoader(classLoader);
-      me.set_anonymousClassLoader(anonymousClassLoader);
+      me.set_hiddenClassLoader(hiddenClassLoader);
       me.set_size(size);
       me.set_metadataType(metadataType);
       me.set_metaspaceObjectType(metaspaceObjectType);
@@ -2089,7 +2767,7 @@ class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
 #ifdef ASSERT
   void verify() const {
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_classLoader");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_anonymousClassLoader");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_hiddenClassLoader");
     assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_size");
     assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_metadataType");
     assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_metaspaceObjectType");
@@ -2117,6 +2795,7 @@ class EventMetaspaceChunkFreeListSummary : public JfrEvent<EventMetaspaceChunkFr
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrMetaspaceChunkFreeListSummaryEvent;
 
@@ -2249,6 +2928,7 @@ class EventPSHeapSummary : public JfrEvent<EventPSHeapSummary>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrPSHeapSummaryEvent;
 
@@ -2348,6 +3028,7 @@ class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
   u8 _edenUsedSize;
   u8 _edenTotalSize;
   u8 _survivorUsedSize;
+  u8 _oldGenUsedSize;
   unsigned _numberOfRegions;
 
  public:
@@ -2355,6 +3036,7 @@ class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1HeapSummaryEvent;
 
@@ -2380,9 +3062,13 @@ class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
     this->_survivorUsedSize = new_value;
     DEBUG_ONLY(set_field_bit(4));
   }
+  void set_oldGenUsedSize(u8 new_value) {
+    this->_oldGenUsedSize = new_value;
+    DEBUG_ONLY(set_field_bit(5));
+  }
   void set_numberOfRegions(unsigned new_value) {
     this->_numberOfRegions = new_value;
-    DEBUG_ONLY(set_field_bit(5));
+    DEBUG_ONLY(set_field_bit(6));
   }
 
   template <typename Writer>
@@ -2392,6 +3078,7 @@ class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
     w.write(_edenUsedSize);
     w.write(_edenTotalSize);
     w.write(_survivorUsedSize);
+    w.write(_oldGenUsedSize);
     w.write(_numberOfRegions);
   }
 
@@ -2404,6 +3091,7 @@ class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
                      u8 edenUsedSize,
                      u8 edenTotalSize,
                      u8 survivorUsedSize,
+                     u8 oldGenUsedSize,
                      unsigned numberOfRegions) {
     EventG1HeapSummary me(UNTIMED);
 
@@ -2413,6 +3101,7 @@ class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
       me.set_edenUsedSize(edenUsedSize);
       me.set_edenTotalSize(edenTotalSize);
       me.set_survivorUsedSize(survivorUsedSize);
+      me.set_oldGenUsedSize(oldGenUsedSize);
       me.set_numberOfRegions(numberOfRegions);
       me.commit();
     }
@@ -2425,7 +3114,8 @@ class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
     assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_edenUsedSize");
     assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_edenTotalSize");
     assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_survivorUsedSize");
-    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_numberOfRegions");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_oldGenUsedSize");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_numberOfRegions");
   }
 #endif
 };
@@ -2444,6 +3134,7 @@ class EventGarbageCollection : public JfrEvent<EventGarbageCollection>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGarbageCollectionEvent;
 
@@ -2543,6 +3234,68 @@ class EventGarbageCollection : public JfrEvent<EventGarbageCollection>
 #endif
 };
 
+class EventSystemGC : public JfrEvent<EventSystemGC>
+{
+ private:
+  bool _invokedConcurrent;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrSystemGCEvent;
+
+  EventSystemGC(EventStartTime timing=TIMED) : JfrEvent<EventSystemGC>(timing) {}
+
+  void set_invokedConcurrent(bool new_value) {
+    this->_invokedConcurrent = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_invokedConcurrent);
+  }
+
+  using JfrEvent<EventSystemGC>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventSystemGC(
+    bool invokedConcurrent) : JfrEvent<EventSystemGC>(TIMED) {
+    if (should_commit()) {
+      set_invokedConcurrent(invokedConcurrent);
+    }
+  }
+
+  void commit(bool invokedConcurrent) {
+    if (should_commit()) {
+      set_invokedConcurrent(invokedConcurrent);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     bool invokedConcurrent) {
+    EventSystemGC me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_invokedConcurrent(invokedConcurrent);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_invokedConcurrent");
+  }
+#endif
+};
+
 class EventParallelOldGarbageCollection : public JfrEvent<EventParallelOldGarbageCollection>
 {
  private:
@@ -2554,6 +3307,7 @@ class EventParallelOldGarbageCollection : public JfrEvent<EventParallelOldGarbag
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrParallelOldGarbageCollectionEvent;
 
@@ -2628,6 +3382,7 @@ class EventYoungGarbageCollection : public JfrEvent<EventYoungGarbageCollection>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrYoungGarbageCollectionEvent;
 
@@ -2701,6 +3456,7 @@ class EventOldGarbageCollection : public JfrEvent<EventOldGarbageCollection>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrOldGarbageCollectionEvent;
 
@@ -2763,6 +3519,7 @@ class EventG1GarbageCollection : public JfrEvent<EventG1GarbageCollection>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1GarbageCollectionEvent;
 
@@ -2839,6 +3596,7 @@ class EventG1MMU : public JfrEvent<EventG1MMU>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1MMUEvent;
 
@@ -2916,6 +3674,7 @@ class EventEvacuationInformation : public JfrEvent<EventEvacuationInformation>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrEvacuationInformationEvent;
 
@@ -3027,6 +3786,7 @@ class EventGCReferenceStatistics : public JfrEvent<EventGCReferenceStatistics>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCReferenceStatisticsEvent;
 
@@ -3091,6 +3851,7 @@ class EventObjectCountAfterGC : public JfrEvent<EventObjectCountAfterGC>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrObjectCountAfterGCEvent;
 
@@ -3160,6 +3921,7 @@ class EventG1EvacuationYoungStatistics : public JfrEvent<EventG1EvacuationYoungS
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1EvacuationYoungStatisticsEvent;
 
@@ -3205,6 +3967,7 @@ class EventG1EvacuationOldStatistics : public JfrEvent<EventG1EvacuationOldStati
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1EvacuationOldStatisticsEvent;
 
@@ -3258,6 +4021,7 @@ class EventG1BasicIHOP : public JfrEvent<EventG1BasicIHOP>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1BasicIHOPEvent;
 
@@ -3375,6 +4139,7 @@ class EventG1AdaptiveIHOP : public JfrEvent<EventG1AdaptiveIHOP>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1AdaptiveIHOPEvent;
 
@@ -3489,6 +4254,7 @@ class EventPromoteObjectInNewPLAB : public JfrEvent<EventPromoteObjectInNewPLAB>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrPromoteObjectInNewPLABEvent;
 
@@ -3578,6 +4344,7 @@ class EventPromoteObjectOutsidePLAB : public JfrEvent<EventPromoteObjectOutsideP
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrPromoteObjectOutsidePLABEvent;
 
@@ -3657,6 +4424,7 @@ class EventPromotionFailed : public JfrEvent<EventPromotionFailed>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrPromotionFailedEvent;
 
@@ -3719,6 +4487,7 @@ class EventEvacuationFailed : public JfrEvent<EventEvacuationFailed>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrEvacuationFailedEvent;
 
@@ -3772,6 +4541,7 @@ class EventConcurrentModeFailure : public JfrEvent<EventConcurrentModeFailure>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrConcurrentModeFailureEvent;
 
@@ -3807,6 +4577,79 @@ class EventConcurrentModeFailure : public JfrEvent<EventConcurrentModeFailure>
 #endif
 };
 
+class EventGCCPUTime : public JfrEvent<EventGCCPUTime>
+{
+ private:
+  unsigned _gcId;
+  u8 _userTime;
+  u8 _systemTime;
+  u8 _realTime;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrGCCPUTimeEvent;
+
+  EventGCCPUTime(EventStartTime timing=TIMED) : JfrEvent<EventGCCPUTime>(timing) {}
+
+  void set_gcId(unsigned new_value) {
+    this->_gcId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_userTime(u8 new_value) {
+    this->_userTime = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_systemTime(u8 new_value) {
+    this->_systemTime = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_realTime(u8 new_value) {
+    this->_realTime = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_gcId);
+    w.write(_userTime);
+    w.write(_systemTime);
+    w.write(_realTime);
+  }
+
+  using JfrEvent<EventGCCPUTime>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 userTime,
+                     u8 systemTime,
+                     u8 realTime) {
+    EventGCCPUTime me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_gcId(gcId);
+      me.set_userTime(userTime);
+      me.set_systemTime(systemTime);
+      me.set_realTime(realTime);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_gcId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_userTime");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_systemTime");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_realTime");
+  }
+#endif
+};
+
 class EventGCPhasePause : public JfrEvent<EventGCPhasePause>
 {
  private:
@@ -3818,6 +4661,7 @@ class EventGCPhasePause : public JfrEvent<EventGCPhasePause>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCPhasePauseEvent;
 
@@ -3892,6 +4736,7 @@ class EventGCPhasePauseLevel1 : public JfrEvent<EventGCPhasePauseLevel1>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCPhasePauseLevel1Event;
 
@@ -3966,6 +4811,7 @@ class EventGCPhasePauseLevel2 : public JfrEvent<EventGCPhasePauseLevel2>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCPhasePauseLevel2Event;
 
@@ -4040,6 +4886,7 @@ class EventGCPhasePauseLevel3 : public JfrEvent<EventGCPhasePauseLevel3>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCPhasePauseLevel3Event;
 
@@ -4114,6 +4961,7 @@ class EventGCPhasePauseLevel4 : public JfrEvent<EventGCPhasePauseLevel4>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCPhasePauseLevel4Event;
 
@@ -4188,6 +5036,7 @@ class EventGCPhaseConcurrent : public JfrEvent<EventGCPhaseConcurrent>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrGCPhaseConcurrentEvent;
 
@@ -4251,6 +5100,169 @@ class EventGCPhaseConcurrent : public JfrEvent<EventGCPhaseConcurrent>
 #endif
 };
 
+class EventGCPhaseConcurrentLevel1 : public JfrEvent<EventGCPhaseConcurrentLevel1>
+{
+ private:
+  unsigned _gcId;
+  const char* _name;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrGCPhaseConcurrentLevel1Event;
+
+  EventGCPhaseConcurrentLevel1(EventStartTime timing=TIMED) : JfrEvent<EventGCPhaseConcurrentLevel1>(timing) {}
+
+  void set_gcId(unsigned new_value) {
+    this->_gcId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_name(const char* new_value) {
+    this->_name = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_gcId);
+    w.write(_name);
+  }
+
+  using JfrEvent<EventGCPhaseConcurrentLevel1>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventGCPhaseConcurrentLevel1(
+    unsigned gcId,
+    const char* name) : JfrEvent<EventGCPhaseConcurrentLevel1>(TIMED) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_name(name);
+    }
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_name(name);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+    EventGCPhaseConcurrentLevel1 me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_gcId(gcId);
+      me.set_name(name);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_gcId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_name");
+  }
+#endif
+};
+
+class EventGCPhaseParallel : public JfrEvent<EventGCPhaseParallel>
+{
+ private:
+  unsigned _gcId;
+  unsigned _gcWorkerId;
+  const char* _name;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrGCPhaseParallelEvent;
+
+  EventGCPhaseParallel(EventStartTime timing=TIMED) : JfrEvent<EventGCPhaseParallel>(timing) {}
+
+  void set_gcId(unsigned new_value) {
+    this->_gcId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_gcWorkerId(unsigned new_value) {
+    this->_gcWorkerId = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_name(const char* new_value) {
+    this->_name = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_gcId);
+    w.write(_gcWorkerId);
+    w.write(_name);
+  }
+
+  using JfrEvent<EventGCPhaseParallel>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventGCPhaseParallel(
+    unsigned gcId,
+    unsigned gcWorkerId,
+    const char* name) : JfrEvent<EventGCPhaseParallel>(TIMED) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_gcWorkerId(gcWorkerId);
+      set_name(name);
+    }
+  }
+
+  void commit(unsigned gcId,
+              unsigned gcWorkerId,
+              const char* name) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_gcWorkerId(gcWorkerId);
+      set_name(name);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     unsigned gcWorkerId,
+                     const char* name) {
+    EventGCPhaseParallel me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_gcId(gcId);
+      me.set_gcWorkerId(gcWorkerId);
+      me.set_name(name);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_gcId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_gcWorkerId");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_name");
+  }
+#endif
+};
+
 class EventAllocationRequiringGC : public JfrEvent<EventAllocationRequiringGC>
 {
  private:
@@ -4262,6 +5274,7 @@ class EventAllocationRequiringGC : public JfrEvent<EventAllocationRequiringGC>
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrAllocationRequiringGCEvent;
 
@@ -4317,6 +5330,7 @@ class EventTenuringDistribution : public JfrEvent<EventTenuringDistribution>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrTenuringDistributionEvent;
 
@@ -4382,6 +5396,7 @@ class EventG1HeapRegionTypeChange : public JfrEvent<EventG1HeapRegionTypeChange>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrG1HeapRegionTypeChangeEvent;
 
@@ -4449,11 +5464,67 @@ class EventG1HeapRegionTypeChange : public JfrEvent<EventG1HeapRegionTypeChange>
 #endif
 };
 
+class EventJITRestart : public JfrEvent<EventJITRestart>
+{
+ private:
+  u8 _freedMemory;
+  u8 _codeCacheMaxCapacity;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrJITRestartEvent;
+
+  EventJITRestart(EventStartTime timing=TIMED) : JfrEvent<EventJITRestart>(timing) {}
+
+  void set_freedMemory(u8 new_value) {
+    this->_freedMemory = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_codeCacheMaxCapacity(u8 new_value) {
+    this->_codeCacheMaxCapacity = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_freedMemory);
+    w.write(_codeCacheMaxCapacity);
+  }
+
+  using JfrEvent<EventJITRestart>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 freedMemory,
+                     u8 codeCacheMaxCapacity) {
+    EventJITRestart me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_freedMemory(freedMemory);
+      me.set_codeCacheMaxCapacity(codeCacheMaxCapacity);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_freedMemory");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_codeCacheMaxCapacity");
+  }
+#endif
+};
+
 class EventCompilation : public JfrEvent<EventCompilation>
 {
  private:
+  s4 _compileId;
+  u8 _compiler;
   const Method* _method;
-  unsigned _compileId;
   u2 _compileLevel;
   bool _succeded;
   bool _isOsr;
@@ -4465,44 +5536,50 @@ class EventCompilation : public JfrEvent<EventCompilation>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrCompilationEvent;
 
   EventCompilation(EventStartTime timing=TIMED) : JfrEvent<EventCompilation>(timing) {}
 
-  void set_method(const Method* new_value) {
-    this->_method = new_value;
+  void set_compileId(s4 new_value) {
+    this->_compileId = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_compileId(unsigned new_value) {
-    this->_compileId = new_value;
+  void set_compiler(u8 new_value) {
+    this->_compiler = new_value;
     DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_method(const Method* new_value) {
+    this->_method = new_value;
+    DEBUG_ONLY(set_field_bit(2));
   }
   void set_compileLevel(u2 new_value) {
     this->_compileLevel = new_value;
-    DEBUG_ONLY(set_field_bit(2));
+    DEBUG_ONLY(set_field_bit(3));
   }
   void set_succeded(bool new_value) {
     this->_succeded = new_value;
-    DEBUG_ONLY(set_field_bit(3));
+    DEBUG_ONLY(set_field_bit(4));
   }
   void set_isOsr(bool new_value) {
     this->_isOsr = new_value;
-    DEBUG_ONLY(set_field_bit(4));
+    DEBUG_ONLY(set_field_bit(5));
   }
   void set_codeSize(u8 new_value) {
     this->_codeSize = new_value;
-    DEBUG_ONLY(set_field_bit(5));
+    DEBUG_ONLY(set_field_bit(6));
   }
   void set_inlinedBytes(u8 new_value) {
     this->_inlinedBytes = new_value;
-    DEBUG_ONLY(set_field_bit(6));
+    DEBUG_ONLY(set_field_bit(7));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
-    w.write(_method);
     w.write(_compileId);
+    w.write(_compiler);
+    w.write(_method);
     w.write(_compileLevel);
     w.write(_succeded);
     w.write(_isOsr);
@@ -4513,16 +5590,18 @@ class EventCompilation : public JfrEvent<EventCompilation>
   using JfrEvent<EventCompilation>::commit; // else commit() is hidden by overloaded versions in this class
 
   EventCompilation(
+    s4 compileId,
+    u8 compiler,
     const Method* method,
-    unsigned compileId,
     u2 compileLevel,
     bool succeded,
     bool isOsr,
     u8 codeSize,
     u8 inlinedBytes) : JfrEvent<EventCompilation>(TIMED) {
     if (should_commit()) {
-      set_method(method);
       set_compileId(compileId);
+      set_compiler(compiler);
+      set_method(method);
       set_compileLevel(compileLevel);
       set_succeded(succeded);
       set_isOsr(isOsr);
@@ -4531,16 +5610,18 @@ class EventCompilation : public JfrEvent<EventCompilation>
     }
   }
 
-  void commit(const Method* method,
-              unsigned compileId,
+  void commit(s4 compileId,
+              u8 compiler,
+              const Method* method,
               u2 compileLevel,
               bool succeded,
               bool isOsr,
               u8 codeSize,
               u8 inlinedBytes) {
     if (should_commit()) {
-      set_method(method);
       set_compileId(compileId);
+      set_compiler(compiler);
+      set_method(method);
       set_compileLevel(compileLevel);
       set_succeded(succeded);
       set_isOsr(isOsr);
@@ -4552,8 +5633,9 @@ class EventCompilation : public JfrEvent<EventCompilation>
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
+                     s4 compileId,
+                     u8 compiler,
                      const Method* method,
-                     unsigned compileId,
                      u2 compileLevel,
                      bool succeded,
                      bool isOsr,
@@ -4564,8 +5646,9 @@ class EventCompilation : public JfrEvent<EventCompilation>
     if (me.should_commit()) {
       me.set_starttime(startTicks);
       me.set_endtime(endTicks);
-      me.set_method(method);
       me.set_compileId(compileId);
+      me.set_compiler(compiler);
+      me.set_method(method);
       me.set_compileLevel(compileLevel);
       me.set_succeded(succeded);
       me.set_isOsr(isOsr);
@@ -4577,13 +5660,14 @@ class EventCompilation : public JfrEvent<EventCompilation>
 
 #ifdef ASSERT
   void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_method");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_compileId");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_compileLevel");
-    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_succeded");
-    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_isOsr");
-    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_codeSize");
-    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_inlinedBytes");
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_compileId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_compiler");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_method");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_compileLevel");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_succeded");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_isOsr");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_codeSize");
+    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_inlinedBytes");
   }
 #endif
 };
@@ -4592,7 +5676,7 @@ class EventCompilerPhase : public JfrEvent<EventCompilerPhase>
 {
  private:
   u8 _phase;
-  unsigned _compileId;
+  s4 _compileId;
   u2 _phaseLevel;
 
  public:
@@ -4600,6 +5684,7 @@ class EventCompilerPhase : public JfrEvent<EventCompilerPhase>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrCompilerPhaseEvent;
 
@@ -4609,7 +5694,7 @@ class EventCompilerPhase : public JfrEvent<EventCompilerPhase>
     this->_phase = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_compileId(unsigned new_value) {
+  void set_compileId(s4 new_value) {
     this->_compileId = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
@@ -4629,7 +5714,7 @@ class EventCompilerPhase : public JfrEvent<EventCompilerPhase>
 
   EventCompilerPhase(
     u8 phase,
-    unsigned compileId,
+    s4 compileId,
     u2 phaseLevel) : JfrEvent<EventCompilerPhase>(TIMED) {
     if (should_commit()) {
       set_phase(phase);
@@ -4639,7 +5724,7 @@ class EventCompilerPhase : public JfrEvent<EventCompilerPhase>
   }
 
   void commit(u8 phase,
-              unsigned compileId,
+              s4 compileId,
               u2 phaseLevel) {
     if (should_commit()) {
       set_phase(phase);
@@ -4652,7 +5737,7 @@ class EventCompilerPhase : public JfrEvent<EventCompilerPhase>
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
                      u8 phase,
-                     unsigned compileId,
+                     s4 compileId,
                      u2 phaseLevel) {
     EventCompilerPhase me(UNTIMED);
 
@@ -4679,13 +5764,14 @@ class EventCompilationFailure : public JfrEvent<EventCompilationFailure>
 {
  private:
   const char* _failureMessage;
-  unsigned _compileId;
+  s4 _compileId;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrCompilationFailureEvent;
 
@@ -4695,7 +5781,7 @@ class EventCompilationFailure : public JfrEvent<EventCompilationFailure>
     this->_failureMessage = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_compileId(unsigned new_value) {
+  void set_compileId(s4 new_value) {
     this->_compileId = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
@@ -4711,7 +5797,7 @@ class EventCompilationFailure : public JfrEvent<EventCompilationFailure>
 
 
   static void commit(const char* failureMessage,
-                     unsigned compileId) {
+                     s4 compileId) {
     EventCompilationFailure me(UNTIMED);
 
     if (me.should_commit()) {
@@ -4732,7 +5818,7 @@ class EventCompilationFailure : public JfrEvent<EventCompilationFailure>
 class EventCompilerInlining : public JfrEvent<EventCompilerInlining>
 {
  private:
-  unsigned _compileId;
+  s4 _compileId;
   const Method* _caller;
   JfrStructCalleeMethod _callee;
   bool _succeeded;
@@ -4744,12 +5830,13 @@ class EventCompilerInlining : public JfrEvent<EventCompilerInlining>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrCompilerInliningEvent;
 
   EventCompilerInlining(EventStartTime timing=TIMED) : JfrEvent<EventCompilerInlining>(timing) {}
 
-  void set_compileId(unsigned new_value) {
+  void set_compileId(s4 new_value) {
     this->_compileId = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
@@ -4788,7 +5875,7 @@ class EventCompilerInlining : public JfrEvent<EventCompilerInlining>
 
 
 
-  static void commit(unsigned compileId,
+  static void commit(s4 compileId,
                      const Method* caller,
                      const JfrStructCalleeMethod& callee,
                      bool succeeded,
@@ -4819,106 +5906,6 @@ class EventCompilerInlining : public JfrEvent<EventCompilerInlining>
 #endif
 };
 
-class EventSweepCodeCache : public JfrEvent<EventSweepCodeCache>
-{
- private:
-  s4 _sweepId;
-  unsigned _sweptCount;
-  unsigned _flushedCount;
-  unsigned _zombifiedCount;
-
- public:
-  static const bool hasThread = true;
-  static const bool hasStackTrace = false;
-  static const bool isInstant = false;
-  static const bool hasCutoff = false;
-  static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrSweepCodeCacheEvent;
-
-  EventSweepCodeCache(EventStartTime timing=TIMED) : JfrEvent<EventSweepCodeCache>(timing) {}
-
-  void set_sweepId(s4 new_value) {
-    this->_sweepId = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-  void set_sweptCount(unsigned new_value) {
-    this->_sweptCount = new_value;
-    DEBUG_ONLY(set_field_bit(1));
-  }
-  void set_flushedCount(unsigned new_value) {
-    this->_flushedCount = new_value;
-    DEBUG_ONLY(set_field_bit(2));
-  }
-  void set_zombifiedCount(unsigned new_value) {
-    this->_zombifiedCount = new_value;
-    DEBUG_ONLY(set_field_bit(3));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_sweepId);
-    w.write(_sweptCount);
-    w.write(_flushedCount);
-    w.write(_zombifiedCount);
-  }
-
-  using JfrEvent<EventSweepCodeCache>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventSweepCodeCache(
-    s4 sweepId,
-    unsigned sweptCount,
-    unsigned flushedCount,
-    unsigned zombifiedCount) : JfrEvent<EventSweepCodeCache>(TIMED) {
-    if (should_commit()) {
-      set_sweepId(sweepId);
-      set_sweptCount(sweptCount);
-      set_flushedCount(flushedCount);
-      set_zombifiedCount(zombifiedCount);
-    }
-  }
-
-  void commit(s4 sweepId,
-              unsigned sweptCount,
-              unsigned flushedCount,
-              unsigned zombifiedCount) {
-    if (should_commit()) {
-      set_sweepId(sweepId);
-      set_sweptCount(sweptCount);
-      set_flushedCount(flushedCount);
-      set_zombifiedCount(zombifiedCount);
-      commit();
-    }
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     s4 sweepId,
-                     unsigned sweptCount,
-                     unsigned flushedCount,
-                     unsigned zombifiedCount) {
-    EventSweepCodeCache me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_sweepId(sweepId);
-      me.set_sweptCount(sweptCount);
-      me.set_flushedCount(flushedCount);
-      me.set_zombifiedCount(zombifiedCount);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_sweepId");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_sweptCount");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_flushedCount");
-    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_zombifiedCount");
-  }
-#endif
-};
-
 class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
 {
  private:
@@ -4931,12 +5918,14 @@ class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
   s4 _adaptorCount;
   u8 _unallocatedCapacity;
   s4 _fullCount;
+  u8 _codeCacheMaxCapacity;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrCodeCacheFullEvent;
 
@@ -4978,6 +5967,10 @@ class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
     this->_fullCount = new_value;
     DEBUG_ONLY(set_field_bit(8));
   }
+  void set_codeCacheMaxCapacity(u8 new_value) {
+    this->_codeCacheMaxCapacity = new_value;
+    DEBUG_ONLY(set_field_bit(9));
+  }
 
   template <typename Writer>
   void writeData(Writer& w) {
@@ -4990,6 +5983,7 @@ class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
     w.write(_adaptorCount);
     w.write(_unallocatedCapacity);
     w.write(_fullCount);
+    w.write(_codeCacheMaxCapacity);
   }
 
   using JfrEvent<EventCodeCacheFull>::commit; // else commit() is hidden by overloaded versions in this class
@@ -5004,7 +5998,8 @@ class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
                      s4 methodCount,
                      s4 adaptorCount,
                      u8 unallocatedCapacity,
-                     s4 fullCount) {
+                     s4 fullCount,
+                     u8 codeCacheMaxCapacity) {
     EventCodeCacheFull me(UNTIMED);
 
     if (me.should_commit()) {
@@ -5017,6 +6012,7 @@ class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
       me.set_adaptorCount(adaptorCount);
       me.set_unallocatedCapacity(unallocatedCapacity);
       me.set_fullCount(fullCount);
+      me.set_codeCacheMaxCapacity(codeCacheMaxCapacity);
       me.commit();
     }
   }
@@ -5032,6 +6028,116 @@ class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
     assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_adaptorCount");
     assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_unallocatedCapacity");
     assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_fullCount");
+    assert(verify_field_bit(9), "Attempting to write an uninitialized event field: %s", "_codeCacheMaxCapacity");
+  }
+#endif
+};
+
+class EventDeoptimization : public JfrEvent<EventDeoptimization>
+{
+ private:
+  s4 _compileId;
+  u8 _compiler;
+  const Method* _method;
+  s4 _lineNumber;
+  s4 _bci;
+  u8 _instruction;
+  u8 _reason;
+  u8 _action;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrDeoptimizationEvent;
+
+  EventDeoptimization(EventStartTime timing=TIMED) : JfrEvent<EventDeoptimization>(timing) {}
+
+  void set_compileId(s4 new_value) {
+    this->_compileId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_compiler(u8 new_value) {
+    this->_compiler = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_method(const Method* new_value) {
+    this->_method = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_lineNumber(s4 new_value) {
+    this->_lineNumber = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_bci(s4 new_value) {
+    this->_bci = new_value;
+    DEBUG_ONLY(set_field_bit(4));
+  }
+  void set_instruction(u8 new_value) {
+    this->_instruction = new_value;
+    DEBUG_ONLY(set_field_bit(5));
+  }
+  void set_reason(u8 new_value) {
+    this->_reason = new_value;
+    DEBUG_ONLY(set_field_bit(6));
+  }
+  void set_action(u8 new_value) {
+    this->_action = new_value;
+    DEBUG_ONLY(set_field_bit(7));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_compileId);
+    w.write(_compiler);
+    w.write(_method);
+    w.write(_lineNumber);
+    w.write(_bci);
+    w.write(_instruction);
+    w.write(_reason);
+    w.write(_action);
+  }
+
+  using JfrEvent<EventDeoptimization>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(s4 compileId,
+                     u8 compiler,
+                     const Method* method,
+                     s4 lineNumber,
+                     s4 bci,
+                     u8 instruction,
+                     u8 reason,
+                     u8 action) {
+    EventDeoptimization me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_compileId(compileId);
+      me.set_compiler(compiler);
+      me.set_method(method);
+      me.set_lineNumber(lineNumber);
+      me.set_bci(bci);
+      me.set_instruction(instruction);
+      me.set_reason(reason);
+      me.set_action(action);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_compileId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_compiler");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_method");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_lineNumber");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_bci");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_instruction");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_reason");
+    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_action");
   }
 #endif
 };
@@ -5039,7 +6145,7 @@ class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
 class EventSafepointBegin : public JfrEvent<EventSafepointBegin>
 {
  private:
-  s4 _safepointId;
+  u8 _safepointId;
   s4 _totalThreadCount;
   s4 _jniCriticalThreadCount;
 
@@ -5048,12 +6154,13 @@ class EventSafepointBegin : public JfrEvent<EventSafepointBegin>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrSafepointBeginEvent;
 
   EventSafepointBegin(EventStartTime timing=TIMED) : JfrEvent<EventSafepointBegin>(timing) {}
 
-  void set_safepointId(s4 new_value) {
+  void set_safepointId(u8 new_value) {
     this->_safepointId = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
@@ -5076,7 +6183,7 @@ class EventSafepointBegin : public JfrEvent<EventSafepointBegin>
   using JfrEvent<EventSafepointBegin>::commit; // else commit() is hidden by overloaded versions in this class
 
   EventSafepointBegin(
-    s4 safepointId,
+    u8 safepointId,
     s4 totalThreadCount,
     s4 jniCriticalThreadCount) : JfrEvent<EventSafepointBegin>(TIMED) {
     if (should_commit()) {
@@ -5086,7 +6193,7 @@ class EventSafepointBegin : public JfrEvent<EventSafepointBegin>
     }
   }
 
-  void commit(s4 safepointId,
+  void commit(u8 safepointId,
               s4 totalThreadCount,
               s4 jniCriticalThreadCount) {
     if (should_commit()) {
@@ -5099,7 +6206,7 @@ class EventSafepointBegin : public JfrEvent<EventSafepointBegin>
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
-                     s4 safepointId,
+                     u8 safepointId,
                      s4 totalThreadCount,
                      s4 jniCriticalThreadCount) {
     EventSafepointBegin me(UNTIMED);
@@ -5126,7 +6233,7 @@ class EventSafepointBegin : public JfrEvent<EventSafepointBegin>
 class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSynchronization>
 {
  private:
-  s4 _safepointId;
+  u8 _safepointId;
   s4 _initialThreadCount;
   s4 _runningThreadCount;
   s4 _iterations;
@@ -5136,12 +6243,13 @@ class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSy
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrSafepointStateSynchronizationEvent;
 
   EventSafepointStateSynchronization(EventStartTime timing=TIMED) : JfrEvent<EventSafepointStateSynchronization>(timing) {}
 
-  void set_safepointId(s4 new_value) {
+  void set_safepointId(u8 new_value) {
     this->_safepointId = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
@@ -5169,7 +6277,7 @@ class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSy
   using JfrEvent<EventSafepointStateSynchronization>::commit; // else commit() is hidden by overloaded versions in this class
 
   EventSafepointStateSynchronization(
-    s4 safepointId,
+    u8 safepointId,
     s4 initialThreadCount,
     s4 runningThreadCount,
     s4 iterations) : JfrEvent<EventSafepointStateSynchronization>(TIMED) {
@@ -5181,7 +6289,7 @@ class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSy
     }
   }
 
-  void commit(s4 safepointId,
+  void commit(u8 safepointId,
               s4 initialThreadCount,
               s4 runningThreadCount,
               s4 iterations) {
@@ -5196,7 +6304,7 @@ class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSy
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
-                     s4 safepointId,
+                     u8 safepointId,
                      s4 initialThreadCount,
                      s4 runningThreadCount,
                      s4 iterations) {
@@ -5223,96 +6331,23 @@ class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSy
 #endif
 };
 
-class EventSafepointWaitBlocked : public JfrEvent<EventSafepointWaitBlocked>
-{
- private:
-  s4 _safepointId;
-  s4 _runningThreadCount;
-
- public:
-  static const bool hasThread = true;
-  static const bool hasStackTrace = false;
-  static const bool isInstant = false;
-  static const bool hasCutoff = false;
-  static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrSafepointWaitBlockedEvent;
-
-  EventSafepointWaitBlocked(EventStartTime timing=TIMED) : JfrEvent<EventSafepointWaitBlocked>(timing) {}
-
-  void set_safepointId(s4 new_value) {
-    this->_safepointId = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-  void set_runningThreadCount(s4 new_value) {
-    this->_runningThreadCount = new_value;
-    DEBUG_ONLY(set_field_bit(1));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_safepointId);
-    w.write(_runningThreadCount);
-  }
-
-  using JfrEvent<EventSafepointWaitBlocked>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventSafepointWaitBlocked(
-    s4 safepointId,
-    s4 runningThreadCount) : JfrEvent<EventSafepointWaitBlocked>(TIMED) {
-    if (should_commit()) {
-      set_safepointId(safepointId);
-      set_runningThreadCount(runningThreadCount);
-    }
-  }
-
-  void commit(s4 safepointId,
-              s4 runningThreadCount) {
-    if (should_commit()) {
-      set_safepointId(safepointId);
-      set_runningThreadCount(runningThreadCount);
-      commit();
-    }
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     s4 safepointId,
-                     s4 runningThreadCount) {
-    EventSafepointWaitBlocked me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_safepointId(safepointId);
-      me.set_runningThreadCount(runningThreadCount);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_safepointId");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_runningThreadCount");
-  }
-#endif
-};
-
 class EventSafepointCleanup : public JfrEvent<EventSafepointCleanup>
 {
  private:
-  s4 _safepointId;
+  u8 _safepointId;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrSafepointCleanupEvent;
 
   EventSafepointCleanup(EventStartTime timing=TIMED) : JfrEvent<EventSafepointCleanup>(timing) {}
 
-  void set_safepointId(s4 new_value) {
+  void set_safepointId(u8 new_value) {
     this->_safepointId = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
@@ -5325,13 +6360,13 @@ class EventSafepointCleanup : public JfrEvent<EventSafepointCleanup>
   using JfrEvent<EventSafepointCleanup>::commit; // else commit() is hidden by overloaded versions in this class
 
   EventSafepointCleanup(
-    s4 safepointId) : JfrEvent<EventSafepointCleanup>(TIMED) {
+    u8 safepointId) : JfrEvent<EventSafepointCleanup>(TIMED) {
     if (should_commit()) {
       set_safepointId(safepointId);
     }
   }
 
-  void commit(s4 safepointId) {
+  void commit(u8 safepointId) {
     if (should_commit()) {
       set_safepointId(safepointId);
       commit();
@@ -5340,7 +6375,7 @@ class EventSafepointCleanup : public JfrEvent<EventSafepointCleanup>
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
-                     s4 safepointId) {
+                     u8 safepointId) {
     EventSafepointCleanup me(UNTIMED);
 
     if (me.should_commit()) {
@@ -5361,7 +6396,7 @@ class EventSafepointCleanup : public JfrEvent<EventSafepointCleanup>
 class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
 {
  private:
-  s4 _safepointId;
+  u8 _safepointId;
   const char* _name;
 
  public:
@@ -5369,12 +6404,13 @@ class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrSafepointCleanupTaskEvent;
 
   EventSafepointCleanupTask(EventStartTime timing=TIMED) : JfrEvent<EventSafepointCleanupTask>(timing) {}
 
-  void set_safepointId(s4 new_value) {
+  void set_safepointId(u8 new_value) {
     this->_safepointId = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
@@ -5392,7 +6428,7 @@ class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
   using JfrEvent<EventSafepointCleanupTask>::commit; // else commit() is hidden by overloaded versions in this class
 
   EventSafepointCleanupTask(
-    s4 safepointId,
+    u8 safepointId,
     const char* name) : JfrEvent<EventSafepointCleanupTask>(TIMED) {
     if (should_commit()) {
       set_safepointId(safepointId);
@@ -5400,7 +6436,7 @@ class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
     }
   }
 
-  void commit(s4 safepointId,
+  void commit(u8 safepointId,
               const char* name) {
     if (should_commit()) {
       set_safepointId(safepointId);
@@ -5411,7 +6447,7 @@ class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
-                     s4 safepointId,
+                     u8 safepointId,
                      const char* name) {
     EventSafepointCleanupTask me(UNTIMED);
 
@@ -5435,19 +6471,20 @@ class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
 class EventSafepointEnd : public JfrEvent<EventSafepointEnd>
 {
  private:
-  s4 _safepointId;
+  u8 _safepointId;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrSafepointEndEvent;
 
   EventSafepointEnd(EventStartTime timing=TIMED) : JfrEvent<EventSafepointEnd>(timing) {}
 
-  void set_safepointId(s4 new_value) {
+  void set_safepointId(u8 new_value) {
     this->_safepointId = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
@@ -5460,13 +6497,13 @@ class EventSafepointEnd : public JfrEvent<EventSafepointEnd>
   using JfrEvent<EventSafepointEnd>::commit; // else commit() is hidden by overloaded versions in this class
 
   EventSafepointEnd(
-    s4 safepointId) : JfrEvent<EventSafepointEnd>(TIMED) {
+    u8 safepointId) : JfrEvent<EventSafepointEnd>(TIMED) {
     if (should_commit()) {
       set_safepointId(safepointId);
     }
   }
 
-  void commit(s4 safepointId) {
+  void commit(u8 safepointId) {
     if (should_commit()) {
       set_safepointId(safepointId);
       commit();
@@ -5475,7 +6512,7 @@ class EventSafepointEnd : public JfrEvent<EventSafepointEnd>
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
-                     s4 safepointId) {
+                     u8 safepointId) {
     EventSafepointEnd me(UNTIMED);
 
     if (me.should_commit()) {
@@ -5500,13 +6537,14 @@ class EventExecuteVMOperation : public JfrEvent<EventExecuteVMOperation>
   bool _safepoint;
   bool _blocking;
   u8 _caller;
-  s4 _safepointId;
+  u8 _safepointId;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrExecuteVMOperationEvent;
 
@@ -5528,7 +6566,7 @@ class EventExecuteVMOperation : public JfrEvent<EventExecuteVMOperation>
     this->_caller = new_value;
     DEBUG_ONLY(set_field_bit(3));
   }
-  void set_safepointId(s4 new_value) {
+  void set_safepointId(u8 new_value) {
     this->_safepointId = new_value;
     DEBUG_ONLY(set_field_bit(4));
   }
@@ -5549,7 +6587,7 @@ class EventExecuteVMOperation : public JfrEvent<EventExecuteVMOperation>
     bool safepoint,
     bool blocking,
     u8 caller,
-    s4 safepointId) : JfrEvent<EventExecuteVMOperation>(TIMED) {
+    u8 safepointId) : JfrEvent<EventExecuteVMOperation>(TIMED) {
     if (should_commit()) {
       set_operation(operation);
       set_safepoint(safepoint);
@@ -5563,7 +6601,7 @@ class EventExecuteVMOperation : public JfrEvent<EventExecuteVMOperation>
               bool safepoint,
               bool blocking,
               u8 caller,
-              s4 safepointId) {
+              u8 safepointId) {
     if (should_commit()) {
       set_operation(operation);
       set_safepoint(safepoint);
@@ -5580,7 +6618,7 @@ class EventExecuteVMOperation : public JfrEvent<EventExecuteVMOperation>
                      bool safepoint,
                      bool blocking,
                      u8 caller,
-                     s4 safepointId) {
+                     u8 safepointId) {
     EventExecuteVMOperation me(UNTIMED);
 
     if (me.should_commit()) {
@@ -5616,6 +6654,7 @@ class EventShutdown : public JfrEvent<EventShutdown>
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrShutdownEvent;
 
@@ -5663,6 +6702,7 @@ class EventObjectAllocationInNewTLAB : public JfrEvent<EventObjectAllocationInNe
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrObjectAllocationInNewTLABEvent;
 
@@ -5725,6 +6765,7 @@ class EventObjectAllocationOutsideTLAB : public JfrEvent<EventObjectAllocationOu
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrObjectAllocationOutsideTLABEvent;
 
@@ -5768,10 +6809,67 @@ class EventObjectAllocationOutsideTLAB : public JfrEvent<EventObjectAllocationOu
 #endif
 };
 
+class EventObjectAllocationSample : public JfrEvent<EventObjectAllocationSample>
+{
+ private:
+  const Klass* _objectClass;
+  s8 _weight;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = true;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrObjectAllocationSampleEvent;
+
+  EventObjectAllocationSample(EventStartTime timing=TIMED) : JfrEvent<EventObjectAllocationSample>(timing) {}
+
+  void set_objectClass(const Klass* new_value) {
+    this->_objectClass = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_weight(s8 new_value) {
+    this->_weight = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_objectClass);
+    w.write(_weight);
+  }
+
+  using JfrEvent<EventObjectAllocationSample>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* objectClass,
+                     s8 weight) {
+    EventObjectAllocationSample me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_objectClass(objectClass);
+      me.set_weight(weight);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_objectClass");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_weight");
+  }
+#endif
+};
+
 class EventOldObjectSample : public JfrEvent<EventOldObjectSample>
 {
  private:
   Ticks _allocationTime;
+  u8 _objectSize;
+  Tickspan _objectAge;
   u8 _lastKnownHeapUsage;
   u8 _object;
   s4 _arrayElements;
@@ -5782,6 +6880,7 @@ class EventOldObjectSample : public JfrEvent<EventOldObjectSample>
   static const bool hasStackTrace = true;
   static const bool isInstant = true;
   static const bool hasCutoff = true;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrOldObjectSampleEvent;
 
@@ -5791,26 +6890,36 @@ class EventOldObjectSample : public JfrEvent<EventOldObjectSample>
     this->_allocationTime = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
+  void set_objectSize(u8 new_value) {
+    this->_objectSize = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_objectAge(const Tickspan& new_value) {
+    this->_objectAge = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
   void set_lastKnownHeapUsage(u8 new_value) {
     this->_lastKnownHeapUsage = new_value;
-    DEBUG_ONLY(set_field_bit(1));
+    DEBUG_ONLY(set_field_bit(3));
   }
   void set_object(u8 new_value) {
     this->_object = new_value;
-    DEBUG_ONLY(set_field_bit(2));
+    DEBUG_ONLY(set_field_bit(4));
   }
   void set_arrayElements(s4 new_value) {
     this->_arrayElements = new_value;
-    DEBUG_ONLY(set_field_bit(3));
+    DEBUG_ONLY(set_field_bit(5));
   }
   void set_root(u8 new_value) {
     this->_root = new_value;
-    DEBUG_ONLY(set_field_bit(4));
+    DEBUG_ONLY(set_field_bit(6));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
     w.write(_allocationTime);
+    w.write(_objectSize);
+    w.write(_objectAge);
     w.write(_lastKnownHeapUsage);
     w.write(_object);
     w.write(_arrayElements);
@@ -5822,6 +6931,8 @@ class EventOldObjectSample : public JfrEvent<EventOldObjectSample>
 
 
   static void commit(const Ticks& allocationTime,
+                     u8 objectSize,
+                     const Tickspan& objectAge,
                      u8 lastKnownHeapUsage,
                      u8 object,
                      s4 arrayElements,
@@ -5830,6 +6941,8 @@ class EventOldObjectSample : public JfrEvent<EventOldObjectSample>
 
     if (me.should_commit()) {
       me.set_allocationTime(allocationTime);
+      me.set_objectSize(objectSize);
+      me.set_objectAge(objectAge);
       me.set_lastKnownHeapUsage(lastKnownHeapUsage);
       me.set_object(object);
       me.set_arrayElements(arrayElements);
@@ -5841,10 +6954,175 @@ class EventOldObjectSample : public JfrEvent<EventOldObjectSample>
 #ifdef ASSERT
   void verify() const {
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_allocationTime");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_lastKnownHeapUsage");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_object");
-    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_arrayElements");
-    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_root");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_objectSize");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_objectAge");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_lastKnownHeapUsage");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_object");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_arrayElements");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_root");
+  }
+#endif
+};
+
+class EventNativeMemoryUsage : public JfrEvent<EventNativeMemoryUsage>
+{
+ private:
+  const char* _type;
+  u8 _reserved;
+  u8 _committed;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrNativeMemoryUsageEvent;
+
+  EventNativeMemoryUsage(EventStartTime timing=TIMED) : JfrEvent<EventNativeMemoryUsage>(timing) {}
+
+  void set_type(const char* new_value) {
+    this->_type = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_reserved(u8 new_value) {
+    this->_reserved = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_committed(u8 new_value) {
+    this->_committed = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_type);
+    w.write(_reserved);
+    w.write(_committed);
+  }
+
+  using JfrEvent<EventNativeMemoryUsage>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventNativeMemoryUsage(
+    const char* type,
+    u8 reserved,
+    u8 committed) : JfrEvent<EventNativeMemoryUsage>(TIMED) {
+    if (should_commit()) {
+      set_type(type);
+      set_reserved(reserved);
+      set_committed(committed);
+    }
+  }
+
+  void commit(const char* type,
+              u8 reserved,
+              u8 committed) {
+    if (should_commit()) {
+      set_type(type);
+      set_reserved(reserved);
+      set_committed(committed);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* type,
+                     u8 reserved,
+                     u8 committed) {
+    EventNativeMemoryUsage me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_type(type);
+      me.set_reserved(reserved);
+      me.set_committed(committed);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_type");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_reserved");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_committed");
+  }
+#endif
+};
+
+class EventNativeMemoryUsageTotal : public JfrEvent<EventNativeMemoryUsageTotal>
+{
+ private:
+  u8 _reserved;
+  u8 _committed;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrNativeMemoryUsageTotalEvent;
+
+  EventNativeMemoryUsageTotal(EventStartTime timing=TIMED) : JfrEvent<EventNativeMemoryUsageTotal>(timing) {}
+
+  void set_reserved(u8 new_value) {
+    this->_reserved = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_committed(u8 new_value) {
+    this->_committed = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_reserved);
+    w.write(_committed);
+  }
+
+  using JfrEvent<EventNativeMemoryUsageTotal>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventNativeMemoryUsageTotal(
+    u8 reserved,
+    u8 committed) : JfrEvent<EventNativeMemoryUsageTotal>(TIMED) {
+    if (should_commit()) {
+      set_reserved(reserved);
+      set_committed(committed);
+    }
+  }
+
+  void commit(u8 reserved,
+              u8 committed) {
+    if (should_commit()) {
+      set_reserved(reserved);
+      set_committed(committed);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 reserved,
+                     u8 committed) {
+    EventNativeMemoryUsageTotal me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_reserved(reserved);
+      me.set_committed(committed);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_reserved");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_committed");
   }
 #endif
 };
@@ -5860,6 +7138,7 @@ class EventDumpReason : public JfrEvent<EventDumpReason>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrDumpReasonEvent;
 
@@ -5914,6 +7193,7 @@ class EventDataLoss : public JfrEvent<EventDataLoss>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrDataLossEvent;
 
@@ -5966,12 +7246,14 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
   const char* _jvmFlags;
   const char* _javaArguments;
   s8 _jvmStartTime;
+  s8 _pid;
 
  public:
   static const bool hasThread = false;
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrJVMInformationEvent;
 
@@ -6001,6 +7283,10 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
     this->_jvmStartTime = new_value;
     DEBUG_ONLY(set_field_bit(5));
   }
+  void set_pid(s8 new_value) {
+    this->_pid = new_value;
+    DEBUG_ONLY(set_field_bit(6));
+  }
 
   template <typename Writer>
   void writeData(Writer& w) {
@@ -6010,6 +7296,7 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
     w.write(_jvmFlags);
     w.write(_javaArguments);
     w.write(_jvmStartTime);
+    w.write(_pid);
   }
 
   using JfrEvent<EventJVMInformation>::commit; // else commit() is hidden by overloaded versions in this class
@@ -6020,7 +7307,8 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
     const char* jvmArguments,
     const char* jvmFlags,
     const char* javaArguments,
-    s8 jvmStartTime) : JfrEvent<EventJVMInformation>(TIMED) {
+    s8 jvmStartTime,
+    s8 pid) : JfrEvent<EventJVMInformation>(TIMED) {
     if (should_commit()) {
       set_jvmName(jvmName);
       set_jvmVersion(jvmVersion);
@@ -6028,6 +7316,7 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
       set_jvmFlags(jvmFlags);
       set_javaArguments(javaArguments);
       set_jvmStartTime(jvmStartTime);
+      set_pid(pid);
     }
   }
 
@@ -6036,7 +7325,8 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
               const char* jvmArguments,
               const char* jvmFlags,
               const char* javaArguments,
-              s8 jvmStartTime) {
+              s8 jvmStartTime,
+              s8 pid) {
     if (should_commit()) {
       set_jvmName(jvmName);
       set_jvmVersion(jvmVersion);
@@ -6044,6 +7334,7 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
       set_jvmFlags(jvmFlags);
       set_javaArguments(javaArguments);
       set_jvmStartTime(jvmStartTime);
+      set_pid(pid);
       commit();
     }
   }
@@ -6055,7 +7346,8 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
                      const char* jvmArguments,
                      const char* jvmFlags,
                      const char* javaArguments,
-                     s8 jvmStartTime) {
+                     s8 jvmStartTime,
+                     s8 pid) {
     EventJVMInformation me(UNTIMED);
 
     if (me.should_commit()) {
@@ -6067,6 +7359,7 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
       me.set_jvmFlags(jvmFlags);
       me.set_javaArguments(javaArguments);
       me.set_jvmStartTime(jvmStartTime);
+      me.set_pid(pid);
       me.commit();
     }
   }
@@ -6079,6 +7372,7 @@ class EventJVMInformation : public JfrEvent<EventJVMInformation>
     assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_jvmFlags");
     assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_javaArguments");
     assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_jvmStartTime");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_pid");
   }
 #endif
 };
@@ -6093,6 +7387,7 @@ class EventOSInformation : public JfrEvent<EventOSInformation>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrOSInformationEvent;
 
@@ -6144,6 +7439,68 @@ class EventOSInformation : public JfrEvent<EventOSInformation>
 #endif
 };
 
+class EventVirtualizationInformation : public JfrEvent<EventVirtualizationInformation>
+{
+ private:
+  const char* _name;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrVirtualizationInformationEvent;
+
+  EventVirtualizationInformation(EventStartTime timing=TIMED) : JfrEvent<EventVirtualizationInformation>(timing) {}
+
+  void set_name(const char* new_value) {
+    this->_name = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_name);
+  }
+
+  using JfrEvent<EventVirtualizationInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventVirtualizationInformation(
+    const char* name) : JfrEvent<EventVirtualizationInformation>(TIMED) {
+    if (should_commit()) {
+      set_name(name);
+    }
+  }
+
+  void commit(const char* name) {
+    if (should_commit()) {
+      set_name(name);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name) {
+    EventVirtualizationInformation me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_name(name);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_name");
+  }
+#endif
+};
+
 class EventInitialSystemProperty : public JfrEvent<EventInitialSystemProperty>
 {
  private:
@@ -6155,6 +7512,7 @@ class EventInitialSystemProperty : public JfrEvent<EventInitialSystemProperty>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrInitialSystemPropertyEvent;
 
@@ -6229,6 +7587,7 @@ class EventInitialEnvironmentVariable : public JfrEvent<EventInitialEnvironmentV
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrInitialEnvironmentVariableEvent;
 
@@ -6303,6 +7662,7 @@ class EventSystemProcess : public JfrEvent<EventSystemProcess>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrSystemProcessEvent;
 
@@ -6380,6 +7740,7 @@ class EventCPUInformation : public JfrEvent<EventCPUInformation>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrCPUInformationEvent;
 
@@ -6492,6 +7853,7 @@ class EventCPUTimeStampCounter : public JfrEvent<EventCPUTimeStampCounter>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrCPUTimeStampCounterEvent;
 
@@ -6591,6 +7953,7 @@ class EventCPULoad : public JfrEvent<EventCPULoad>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrCPULoadEvent;
 
@@ -6677,6 +8040,7 @@ class EventThreadCPULoad : public JfrEvent<EventThreadCPULoad>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrThreadCPULoadEvent;
 
@@ -6750,6 +8114,7 @@ class EventThreadContextSwitchRate : public JfrEvent<EventThreadContextSwitchRat
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrThreadContextSwitchRateEvent;
 
@@ -6813,6 +8178,7 @@ class EventNetworkUtilization : public JfrEvent<EventNetworkUtilization>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrNetworkUtilizationEvent;
 
@@ -6901,6 +8267,7 @@ class EventJavaThreadStatistics : public JfrEvent<EventJavaThreadStatistics>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrJavaThreadStatisticsEvent;
 
@@ -6999,6 +8366,7 @@ class EventClassLoadingStatistics : public JfrEvent<EventClassLoadingStatistics>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrClassLoadingStatisticsEvent;
 
@@ -7071,15 +8439,16 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
   s8 _classCount;
   u8 _chunkSize;
   u8 _blockSize;
-  s8 _anonymousClassCount;
-  u8 _anonymousChunkSize;
-  u8 _anonymousBlockSize;
+  s8 _hiddenClassCount;
+  u8 _hiddenChunkSize;
+  u8 _hiddenBlockSize;
 
  public:
   static const bool hasThread = false;
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrClassLoaderStatisticsEvent;
 
@@ -7109,16 +8478,16 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
     this->_blockSize = new_value;
     DEBUG_ONLY(set_field_bit(5));
   }
-  void set_anonymousClassCount(s8 new_value) {
-    this->_anonymousClassCount = new_value;
+  void set_hiddenClassCount(s8 new_value) {
+    this->_hiddenClassCount = new_value;
     DEBUG_ONLY(set_field_bit(6));
   }
-  void set_anonymousChunkSize(u8 new_value) {
-    this->_anonymousChunkSize = new_value;
+  void set_hiddenChunkSize(u8 new_value) {
+    this->_hiddenChunkSize = new_value;
     DEBUG_ONLY(set_field_bit(7));
   }
-  void set_anonymousBlockSize(u8 new_value) {
-    this->_anonymousBlockSize = new_value;
+  void set_hiddenBlockSize(u8 new_value) {
+    this->_hiddenBlockSize = new_value;
     DEBUG_ONLY(set_field_bit(8));
   }
 
@@ -7130,9 +8499,9 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
     w.write(_classCount);
     w.write(_chunkSize);
     w.write(_blockSize);
-    w.write(_anonymousClassCount);
-    w.write(_anonymousChunkSize);
-    w.write(_anonymousBlockSize);
+    w.write(_hiddenClassCount);
+    w.write(_hiddenChunkSize);
+    w.write(_hiddenBlockSize);
   }
 
   using JfrEvent<EventClassLoaderStatistics>::commit; // else commit() is hidden by overloaded versions in this class
@@ -7144,9 +8513,9 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
     s8 classCount,
     u8 chunkSize,
     u8 blockSize,
-    s8 anonymousClassCount,
-    u8 anonymousChunkSize,
-    u8 anonymousBlockSize) : JfrEvent<EventClassLoaderStatistics>(TIMED) {
+    s8 hiddenClassCount,
+    u8 hiddenChunkSize,
+    u8 hiddenBlockSize) : JfrEvent<EventClassLoaderStatistics>(TIMED) {
     if (should_commit()) {
       set_classLoader(classLoader);
       set_parentClassLoader(parentClassLoader);
@@ -7154,9 +8523,9 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
       set_classCount(classCount);
       set_chunkSize(chunkSize);
       set_blockSize(blockSize);
-      set_anonymousClassCount(anonymousClassCount);
-      set_anonymousChunkSize(anonymousChunkSize);
-      set_anonymousBlockSize(anonymousBlockSize);
+      set_hiddenClassCount(hiddenClassCount);
+      set_hiddenChunkSize(hiddenChunkSize);
+      set_hiddenBlockSize(hiddenBlockSize);
     }
   }
 
@@ -7166,9 +8535,9 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
               s8 classCount,
               u8 chunkSize,
               u8 blockSize,
-              s8 anonymousClassCount,
-              u8 anonymousChunkSize,
-              u8 anonymousBlockSize) {
+              s8 hiddenClassCount,
+              u8 hiddenChunkSize,
+              u8 hiddenBlockSize) {
     if (should_commit()) {
       set_classLoader(classLoader);
       set_parentClassLoader(parentClassLoader);
@@ -7176,9 +8545,9 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
       set_classCount(classCount);
       set_chunkSize(chunkSize);
       set_blockSize(blockSize);
-      set_anonymousClassCount(anonymousClassCount);
-      set_anonymousChunkSize(anonymousChunkSize);
-      set_anonymousBlockSize(anonymousBlockSize);
+      set_hiddenClassCount(hiddenClassCount);
+      set_hiddenChunkSize(hiddenChunkSize);
+      set_hiddenBlockSize(hiddenBlockSize);
       commit();
     }
   }
@@ -7191,9 +8560,9 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
                      s8 classCount,
                      u8 chunkSize,
                      u8 blockSize,
-                     s8 anonymousClassCount,
-                     u8 anonymousChunkSize,
-                     u8 anonymousBlockSize) {
+                     s8 hiddenClassCount,
+                     u8 hiddenChunkSize,
+                     u8 hiddenBlockSize) {
     EventClassLoaderStatistics me(UNTIMED);
 
     if (me.should_commit()) {
@@ -7205,9 +8574,9 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
       me.set_classCount(classCount);
       me.set_chunkSize(chunkSize);
       me.set_blockSize(blockSize);
-      me.set_anonymousClassCount(anonymousClassCount);
-      me.set_anonymousChunkSize(anonymousChunkSize);
-      me.set_anonymousBlockSize(anonymousBlockSize);
+      me.set_hiddenClassCount(hiddenClassCount);
+      me.set_hiddenChunkSize(hiddenChunkSize);
+      me.set_hiddenBlockSize(hiddenBlockSize);
       me.commit();
     }
   }
@@ -7220,9 +8589,341 @@ class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
     assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_classCount");
     assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_chunkSize");
     assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_blockSize");
-    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_anonymousClassCount");
-    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_anonymousChunkSize");
-    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_anonymousBlockSize");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_hiddenClassCount");
+    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_hiddenChunkSize");
+    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_hiddenBlockSize");
+  }
+#endif
+};
+
+class EventSymbolTableStatistics : public JfrEvent<EventSymbolTableStatistics>
+{
+ private:
+  u8 _bucketCount;
+  u8 _entryCount;
+  u8 _totalFootprint;
+  u8 _bucketCountMaximum;
+  float _bucketCountAverage;
+  float _bucketCountVariance;
+  float _bucketCountStandardDeviation;
+  float _insertionRate;
+  float _removalRate;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrSymbolTableStatisticsEvent;
+
+  EventSymbolTableStatistics(EventStartTime timing=TIMED) : JfrEvent<EventSymbolTableStatistics>(timing) {}
+
+  void set_bucketCount(u8 new_value) {
+    this->_bucketCount = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_entryCount(u8 new_value) {
+    this->_entryCount = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_totalFootprint(u8 new_value) {
+    this->_totalFootprint = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_bucketCountMaximum(u8 new_value) {
+    this->_bucketCountMaximum = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_bucketCountAverage(float new_value) {
+    this->_bucketCountAverage = new_value;
+    DEBUG_ONLY(set_field_bit(4));
+  }
+  void set_bucketCountVariance(float new_value) {
+    this->_bucketCountVariance = new_value;
+    DEBUG_ONLY(set_field_bit(5));
+  }
+  void set_bucketCountStandardDeviation(float new_value) {
+    this->_bucketCountStandardDeviation = new_value;
+    DEBUG_ONLY(set_field_bit(6));
+  }
+  void set_insertionRate(float new_value) {
+    this->_insertionRate = new_value;
+    DEBUG_ONLY(set_field_bit(7));
+  }
+  void set_removalRate(float new_value) {
+    this->_removalRate = new_value;
+    DEBUG_ONLY(set_field_bit(8));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_bucketCount);
+    w.write(_entryCount);
+    w.write(_totalFootprint);
+    w.write(_bucketCountMaximum);
+    w.write(_bucketCountAverage);
+    w.write(_bucketCountVariance);
+    w.write(_bucketCountStandardDeviation);
+    w.write(_insertionRate);
+    w.write(_removalRate);
+  }
+
+  using JfrEvent<EventSymbolTableStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventSymbolTableStatistics(
+    u8 bucketCount,
+    u8 entryCount,
+    u8 totalFootprint,
+    u8 bucketCountMaximum,
+    float bucketCountAverage,
+    float bucketCountVariance,
+    float bucketCountStandardDeviation,
+    float insertionRate,
+    float removalRate) : JfrEvent<EventSymbolTableStatistics>(TIMED) {
+    if (should_commit()) {
+      set_bucketCount(bucketCount);
+      set_entryCount(entryCount);
+      set_totalFootprint(totalFootprint);
+      set_bucketCountMaximum(bucketCountMaximum);
+      set_bucketCountAverage(bucketCountAverage);
+      set_bucketCountVariance(bucketCountVariance);
+      set_bucketCountStandardDeviation(bucketCountStandardDeviation);
+      set_insertionRate(insertionRate);
+      set_removalRate(removalRate);
+    }
+  }
+
+  void commit(u8 bucketCount,
+              u8 entryCount,
+              u8 totalFootprint,
+              u8 bucketCountMaximum,
+              float bucketCountAverage,
+              float bucketCountVariance,
+              float bucketCountStandardDeviation,
+              float insertionRate,
+              float removalRate) {
+    if (should_commit()) {
+      set_bucketCount(bucketCount);
+      set_entryCount(entryCount);
+      set_totalFootprint(totalFootprint);
+      set_bucketCountMaximum(bucketCountMaximum);
+      set_bucketCountAverage(bucketCountAverage);
+      set_bucketCountVariance(bucketCountVariance);
+      set_bucketCountStandardDeviation(bucketCountStandardDeviation);
+      set_insertionRate(insertionRate);
+      set_removalRate(removalRate);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 bucketCount,
+                     u8 entryCount,
+                     u8 totalFootprint,
+                     u8 bucketCountMaximum,
+                     float bucketCountAverage,
+                     float bucketCountVariance,
+                     float bucketCountStandardDeviation,
+                     float insertionRate,
+                     float removalRate) {
+    EventSymbolTableStatistics me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_bucketCount(bucketCount);
+      me.set_entryCount(entryCount);
+      me.set_totalFootprint(totalFootprint);
+      me.set_bucketCountMaximum(bucketCountMaximum);
+      me.set_bucketCountAverage(bucketCountAverage);
+      me.set_bucketCountVariance(bucketCountVariance);
+      me.set_bucketCountStandardDeviation(bucketCountStandardDeviation);
+      me.set_insertionRate(insertionRate);
+      me.set_removalRate(removalRate);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_bucketCount");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_entryCount");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_totalFootprint");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_bucketCountMaximum");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_bucketCountAverage");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_bucketCountVariance");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_bucketCountStandardDeviation");
+    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_insertionRate");
+    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_removalRate");
+  }
+#endif
+};
+
+class EventStringTableStatistics : public JfrEvent<EventStringTableStatistics>
+{
+ private:
+  u8 _bucketCount;
+  u8 _entryCount;
+  u8 _totalFootprint;
+  u8 _bucketCountMaximum;
+  float _bucketCountAverage;
+  float _bucketCountVariance;
+  float _bucketCountStandardDeviation;
+  float _insertionRate;
+  float _removalRate;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrStringTableStatisticsEvent;
+
+  EventStringTableStatistics(EventStartTime timing=TIMED) : JfrEvent<EventStringTableStatistics>(timing) {}
+
+  void set_bucketCount(u8 new_value) {
+    this->_bucketCount = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_entryCount(u8 new_value) {
+    this->_entryCount = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_totalFootprint(u8 new_value) {
+    this->_totalFootprint = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_bucketCountMaximum(u8 new_value) {
+    this->_bucketCountMaximum = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_bucketCountAverage(float new_value) {
+    this->_bucketCountAverage = new_value;
+    DEBUG_ONLY(set_field_bit(4));
+  }
+  void set_bucketCountVariance(float new_value) {
+    this->_bucketCountVariance = new_value;
+    DEBUG_ONLY(set_field_bit(5));
+  }
+  void set_bucketCountStandardDeviation(float new_value) {
+    this->_bucketCountStandardDeviation = new_value;
+    DEBUG_ONLY(set_field_bit(6));
+  }
+  void set_insertionRate(float new_value) {
+    this->_insertionRate = new_value;
+    DEBUG_ONLY(set_field_bit(7));
+  }
+  void set_removalRate(float new_value) {
+    this->_removalRate = new_value;
+    DEBUG_ONLY(set_field_bit(8));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_bucketCount);
+    w.write(_entryCount);
+    w.write(_totalFootprint);
+    w.write(_bucketCountMaximum);
+    w.write(_bucketCountAverage);
+    w.write(_bucketCountVariance);
+    w.write(_bucketCountStandardDeviation);
+    w.write(_insertionRate);
+    w.write(_removalRate);
+  }
+
+  using JfrEvent<EventStringTableStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventStringTableStatistics(
+    u8 bucketCount,
+    u8 entryCount,
+    u8 totalFootprint,
+    u8 bucketCountMaximum,
+    float bucketCountAverage,
+    float bucketCountVariance,
+    float bucketCountStandardDeviation,
+    float insertionRate,
+    float removalRate) : JfrEvent<EventStringTableStatistics>(TIMED) {
+    if (should_commit()) {
+      set_bucketCount(bucketCount);
+      set_entryCount(entryCount);
+      set_totalFootprint(totalFootprint);
+      set_bucketCountMaximum(bucketCountMaximum);
+      set_bucketCountAverage(bucketCountAverage);
+      set_bucketCountVariance(bucketCountVariance);
+      set_bucketCountStandardDeviation(bucketCountStandardDeviation);
+      set_insertionRate(insertionRate);
+      set_removalRate(removalRate);
+    }
+  }
+
+  void commit(u8 bucketCount,
+              u8 entryCount,
+              u8 totalFootprint,
+              u8 bucketCountMaximum,
+              float bucketCountAverage,
+              float bucketCountVariance,
+              float bucketCountStandardDeviation,
+              float insertionRate,
+              float removalRate) {
+    if (should_commit()) {
+      set_bucketCount(bucketCount);
+      set_entryCount(entryCount);
+      set_totalFootprint(totalFootprint);
+      set_bucketCountMaximum(bucketCountMaximum);
+      set_bucketCountAverage(bucketCountAverage);
+      set_bucketCountVariance(bucketCountVariance);
+      set_bucketCountStandardDeviation(bucketCountStandardDeviation);
+      set_insertionRate(insertionRate);
+      set_removalRate(removalRate);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 bucketCount,
+                     u8 entryCount,
+                     u8 totalFootprint,
+                     u8 bucketCountMaximum,
+                     float bucketCountAverage,
+                     float bucketCountVariance,
+                     float bucketCountStandardDeviation,
+                     float insertionRate,
+                     float removalRate) {
+    EventStringTableStatistics me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_bucketCount(bucketCount);
+      me.set_entryCount(entryCount);
+      me.set_totalFootprint(totalFootprint);
+      me.set_bucketCountMaximum(bucketCountMaximum);
+      me.set_bucketCountAverage(bucketCountAverage);
+      me.set_bucketCountVariance(bucketCountVariance);
+      me.set_bucketCountStandardDeviation(bucketCountStandardDeviation);
+      me.set_insertionRate(insertionRate);
+      me.set_removalRate(removalRate);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_bucketCount");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_entryCount");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_totalFootprint");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_bucketCountMaximum");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_bucketCountAverage");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_bucketCountVariance");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_bucketCountStandardDeviation");
+    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_insertionRate");
+    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_removalRate");
   }
 #endif
 };
@@ -7238,6 +8939,7 @@ class EventThreadAllocationStatistics : public JfrEvent<EventThreadAllocationSta
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrThreadAllocationStatisticsEvent;
 
@@ -7312,6 +9014,7 @@ class EventPhysicalMemory : public JfrEvent<EventPhysicalMemory>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrPhysicalMemoryEvent;
 
@@ -7387,6 +9090,7 @@ class EventExecutionSample : public JfrEvent<EventExecutionSample>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrExecutionSampleEvent;
 
@@ -7474,6 +9178,7 @@ class EventNativeMethodSample : public JfrEvent<EventNativeMethodSample>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrNativeMethodSampleEvent;
 
@@ -7559,6 +9264,7 @@ class EventThreadDump : public JfrEvent<EventThreadDump>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrThreadDumpEvent;
 
@@ -7622,6 +9328,7 @@ class EventNativeLibrary : public JfrEvent<EventNativeLibrary>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrNativeLibraryEvent;
 
@@ -7708,6 +9415,7 @@ class EventModuleRequire : public JfrEvent<EventModuleRequire>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrModuleRequireEvent;
 
@@ -7782,6 +9490,7 @@ class EventModuleExport : public JfrEvent<EventModuleExport>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrModuleExportEvent;
 
@@ -7855,8 +9564,8 @@ class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
   s4 _standardCompileCount;
   u8 _osrBytesCompiled;
   u8 _standardBytesCompiled;
-  u8 _nmetodsSize;
-  u8 _nmetodCodeSize;
+  u8 _nmethodsSize;
+  u8 _nmethodCodeSize;
   s8 _peakTimeSpent;
   s8 _totalTimeSpent;
 
@@ -7865,6 +9574,7 @@ class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrCompilerStatisticsEvent;
 
@@ -7898,12 +9608,12 @@ class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
     this->_standardBytesCompiled = new_value;
     DEBUG_ONLY(set_field_bit(6));
   }
-  void set_nmetodsSize(u8 new_value) {
-    this->_nmetodsSize = new_value;
+  void set_nmethodsSize(u8 new_value) {
+    this->_nmethodsSize = new_value;
     DEBUG_ONLY(set_field_bit(7));
   }
-  void set_nmetodCodeSize(u8 new_value) {
-    this->_nmetodCodeSize = new_value;
+  void set_nmethodCodeSize(u8 new_value) {
+    this->_nmethodCodeSize = new_value;
     DEBUG_ONLY(set_field_bit(8));
   }
   void set_peakTimeSpent(s8 new_value) {
@@ -7924,8 +9634,8 @@ class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
     w.write(_standardCompileCount);
     w.write(_osrBytesCompiled);
     w.write(_standardBytesCompiled);
-    w.write(_nmetodsSize);
-    w.write(_nmetodCodeSize);
+    w.write(_nmethodsSize);
+    w.write(_nmethodCodeSize);
     w.write(_peakTimeSpent);
     w.write(_totalTimeSpent);
   }
@@ -7941,8 +9651,8 @@ class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
                      s4 standardCompileCount,
                      u8 osrBytesCompiled,
                      u8 standardBytesCompiled,
-                     u8 nmetodsSize,
-                     u8 nmetodCodeSize,
+                     u8 nmethodsSize,
+                     u8 nmethodCodeSize,
                      s8 peakTimeSpent,
                      s8 totalTimeSpent) {
     EventCompilerStatistics me(UNTIMED);
@@ -7955,8 +9665,8 @@ class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
       me.set_standardCompileCount(standardCompileCount);
       me.set_osrBytesCompiled(osrBytesCompiled);
       me.set_standardBytesCompiled(standardBytesCompiled);
-      me.set_nmetodsSize(nmetodsSize);
-      me.set_nmetodCodeSize(nmetodCodeSize);
+      me.set_nmethodsSize(nmethodsSize);
+      me.set_nmethodCodeSize(nmethodCodeSize);
       me.set_peakTimeSpent(peakTimeSpent);
       me.set_totalTimeSpent(totalTimeSpent);
       me.commit();
@@ -7972,8 +9682,8 @@ class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
     assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_standardCompileCount");
     assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_osrBytesCompiled");
     assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_standardBytesCompiled");
-    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_nmetodsSize");
-    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_nmetodCodeSize");
+    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_nmethodsSize");
+    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_nmethodCodeSize");
     assert(verify_field_bit(9), "Attempting to write an uninitialized event field: %s", "_peakTimeSpent");
     assert(verify_field_bit(10), "Attempting to write an uninitialized event field: %s", "_totalTimeSpent");
   }
@@ -7985,12 +9695,14 @@ class EventCompilerConfiguration : public JfrEvent<EventCompilerConfiguration>
  private:
   s4 _threadCount;
   bool _tieredCompilation;
+  bool _dynamicCompilerThreadCount;
 
  public:
   static const bool hasThread = false;
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrCompilerConfigurationEvent;
 
@@ -8004,11 +9716,16 @@ class EventCompilerConfiguration : public JfrEvent<EventCompilerConfiguration>
     this->_tieredCompilation = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
+  void set_dynamicCompilerThreadCount(bool new_value) {
+    this->_dynamicCompilerThreadCount = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
 
   template <typename Writer>
   void writeData(Writer& w) {
     w.write(_threadCount);
     w.write(_tieredCompilation);
+    w.write(_dynamicCompilerThreadCount);
   }
 
   using JfrEvent<EventCompilerConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
@@ -8016,12 +9733,14 @@ class EventCompilerConfiguration : public JfrEvent<EventCompilerConfiguration>
 
 
   static void commit(s4 threadCount,
-                     bool tieredCompilation) {
+                     bool tieredCompilation,
+                     bool dynamicCompilerThreadCount) {
     EventCompilerConfiguration me(UNTIMED);
 
     if (me.should_commit()) {
       me.set_threadCount(threadCount);
       me.set_tieredCompilation(tieredCompilation);
+      me.set_dynamicCompilerThreadCount(dynamicCompilerThreadCount);
       me.commit();
     }
   }
@@ -8030,6 +9749,7 @@ class EventCompilerConfiguration : public JfrEvent<EventCompilerConfiguration>
   void verify() const {
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_threadCount");
     assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_tieredCompilation");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_dynamicCompilerThreadCount");
   }
 #endif
 };
@@ -8051,6 +9771,7 @@ class EventCodeCacheStatistics : public JfrEvent<EventCodeCacheStatistics>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrCodeCacheStatisticsEvent;
 
@@ -8160,6 +9881,7 @@ class EventCodeCacheConfiguration : public JfrEvent<EventCodeCacheConfiguration>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrCodeCacheConfigurationEvent;
 
@@ -8259,141 +9981,6 @@ class EventCodeCacheConfiguration : public JfrEvent<EventCodeCacheConfiguration>
 #endif
 };
 
-class EventCodeSweeperStatistics : public JfrEvent<EventCodeSweeperStatistics>
-{
- private:
-  s4 _sweepCount;
-  s4 _methodReclaimedCount;
-  Tickspan _totalSweepTime;
-  Tickspan _peakFractionTime;
-  Tickspan _peakSweepTime;
-
- public:
-  static const bool hasThread = false;
-  static const bool hasStackTrace = false;
-  static const bool isInstant = true;
-  static const bool hasCutoff = false;
-  static const bool isRequestable = true;
-  static const JfrEventId eventId = JfrCodeSweeperStatisticsEvent;
-
-  EventCodeSweeperStatistics(EventStartTime timing=TIMED) : JfrEvent<EventCodeSweeperStatistics>(timing) {}
-
-  void set_sweepCount(s4 new_value) {
-    this->_sweepCount = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-  void set_methodReclaimedCount(s4 new_value) {
-    this->_methodReclaimedCount = new_value;
-    DEBUG_ONLY(set_field_bit(1));
-  }
-  void set_totalSweepTime(const Tickspan& new_value) {
-    this->_totalSweepTime = new_value;
-    DEBUG_ONLY(set_field_bit(2));
-  }
-  void set_peakFractionTime(const Tickspan& new_value) {
-    this->_peakFractionTime = new_value;
-    DEBUG_ONLY(set_field_bit(3));
-  }
-  void set_peakSweepTime(const Tickspan& new_value) {
-    this->_peakSweepTime = new_value;
-    DEBUG_ONLY(set_field_bit(4));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_sweepCount);
-    w.write(_methodReclaimedCount);
-    w.write(_totalSweepTime);
-    w.write(_peakFractionTime);
-    w.write(_peakSweepTime);
-  }
-
-  using JfrEvent<EventCodeSweeperStatistics>::commit; // else commit() is hidden by overloaded versions in this class
-
-
-
-  static void commit(s4 sweepCount,
-                     s4 methodReclaimedCount,
-                     const Tickspan& totalSweepTime,
-                     const Tickspan& peakFractionTime,
-                     const Tickspan& peakSweepTime) {
-    EventCodeSweeperStatistics me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_sweepCount(sweepCount);
-      me.set_methodReclaimedCount(methodReclaimedCount);
-      me.set_totalSweepTime(totalSweepTime);
-      me.set_peakFractionTime(peakFractionTime);
-      me.set_peakSweepTime(peakSweepTime);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_sweepCount");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_methodReclaimedCount");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_totalSweepTime");
-    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_peakFractionTime");
-    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_peakSweepTime");
-  }
-#endif
-};
-
-class EventCodeSweeperConfiguration : public JfrEvent<EventCodeSweeperConfiguration>
-{
- private:
-  bool _sweeperEnabled;
-  bool _flushingEnabled;
-
- public:
-  static const bool hasThread = false;
-  static const bool hasStackTrace = false;
-  static const bool isInstant = true;
-  static const bool hasCutoff = false;
-  static const bool isRequestable = true;
-  static const JfrEventId eventId = JfrCodeSweeperConfigurationEvent;
-
-  EventCodeSweeperConfiguration(EventStartTime timing=TIMED) : JfrEvent<EventCodeSweeperConfiguration>(timing) {}
-
-  void set_sweeperEnabled(bool new_value) {
-    this->_sweeperEnabled = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-  void set_flushingEnabled(bool new_value) {
-    this->_flushingEnabled = new_value;
-    DEBUG_ONLY(set_field_bit(1));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_sweeperEnabled);
-    w.write(_flushingEnabled);
-  }
-
-  using JfrEvent<EventCodeSweeperConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
-
-
-
-  static void commit(bool sweeperEnabled,
-                     bool flushingEnabled) {
-    EventCodeSweeperConfiguration me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_sweeperEnabled(sweeperEnabled);
-      me.set_flushingEnabled(flushingEnabled);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_sweeperEnabled");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_flushingEnabled");
-  }
-#endif
-};
-
 class EventIntFlag : public JfrEvent<EventIntFlag>
 {
  private:
@@ -8406,6 +9993,7 @@ class EventIntFlag : public JfrEvent<EventIntFlag>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrIntFlagEvent;
 
@@ -8493,6 +10081,7 @@ class EventUnsignedIntFlag : public JfrEvent<EventUnsignedIntFlag>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrUnsignedIntFlagEvent;
 
@@ -8580,6 +10169,7 @@ class EventLongFlag : public JfrEvent<EventLongFlag>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrLongFlagEvent;
 
@@ -8667,6 +10257,7 @@ class EventUnsignedLongFlag : public JfrEvent<EventUnsignedLongFlag>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrUnsignedLongFlagEvent;
 
@@ -8754,6 +10345,7 @@ class EventDoubleFlag : public JfrEvent<EventDoubleFlag>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrDoubleFlagEvent;
 
@@ -8841,6 +10433,7 @@ class EventBooleanFlag : public JfrEvent<EventBooleanFlag>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrBooleanFlagEvent;
 
@@ -8928,6 +10521,7 @@ class EventStringFlag : public JfrEvent<EventStringFlag>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrStringFlagEvent;
 
@@ -9016,6 +10610,7 @@ class EventObjectCount : public JfrEvent<EventObjectCount>
   static const bool hasStackTrace = false;
   static const bool isInstant = true;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrObjectCountEvent;
 
@@ -9088,6 +10683,7 @@ class EventG1HeapRegionInformation : public JfrEvent<EventG1HeapRegionInformatio
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrG1HeapRegionInformationEvent;
 
@@ -9193,6 +10789,7 @@ class EventGCConfiguration : public JfrEvent<EventGCConfiguration>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrGCConfigurationEvent;
 
@@ -9351,6 +10948,7 @@ class EventGCSurvivorConfiguration : public JfrEvent<EventGCSurvivorConfiguratio
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrGCSurvivorConfigurationEvent;
 
@@ -9426,6 +11024,7 @@ class EventGCTLABConfiguration : public JfrEvent<EventGCTLABConfiguration>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrGCTLABConfigurationEvent;
 
@@ -9517,6 +11116,7 @@ class EventGCHeapConfiguration : public JfrEvent<EventGCHeapConfiguration>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrGCHeapConfigurationEvent;
 
@@ -9652,6 +11252,7 @@ class EventYoungGenerationConfiguration : public JfrEvent<EventYoungGenerationCo
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = true;
   static const JfrEventId eventId = JfrYoungGenerationConfigurationEvent;
 
@@ -9727,202 +11328,406 @@ class EventYoungGenerationConfiguration : public JfrEvent<EventYoungGenerationCo
 #endif
 };
 
-class EventZPageAllocation : public JfrEvent<EventZPageAllocation>
+class EventZAllocationStall : public JfrEvent<EventZAllocationStall>
 {
  private:
-  u8 _pageSize;
-  u8 _usedAfter;
-  u8 _freeAfter;
-  u8 _inCacheAfter;
-  bool _nonBlocking;
-  bool _noReserve;
+  u8 _type;
+  u8 _size;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrZAllocationStallEvent;
+
+  EventZAllocationStall(EventStartTime timing=TIMED) : JfrEvent<EventZAllocationStall>(timing) {}
+
+  void set_type(u8 new_value) {
+    this->_type = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_size(u8 new_value) {
+    this->_size = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_type);
+    w.write(_size);
+  }
+
+  using JfrEvent<EventZAllocationStall>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZAllocationStall(
+    u8 type,
+    u8 size) : JfrEvent<EventZAllocationStall>(TIMED) {
+    if (should_commit()) {
+      set_type(type);
+      set_size(size);
+    }
+  }
+
+  void commit(u8 type,
+              u8 size) {
+    if (should_commit()) {
+      set_type(type);
+      set_size(size);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 type,
+                     u8 size) {
+    EventZAllocationStall me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_type(type);
+      me.set_size(size);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_type");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_size");
+  }
+#endif
+};
+
+class EventZPageAllocation : public JfrEvent<EventZPageAllocation>
+{
+ private:
+  u8 _type;
+  u8 _size;
+  u8 _flushed;
+  u8 _committed;
+  unsigned _segments;
+  bool _nonBlocking;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrZPageAllocationEvent;
 
   EventZPageAllocation(EventStartTime timing=TIMED) : JfrEvent<EventZPageAllocation>(timing) {}
 
-  void set_pageSize(u8 new_value) {
-    this->_pageSize = new_value;
+  void set_type(u8 new_value) {
+    this->_type = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_usedAfter(u8 new_value) {
-    this->_usedAfter = new_value;
+  void set_size(u8 new_value) {
+    this->_size = new_value;
     DEBUG_ONLY(set_field_bit(1));
   }
-  void set_freeAfter(u8 new_value) {
-    this->_freeAfter = new_value;
+  void set_flushed(u8 new_value) {
+    this->_flushed = new_value;
     DEBUG_ONLY(set_field_bit(2));
   }
-  void set_inCacheAfter(u8 new_value) {
-    this->_inCacheAfter = new_value;
+  void set_committed(u8 new_value) {
+    this->_committed = new_value;
     DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_segments(unsigned new_value) {
+    this->_segments = new_value;
+    DEBUG_ONLY(set_field_bit(4));
   }
   void set_nonBlocking(bool new_value) {
     this->_nonBlocking = new_value;
-    DEBUG_ONLY(set_field_bit(4));
-  }
-  void set_noReserve(bool new_value) {
-    this->_noReserve = new_value;
     DEBUG_ONLY(set_field_bit(5));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
-    w.write(_pageSize);
-    w.write(_usedAfter);
-    w.write(_freeAfter);
-    w.write(_inCacheAfter);
+    w.write(_type);
+    w.write(_size);
+    w.write(_flushed);
+    w.write(_committed);
+    w.write(_segments);
     w.write(_nonBlocking);
-    w.write(_noReserve);
   }
 
   using JfrEvent<EventZPageAllocation>::commit; // else commit() is hidden by overloaded versions in this class
 
   EventZPageAllocation(
-    u8 pageSize,
-    u8 usedAfter,
-    u8 freeAfter,
-    u8 inCacheAfter,
-    bool nonBlocking,
-    bool noReserve) : JfrEvent<EventZPageAllocation>(TIMED) {
+    u8 type,
+    u8 size,
+    u8 flushed,
+    u8 committed,
+    unsigned segments,
+    bool nonBlocking) : JfrEvent<EventZPageAllocation>(TIMED) {
     if (should_commit()) {
-      set_pageSize(pageSize);
-      set_usedAfter(usedAfter);
-      set_freeAfter(freeAfter);
-      set_inCacheAfter(inCacheAfter);
+      set_type(type);
+      set_size(size);
+      set_flushed(flushed);
+      set_committed(committed);
+      set_segments(segments);
       set_nonBlocking(nonBlocking);
-      set_noReserve(noReserve);
     }
   }
 
-  void commit(u8 pageSize,
-              u8 usedAfter,
-              u8 freeAfter,
-              u8 inCacheAfter,
-              bool nonBlocking,
-              bool noReserve) {
+  void commit(u8 type,
+              u8 size,
+              u8 flushed,
+              u8 committed,
+              unsigned segments,
+              bool nonBlocking) {
     if (should_commit()) {
-      set_pageSize(pageSize);
-      set_usedAfter(usedAfter);
-      set_freeAfter(freeAfter);
-      set_inCacheAfter(inCacheAfter);
+      set_type(type);
+      set_size(size);
+      set_flushed(flushed);
+      set_committed(committed);
+      set_segments(segments);
       set_nonBlocking(nonBlocking);
-      set_noReserve(noReserve);
       commit();
     }
   }
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
-                     u8 pageSize,
-                     u8 usedAfter,
-                     u8 freeAfter,
-                     u8 inCacheAfter,
-                     bool nonBlocking,
-                     bool noReserve) {
+                     u8 type,
+                     u8 size,
+                     u8 flushed,
+                     u8 committed,
+                     unsigned segments,
+                     bool nonBlocking) {
     EventZPageAllocation me(UNTIMED);
 
     if (me.should_commit()) {
       me.set_starttime(startTicks);
       me.set_endtime(endTicks);
-      me.set_pageSize(pageSize);
-      me.set_usedAfter(usedAfter);
-      me.set_freeAfter(freeAfter);
-      me.set_inCacheAfter(inCacheAfter);
+      me.set_type(type);
+      me.set_size(size);
+      me.set_flushed(flushed);
+      me.set_committed(committed);
+      me.set_segments(segments);
       me.set_nonBlocking(nonBlocking);
-      me.set_noReserve(noReserve);
       me.commit();
     }
   }
 
 #ifdef ASSERT
   void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_pageSize");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_usedAfter");
-    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_freeAfter");
-    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_inCacheAfter");
-    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_nonBlocking");
-    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_noReserve");
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_type");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_size");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_flushed");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_committed");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_segments");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_nonBlocking");
   }
 #endif
 };
 
-class EventZThreadPhase : public JfrEvent<EventZThreadPhase>
+class EventZRelocationSet : public JfrEvent<EventZRelocationSet>
 {
  private:
-  unsigned _gcId;
-  const char* _name;
+  u8 _total;
+  u8 _empty;
+  u8 _relocate;
 
  public:
   static const bool hasThread = true;
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrZThreadPhaseEvent;
+  static const JfrEventId eventId = JfrZRelocationSetEvent;
 
-  EventZThreadPhase(EventStartTime timing=TIMED) : JfrEvent<EventZThreadPhase>(timing) {}
+  EventZRelocationSet(EventStartTime timing=TIMED) : JfrEvent<EventZRelocationSet>(timing) {}
 
-  void set_gcId(unsigned new_value) {
-    this->_gcId = new_value;
+  void set_total(u8 new_value) {
+    this->_total = new_value;
     DEBUG_ONLY(set_field_bit(0));
   }
-  void set_name(const char* new_value) {
-    this->_name = new_value;
+  void set_empty(u8 new_value) {
+    this->_empty = new_value;
     DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_relocate(u8 new_value) {
+    this->_relocate = new_value;
+    DEBUG_ONLY(set_field_bit(2));
   }
 
   template <typename Writer>
   void writeData(Writer& w) {
-    w.write(_gcId);
-    w.write(_name);
+    w.write(_total);
+    w.write(_empty);
+    w.write(_relocate);
   }
 
-  using JfrEvent<EventZThreadPhase>::commit; // else commit() is hidden by overloaded versions in this class
+  using JfrEvent<EventZRelocationSet>::commit; // else commit() is hidden by overloaded versions in this class
 
-  EventZThreadPhase(
-    unsigned gcId,
-    const char* name) : JfrEvent<EventZThreadPhase>(TIMED) {
+  EventZRelocationSet(
+    u8 total,
+    u8 empty,
+    u8 relocate) : JfrEvent<EventZRelocationSet>(TIMED) {
     if (should_commit()) {
-      set_gcId(gcId);
-      set_name(name);
+      set_total(total);
+      set_empty(empty);
+      set_relocate(relocate);
     }
   }
 
-  void commit(unsigned gcId,
-              const char* name) {
+  void commit(u8 total,
+              u8 empty,
+              u8 relocate) {
     if (should_commit()) {
-      set_gcId(gcId);
-      set_name(name);
+      set_total(total);
+      set_empty(empty);
+      set_relocate(relocate);
       commit();
     }
   }
 
   static void commit(const Ticks& startTicks,
                      const Ticks& endTicks,
-                     unsigned gcId,
-                     const char* name) {
-    EventZThreadPhase me(UNTIMED);
+                     u8 total,
+                     u8 empty,
+                     u8 relocate) {
+    EventZRelocationSet me(UNTIMED);
 
     if (me.should_commit()) {
       me.set_starttime(startTicks);
       me.set_endtime(endTicks);
-      me.set_gcId(gcId);
-      me.set_name(name);
+      me.set_total(total);
+      me.set_empty(empty);
+      me.set_relocate(relocate);
       me.commit();
     }
   }
 
 #ifdef ASSERT
   void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_gcId");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_name");
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_total");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_empty");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_relocate");
+  }
+#endif
+};
+
+class EventZRelocationSetGroup : public JfrEvent<EventZRelocationSetGroup>
+{
+ private:
+  u8 _type;
+  u8 _pages;
+  u8 _total;
+  u8 _empty;
+  u8 _relocate;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrZRelocationSetGroupEvent;
+
+  EventZRelocationSetGroup(EventStartTime timing=TIMED) : JfrEvent<EventZRelocationSetGroup>(timing) {}
+
+  void set_type(u8 new_value) {
+    this->_type = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_pages(u8 new_value) {
+    this->_pages = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_total(u8 new_value) {
+    this->_total = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_empty(u8 new_value) {
+    this->_empty = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_relocate(u8 new_value) {
+    this->_relocate = new_value;
+    DEBUG_ONLY(set_field_bit(4));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_type);
+    w.write(_pages);
+    w.write(_total);
+    w.write(_empty);
+    w.write(_relocate);
+  }
+
+  using JfrEvent<EventZRelocationSetGroup>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZRelocationSetGroup(
+    u8 type,
+    u8 pages,
+    u8 total,
+    u8 empty,
+    u8 relocate) : JfrEvent<EventZRelocationSetGroup>(TIMED) {
+    if (should_commit()) {
+      set_type(type);
+      set_pages(pages);
+      set_total(total);
+      set_empty(empty);
+      set_relocate(relocate);
+    }
+  }
+
+  void commit(u8 type,
+              u8 pages,
+              u8 total,
+              u8 empty,
+              u8 relocate) {
+    if (should_commit()) {
+      set_type(type);
+      set_pages(pages);
+      set_total(total);
+      set_empty(empty);
+      set_relocate(relocate);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 type,
+                     u8 pages,
+                     u8 total,
+                     u8 empty,
+                     u8 relocate) {
+    EventZRelocationSetGroup me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_type(type);
+      me.set_pages(pages);
+      me.set_total(total);
+      me.set_empty(empty);
+      me.set_relocate(relocate);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_type");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_pages");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_total");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_empty");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_relocate");
   }
 #endif
 };
@@ -9939,6 +11744,7 @@ class EventZStatisticsCounter : public JfrEvent<EventZStatisticsCounter>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrZStatisticsCounterEvent;
 
@@ -10025,6 +11831,7 @@ class EventZStatisticsSampler : public JfrEvent<EventZStatisticsSampler>
   static const bool hasStackTrace = false;
   static const bool isInstant = false;
   static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
   static const bool isRequestable = false;
   static const JfrEventId eventId = JfrZStatisticsSamplerEvent;
 
@@ -10088,1525 +11895,5356 @@ class EventZStatisticsSampler : public JfrEvent<EventZStatisticsSampler>
 #endif
 };
 
+class EventZThreadPhase : public JfrEvent<EventZThreadPhase>
+{
+ private:
+  unsigned _gcId;
+  const char* _name;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrZThreadPhaseEvent;
+
+  EventZThreadPhase(EventStartTime timing=TIMED) : JfrEvent<EventZThreadPhase>(timing) {}
+
+  void set_gcId(unsigned new_value) {
+    this->_gcId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_name(const char* new_value) {
+    this->_name = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_gcId);
+    w.write(_name);
+  }
+
+  using JfrEvent<EventZThreadPhase>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZThreadPhase(
+    unsigned gcId,
+    const char* name) : JfrEvent<EventZThreadPhase>(TIMED) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_name(name);
+    }
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+    if (should_commit()) {
+      set_gcId(gcId);
+      set_name(name);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+    EventZThreadPhase me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_gcId(gcId);
+      me.set_name(name);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_gcId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_name");
+  }
+#endif
+};
+
+class EventZUncommit : public JfrEvent<EventZUncommit>
+{
+ private:
+  u8 _uncommitted;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrZUncommitEvent;
+
+  EventZUncommit(EventStartTime timing=TIMED) : JfrEvent<EventZUncommit>(timing) {}
+
+  void set_uncommitted(u8 new_value) {
+    this->_uncommitted = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_uncommitted);
+  }
+
+  using JfrEvent<EventZUncommit>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZUncommit(
+    u8 uncommitted) : JfrEvent<EventZUncommit>(TIMED) {
+    if (should_commit()) {
+      set_uncommitted(uncommitted);
+    }
+  }
+
+  void commit(u8 uncommitted) {
+    if (should_commit()) {
+      set_uncommitted(uncommitted);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 uncommitted) {
+    EventZUncommit me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_uncommitted(uncommitted);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_uncommitted");
+  }
+#endif
+};
+
+class EventZUnmap : public JfrEvent<EventZUnmap>
+{
+ private:
+  u8 _unmapped;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrZUnmapEvent;
+
+  EventZUnmap(EventStartTime timing=TIMED) : JfrEvent<EventZUnmap>(timing) {}
+
+  void set_unmapped(u8 new_value) {
+    this->_unmapped = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_unmapped);
+  }
+
+  using JfrEvent<EventZUnmap>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZUnmap(
+    u8 unmapped) : JfrEvent<EventZUnmap>(TIMED) {
+    if (should_commit()) {
+      set_unmapped(unmapped);
+    }
+  }
+
+  void commit(u8 unmapped) {
+    if (should_commit()) {
+      set_unmapped(unmapped);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 unmapped) {
+    EventZUnmap me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_unmapped(unmapped);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_unmapped");
+  }
+#endif
+};
+
+class EventShenandoahHeapRegionStateChange : public JfrEvent<EventShenandoahHeapRegionStateChange>
+{
+ private:
+  unsigned _index;
+  u8 _from;
+  u8 _to;
+  u8 _start;
+  u8 _used;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrShenandoahHeapRegionStateChangeEvent;
+
+  EventShenandoahHeapRegionStateChange(EventStartTime timing=TIMED) : JfrEvent<EventShenandoahHeapRegionStateChange>(timing) {}
+
+  void set_index(unsigned new_value) {
+    this->_index = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_from(u8 new_value) {
+    this->_from = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_to(u8 new_value) {
+    this->_to = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_start(u8 new_value) {
+    this->_start = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_used(u8 new_value) {
+    this->_used = new_value;
+    DEBUG_ONLY(set_field_bit(4));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_index);
+    w.write(_from);
+    w.write(_to);
+    w.write(_start);
+    w.write(_used);
+  }
+
+  using JfrEvent<EventShenandoahHeapRegionStateChange>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned index,
+                     u8 from,
+                     u8 to,
+                     u8 start,
+                     u8 used) {
+    EventShenandoahHeapRegionStateChange me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_index(index);
+      me.set_from(from);
+      me.set_to(to);
+      me.set_start(start);
+      me.set_used(used);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_index");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_from");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_to");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_start");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_used");
+  }
+#endif
+};
+
+class EventShenandoahHeapRegionInformation : public JfrEvent<EventShenandoahHeapRegionInformation>
+{
+ private:
+  unsigned _index;
+  u8 _state;
+  u8 _start;
+  u8 _used;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrShenandoahHeapRegionInformationEvent;
+
+  EventShenandoahHeapRegionInformation(EventStartTime timing=TIMED) : JfrEvent<EventShenandoahHeapRegionInformation>(timing) {}
+
+  void set_index(unsigned new_value) {
+    this->_index = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_state(u8 new_value) {
+    this->_state = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_start(u8 new_value) {
+    this->_start = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_used(u8 new_value) {
+    this->_used = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_index);
+    w.write(_state);
+    w.write(_start);
+    w.write(_used);
+  }
+
+  using JfrEvent<EventShenandoahHeapRegionInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventShenandoahHeapRegionInformation(
+    unsigned index,
+    u8 state,
+    u8 start,
+    u8 used) : JfrEvent<EventShenandoahHeapRegionInformation>(TIMED) {
+    if (should_commit()) {
+      set_index(index);
+      set_state(state);
+      set_start(start);
+      set_used(used);
+    }
+  }
+
+  void commit(unsigned index,
+              u8 state,
+              u8 start,
+              u8 used) {
+    if (should_commit()) {
+      set_index(index);
+      set_state(state);
+      set_start(start);
+      set_used(used);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned index,
+                     u8 state,
+                     u8 start,
+                     u8 used) {
+    EventShenandoahHeapRegionInformation me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_index(index);
+      me.set_state(state);
+      me.set_start(start);
+      me.set_used(used);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_index");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_state");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_start");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_used");
+  }
+#endif
+};
+
+class EventFlush : public JfrEvent<EventFlush>
+{
+ private:
+  u8 _flushId;
+  u8 _elements;
+  u8 _size;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrFlushEvent;
+
+  EventFlush(EventStartTime timing=TIMED) : JfrEvent<EventFlush>(timing) {}
+
+  void set_flushId(u8 new_value) {
+    this->_flushId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_elements(u8 new_value) {
+    this->_elements = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_size(u8 new_value) {
+    this->_size = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_flushId);
+    w.write(_elements);
+    w.write(_size);
+  }
+
+  using JfrEvent<EventFlush>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventFlush(
+    u8 flushId,
+    u8 elements,
+    u8 size) : JfrEvent<EventFlush>(TIMED) {
+    if (should_commit()) {
+      set_flushId(flushId);
+      set_elements(elements);
+      set_size(size);
+    }
+  }
+
+  void commit(u8 flushId,
+              u8 elements,
+              u8 size) {
+    if (should_commit()) {
+      set_flushId(flushId);
+      set_elements(elements);
+      set_size(size);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 flushId,
+                     u8 elements,
+                     u8 size) {
+    EventFlush me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_flushId(flushId);
+      me.set_elements(elements);
+      me.set_size(size);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_flushId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_elements");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_size");
+  }
+#endif
+};
+
+class EventHeapDump : public JfrEvent<EventHeapDump>
+{
+ private:
+  const char* _destination;
+  s8 _size;
+  bool _gcBeforeDump;
+  bool _onOutOfMemoryError;
+  bool _overwrite;
+  s4 _compression;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrHeapDumpEvent;
+
+  EventHeapDump(EventStartTime timing=TIMED) : JfrEvent<EventHeapDump>(timing) {}
+
+  void set_destination(const char* new_value) {
+    this->_destination = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_size(s8 new_value) {
+    this->_size = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_gcBeforeDump(bool new_value) {
+    this->_gcBeforeDump = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_onOutOfMemoryError(bool new_value) {
+    this->_onOutOfMemoryError = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_overwrite(bool new_value) {
+    this->_overwrite = new_value;
+    DEBUG_ONLY(set_field_bit(4));
+  }
+  void set_compression(s4 new_value) {
+    this->_compression = new_value;
+    DEBUG_ONLY(set_field_bit(5));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_destination);
+    w.write(_size);
+    w.write(_gcBeforeDump);
+    w.write(_onOutOfMemoryError);
+    w.write(_overwrite);
+    w.write(_compression);
+  }
+
+  using JfrEvent<EventHeapDump>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventHeapDump(
+    const char* destination,
+    s8 size,
+    bool gcBeforeDump,
+    bool onOutOfMemoryError,
+    bool overwrite,
+    s4 compression) : JfrEvent<EventHeapDump>(TIMED) {
+    if (should_commit()) {
+      set_destination(destination);
+      set_size(size);
+      set_gcBeforeDump(gcBeforeDump);
+      set_onOutOfMemoryError(onOutOfMemoryError);
+      set_overwrite(overwrite);
+      set_compression(compression);
+    }
+  }
+
+  void commit(const char* destination,
+              s8 size,
+              bool gcBeforeDump,
+              bool onOutOfMemoryError,
+              bool overwrite,
+              s4 compression) {
+    if (should_commit()) {
+      set_destination(destination);
+      set_size(size);
+      set_gcBeforeDump(gcBeforeDump);
+      set_onOutOfMemoryError(onOutOfMemoryError);
+      set_overwrite(overwrite);
+      set_compression(compression);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* destination,
+                     s8 size,
+                     bool gcBeforeDump,
+                     bool onOutOfMemoryError,
+                     bool overwrite,
+                     s4 compression) {
+    EventHeapDump me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_destination(destination);
+      me.set_size(size);
+      me.set_gcBeforeDump(gcBeforeDump);
+      me.set_onOutOfMemoryError(onOutOfMemoryError);
+      me.set_overwrite(overwrite);
+      me.set_compression(compression);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_destination");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_size");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_gcBeforeDump");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_onOutOfMemoryError");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_overwrite");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_compression");
+  }
+#endif
+};
+
+class EventGCLocker : public JfrEvent<EventGCLocker>
+{
+ private:
+  unsigned _lockCount;
+  unsigned _stallCount;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrGCLockerEvent;
+
+  EventGCLocker(EventStartTime timing=TIMED) : JfrEvent<EventGCLocker>(timing) {}
+
+  void set_lockCount(unsigned new_value) {
+    this->_lockCount = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_stallCount(unsigned new_value) {
+    this->_stallCount = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_lockCount);
+    w.write(_stallCount);
+  }
+
+  using JfrEvent<EventGCLocker>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventGCLocker(
+    unsigned lockCount,
+    unsigned stallCount) : JfrEvent<EventGCLocker>(TIMED) {
+    if (should_commit()) {
+      set_lockCount(lockCount);
+      set_stallCount(stallCount);
+    }
+  }
+
+  void commit(unsigned lockCount,
+              unsigned stallCount) {
+    if (should_commit()) {
+      set_lockCount(lockCount);
+      set_stallCount(stallCount);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned lockCount,
+                     unsigned stallCount) {
+    EventGCLocker me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_lockCount(lockCount);
+      me.set_stallCount(stallCount);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_lockCount");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_stallCount");
+  }
+#endif
+};
+
+class EventFinalizerStatistics : public JfrEvent<EventFinalizerStatistics>
+{
+ private:
+  const Klass* _finalizableClass;
+  u8 _codeSource;
+  u8 _objects;
+  u8 _totalFinalizersRun;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrFinalizerStatisticsEvent;
+
+  EventFinalizerStatistics(EventStartTime timing=TIMED) : JfrEvent<EventFinalizerStatistics>(timing) {}
+
+  void set_finalizableClass(const Klass* new_value) {
+    this->_finalizableClass = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_codeSource(u8 new_value) {
+    this->_codeSource = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_objects(u8 new_value) {
+    this->_objects = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_totalFinalizersRun(u8 new_value) {
+    this->_totalFinalizersRun = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_finalizableClass);
+    w.write(_codeSource);
+    w.write(_objects);
+    w.write(_totalFinalizersRun);
+  }
+
+  using JfrEvent<EventFinalizerStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* finalizableClass,
+                     u8 codeSource,
+                     u8 objects,
+                     u8 totalFinalizersRun) {
+    EventFinalizerStatistics me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_finalizableClass(finalizableClass);
+      me.set_codeSource(codeSource);
+      me.set_objects(objects);
+      me.set_totalFinalizersRun(totalFinalizersRun);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_finalizableClass");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_codeSource");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_objects");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_totalFinalizersRun");
+  }
+#endif
+};
+
 
 
 #else // !INCLUDE_JFR
 
+template <typename T>
 class JfrEvent {
  public:
   JfrEvent() {}
   void set_starttime(const Ticks&) const {}
   void set_endtime(const Ticks&) const {}
   bool should_commit() const { return false; }
+  bool is_started() const { return false; }
   static bool is_enabled() { return false; }
   void commit() {}
 };
 
-
 struct JfrStructVirtualSpace
 {
  public:
-  void set_start(u8) { }
-  void set_committedEnd(u8) { }
-  void set_committedSize(u8) { }
-  void set_reservedEnd(u8) { }
-  void set_reservedSize(u8) { }
+  void set_start(u8 new_value) { }
+  void set_committedEnd(u8 new_value) { }
+  void set_committedSize(u8 new_value) { }
+  void set_reservedEnd(u8 new_value) { }
+  void set_reservedSize(u8 new_value) { }
+
 };
 
 
 struct JfrStructObjectSpace
 {
  public:
-  void set_start(u8) { }
-  void set_end(u8) { }
-  void set_used(u8) { }
-  void set_size(u8) { }
+  void set_start(u8 new_value) { }
+  void set_end(u8 new_value) { }
+  void set_used(u8 new_value) { }
+  void set_size(u8 new_value) { }
+
 };
 
 
 struct JfrStructMetaspaceSizes
 {
  public:
-  void set_committed(u8) { }
-  void set_used(u8) { }
-  void set_reserved(u8) { }
+  void set_committed(u8 new_value) { }
+  void set_used(u8 new_value) { }
+  void set_reserved(u8 new_value) { }
+
 };
 
 
 struct JfrStructCopyFailed
 {
  public:
-  void set_objectCount(u8) { }
-  void set_firstSize(u8) { }
-  void set_smallestSize(u8) { }
-  void set_totalSize(u8) { }
+  void set_objectCount(u8 new_value) { }
+  void set_firstSize(u8 new_value) { }
+  void set_smallestSize(u8 new_value) { }
+  void set_totalSize(u8 new_value) { }
+
 };
 
 
 struct JfrStructG1EvacuationStatistics
 {
  public:
-  void set_gcId(unsigned) { }
-  void set_allocated(u8) { }
-  void set_wasted(u8) { }
-  void set_used(u8) { }
-  void set_undoWaste(u8) { }
-  void set_regionEndWaste(u8) { }
-  void set_regionsRefilled(unsigned) { }
-  void set_directAllocated(u8) { }
-  void set_failureUsed(u8) { }
-  void set_failureWaste(u8) { }
+  void set_gcId(unsigned new_value) { }
+  void set_allocated(u8 new_value) { }
+  void set_wasted(u8 new_value) { }
+  void set_used(u8 new_value) { }
+  void set_undoWaste(u8 new_value) { }
+  void set_regionEndWaste(u8 new_value) { }
+  void set_regionsRefilled(unsigned new_value) { }
+  void set_numPlabsFilled(u8 new_value) { }
+  void set_directAllocated(u8 new_value) { }
+  void set_numDirectAllocated(u8 new_value) { }
+  void set_failureUsed(u8 new_value) { }
+  void set_failureWaste(u8 new_value) { }
+
 };
 
 
 struct JfrStructCalleeMethod
 {
  public:
-  void set_type(const char*) { }
-  void set_name(const char*) { }
-  void set_descriptor(const char*) { }
+  void set_type(const char* new_value) { }
+  void set_name(const char* new_value) { }
+  void set_descriptor(const char* new_value) { }
+
 };
 
 
 struct JfrStructStackFrame
 {
  public:
-  void set_method(const Method*) { }
-  void set_lineNumber(s4) { }
-  void set_bytecodeIndex(s4) { }
-  void set_type(u8) { }
+  void set_method(const Method* new_value) { }
+  void set_lineNumber(s4 new_value) { }
+  void set_bytecodeIndex(s4 new_value) { }
+  void set_type(u8 new_value) { }
+
 };
 
-class EventThreadStart : public JfrEvent
+
+class EventDuration : public JfrEvent<EventDuration>
 {
  public:
-  EventThreadStart(EventStartTime ignore=TIMED) {}
-  void set_thread(u8) { }
+  EventDuration(EventStartTime timing=TIMED) {}
+
+
+  using JfrEvent<EventDuration>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventDuration(
+    ) {
+  }
+
+  void commit() {
+  }
 };
 
-class EventThreadEnd : public JfrEvent
+class EventInstant : public JfrEvent<EventInstant>
 {
  public:
-  EventThreadEnd(EventStartTime ignore=TIMED) {}
-  void set_thread(u8) { }
+  EventInstant(EventStartTime timing=TIMED) {}
+
+
+  using JfrEvent<EventInstant>::commit; // else commit() is hidden by overloaded versions in this class
+
+
 };
 
-class EventThreadSleep : public JfrEvent
+class EventValue : public JfrEvent<EventValue>
 {
  public:
-  EventThreadSleep(EventStartTime ignore=TIMED) {}
-  EventThreadSleep(
-    s8) { }
-  void set_time(s8) { }
+  EventValue(EventStartTime timing=TIMED) {}
+
+  void set_value(u8 new_value) {
+  }
+
+  using JfrEvent<EventValue>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 value) {
+  }
 };
 
-class EventThreadPark : public JfrEvent
+class EventText : public JfrEvent<EventText>
 {
  public:
-  EventThreadPark(EventStartTime ignore=TIMED) {}
+  EventText(EventStartTime timing=TIMED) {}
+
+  void set_text(const char* new_value) {
+  }
+
+  using JfrEvent<EventText>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* text) {
+  }
+};
+
+class EventZThreadDebug : public JfrEvent<EventZThreadDebug>
+{
+ public:
+  EventZThreadDebug(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventZThreadDebug>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZThreadDebug(
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
+};
+
+class EventThreadStart : public JfrEvent<EventThreadStart>
+{
+ public:
+  EventThreadStart(EventStartTime timing=TIMED) {}
+
+  void set_thread(u8 new_value) {
+  }
+  void set_parentThread(u8 new_value) {
+  }
+
+  using JfrEvent<EventThreadStart>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 thread,
+                     u8 parentThread) {
+  }
+};
+
+class EventThreadEnd : public JfrEvent<EventThreadEnd>
+{
+ public:
+  EventThreadEnd(EventStartTime timing=TIMED) {}
+
+  void set_thread(u8 new_value) {
+  }
+
+  using JfrEvent<EventThreadEnd>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 thread) {
+  }
+};
+
+class EventThreadPark : public JfrEvent<EventThreadPark>
+{
+ public:
+  EventThreadPark(EventStartTime timing=TIMED) {}
+
+  void set_parkedClass(const Klass* new_value) {
+  }
+  void set_timeout(s8 new_value) {
+  }
+  void set_until(s8 new_value) {
+  }
+  void set_address(u8 new_value) {
+  }
+
+  using JfrEvent<EventThreadPark>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventThreadPark(
-    const Klass*,
-    s8,
-    u8) { }
-  void set_parkedClass(const Klass*) { }
-  void set_timeout(s8) { }
-  void set_address(u8) { }
+    const Klass* parkedClass,
+    s8 timeout,
+    s8 until,
+    u8 address) {
+  }
+
+  void commit(const Klass* parkedClass,
+              s8 timeout,
+              s8 until,
+              u8 address) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const Klass* parkedClass,
+                     s8 timeout,
+                     s8 until,
+                     u8 address) {
+  }
 };
 
-class EventJavaMonitorEnter : public JfrEvent
+class EventJavaMonitorEnter : public JfrEvent<EventJavaMonitorEnter>
 {
  public:
-  EventJavaMonitorEnter(EventStartTime ignore=TIMED) {}
+  EventJavaMonitorEnter(EventStartTime timing=TIMED) {}
+
+  void set_monitorClass(const Klass* new_value) {
+  }
+  void set_previousOwner(u8 new_value) {
+  }
+  void set_address(u8 new_value) {
+  }
+
+  using JfrEvent<EventJavaMonitorEnter>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventJavaMonitorEnter(
-    const Klass*,
-    u8,
-    u8) { }
-  void set_monitorClass(const Klass*) { }
-  void set_previousOwner(u8) { }
-  void set_address(u8) { }
+    const Klass* monitorClass,
+    u8 previousOwner,
+    u8 address) {
+  }
+
+  void commit(const Klass* monitorClass,
+              u8 previousOwner,
+              u8 address) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const Klass* monitorClass,
+                     u8 previousOwner,
+                     u8 address) {
+  }
 };
 
-class EventJavaMonitorWait : public JfrEvent
+class EventJavaMonitorWait : public JfrEvent<EventJavaMonitorWait>
 {
  public:
-  EventJavaMonitorWait(EventStartTime ignore=TIMED) {}
+  EventJavaMonitorWait(EventStartTime timing=TIMED) {}
+
+  void set_monitorClass(const Klass* new_value) {
+  }
+  void set_notifier(u8 new_value) {
+  }
+  void set_timeout(s8 new_value) {
+  }
+  void set_timedOut(bool new_value) {
+  }
+  void set_address(u8 new_value) {
+  }
+
+  using JfrEvent<EventJavaMonitorWait>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventJavaMonitorWait(
-    const Klass*,
-    u8,
-    s8,
-    bool,
-    u8) { }
-  void set_monitorClass(const Klass*) { }
-  void set_notifier(u8) { }
-  void set_timeout(s8) { }
-  void set_timedOut(bool) { }
-  void set_address(u8) { }
+    const Klass* monitorClass,
+    u8 notifier,
+    s8 timeout,
+    bool timedOut,
+    u8 address) {
+  }
+
+  void commit(const Klass* monitorClass,
+              u8 notifier,
+              s8 timeout,
+              bool timedOut,
+              u8 address) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const Klass* monitorClass,
+                     u8 notifier,
+                     s8 timeout,
+                     bool timedOut,
+                     u8 address) {
+  }
 };
 
-class EventJavaMonitorInflate : public JfrEvent
+class EventJavaMonitorInflate : public JfrEvent<EventJavaMonitorInflate>
 {
  public:
-  EventJavaMonitorInflate(EventStartTime ignore=TIMED) {}
+  EventJavaMonitorInflate(EventStartTime timing=TIMED) {}
+
+  void set_monitorClass(const Klass* new_value) {
+  }
+  void set_address(u8 new_value) {
+  }
+  void set_cause(u8 new_value) {
+  }
+
+  using JfrEvent<EventJavaMonitorInflate>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventJavaMonitorInflate(
-    const Klass*,
-    u8,
-    u8) { }
-  void set_monitorClass(const Klass*) { }
-  void set_address(u8) { }
-  void set_cause(u8) { }
+    const Klass* monitorClass,
+    u8 address,
+    u8 cause) {
+  }
+
+  void commit(const Klass* monitorClass,
+              u8 address,
+              u8 cause) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const Klass* monitorClass,
+                     u8 address,
+                     u8 cause) {
+  }
 };
 
-class EventBiasedLockRevocation : public JfrEvent
+class EventSyncOnValueBasedClass : public JfrEvent<EventSyncOnValueBasedClass>
 {
  public:
-  EventBiasedLockRevocation(EventStartTime ignore=TIMED) {}
-  EventBiasedLockRevocation(
-    const Klass*,
-    s4,
-    u8) { }
-  void set_lockClass(const Klass*) { }
-  void set_safepointId(s4) { }
-  void set_previousOwner(u8) { }
+  EventSyncOnValueBasedClass(EventStartTime timing=TIMED) {}
+
+  void set_valueBasedClass(const Klass* new_value) {
+  }
+
+  using JfrEvent<EventSyncOnValueBasedClass>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* valueBasedClass) {
+  }
 };
 
-class EventBiasedLockSelfRevocation : public JfrEvent
+class EventContinuationFreeze : public JfrEvent<EventContinuationFreeze>
 {
  public:
-  EventBiasedLockSelfRevocation(EventStartTime ignore=TIMED) {}
-  EventBiasedLockSelfRevocation(
-    const Klass*) { }
-  void set_lockClass(const Klass*) { }
+  EventContinuationFreeze(EventStartTime timing=TIMED) {}
+
+  void set_carrierThread(u8 new_value) {
+  }
+  void set_continuationClass(const Klass* new_value) {
+  }
+  void set_interpretedFrames(u2 new_value) {
+  }
+  void set_size(u2 new_value) {
+  }
+
+  using JfrEvent<EventContinuationFreeze>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventContinuationFreeze(
+    u8 carrierThread,
+    const Klass* continuationClass,
+    u2 interpretedFrames,
+    u2 size) {
+  }
+
+  void commit(u8 carrierThread,
+              const Klass* continuationClass,
+              u2 interpretedFrames,
+              u2 size) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 carrierThread,
+                     const Klass* continuationClass,
+                     u2 interpretedFrames,
+                     u2 size) {
+  }
 };
 
-class EventBiasedLockClassRevocation : public JfrEvent
+class EventContinuationThaw : public JfrEvent<EventContinuationThaw>
 {
  public:
-  EventBiasedLockClassRevocation(EventStartTime ignore=TIMED) {}
-  EventBiasedLockClassRevocation(
-    const Klass*,
-    bool,
-    s4) { }
-  void set_revokedClass(const Klass*) { }
-  void set_disableBiasing(bool) { }
-  void set_safepointId(s4) { }
+  EventContinuationThaw(EventStartTime timing=TIMED) {}
+
+  void set_carrierThread(u8 new_value) {
+  }
+  void set_continuationClass(const Klass* new_value) {
+  }
+  void set_interpretedFrames(u2 new_value) {
+  }
+  void set_size(u2 new_value) {
+  }
+
+  using JfrEvent<EventContinuationThaw>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventContinuationThaw(
+    u8 carrierThread,
+    const Klass* continuationClass,
+    u2 interpretedFrames,
+    u2 size) {
+  }
+
+  void commit(u8 carrierThread,
+              const Klass* continuationClass,
+              u2 interpretedFrames,
+              u2 size) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 carrierThread,
+                     const Klass* continuationClass,
+                     u2 interpretedFrames,
+                     u2 size) {
+  }
 };
 
-class EventReservedStackActivation : public JfrEvent
+class EventContinuationFreezeFast : public JfrEvent<EventContinuationFreezeFast>
 {
  public:
-  EventReservedStackActivation(EventStartTime ignore=TIMED) {}
-  void set_method(const Method*) { }
+  EventContinuationFreezeFast(EventStartTime timing=TIMED) {}
+
+  void set_id(u8 new_value) {
+  }
+  void set_size(unsigned new_value) {
+  }
+  void set_allocate(bool new_value) {
+  }
+
+  using JfrEvent<EventContinuationFreezeFast>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 id,
+                     unsigned size,
+                     bool allocate) {
+  }
 };
 
-class EventClassLoad : public JfrEvent
+class EventContinuationFreezeSlow : public JfrEvent<EventContinuationFreezeSlow>
 {
  public:
-  EventClassLoad(EventStartTime ignore=TIMED) {}
+  EventContinuationFreezeSlow(EventStartTime timing=TIMED) {}
+
+  void set_id(u8 new_value) {
+  }
+
+  using JfrEvent<EventContinuationFreezeSlow>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 id) {
+  }
+};
+
+class EventContinuationThawFast : public JfrEvent<EventContinuationThawFast>
+{
+ public:
+  EventContinuationThawFast(EventStartTime timing=TIMED) {}
+
+  void set_id(u8 new_value) {
+  }
+  void set_full(bool new_value) {
+  }
+  void set_size(unsigned new_value) {
+  }
+
+  using JfrEvent<EventContinuationThawFast>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 id,
+                     bool full,
+                     unsigned size) {
+  }
+};
+
+class EventContinuationThawSlow : public JfrEvent<EventContinuationThawSlow>
+{
+ public:
+  EventContinuationThawSlow(EventStartTime timing=TIMED) {}
+
+  void set_id(u8 new_value) {
+  }
+
+  using JfrEvent<EventContinuationThawSlow>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 id) {
+  }
+};
+
+class EventReservedStackActivation : public JfrEvent<EventReservedStackActivation>
+{
+ public:
+  EventReservedStackActivation(EventStartTime timing=TIMED) {}
+
+  void set_method(const Method* new_value) {
+  }
+
+  using JfrEvent<EventReservedStackActivation>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Method* method) {
+  }
+};
+
+class EventClassLoad : public JfrEvent<EventClassLoad>
+{
+ public:
+  EventClassLoad(EventStartTime timing=TIMED) {}
+
+  void set_loadedClass(const Klass* new_value) {
+  }
+  void set_definingClassLoader(const ClassLoaderData* new_value) {
+  }
+  void set_initiatingClassLoader(const ClassLoaderData* new_value) {
+  }
+
+  using JfrEvent<EventClassLoad>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventClassLoad(
-    const Klass*,
-    const ClassLoaderData*,
-    const ClassLoaderData*) { }
-  void set_loadedClass(const Klass*) { }
-  void set_definingClassLoader(const ClassLoaderData*) { }
-  void set_initiatingClassLoader(const ClassLoaderData*) { }
+    const Klass* loadedClass,
+    const ClassLoaderData* definingClassLoader,
+    const ClassLoaderData* initiatingClassLoader) {
+  }
+
+  void commit(const Klass* loadedClass,
+              const ClassLoaderData* definingClassLoader,
+              const ClassLoaderData* initiatingClassLoader) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const Klass* loadedClass,
+                     const ClassLoaderData* definingClassLoader,
+                     const ClassLoaderData* initiatingClassLoader) {
+  }
 };
 
-class EventClassDefine : public JfrEvent
+class EventClassDefine : public JfrEvent<EventClassDefine>
 {
  public:
-  EventClassDefine(EventStartTime ignore=TIMED) {}
-  void set_definedClass(const Klass*) { }
-  void set_definingClassLoader(const ClassLoaderData*) { }
+  EventClassDefine(EventStartTime timing=TIMED) {}
+
+  void set_definedClass(const Klass* new_value) {
+  }
+  void set_definingClassLoader(const ClassLoaderData* new_value) {
+  }
+
+  using JfrEvent<EventClassDefine>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* definedClass,
+                     const ClassLoaderData* definingClassLoader) {
+  }
 };
 
-class EventClassUnload : public JfrEvent
+class EventClassRedefinition : public JfrEvent<EventClassRedefinition>
 {
  public:
-  EventClassUnload(EventStartTime ignore=TIMED) {}
-  void set_unloadedClass(const Klass*) { }
-  void set_definingClassLoader(const ClassLoaderData*) { }
+  EventClassRedefinition(EventStartTime timing=TIMED) {}
+
+  void set_redefinedClass(const Klass* new_value) {
+  }
+  void set_classModificationCount(s4 new_value) {
+  }
+  void set_redefinitionId(u8 new_value) {
+  }
+
+  using JfrEvent<EventClassRedefinition>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* redefinedClass,
+                     s4 classModificationCount,
+                     u8 redefinitionId) {
+  }
 };
 
-class EventIntFlagChanged : public JfrEvent
+class EventRedefineClasses : public JfrEvent<EventRedefineClasses>
 {
  public:
-  EventIntFlagChanged(EventStartTime ignore=TIMED) {}
-  void set_name(const char*) { }
-  void set_oldValue(s4) { }
-  void set_newValue(s4) { }
-  void set_origin(u8) { }
+  EventRedefineClasses(EventStartTime timing=TIMED) {}
+
+  void set_classCount(s4 new_value) {
+  }
+  void set_redefinitionId(u8 new_value) {
+  }
+
+  using JfrEvent<EventRedefineClasses>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventRedefineClasses(
+    s4 classCount,
+    u8 redefinitionId) {
+  }
+
+  void commit(s4 classCount,
+              u8 redefinitionId) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     s4 classCount,
+                     u8 redefinitionId) {
+  }
 };
 
-class EventUnsignedIntFlagChanged : public JfrEvent
+class EventRetransformClasses : public JfrEvent<EventRetransformClasses>
 {
  public:
-  EventUnsignedIntFlagChanged(EventStartTime ignore=TIMED) {}
-  void set_name(const char*) { }
-  void set_oldValue(unsigned) { }
-  void set_newValue(unsigned) { }
-  void set_origin(u8) { }
+  EventRetransformClasses(EventStartTime timing=TIMED) {}
+
+  void set_classCount(s4 new_value) {
+  }
+  void set_redefinitionId(u8 new_value) {
+  }
+
+  using JfrEvent<EventRetransformClasses>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventRetransformClasses(
+    s4 classCount,
+    u8 redefinitionId) {
+  }
+
+  void commit(s4 classCount,
+              u8 redefinitionId) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     s4 classCount,
+                     u8 redefinitionId) {
+  }
 };
 
-class EventLongFlagChanged : public JfrEvent
+class EventClassUnload : public JfrEvent<EventClassUnload>
 {
  public:
-  EventLongFlagChanged(EventStartTime ignore=TIMED) {}
-  void set_name(const char*) { }
-  void set_oldValue(s8) { }
-  void set_newValue(s8) { }
-  void set_origin(u8) { }
+  EventClassUnload(EventStartTime timing=TIMED) {}
+
+  void set_unloadedClass(const Klass* new_value) {
+  }
+  void set_definingClassLoader(const ClassLoaderData* new_value) {
+  }
+
+  using JfrEvent<EventClassUnload>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* unloadedClass,
+                     const ClassLoaderData* definingClassLoader) {
+  }
 };
 
-class EventUnsignedLongFlagChanged : public JfrEvent
+class EventIntFlagChanged : public JfrEvent<EventIntFlagChanged>
 {
  public:
-  EventUnsignedLongFlagChanged(EventStartTime ignore=TIMED) {}
-  void set_name(const char*) { }
-  void set_oldValue(u8) { }
-  void set_newValue(u8) { }
-  void set_origin(u8) { }
+  EventIntFlagChanged(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_oldValue(s4 new_value) {
+  }
+  void set_newValue(s4 new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventIntFlagChanged>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* name,
+                     s4 oldValue,
+                     s4 newValue,
+                     u8 origin) {
+  }
 };
 
-class EventDoubleFlagChanged : public JfrEvent
+class EventUnsignedIntFlagChanged : public JfrEvent<EventUnsignedIntFlagChanged>
 {
  public:
-  EventDoubleFlagChanged(EventStartTime ignore=TIMED) {}
-  void set_name(const char*) { }
-  void set_oldValue(double) { }
-  void set_newValue(double) { }
-  void set_origin(u8) { }
+  EventUnsignedIntFlagChanged(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_oldValue(unsigned new_value) {
+  }
+  void set_newValue(unsigned new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventUnsignedIntFlagChanged>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* name,
+                     unsigned oldValue,
+                     unsigned newValue,
+                     u8 origin) {
+  }
 };
 
-class EventBooleanFlagChanged : public JfrEvent
+class EventLongFlagChanged : public JfrEvent<EventLongFlagChanged>
 {
  public:
-  EventBooleanFlagChanged(EventStartTime ignore=TIMED) {}
-  void set_name(const char*) { }
-  void set_oldValue(bool) { }
-  void set_newValue(bool) { }
-  void set_origin(u8) { }
+  EventLongFlagChanged(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_oldValue(s8 new_value) {
+  }
+  void set_newValue(s8 new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventLongFlagChanged>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* name,
+                     s8 oldValue,
+                     s8 newValue,
+                     u8 origin) {
+  }
 };
 
-class EventStringFlagChanged : public JfrEvent
+class EventUnsignedLongFlagChanged : public JfrEvent<EventUnsignedLongFlagChanged>
 {
  public:
-  EventStringFlagChanged(EventStartTime ignore=TIMED) {}
-  void set_name(const char*) { }
-  void set_oldValue(const char*) { }
-  void set_newValue(const char*) { }
-  void set_origin(u8) { }
+  EventUnsignedLongFlagChanged(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_oldValue(u8 new_value) {
+  }
+  void set_newValue(u8 new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventUnsignedLongFlagChanged>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* name,
+                     u8 oldValue,
+                     u8 newValue,
+                     u8 origin) {
+  }
 };
 
-class EventGCHeapSummary : public JfrEvent
+class EventDoubleFlagChanged : public JfrEvent<EventDoubleFlagChanged>
 {
  public:
-  EventGCHeapSummary(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_when(u8) { }
-  void set_heapSpace(const JfrStructVirtualSpace&) { }
-  void set_heapUsed(u8) { }
+  EventDoubleFlagChanged(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_oldValue(double new_value) {
+  }
+  void set_newValue(double new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventDoubleFlagChanged>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* name,
+                     double oldValue,
+                     double newValue,
+                     u8 origin) {
+  }
 };
 
-class EventMetaspaceSummary : public JfrEvent
+class EventBooleanFlagChanged : public JfrEvent<EventBooleanFlagChanged>
 {
  public:
-  EventMetaspaceSummary(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_when(u8) { }
-  void set_gcThreshold(u8) { }
-  void set_metaspace(const JfrStructMetaspaceSizes&) { }
-  void set_dataSpace(const JfrStructMetaspaceSizes&) { }
-  void set_classSpace(const JfrStructMetaspaceSizes&) { }
+  EventBooleanFlagChanged(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_oldValue(bool new_value) {
+  }
+  void set_newValue(bool new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventBooleanFlagChanged>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* name,
+                     bool oldValue,
+                     bool newValue,
+                     u8 origin) {
+  }
 };
 
-class EventMetaspaceGCThreshold : public JfrEvent
+class EventStringFlagChanged : public JfrEvent<EventStringFlagChanged>
 {
  public:
-  EventMetaspaceGCThreshold(EventStartTime ignore=TIMED) {}
-  void set_oldValue(u8) { }
-  void set_newValue(u8) { }
-  void set_updater(u8) { }
+  EventStringFlagChanged(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_oldValue(const char* new_value) {
+  }
+  void set_newValue(const char* new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventStringFlagChanged>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* name,
+                     const char* oldValue,
+                     const char* newValue,
+                     u8 origin) {
+  }
 };
 
-class EventMetaspaceAllocationFailure : public JfrEvent
+class EventGCHeapSummary : public JfrEvent<EventGCHeapSummary>
 {
  public:
-  EventMetaspaceAllocationFailure(EventStartTime ignore=TIMED) {}
-  void set_classLoader(const ClassLoaderData*) { }
-  void set_anonymousClassLoader(bool) { }
-  void set_size(u8) { }
-  void set_metadataType(u8) { }
-  void set_metaspaceObjectType(u8) { }
+  EventGCHeapSummary(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_when(u8 new_value) {
+  }
+  void set_heapSpace(const JfrStructVirtualSpace& value) {
+  }
+  void set_heapUsed(u8 new_value) {
+  }
+
+  using JfrEvent<EventGCHeapSummary>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 when,
+                     const JfrStructVirtualSpace& heapSpace,
+                     u8 heapUsed) {
+  }
 };
 
-class EventMetaspaceOOM : public JfrEvent
+class EventMetaspaceSummary : public JfrEvent<EventMetaspaceSummary>
 {
  public:
-  EventMetaspaceOOM(EventStartTime ignore=TIMED) {}
-  void set_classLoader(const ClassLoaderData*) { }
-  void set_anonymousClassLoader(bool) { }
-  void set_size(u8) { }
-  void set_metadataType(u8) { }
-  void set_metaspaceObjectType(u8) { }
+  EventMetaspaceSummary(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_when(u8 new_value) {
+  }
+  void set_gcThreshold(u8 new_value) {
+  }
+  void set_metaspace(const JfrStructMetaspaceSizes& value) {
+  }
+  void set_dataSpace(const JfrStructMetaspaceSizes& value) {
+  }
+  void set_classSpace(const JfrStructMetaspaceSizes& value) {
+  }
+
+  using JfrEvent<EventMetaspaceSummary>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 when,
+                     u8 gcThreshold,
+                     const JfrStructMetaspaceSizes& metaspace,
+                     const JfrStructMetaspaceSizes& dataSpace,
+                     const JfrStructMetaspaceSizes& classSpace) {
+  }
 };
 
-class EventMetaspaceChunkFreeListSummary : public JfrEvent
+class EventMetaspaceGCThreshold : public JfrEvent<EventMetaspaceGCThreshold>
 {
  public:
-  EventMetaspaceChunkFreeListSummary(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_when(u8) { }
-  void set_metadataType(u8) { }
-  void set_specializedChunks(u8) { }
-  void set_specializedChunksTotalSize(u8) { }
-  void set_smallChunks(u8) { }
-  void set_smallChunksTotalSize(u8) { }
-  void set_mediumChunks(u8) { }
-  void set_mediumChunksTotalSize(u8) { }
-  void set_humongousChunks(u8) { }
-  void set_humongousChunksTotalSize(u8) { }
+  EventMetaspaceGCThreshold(EventStartTime timing=TIMED) {}
+
+  void set_oldValue(u8 new_value) {
+  }
+  void set_newValue(u8 new_value) {
+  }
+  void set_updater(u8 new_value) {
+  }
+
+  using JfrEvent<EventMetaspaceGCThreshold>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 oldValue,
+                     u8 newValue,
+                     u8 updater) {
+  }
 };
 
-class EventPSHeapSummary : public JfrEvent
+class EventMetaspaceAllocationFailure : public JfrEvent<EventMetaspaceAllocationFailure>
 {
  public:
-  EventPSHeapSummary(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_when(u8) { }
-  void set_oldSpace(const JfrStructVirtualSpace&) { }
-  void set_oldObjectSpace(const JfrStructObjectSpace&) { }
-  void set_youngSpace(const JfrStructVirtualSpace&) { }
-  void set_edenSpace(const JfrStructObjectSpace&) { }
-  void set_fromSpace(const JfrStructObjectSpace&) { }
-  void set_toSpace(const JfrStructObjectSpace&) { }
+  EventMetaspaceAllocationFailure(EventStartTime timing=TIMED) {}
+
+  void set_classLoader(const ClassLoaderData* new_value) {
+  }
+  void set_hiddenClassLoader(bool new_value) {
+  }
+  void set_size(u8 new_value) {
+  }
+  void set_metadataType(u8 new_value) {
+  }
+  void set_metaspaceObjectType(u8 new_value) {
+  }
+
+  using JfrEvent<EventMetaspaceAllocationFailure>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const ClassLoaderData* classLoader,
+                     bool hiddenClassLoader,
+                     u8 size,
+                     u8 metadataType,
+                     u8 metaspaceObjectType) {
+  }
 };
 
-class EventG1HeapSummary : public JfrEvent
+class EventMetaspaceOOM : public JfrEvent<EventMetaspaceOOM>
 {
  public:
-  EventG1HeapSummary(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_when(u8) { }
-  void set_edenUsedSize(u8) { }
-  void set_edenTotalSize(u8) { }
-  void set_survivorUsedSize(u8) { }
-  void set_numberOfRegions(unsigned) { }
+  EventMetaspaceOOM(EventStartTime timing=TIMED) {}
+
+  void set_classLoader(const ClassLoaderData* new_value) {
+  }
+  void set_hiddenClassLoader(bool new_value) {
+  }
+  void set_size(u8 new_value) {
+  }
+  void set_metadataType(u8 new_value) {
+  }
+  void set_metaspaceObjectType(u8 new_value) {
+  }
+
+  using JfrEvent<EventMetaspaceOOM>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const ClassLoaderData* classLoader,
+                     bool hiddenClassLoader,
+                     u8 size,
+                     u8 metadataType,
+                     u8 metaspaceObjectType) {
+  }
 };
 
-class EventGarbageCollection : public JfrEvent
+class EventMetaspaceChunkFreeListSummary : public JfrEvent<EventMetaspaceChunkFreeListSummary>
 {
  public:
-  EventGarbageCollection(EventStartTime ignore=TIMED) {}
+  EventMetaspaceChunkFreeListSummary(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_when(u8 new_value) {
+  }
+  void set_metadataType(u8 new_value) {
+  }
+  void set_specializedChunks(u8 new_value) {
+  }
+  void set_specializedChunksTotalSize(u8 new_value) {
+  }
+  void set_smallChunks(u8 new_value) {
+  }
+  void set_smallChunksTotalSize(u8 new_value) {
+  }
+  void set_mediumChunks(u8 new_value) {
+  }
+  void set_mediumChunksTotalSize(u8 new_value) {
+  }
+  void set_humongousChunks(u8 new_value) {
+  }
+  void set_humongousChunksTotalSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventMetaspaceChunkFreeListSummary>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 when,
+                     u8 metadataType,
+                     u8 specializedChunks,
+                     u8 specializedChunksTotalSize,
+                     u8 smallChunks,
+                     u8 smallChunksTotalSize,
+                     u8 mediumChunks,
+                     u8 mediumChunksTotalSize,
+                     u8 humongousChunks,
+                     u8 humongousChunksTotalSize) {
+  }
+};
+
+class EventPSHeapSummary : public JfrEvent<EventPSHeapSummary>
+{
+ public:
+  EventPSHeapSummary(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_when(u8 new_value) {
+  }
+  void set_oldSpace(const JfrStructVirtualSpace& value) {
+  }
+  void set_oldObjectSpace(const JfrStructObjectSpace& value) {
+  }
+  void set_youngSpace(const JfrStructVirtualSpace& value) {
+  }
+  void set_edenSpace(const JfrStructObjectSpace& value) {
+  }
+  void set_fromSpace(const JfrStructObjectSpace& value) {
+  }
+  void set_toSpace(const JfrStructObjectSpace& value) {
+  }
+
+  using JfrEvent<EventPSHeapSummary>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 when,
+                     const JfrStructVirtualSpace& oldSpace,
+                     const JfrStructObjectSpace& oldObjectSpace,
+                     const JfrStructVirtualSpace& youngSpace,
+                     const JfrStructObjectSpace& edenSpace,
+                     const JfrStructObjectSpace& fromSpace,
+                     const JfrStructObjectSpace& toSpace) {
+  }
+};
+
+class EventG1HeapSummary : public JfrEvent<EventG1HeapSummary>
+{
+ public:
+  EventG1HeapSummary(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_when(u8 new_value) {
+  }
+  void set_edenUsedSize(u8 new_value) {
+  }
+  void set_edenTotalSize(u8 new_value) {
+  }
+  void set_survivorUsedSize(u8 new_value) {
+  }
+  void set_oldGenUsedSize(u8 new_value) {
+  }
+  void set_numberOfRegions(unsigned new_value) {
+  }
+
+  using JfrEvent<EventG1HeapSummary>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 when,
+                     u8 edenUsedSize,
+                     u8 edenTotalSize,
+                     u8 survivorUsedSize,
+                     u8 oldGenUsedSize,
+                     unsigned numberOfRegions) {
+  }
+};
+
+class EventGarbageCollection : public JfrEvent<EventGarbageCollection>
+{
+ public:
+  EventGarbageCollection(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(u8 new_value) {
+  }
+  void set_cause(u8 new_value) {
+  }
+  void set_sumOfPauses(const Tickspan& new_value) {
+  }
+  void set_longestPause(const Tickspan& new_value) {
+  }
+
+  using JfrEvent<EventGarbageCollection>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGarbageCollection(
-    unsigned,
-    u8,
-    u8,
-    const Tickspan&,
-    const Tickspan&) { }
-  void set_gcId(unsigned) { }
-  void set_name(u8) { }
-  void set_cause(u8) { }
-  void set_sumOfPauses(const Tickspan&) { }
-  void set_longestPause(const Tickspan&) { }
+    unsigned gcId,
+    u8 name,
+    u8 cause,
+    const Tickspan& sumOfPauses,
+    const Tickspan& longestPause) {
+  }
+
+  void commit(unsigned gcId,
+              u8 name,
+              u8 cause,
+              const Tickspan& sumOfPauses,
+              const Tickspan& longestPause) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     u8 name,
+                     u8 cause,
+                     const Tickspan& sumOfPauses,
+                     const Tickspan& longestPause) {
+  }
 };
 
-class EventParallelOldGarbageCollection : public JfrEvent
+class EventSystemGC : public JfrEvent<EventSystemGC>
 {
  public:
-  EventParallelOldGarbageCollection(EventStartTime ignore=TIMED) {}
+  EventSystemGC(EventStartTime timing=TIMED) {}
+
+  void set_invokedConcurrent(bool new_value) {
+  }
+
+  using JfrEvent<EventSystemGC>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventSystemGC(
+    bool invokedConcurrent) {
+  }
+
+  void commit(bool invokedConcurrent) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     bool invokedConcurrent) {
+  }
+};
+
+class EventParallelOldGarbageCollection : public JfrEvent<EventParallelOldGarbageCollection>
+{
+ public:
+  EventParallelOldGarbageCollection(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_densePrefix(u8 new_value) {
+  }
+
+  using JfrEvent<EventParallelOldGarbageCollection>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventParallelOldGarbageCollection(
-    unsigned,
-    u8) { }
-  void set_gcId(unsigned) { }
-  void set_densePrefix(u8) { }
+    unsigned gcId,
+    u8 densePrefix) {
+  }
+
+  void commit(unsigned gcId,
+              u8 densePrefix) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     u8 densePrefix) {
+  }
 };
 
-class EventYoungGarbageCollection : public JfrEvent
+class EventYoungGarbageCollection : public JfrEvent<EventYoungGarbageCollection>
 {
  public:
-  EventYoungGarbageCollection(EventStartTime ignore=TIMED) {}
+  EventYoungGarbageCollection(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_tenuringThreshold(unsigned new_value) {
+  }
+
+  using JfrEvent<EventYoungGarbageCollection>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventYoungGarbageCollection(
-    unsigned,
-    unsigned) { }
-  void set_gcId(unsigned) { }
-  void set_tenuringThreshold(unsigned) { }
+    unsigned gcId,
+    unsigned tenuringThreshold) {
+  }
+
+  void commit(unsigned gcId,
+              unsigned tenuringThreshold) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     unsigned tenuringThreshold) {
+  }
 };
 
-class EventOldGarbageCollection : public JfrEvent
+class EventOldGarbageCollection : public JfrEvent<EventOldGarbageCollection>
 {
  public:
-  EventOldGarbageCollection(EventStartTime ignore=TIMED) {}
+  EventOldGarbageCollection(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+
+  using JfrEvent<EventOldGarbageCollection>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventOldGarbageCollection(
-    unsigned) { }
-  void set_gcId(unsigned) { }
+    unsigned gcId) {
+  }
+
+  void commit(unsigned gcId) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId) {
+  }
 };
 
-class EventG1GarbageCollection : public JfrEvent
+class EventG1GarbageCollection : public JfrEvent<EventG1GarbageCollection>
 {
  public:
-  EventG1GarbageCollection(EventStartTime ignore=TIMED) {}
+  EventG1GarbageCollection(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_type(u8 new_value) {
+  }
+
+  using JfrEvent<EventG1GarbageCollection>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventG1GarbageCollection(
-    unsigned,
-    u8) { }
-  void set_gcId(unsigned) { }
-  void set_type(u8) { }
+    unsigned gcId,
+    u8 type) {
+  }
+
+  void commit(unsigned gcId,
+              u8 type) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     u8 type) {
+  }
 };
 
-class EventG1MMU : public JfrEvent
+class EventG1MMU : public JfrEvent<EventG1MMU>
 {
  public:
-  EventG1MMU(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_timeSlice(s8) { }
-  void set_gcTime(s8) { }
-  void set_pauseTarget(s8) { }
+  EventG1MMU(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_timeSlice(s8 new_value) {
+  }
+  void set_gcTime(s8 new_value) {
+  }
+  void set_pauseTarget(s8 new_value) {
+  }
+
+  using JfrEvent<EventG1MMU>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     s8 timeSlice,
+                     s8 gcTime,
+                     s8 pauseTarget) {
+  }
 };
 
-class EventEvacuationInformation : public JfrEvent
+class EventEvacuationInformation : public JfrEvent<EventEvacuationInformation>
 {
  public:
-  EventEvacuationInformation(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_cSetRegions(unsigned) { }
-  void set_cSetUsedBefore(u8) { }
-  void set_cSetUsedAfter(u8) { }
-  void set_allocationRegions(unsigned) { }
-  void set_allocationRegionsUsedBefore(u8) { }
-  void set_allocationRegionsUsedAfter(u8) { }
-  void set_bytesCopied(u8) { }
-  void set_regionsFreed(unsigned) { }
+  EventEvacuationInformation(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_cSetRegions(unsigned new_value) {
+  }
+  void set_cSetUsedBefore(u8 new_value) {
+  }
+  void set_cSetUsedAfter(u8 new_value) {
+  }
+  void set_allocationRegions(unsigned new_value) {
+  }
+  void set_allocationRegionsUsedBefore(u8 new_value) {
+  }
+  void set_allocationRegionsUsedAfter(u8 new_value) {
+  }
+  void set_bytesCopied(u8 new_value) {
+  }
+  void set_regionsFreed(unsigned new_value) {
+  }
+
+  using JfrEvent<EventEvacuationInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     unsigned cSetRegions,
+                     u8 cSetUsedBefore,
+                     u8 cSetUsedAfter,
+                     unsigned allocationRegions,
+                     u8 allocationRegionsUsedBefore,
+                     u8 allocationRegionsUsedAfter,
+                     u8 bytesCopied,
+                     unsigned regionsFreed) {
+  }
 };
 
-class EventGCReferenceStatistics : public JfrEvent
+class EventGCReferenceStatistics : public JfrEvent<EventGCReferenceStatistics>
 {
  public:
-  EventGCReferenceStatistics(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_type(u8) { }
-  void set_count(u8) { }
+  EventGCReferenceStatistics(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_type(u8 new_value) {
+  }
+  void set_count(u8 new_value) {
+  }
+
+  using JfrEvent<EventGCReferenceStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 type,
+                     u8 count) {
+  }
 };
 
-class EventObjectCountAfterGC : public JfrEvent
+class EventObjectCountAfterGC : public JfrEvent<EventObjectCountAfterGC>
 {
  public:
-  EventObjectCountAfterGC(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_objectClass(const Klass*) { }
-  void set_count(s8) { }
-  void set_totalSize(u8) { }
+  EventObjectCountAfterGC(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_objectClass(const Klass* new_value) {
+  }
+  void set_count(s8 new_value) {
+  }
+  void set_totalSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventObjectCountAfterGC>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     const Klass* objectClass,
+                     s8 count,
+                     u8 totalSize) {
+  }
 };
 
-class EventG1EvacuationYoungStatistics : public JfrEvent
+class EventG1EvacuationYoungStatistics : public JfrEvent<EventG1EvacuationYoungStatistics>
 {
  public:
-  EventG1EvacuationYoungStatistics(EventStartTime ignore=TIMED) {}
-  void set_statistics(const JfrStructG1EvacuationStatistics&) { }
+  EventG1EvacuationYoungStatistics(EventStartTime timing=TIMED) {}
+
+  void set_statistics(const JfrStructG1EvacuationStatistics& value) {
+  }
+
+  using JfrEvent<EventG1EvacuationYoungStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const JfrStructG1EvacuationStatistics& statistics) {
+  }
 };
 
-class EventG1EvacuationOldStatistics : public JfrEvent
+class EventG1EvacuationOldStatistics : public JfrEvent<EventG1EvacuationOldStatistics>
 {
  public:
-  EventG1EvacuationOldStatistics(EventStartTime ignore=TIMED) {}
-  void set_statistics(const JfrStructG1EvacuationStatistics&) { }
+  EventG1EvacuationOldStatistics(EventStartTime timing=TIMED) {}
+
+  void set_statistics(const JfrStructG1EvacuationStatistics& value) {
+  }
+
+  using JfrEvent<EventG1EvacuationOldStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const JfrStructG1EvacuationStatistics& statistics) {
+  }
 };
 
-class EventG1BasicIHOP : public JfrEvent
+class EventG1BasicIHOP : public JfrEvent<EventG1BasicIHOP>
 {
  public:
-  EventG1BasicIHOP(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_threshold(u8) { }
-  void set_thresholdPercentage(float) { }
-  void set_targetOccupancy(u8) { }
-  void set_currentOccupancy(u8) { }
-  void set_recentMutatorAllocationSize(u8) { }
-  void set_recentMutatorDuration(s8) { }
-  void set_recentAllocationRate(double) { }
-  void set_lastMarkingDuration(s8) { }
+  EventG1BasicIHOP(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_threshold(u8 new_value) {
+  }
+  void set_thresholdPercentage(float new_value) {
+  }
+  void set_targetOccupancy(u8 new_value) {
+  }
+  void set_currentOccupancy(u8 new_value) {
+  }
+  void set_recentMutatorAllocationSize(u8 new_value) {
+  }
+  void set_recentMutatorDuration(s8 new_value) {
+  }
+  void set_recentAllocationRate(double new_value) {
+  }
+  void set_lastMarkingDuration(s8 new_value) {
+  }
+
+  using JfrEvent<EventG1BasicIHOP>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 threshold,
+                     float thresholdPercentage,
+                     u8 targetOccupancy,
+                     u8 currentOccupancy,
+                     u8 recentMutatorAllocationSize,
+                     s8 recentMutatorDuration,
+                     double recentAllocationRate,
+                     s8 lastMarkingDuration) {
+  }
 };
 
-class EventG1AdaptiveIHOP : public JfrEvent
+class EventG1AdaptiveIHOP : public JfrEvent<EventG1AdaptiveIHOP>
 {
  public:
-  EventG1AdaptiveIHOP(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_threshold(u8) { }
-  void set_thresholdPercentage(float) { }
-  void set_ihopTargetOccupancy(u8) { }
-  void set_currentOccupancy(u8) { }
-  void set_additionalBufferSize(u8) { }
-  void set_predictedAllocationRate(double) { }
-  void set_predictedMarkingDuration(s8) { }
-  void set_predictionActive(bool) { }
+  EventG1AdaptiveIHOP(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_threshold(u8 new_value) {
+  }
+  void set_thresholdPercentage(float new_value) {
+  }
+  void set_ihopTargetOccupancy(u8 new_value) {
+  }
+  void set_currentOccupancy(u8 new_value) {
+  }
+  void set_additionalBufferSize(u8 new_value) {
+  }
+  void set_predictedAllocationRate(double new_value) {
+  }
+  void set_predictedMarkingDuration(s8 new_value) {
+  }
+  void set_predictionActive(bool new_value) {
+  }
+
+  using JfrEvent<EventG1AdaptiveIHOP>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 threshold,
+                     float thresholdPercentage,
+                     u8 ihopTargetOccupancy,
+                     u8 currentOccupancy,
+                     u8 additionalBufferSize,
+                     double predictedAllocationRate,
+                     s8 predictedMarkingDuration,
+                     bool predictionActive) {
+  }
 };
 
-class EventPromoteObjectInNewPLAB : public JfrEvent
+class EventPromoteObjectInNewPLAB : public JfrEvent<EventPromoteObjectInNewPLAB>
 {
  public:
-  EventPromoteObjectInNewPLAB(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_objectClass(const Klass*) { }
-  void set_objectSize(u8) { }
-  void set_tenuringAge(unsigned) { }
-  void set_tenured(bool) { }
-  void set_plabSize(u8) { }
+  EventPromoteObjectInNewPLAB(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_objectClass(const Klass* new_value) {
+  }
+  void set_objectSize(u8 new_value) {
+  }
+  void set_tenuringAge(unsigned new_value) {
+  }
+  void set_tenured(bool new_value) {
+  }
+  void set_plabSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventPromoteObjectInNewPLAB>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     const Klass* objectClass,
+                     u8 objectSize,
+                     unsigned tenuringAge,
+                     bool tenured,
+                     u8 plabSize) {
+  }
 };
 
-class EventPromoteObjectOutsidePLAB : public JfrEvent
+class EventPromoteObjectOutsidePLAB : public JfrEvent<EventPromoteObjectOutsidePLAB>
 {
  public:
-  EventPromoteObjectOutsidePLAB(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_objectClass(const Klass*) { }
-  void set_objectSize(u8) { }
-  void set_tenuringAge(unsigned) { }
-  void set_tenured(bool) { }
+  EventPromoteObjectOutsidePLAB(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_objectClass(const Klass* new_value) {
+  }
+  void set_objectSize(u8 new_value) {
+  }
+  void set_tenuringAge(unsigned new_value) {
+  }
+  void set_tenured(bool new_value) {
+  }
+
+  using JfrEvent<EventPromoteObjectOutsidePLAB>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     const Klass* objectClass,
+                     u8 objectSize,
+                     unsigned tenuringAge,
+                     bool tenured) {
+  }
 };
 
-class EventPromotionFailed : public JfrEvent
+class EventPromotionFailed : public JfrEvent<EventPromotionFailed>
 {
  public:
-  EventPromotionFailed(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_promotionFailed(const JfrStructCopyFailed&) { }
-  void set_thread(u8) { }
+  EventPromotionFailed(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_promotionFailed(const JfrStructCopyFailed& value) {
+  }
+  void set_thread(u8 new_value) {
+  }
+
+  using JfrEvent<EventPromotionFailed>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     const JfrStructCopyFailed& promotionFailed,
+                     u8 thread) {
+  }
 };
 
-class EventEvacuationFailed : public JfrEvent
+class EventEvacuationFailed : public JfrEvent<EventEvacuationFailed>
 {
  public:
-  EventEvacuationFailed(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_evacuationFailed(const JfrStructCopyFailed&) { }
+  EventEvacuationFailed(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_evacuationFailed(const JfrStructCopyFailed& value) {
+  }
+
+  using JfrEvent<EventEvacuationFailed>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     const JfrStructCopyFailed& evacuationFailed) {
+  }
 };
 
-class EventConcurrentModeFailure : public JfrEvent
+class EventConcurrentModeFailure : public JfrEvent<EventConcurrentModeFailure>
 {
  public:
-  EventConcurrentModeFailure(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
+  EventConcurrentModeFailure(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+
+  using JfrEvent<EventConcurrentModeFailure>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId) {
+  }
 };
 
-class EventGCPhasePause : public JfrEvent
+class EventGCCPUTime : public JfrEvent<EventGCCPUTime>
 {
  public:
-  EventGCPhasePause(EventStartTime ignore=TIMED) {}
+  EventGCCPUTime(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_userTime(u8 new_value) {
+  }
+  void set_systemTime(u8 new_value) {
+  }
+  void set_realTime(u8 new_value) {
+  }
+
+  using JfrEvent<EventGCCPUTime>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 userTime,
+                     u8 systemTime,
+                     u8 realTime) {
+  }
+};
+
+class EventGCPhasePause : public JfrEvent<EventGCPhasePause>
+{
+ public:
+  EventGCPhasePause(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhasePause>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCPhasePause(
-    unsigned,
-    const char*) { }
-  void set_gcId(unsigned) { }
-  void set_name(const char*) { }
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
 };
 
-class EventGCPhasePauseLevel1 : public JfrEvent
+class EventGCPhasePauseLevel1 : public JfrEvent<EventGCPhasePauseLevel1>
 {
  public:
-  EventGCPhasePauseLevel1(EventStartTime ignore=TIMED) {}
+  EventGCPhasePauseLevel1(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhasePauseLevel1>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCPhasePauseLevel1(
-    unsigned,
-    const char*) { }
-  void set_gcId(unsigned) { }
-  void set_name(const char*) { }
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
 };
 
-class EventGCPhasePauseLevel2 : public JfrEvent
+class EventGCPhasePauseLevel2 : public JfrEvent<EventGCPhasePauseLevel2>
 {
  public:
-  EventGCPhasePauseLevel2(EventStartTime ignore=TIMED) {}
+  EventGCPhasePauseLevel2(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhasePauseLevel2>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCPhasePauseLevel2(
-    unsigned,
-    const char*) { }
-  void set_gcId(unsigned) { }
-  void set_name(const char*) { }
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
 };
 
-class EventGCPhasePauseLevel3 : public JfrEvent
+class EventGCPhasePauseLevel3 : public JfrEvent<EventGCPhasePauseLevel3>
 {
  public:
-  EventGCPhasePauseLevel3(EventStartTime ignore=TIMED) {}
+  EventGCPhasePauseLevel3(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhasePauseLevel3>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCPhasePauseLevel3(
-    unsigned,
-    const char*) { }
-  void set_gcId(unsigned) { }
-  void set_name(const char*) { }
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
 };
 
-class EventGCPhasePauseLevel4 : public JfrEvent
+class EventGCPhasePauseLevel4 : public JfrEvent<EventGCPhasePauseLevel4>
 {
  public:
-  EventGCPhasePauseLevel4(EventStartTime ignore=TIMED) {}
+  EventGCPhasePauseLevel4(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhasePauseLevel4>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCPhasePauseLevel4(
-    unsigned,
-    const char*) { }
-  void set_gcId(unsigned) { }
-  void set_name(const char*) { }
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
 };
 
-class EventGCPhaseConcurrent : public JfrEvent
+class EventGCPhaseConcurrent : public JfrEvent<EventGCPhaseConcurrent>
 {
  public:
-  EventGCPhaseConcurrent(EventStartTime ignore=TIMED) {}
+  EventGCPhaseConcurrent(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhaseConcurrent>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCPhaseConcurrent(
-    unsigned,
-    const char*) { }
-  void set_gcId(unsigned) { }
-  void set_name(const char*) { }
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
 };
 
-class EventAllocationRequiringGC : public JfrEvent
+class EventGCPhaseConcurrentLevel1 : public JfrEvent<EventGCPhaseConcurrentLevel1>
 {
  public:
-  EventAllocationRequiringGC(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_size(u8) { }
+  EventGCPhaseConcurrentLevel1(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhaseConcurrentLevel1>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventGCPhaseConcurrentLevel1(
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
 };
 
-class EventTenuringDistribution : public JfrEvent
+class EventGCPhaseParallel : public JfrEvent<EventGCPhaseParallel>
 {
  public:
-  EventTenuringDistribution(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_age(unsigned) { }
-  void set_size(u8) { }
+  EventGCPhaseParallel(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_gcWorkerId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventGCPhaseParallel>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventGCPhaseParallel(
+    unsigned gcId,
+    unsigned gcWorkerId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              unsigned gcWorkerId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     unsigned gcWorkerId,
+                     const char* name) {
+  }
 };
 
-class EventG1HeapRegionTypeChange : public JfrEvent
+class EventAllocationRequiringGC : public JfrEvent<EventAllocationRequiringGC>
 {
  public:
-  EventG1HeapRegionTypeChange(EventStartTime ignore=TIMED) {}
-  void set_index(unsigned) { }
-  void set_from(u8) { }
-  void set_to(u8) { }
-  void set_start(u8) { }
-  void set_used(u8) { }
+  EventAllocationRequiringGC(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_size(u8 new_value) {
+  }
+
+  using JfrEvent<EventAllocationRequiringGC>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 size) {
+  }
 };
 
-class EventCompilation : public JfrEvent
+class EventTenuringDistribution : public JfrEvent<EventTenuringDistribution>
 {
  public:
-  EventCompilation(EventStartTime ignore=TIMED) {}
+  EventTenuringDistribution(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_age(unsigned new_value) {
+  }
+  void set_size(u8 new_value) {
+  }
+
+  using JfrEvent<EventTenuringDistribution>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     unsigned age,
+                     u8 size) {
+  }
+};
+
+class EventG1HeapRegionTypeChange : public JfrEvent<EventG1HeapRegionTypeChange>
+{
+ public:
+  EventG1HeapRegionTypeChange(EventStartTime timing=TIMED) {}
+
+  void set_index(unsigned new_value) {
+  }
+  void set_from(u8 new_value) {
+  }
+  void set_to(u8 new_value) {
+  }
+  void set_start(u8 new_value) {
+  }
+  void set_used(u8 new_value) {
+  }
+
+  using JfrEvent<EventG1HeapRegionTypeChange>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned index,
+                     u8 from,
+                     u8 to,
+                     u8 start,
+                     u8 used) {
+  }
+};
+
+class EventJITRestart : public JfrEvent<EventJITRestart>
+{
+ public:
+  EventJITRestart(EventStartTime timing=TIMED) {}
+
+  void set_freedMemory(u8 new_value) {
+  }
+  void set_codeCacheMaxCapacity(u8 new_value) {
+  }
+
+  using JfrEvent<EventJITRestart>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 freedMemory,
+                     u8 codeCacheMaxCapacity) {
+  }
+};
+
+class EventCompilation : public JfrEvent<EventCompilation>
+{
+ public:
+  EventCompilation(EventStartTime timing=TIMED) {}
+
+  void set_compileId(s4 new_value) {
+  }
+  void set_compiler(u8 new_value) {
+  }
+  void set_method(const Method* new_value) {
+  }
+  void set_compileLevel(u2 new_value) {
+  }
+  void set_succeded(bool new_value) {
+  }
+  void set_isOsr(bool new_value) {
+  }
+  void set_codeSize(u8 new_value) {
+  }
+  void set_inlinedBytes(u8 new_value) {
+  }
+
+  using JfrEvent<EventCompilation>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventCompilation(
-    const Method*,
-    unsigned,
-    u2,
-    bool,
-    bool,
-    u8,
-    u8) { }
-  void set_method(const Method*) { }
-  void set_compileId(unsigned) { }
-  void set_compileLevel(u2) { }
-  void set_succeded(bool) { }
-  void set_isOsr(bool) { }
-  void set_codeSize(u8) { }
-  void set_inlinedBytes(u8) { }
+    s4 compileId,
+    u8 compiler,
+    const Method* method,
+    u2 compileLevel,
+    bool succeded,
+    bool isOsr,
+    u8 codeSize,
+    u8 inlinedBytes) {
+  }
+
+  void commit(s4 compileId,
+              u8 compiler,
+              const Method* method,
+              u2 compileLevel,
+              bool succeded,
+              bool isOsr,
+              u8 codeSize,
+              u8 inlinedBytes) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     s4 compileId,
+                     u8 compiler,
+                     const Method* method,
+                     u2 compileLevel,
+                     bool succeded,
+                     bool isOsr,
+                     u8 codeSize,
+                     u8 inlinedBytes) {
+  }
 };
 
-class EventCompilerPhase : public JfrEvent
+class EventCompilerPhase : public JfrEvent<EventCompilerPhase>
 {
  public:
-  EventCompilerPhase(EventStartTime ignore=TIMED) {}
+  EventCompilerPhase(EventStartTime timing=TIMED) {}
+
+  void set_phase(u8 new_value) {
+  }
+  void set_compileId(s4 new_value) {
+  }
+  void set_phaseLevel(u2 new_value) {
+  }
+
+  using JfrEvent<EventCompilerPhase>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventCompilerPhase(
-    u8,
-    unsigned,
-    u2) { }
-  void set_phase(u8) { }
-  void set_compileId(unsigned) { }
-  void set_phaseLevel(u2) { }
+    u8 phase,
+    s4 compileId,
+    u2 phaseLevel) {
+  }
+
+  void commit(u8 phase,
+              s4 compileId,
+              u2 phaseLevel) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 phase,
+                     s4 compileId,
+                     u2 phaseLevel) {
+  }
 };
 
-class EventCompilationFailure : public JfrEvent
+class EventCompilationFailure : public JfrEvent<EventCompilationFailure>
 {
  public:
-  EventCompilationFailure(EventStartTime ignore=TIMED) {}
-  void set_failureMessage(const char*) { }
-  void set_compileId(unsigned) { }
+  EventCompilationFailure(EventStartTime timing=TIMED) {}
+
+  void set_failureMessage(const char* new_value) {
+  }
+  void set_compileId(s4 new_value) {
+  }
+
+  using JfrEvent<EventCompilationFailure>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* failureMessage,
+                     s4 compileId) {
+  }
 };
 
-class EventCompilerInlining : public JfrEvent
+class EventCompilerInlining : public JfrEvent<EventCompilerInlining>
 {
  public:
-  EventCompilerInlining(EventStartTime ignore=TIMED) {}
-  void set_compileId(unsigned) { }
-  void set_caller(const Method*) { }
-  void set_callee(const JfrStructCalleeMethod&) { }
-  void set_succeeded(bool) { }
-  void set_message(const char*) { }
-  void set_bci(s4) { }
+  EventCompilerInlining(EventStartTime timing=TIMED) {}
+
+  void set_compileId(s4 new_value) {
+  }
+  void set_caller(const Method* new_value) {
+  }
+  void set_callee(const JfrStructCalleeMethod& value) {
+  }
+  void set_succeeded(bool new_value) {
+  }
+  void set_message(const char* new_value) {
+  }
+  void set_bci(s4 new_value) {
+  }
+
+  using JfrEvent<EventCompilerInlining>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(s4 compileId,
+                     const Method* caller,
+                     const JfrStructCalleeMethod& callee,
+                     bool succeeded,
+                     const char* message,
+                     s4 bci) {
+  }
 };
 
-class EventSweepCodeCache : public JfrEvent
+class EventCodeCacheFull : public JfrEvent<EventCodeCacheFull>
 {
  public:
-  EventSweepCodeCache(EventStartTime ignore=TIMED) {}
-  EventSweepCodeCache(
-    s4,
-    unsigned,
-    unsigned,
-    unsigned) { }
-  void set_sweepId(s4) { }
-  void set_sweptCount(unsigned) { }
-  void set_flushedCount(unsigned) { }
-  void set_zombifiedCount(unsigned) { }
+  EventCodeCacheFull(EventStartTime timing=TIMED) {}
+
+  void set_codeBlobType(u8 new_value) {
+  }
+  void set_startAddress(u8 new_value) {
+  }
+  void set_commitedTopAddress(u8 new_value) {
+  }
+  void set_reservedTopAddress(u8 new_value) {
+  }
+  void set_entryCount(s4 new_value) {
+  }
+  void set_methodCount(s4 new_value) {
+  }
+  void set_adaptorCount(s4 new_value) {
+  }
+  void set_unallocatedCapacity(u8 new_value) {
+  }
+  void set_fullCount(s4 new_value) {
+  }
+  void set_codeCacheMaxCapacity(u8 new_value) {
+  }
+
+  using JfrEvent<EventCodeCacheFull>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 codeBlobType,
+                     u8 startAddress,
+                     u8 commitedTopAddress,
+                     u8 reservedTopAddress,
+                     s4 entryCount,
+                     s4 methodCount,
+                     s4 adaptorCount,
+                     u8 unallocatedCapacity,
+                     s4 fullCount,
+                     u8 codeCacheMaxCapacity) {
+  }
 };
 
-class EventCodeCacheFull : public JfrEvent
+class EventDeoptimization : public JfrEvent<EventDeoptimization>
 {
  public:
-  EventCodeCacheFull(EventStartTime ignore=TIMED) {}
-  void set_codeBlobType(u8) { }
-  void set_startAddress(u8) { }
-  void set_commitedTopAddress(u8) { }
-  void set_reservedTopAddress(u8) { }
-  void set_entryCount(s4) { }
-  void set_methodCount(s4) { }
-  void set_adaptorCount(s4) { }
-  void set_unallocatedCapacity(u8) { }
-  void set_fullCount(s4) { }
+  EventDeoptimization(EventStartTime timing=TIMED) {}
+
+  void set_compileId(s4 new_value) {
+  }
+  void set_compiler(u8 new_value) {
+  }
+  void set_method(const Method* new_value) {
+  }
+  void set_lineNumber(s4 new_value) {
+  }
+  void set_bci(s4 new_value) {
+  }
+  void set_instruction(u8 new_value) {
+  }
+  void set_reason(u8 new_value) {
+  }
+  void set_action(u8 new_value) {
+  }
+
+  using JfrEvent<EventDeoptimization>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(s4 compileId,
+                     u8 compiler,
+                     const Method* method,
+                     s4 lineNumber,
+                     s4 bci,
+                     u8 instruction,
+                     u8 reason,
+                     u8 action) {
+  }
 };
 
-class EventSafepointBegin : public JfrEvent
+class EventSafepointBegin : public JfrEvent<EventSafepointBegin>
 {
  public:
-  EventSafepointBegin(EventStartTime ignore=TIMED) {}
+  EventSafepointBegin(EventStartTime timing=TIMED) {}
+
+  void set_safepointId(u8 new_value) {
+  }
+  void set_totalThreadCount(s4 new_value) {
+  }
+  void set_jniCriticalThreadCount(s4 new_value) {
+  }
+
+  using JfrEvent<EventSafepointBegin>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventSafepointBegin(
-    s4,
-    s4,
-    s4) { }
-  void set_safepointId(s4) { }
-  void set_totalThreadCount(s4) { }
-  void set_jniCriticalThreadCount(s4) { }
+    u8 safepointId,
+    s4 totalThreadCount,
+    s4 jniCriticalThreadCount) {
+  }
+
+  void commit(u8 safepointId,
+              s4 totalThreadCount,
+              s4 jniCriticalThreadCount) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 safepointId,
+                     s4 totalThreadCount,
+                     s4 jniCriticalThreadCount) {
+  }
 };
 
-class EventSafepointStateSynchronization : public JfrEvent
+class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSynchronization>
 {
  public:
-  EventSafepointStateSynchronization(EventStartTime ignore=TIMED) {}
+  EventSafepointStateSynchronization(EventStartTime timing=TIMED) {}
+
+  void set_safepointId(u8 new_value) {
+  }
+  void set_initialThreadCount(s4 new_value) {
+  }
+  void set_runningThreadCount(s4 new_value) {
+  }
+  void set_iterations(s4 new_value) {
+  }
+
+  using JfrEvent<EventSafepointStateSynchronization>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventSafepointStateSynchronization(
-    s4,
-    s4,
-    s4,
-    s4) { }
-  void set_safepointId(s4) { }
-  void set_initialThreadCount(s4) { }
-  void set_runningThreadCount(s4) { }
-  void set_iterations(s4) { }
+    u8 safepointId,
+    s4 initialThreadCount,
+    s4 runningThreadCount,
+    s4 iterations) {
+  }
+
+  void commit(u8 safepointId,
+              s4 initialThreadCount,
+              s4 runningThreadCount,
+              s4 iterations) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 safepointId,
+                     s4 initialThreadCount,
+                     s4 runningThreadCount,
+                     s4 iterations) {
+  }
 };
 
-class EventSafepointWaitBlocked : public JfrEvent
+class EventSafepointCleanup : public JfrEvent<EventSafepointCleanup>
 {
  public:
-  EventSafepointWaitBlocked(EventStartTime ignore=TIMED) {}
-  EventSafepointWaitBlocked(
-    s4,
-    s4) { }
-  void set_safepointId(s4) { }
-  void set_runningThreadCount(s4) { }
-};
+  EventSafepointCleanup(EventStartTime timing=TIMED) {}
 
-class EventSafepointCleanup : public JfrEvent
-{
- public:
-  EventSafepointCleanup(EventStartTime ignore=TIMED) {}
+  void set_safepointId(u8 new_value) {
+  }
+
+  using JfrEvent<EventSafepointCleanup>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventSafepointCleanup(
-    s4) { }
-  void set_safepointId(s4) { }
+    u8 safepointId) {
+  }
+
+  void commit(u8 safepointId) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 safepointId) {
+  }
 };
 
-class EventSafepointCleanupTask : public JfrEvent
+class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
 {
  public:
-  EventSafepointCleanupTask(EventStartTime ignore=TIMED) {}
+  EventSafepointCleanupTask(EventStartTime timing=TIMED) {}
+
+  void set_safepointId(u8 new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventSafepointCleanupTask>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventSafepointCleanupTask(
-    s4,
-    const char*) { }
-  void set_safepointId(s4) { }
-  void set_name(const char*) { }
+    u8 safepointId,
+    const char* name) {
+  }
+
+  void commit(u8 safepointId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 safepointId,
+                     const char* name) {
+  }
 };
 
-class EventSafepointEnd : public JfrEvent
+class EventSafepointEnd : public JfrEvent<EventSafepointEnd>
 {
  public:
-  EventSafepointEnd(EventStartTime ignore=TIMED) {}
+  EventSafepointEnd(EventStartTime timing=TIMED) {}
+
+  void set_safepointId(u8 new_value) {
+  }
+
+  using JfrEvent<EventSafepointEnd>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventSafepointEnd(
-    s4) { }
-  void set_safepointId(s4) { }
+    u8 safepointId) {
+  }
+
+  void commit(u8 safepointId) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 safepointId) {
+  }
 };
 
-class EventExecuteVMOperation : public JfrEvent
+class EventExecuteVMOperation : public JfrEvent<EventExecuteVMOperation>
 {
  public:
-  EventExecuteVMOperation(EventStartTime ignore=TIMED) {}
+  EventExecuteVMOperation(EventStartTime timing=TIMED) {}
+
+  void set_operation(u8 new_value) {
+  }
+  void set_safepoint(bool new_value) {
+  }
+  void set_blocking(bool new_value) {
+  }
+  void set_caller(u8 new_value) {
+  }
+  void set_safepointId(u8 new_value) {
+  }
+
+  using JfrEvent<EventExecuteVMOperation>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventExecuteVMOperation(
-    u8,
-    bool,
-    bool,
-    u8,
-    s4) { }
-  void set_operation(u8) { }
-  void set_safepoint(bool) { }
-  void set_blocking(bool) { }
-  void set_caller(u8) { }
-  void set_safepointId(s4) { }
+    u8 operation,
+    bool safepoint,
+    bool blocking,
+    u8 caller,
+    u8 safepointId) {
+  }
+
+  void commit(u8 operation,
+              bool safepoint,
+              bool blocking,
+              u8 caller,
+              u8 safepointId) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 operation,
+                     bool safepoint,
+                     bool blocking,
+                     u8 caller,
+                     u8 safepointId) {
+  }
 };
 
-class EventShutdown : public JfrEvent
+class EventShutdown : public JfrEvent<EventShutdown>
 {
  public:
-  EventShutdown(EventStartTime ignore=TIMED) {}
-  void set_reason(const char*) { }
+  EventShutdown(EventStartTime timing=TIMED) {}
+
+  void set_reason(const char* new_value) {
+  }
+
+  using JfrEvent<EventShutdown>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* reason) {
+  }
 };
 
-class EventObjectAllocationInNewTLAB : public JfrEvent
+class EventObjectAllocationInNewTLAB : public JfrEvent<EventObjectAllocationInNewTLAB>
 {
  public:
-  EventObjectAllocationInNewTLAB(EventStartTime ignore=TIMED) {}
-  void set_objectClass(const Klass*) { }
-  void set_allocationSize(u8) { }
-  void set_tlabSize(u8) { }
+  EventObjectAllocationInNewTLAB(EventStartTime timing=TIMED) {}
+
+  void set_objectClass(const Klass* new_value) {
+  }
+  void set_allocationSize(u8 new_value) {
+  }
+  void set_tlabSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventObjectAllocationInNewTLAB>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* objectClass,
+                     u8 allocationSize,
+                     u8 tlabSize) {
+  }
 };
 
-class EventObjectAllocationOutsideTLAB : public JfrEvent
+class EventObjectAllocationOutsideTLAB : public JfrEvent<EventObjectAllocationOutsideTLAB>
 {
  public:
-  EventObjectAllocationOutsideTLAB(EventStartTime ignore=TIMED) {}
-  void set_objectClass(const Klass*) { }
-  void set_allocationSize(u8) { }
+  EventObjectAllocationOutsideTLAB(EventStartTime timing=TIMED) {}
+
+  void set_objectClass(const Klass* new_value) {
+  }
+  void set_allocationSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventObjectAllocationOutsideTLAB>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* objectClass,
+                     u8 allocationSize) {
+  }
 };
 
-class EventOldObjectSample : public JfrEvent
+class EventObjectAllocationSample : public JfrEvent<EventObjectAllocationSample>
 {
  public:
-  EventOldObjectSample(EventStartTime ignore=TIMED) {}
-  void set_allocationTime(const Ticks&) { }
-  void set_lastKnownHeapUsage(u8) { }
-  void set_object(u8) { }
-  void set_arrayElements(s4) { }
-  void set_root(u8) { }
+  EventObjectAllocationSample(EventStartTime timing=TIMED) {}
+
+  void set_objectClass(const Klass* new_value) {
+  }
+  void set_weight(s8 new_value) {
+  }
+
+  using JfrEvent<EventObjectAllocationSample>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* objectClass,
+                     s8 weight) {
+  }
 };
 
-class EventDumpReason : public JfrEvent
+class EventOldObjectSample : public JfrEvent<EventOldObjectSample>
 {
  public:
-  EventDumpReason(EventStartTime ignore=TIMED) {}
-  void set_reason(const char*) { }
-  void set_recordingId(s4) { }
+  EventOldObjectSample(EventStartTime timing=TIMED) {}
+
+  void set_allocationTime(const Ticks& new_value) {
+  }
+  void set_objectSize(u8 new_value) {
+  }
+  void set_objectAge(const Tickspan& new_value) {
+  }
+  void set_lastKnownHeapUsage(u8 new_value) {
+  }
+  void set_object(u8 new_value) {
+  }
+  void set_arrayElements(s4 new_value) {
+  }
+  void set_root(u8 new_value) {
+  }
+
+  using JfrEvent<EventOldObjectSample>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Ticks& allocationTime,
+                     u8 objectSize,
+                     const Tickspan& objectAge,
+                     u8 lastKnownHeapUsage,
+                     u8 object,
+                     s4 arrayElements,
+                     u8 root) {
+  }
 };
 
-class EventDataLoss : public JfrEvent
+class EventNativeMemoryUsage : public JfrEvent<EventNativeMemoryUsage>
 {
  public:
-  EventDataLoss(EventStartTime ignore=TIMED) {}
-  void set_amount(u8) { }
-  void set_total(u8) { }
+  EventNativeMemoryUsage(EventStartTime timing=TIMED) {}
+
+  void set_type(const char* new_value) {
+  }
+  void set_reserved(u8 new_value) {
+  }
+  void set_committed(u8 new_value) {
+  }
+
+  using JfrEvent<EventNativeMemoryUsage>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventNativeMemoryUsage(
+    const char* type,
+    u8 reserved,
+    u8 committed) {
+  }
+
+  void commit(const char* type,
+              u8 reserved,
+              u8 committed) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* type,
+                     u8 reserved,
+                     u8 committed) {
+  }
 };
 
-class EventJVMInformation : public JfrEvent
+class EventNativeMemoryUsageTotal : public JfrEvent<EventNativeMemoryUsageTotal>
 {
  public:
-  EventJVMInformation(EventStartTime ignore=TIMED) {}
+  EventNativeMemoryUsageTotal(EventStartTime timing=TIMED) {}
+
+  void set_reserved(u8 new_value) {
+  }
+  void set_committed(u8 new_value) {
+  }
+
+  using JfrEvent<EventNativeMemoryUsageTotal>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventNativeMemoryUsageTotal(
+    u8 reserved,
+    u8 committed) {
+  }
+
+  void commit(u8 reserved,
+              u8 committed) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 reserved,
+                     u8 committed) {
+  }
+};
+
+class EventDumpReason : public JfrEvent<EventDumpReason>
+{
+ public:
+  EventDumpReason(EventStartTime timing=TIMED) {}
+
+  void set_reason(const char* new_value) {
+  }
+  void set_recordingId(s4 new_value) {
+  }
+
+  using JfrEvent<EventDumpReason>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const char* reason,
+                     s4 recordingId) {
+  }
+};
+
+class EventDataLoss : public JfrEvent<EventDataLoss>
+{
+ public:
+  EventDataLoss(EventStartTime timing=TIMED) {}
+
+  void set_amount(u8 new_value) {
+  }
+  void set_total(u8 new_value) {
+  }
+
+  using JfrEvent<EventDataLoss>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 amount,
+                     u8 total) {
+  }
+};
+
+class EventJVMInformation : public JfrEvent<EventJVMInformation>
+{
+ public:
+  EventJVMInformation(EventStartTime timing=TIMED) {}
+
+  void set_jvmName(const char* new_value) {
+  }
+  void set_jvmVersion(const char* new_value) {
+  }
+  void set_jvmArguments(const char* new_value) {
+  }
+  void set_jvmFlags(const char* new_value) {
+  }
+  void set_javaArguments(const char* new_value) {
+  }
+  void set_jvmStartTime(s8 new_value) {
+  }
+  void set_pid(s8 new_value) {
+  }
+
+  using JfrEvent<EventJVMInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventJVMInformation(
-    const char*,
-    const char*,
-    const char*,
-    const char*,
-    const char*,
-    s8) { }
-  void set_jvmName(const char*) { }
-  void set_jvmVersion(const char*) { }
-  void set_jvmArguments(const char*) { }
-  void set_jvmFlags(const char*) { }
-  void set_javaArguments(const char*) { }
-  void set_jvmStartTime(s8) { }
+    const char* jvmName,
+    const char* jvmVersion,
+    const char* jvmArguments,
+    const char* jvmFlags,
+    const char* javaArguments,
+    s8 jvmStartTime,
+    s8 pid) {
+  }
+
+  void commit(const char* jvmName,
+              const char* jvmVersion,
+              const char* jvmArguments,
+              const char* jvmFlags,
+              const char* javaArguments,
+              s8 jvmStartTime,
+              s8 pid) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* jvmName,
+                     const char* jvmVersion,
+                     const char* jvmArguments,
+                     const char* jvmFlags,
+                     const char* javaArguments,
+                     s8 jvmStartTime,
+                     s8 pid) {
+  }
 };
 
-class EventOSInformation : public JfrEvent
+class EventOSInformation : public JfrEvent<EventOSInformation>
 {
  public:
-  EventOSInformation(EventStartTime ignore=TIMED) {}
+  EventOSInformation(EventStartTime timing=TIMED) {}
+
+  void set_osVersion(const char* new_value) {
+  }
+
+  using JfrEvent<EventOSInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventOSInformation(
-    const char*) { }
-  void set_osVersion(const char*) { }
+    const char* osVersion) {
+  }
+
+  void commit(const char* osVersion) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* osVersion) {
+  }
 };
 
-class EventInitialSystemProperty : public JfrEvent
+class EventVirtualizationInformation : public JfrEvent<EventVirtualizationInformation>
 {
  public:
-  EventInitialSystemProperty(EventStartTime ignore=TIMED) {}
+  EventVirtualizationInformation(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventVirtualizationInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventVirtualizationInformation(
+    const char* name) {
+  }
+
+  void commit(const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name) {
+  }
+};
+
+class EventInitialSystemProperty : public JfrEvent<EventInitialSystemProperty>
+{
+ public:
+  EventInitialSystemProperty(EventStartTime timing=TIMED) {}
+
+  void set_key(const char* new_value) {
+  }
+  void set_value(const char* new_value) {
+  }
+
+  using JfrEvent<EventInitialSystemProperty>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventInitialSystemProperty(
-    const char*,
-    const char*) { }
-  void set_key(const char*) { }
-  void set_value(const char*) { }
+    const char* key,
+    const char* value) {
+  }
+
+  void commit(const char* key,
+              const char* value) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* key,
+                     const char* value) {
+  }
 };
 
-class EventInitialEnvironmentVariable : public JfrEvent
+class EventInitialEnvironmentVariable : public JfrEvent<EventInitialEnvironmentVariable>
 {
  public:
-  EventInitialEnvironmentVariable(EventStartTime ignore=TIMED) {}
+  EventInitialEnvironmentVariable(EventStartTime timing=TIMED) {}
+
+  void set_key(const char* new_value) {
+  }
+  void set_value(const char* new_value) {
+  }
+
+  using JfrEvent<EventInitialEnvironmentVariable>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventInitialEnvironmentVariable(
-    const char*,
-    const char*) { }
-  void set_key(const char*) { }
-  void set_value(const char*) { }
+    const char* key,
+    const char* value) {
+  }
+
+  void commit(const char* key,
+              const char* value) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* key,
+                     const char* value) {
+  }
 };
 
-class EventSystemProcess : public JfrEvent
+class EventSystemProcess : public JfrEvent<EventSystemProcess>
 {
  public:
-  EventSystemProcess(EventStartTime ignore=TIMED) {}
+  EventSystemProcess(EventStartTime timing=TIMED) {}
+
+  void set_pid(const char* new_value) {
+  }
+  void set_commandLine(const char* new_value) {
+  }
+
+  using JfrEvent<EventSystemProcess>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventSystemProcess(
-    const char*,
-    const char*) { }
-  void set_pid(const char*) { }
-  void set_commandLine(const char*) { }
+    const char* pid,
+    const char* commandLine) {
+  }
+
+  void commit(const char* pid,
+              const char* commandLine) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* pid,
+                     const char* commandLine) {
+  }
 };
 
-class EventCPUInformation : public JfrEvent
+class EventCPUInformation : public JfrEvent<EventCPUInformation>
 {
  public:
-  EventCPUInformation(EventStartTime ignore=TIMED) {}
+  EventCPUInformation(EventStartTime timing=TIMED) {}
+
+  void set_cpu(const char* new_value) {
+  }
+  void set_description(const char* new_value) {
+  }
+  void set_sockets(unsigned new_value) {
+  }
+  void set_cores(unsigned new_value) {
+  }
+  void set_hwThreads(unsigned new_value) {
+  }
+
+  using JfrEvent<EventCPUInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventCPUInformation(
-    const char*,
-    const char*,
-    unsigned,
-    unsigned,
-    unsigned) { }
-  void set_cpu(const char*) { }
-  void set_description(const char*) { }
-  void set_sockets(unsigned) { }
-  void set_cores(unsigned) { }
-  void set_hwThreads(unsigned) { }
+    const char* cpu,
+    const char* description,
+    unsigned sockets,
+    unsigned cores,
+    unsigned hwThreads) {
+  }
+
+  void commit(const char* cpu,
+              const char* description,
+              unsigned sockets,
+              unsigned cores,
+              unsigned hwThreads) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* cpu,
+                     const char* description,
+                     unsigned sockets,
+                     unsigned cores,
+                     unsigned hwThreads) {
+  }
 };
 
-class EventCPUTimeStampCounter : public JfrEvent
+class EventCPUTimeStampCounter : public JfrEvent<EventCPUTimeStampCounter>
 {
  public:
-  EventCPUTimeStampCounter(EventStartTime ignore=TIMED) {}
+  EventCPUTimeStampCounter(EventStartTime timing=TIMED) {}
+
+  void set_fastTimeEnabled(bool new_value) {
+  }
+  void set_fastTimeAutoEnabled(bool new_value) {
+  }
+  void set_osFrequency(s8 new_value) {
+  }
+  void set_fastTimeFrequency(s8 new_value) {
+  }
+
+  using JfrEvent<EventCPUTimeStampCounter>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventCPUTimeStampCounter(
-    bool,
-    bool,
-    s8,
-    s8) { }
-  void set_fastTimeEnabled(bool) { }
-  void set_fastTimeAutoEnabled(bool) { }
-  void set_osFrequency(s8) { }
-  void set_fastTimeFrequency(s8) { }
+    bool fastTimeEnabled,
+    bool fastTimeAutoEnabled,
+    s8 osFrequency,
+    s8 fastTimeFrequency) {
+  }
+
+  void commit(bool fastTimeEnabled,
+              bool fastTimeAutoEnabled,
+              s8 osFrequency,
+              s8 fastTimeFrequency) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     bool fastTimeEnabled,
+                     bool fastTimeAutoEnabled,
+                     s8 osFrequency,
+                     s8 fastTimeFrequency) {
+  }
 };
 
-class EventCPULoad : public JfrEvent
+class EventCPULoad : public JfrEvent<EventCPULoad>
 {
  public:
-  EventCPULoad(EventStartTime ignore=TIMED) {}
+  EventCPULoad(EventStartTime timing=TIMED) {}
+
+  void set_jvmUser(float new_value) {
+  }
+  void set_jvmSystem(float new_value) {
+  }
+  void set_machineTotal(float new_value) {
+  }
+
+  using JfrEvent<EventCPULoad>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventCPULoad(
-    float,
-    float,
-    float) { }
-  void set_jvmUser(float) { }
-  void set_jvmSystem(float) { }
-  void set_machineTotal(float) { }
+    float jvmUser,
+    float jvmSystem,
+    float machineTotal) {
+  }
+
+  void commit(float jvmUser,
+              float jvmSystem,
+              float machineTotal) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     float jvmUser,
+                     float jvmSystem,
+                     float machineTotal) {
+  }
 };
 
-class EventThreadCPULoad : public JfrEvent
+class EventThreadCPULoad : public JfrEvent<EventThreadCPULoad>
 {
  public:
-  EventThreadCPULoad(EventStartTime ignore=TIMED) {}
+  EventThreadCPULoad(EventStartTime timing=TIMED) {}
+
+  void set_user(float new_value) {
+  }
+  void set_system(float new_value) {
+  }
+
+  using JfrEvent<EventThreadCPULoad>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventThreadCPULoad(
-    float,
-    float) { }
-  void set_user(float) { }
-  void set_system(float) { }
+    float user,
+    float system) {
+  }
+
+  void commit(float user,
+              float system) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     float user,
+                     float system) {
+  }
 };
 
-class EventThreadContextSwitchRate : public JfrEvent
+class EventThreadContextSwitchRate : public JfrEvent<EventThreadContextSwitchRate>
 {
  public:
-  EventThreadContextSwitchRate(EventStartTime ignore=TIMED) {}
+  EventThreadContextSwitchRate(EventStartTime timing=TIMED) {}
+
+  void set_switchRate(float new_value) {
+  }
+
+  using JfrEvent<EventThreadContextSwitchRate>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventThreadContextSwitchRate(
-    float) { }
-  void set_switchRate(float) { }
+    float switchRate) {
+  }
+
+  void commit(float switchRate) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     float switchRate) {
+  }
 };
 
-class EventNetworkUtilization : public JfrEvent
+class EventNetworkUtilization : public JfrEvent<EventNetworkUtilization>
 {
  public:
-  EventNetworkUtilization(EventStartTime ignore=TIMED) {}
+  EventNetworkUtilization(EventStartTime timing=TIMED) {}
+
+  void set_networkInterface(u8 new_value) {
+  }
+  void set_readRate(s8 new_value) {
+  }
+  void set_writeRate(s8 new_value) {
+  }
+
+  using JfrEvent<EventNetworkUtilization>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventNetworkUtilization(
-    u8,
-    s8,
-    s8) { }
-  void set_networkInterface(u8) { }
-  void set_readRate(s8) { }
-  void set_writeRate(s8) { }
+    u8 networkInterface,
+    s8 readRate,
+    s8 writeRate) {
+  }
+
+  void commit(u8 networkInterface,
+              s8 readRate,
+              s8 writeRate) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 networkInterface,
+                     s8 readRate,
+                     s8 writeRate) {
+  }
 };
 
-class EventJavaThreadStatistics : public JfrEvent
+class EventJavaThreadStatistics : public JfrEvent<EventJavaThreadStatistics>
 {
  public:
-  EventJavaThreadStatistics(EventStartTime ignore=TIMED) {}
+  EventJavaThreadStatistics(EventStartTime timing=TIMED) {}
+
+  void set_activeCount(s8 new_value) {
+  }
+  void set_daemonCount(s8 new_value) {
+  }
+  void set_accumulatedCount(s8 new_value) {
+  }
+  void set_peakCount(s8 new_value) {
+  }
+
+  using JfrEvent<EventJavaThreadStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventJavaThreadStatistics(
-    s8,
-    s8,
-    s8,
-    s8) { }
-  void set_activeCount(s8) { }
-  void set_daemonCount(s8) { }
-  void set_accumulatedCount(s8) { }
-  void set_peakCount(s8) { }
+    s8 activeCount,
+    s8 daemonCount,
+    s8 accumulatedCount,
+    s8 peakCount) {
+  }
+
+  void commit(s8 activeCount,
+              s8 daemonCount,
+              s8 accumulatedCount,
+              s8 peakCount) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     s8 activeCount,
+                     s8 daemonCount,
+                     s8 accumulatedCount,
+                     s8 peakCount) {
+  }
 };
 
-class EventClassLoadingStatistics : public JfrEvent
+class EventClassLoadingStatistics : public JfrEvent<EventClassLoadingStatistics>
 {
  public:
-  EventClassLoadingStatistics(EventStartTime ignore=TIMED) {}
+  EventClassLoadingStatistics(EventStartTime timing=TIMED) {}
+
+  void set_loadedClassCount(s8 new_value) {
+  }
+  void set_unloadedClassCount(s8 new_value) {
+  }
+
+  using JfrEvent<EventClassLoadingStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventClassLoadingStatistics(
-    s8,
-    s8) { }
-  void set_loadedClassCount(s8) { }
-  void set_unloadedClassCount(s8) { }
+    s8 loadedClassCount,
+    s8 unloadedClassCount) {
+  }
+
+  void commit(s8 loadedClassCount,
+              s8 unloadedClassCount) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     s8 loadedClassCount,
+                     s8 unloadedClassCount) {
+  }
 };
 
-class EventClassLoaderStatistics : public JfrEvent
+class EventClassLoaderStatistics : public JfrEvent<EventClassLoaderStatistics>
 {
  public:
-  EventClassLoaderStatistics(EventStartTime ignore=TIMED) {}
+  EventClassLoaderStatistics(EventStartTime timing=TIMED) {}
+
+  void set_classLoader(const ClassLoaderData* new_value) {
+  }
+  void set_parentClassLoader(const ClassLoaderData* new_value) {
+  }
+  void set_classLoaderData(u8 new_value) {
+  }
+  void set_classCount(s8 new_value) {
+  }
+  void set_chunkSize(u8 new_value) {
+  }
+  void set_blockSize(u8 new_value) {
+  }
+  void set_hiddenClassCount(s8 new_value) {
+  }
+  void set_hiddenChunkSize(u8 new_value) {
+  }
+  void set_hiddenBlockSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventClassLoaderStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventClassLoaderStatistics(
-    const ClassLoaderData*,
-    const ClassLoaderData*,
-    u8,
-    s8,
-    u8,
-    u8,
-    s8,
-    u8,
-    u8) { }
-  void set_classLoader(const ClassLoaderData*) { }
-  void set_parentClassLoader(const ClassLoaderData*) { }
-  void set_classLoaderData(u8) { }
-  void set_classCount(s8) { }
-  void set_chunkSize(u8) { }
-  void set_blockSize(u8) { }
-  void set_anonymousClassCount(s8) { }
-  void set_anonymousChunkSize(u8) { }
-  void set_anonymousBlockSize(u8) { }
+    const ClassLoaderData* classLoader,
+    const ClassLoaderData* parentClassLoader,
+    u8 classLoaderData,
+    s8 classCount,
+    u8 chunkSize,
+    u8 blockSize,
+    s8 hiddenClassCount,
+    u8 hiddenChunkSize,
+    u8 hiddenBlockSize) {
+  }
+
+  void commit(const ClassLoaderData* classLoader,
+              const ClassLoaderData* parentClassLoader,
+              u8 classLoaderData,
+              s8 classCount,
+              u8 chunkSize,
+              u8 blockSize,
+              s8 hiddenClassCount,
+              u8 hiddenChunkSize,
+              u8 hiddenBlockSize) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const ClassLoaderData* classLoader,
+                     const ClassLoaderData* parentClassLoader,
+                     u8 classLoaderData,
+                     s8 classCount,
+                     u8 chunkSize,
+                     u8 blockSize,
+                     s8 hiddenClassCount,
+                     u8 hiddenChunkSize,
+                     u8 hiddenBlockSize) {
+  }
 };
 
-class EventThreadAllocationStatistics : public JfrEvent
+class EventSymbolTableStatistics : public JfrEvent<EventSymbolTableStatistics>
 {
  public:
-  EventThreadAllocationStatistics(EventStartTime ignore=TIMED) {}
+  EventSymbolTableStatistics(EventStartTime timing=TIMED) {}
+
+  void set_bucketCount(u8 new_value) {
+  }
+  void set_entryCount(u8 new_value) {
+  }
+  void set_totalFootprint(u8 new_value) {
+  }
+  void set_bucketCountMaximum(u8 new_value) {
+  }
+  void set_bucketCountAverage(float new_value) {
+  }
+  void set_bucketCountVariance(float new_value) {
+  }
+  void set_bucketCountStandardDeviation(float new_value) {
+  }
+  void set_insertionRate(float new_value) {
+  }
+  void set_removalRate(float new_value) {
+  }
+
+  using JfrEvent<EventSymbolTableStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventSymbolTableStatistics(
+    u8 bucketCount,
+    u8 entryCount,
+    u8 totalFootprint,
+    u8 bucketCountMaximum,
+    float bucketCountAverage,
+    float bucketCountVariance,
+    float bucketCountStandardDeviation,
+    float insertionRate,
+    float removalRate) {
+  }
+
+  void commit(u8 bucketCount,
+              u8 entryCount,
+              u8 totalFootprint,
+              u8 bucketCountMaximum,
+              float bucketCountAverage,
+              float bucketCountVariance,
+              float bucketCountStandardDeviation,
+              float insertionRate,
+              float removalRate) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 bucketCount,
+                     u8 entryCount,
+                     u8 totalFootprint,
+                     u8 bucketCountMaximum,
+                     float bucketCountAverage,
+                     float bucketCountVariance,
+                     float bucketCountStandardDeviation,
+                     float insertionRate,
+                     float removalRate) {
+  }
+};
+
+class EventStringTableStatistics : public JfrEvent<EventStringTableStatistics>
+{
+ public:
+  EventStringTableStatistics(EventStartTime timing=TIMED) {}
+
+  void set_bucketCount(u8 new_value) {
+  }
+  void set_entryCount(u8 new_value) {
+  }
+  void set_totalFootprint(u8 new_value) {
+  }
+  void set_bucketCountMaximum(u8 new_value) {
+  }
+  void set_bucketCountAverage(float new_value) {
+  }
+  void set_bucketCountVariance(float new_value) {
+  }
+  void set_bucketCountStandardDeviation(float new_value) {
+  }
+  void set_insertionRate(float new_value) {
+  }
+  void set_removalRate(float new_value) {
+  }
+
+  using JfrEvent<EventStringTableStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventStringTableStatistics(
+    u8 bucketCount,
+    u8 entryCount,
+    u8 totalFootprint,
+    u8 bucketCountMaximum,
+    float bucketCountAverage,
+    float bucketCountVariance,
+    float bucketCountStandardDeviation,
+    float insertionRate,
+    float removalRate) {
+  }
+
+  void commit(u8 bucketCount,
+              u8 entryCount,
+              u8 totalFootprint,
+              u8 bucketCountMaximum,
+              float bucketCountAverage,
+              float bucketCountVariance,
+              float bucketCountStandardDeviation,
+              float insertionRate,
+              float removalRate) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 bucketCount,
+                     u8 entryCount,
+                     u8 totalFootprint,
+                     u8 bucketCountMaximum,
+                     float bucketCountAverage,
+                     float bucketCountVariance,
+                     float bucketCountStandardDeviation,
+                     float insertionRate,
+                     float removalRate) {
+  }
+};
+
+class EventThreadAllocationStatistics : public JfrEvent<EventThreadAllocationStatistics>
+{
+ public:
+  EventThreadAllocationStatistics(EventStartTime timing=TIMED) {}
+
+  void set_allocated(u8 new_value) {
+  }
+  void set_thread(u8 new_value) {
+  }
+
+  using JfrEvent<EventThreadAllocationStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventThreadAllocationStatistics(
-    u8,
-    u8) { }
-  void set_allocated(u8) { }
-  void set_thread(u8) { }
+    u8 allocated,
+    u8 thread) {
+  }
+
+  void commit(u8 allocated,
+              u8 thread) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 allocated,
+                     u8 thread) {
+  }
 };
 
-class EventPhysicalMemory : public JfrEvent
+class EventPhysicalMemory : public JfrEvent<EventPhysicalMemory>
 {
  public:
-  EventPhysicalMemory(EventStartTime ignore=TIMED) {}
+  EventPhysicalMemory(EventStartTime timing=TIMED) {}
+
+  void set_totalSize(u8 new_value) {
+  }
+  void set_usedSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventPhysicalMemory>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventPhysicalMemory(
-    u8,
-    u8) { }
-  void set_totalSize(u8) { }
-  void set_usedSize(u8) { }
+    u8 totalSize,
+    u8 usedSize) {
+  }
+
+  void commit(u8 totalSize,
+              u8 usedSize) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 totalSize,
+                     u8 usedSize) {
+  }
 };
 
-class EventExecutionSample : public JfrEvent
+class EventExecutionSample : public JfrEvent<EventExecutionSample>
 {
  public:
-  EventExecutionSample(EventStartTime ignore=TIMED) {}
+  EventExecutionSample(EventStartTime timing=TIMED) {}
+
+  void set_sampledThread(u8 new_value) {
+  }
+  void set_stackTrace(u8 new_value) {
+  }
+  void set_state(u8 new_value) {
+  }
+
+  using JfrEvent<EventExecutionSample>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventExecutionSample(
-    u8,
-    u8,
-    u8) { }
-  void set_sampledThread(u8) { }
-  void set_stackTrace(u8) { }
-  void set_state(u8) { }
+    u8 sampledThread,
+    u8 stackTrace,
+    u8 state) {
+  }
+
+  void commit(u8 sampledThread,
+              u8 stackTrace,
+              u8 state) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 sampledThread,
+                     u8 stackTrace,
+                     u8 state) {
+  }
 };
 
-class EventNativeMethodSample : public JfrEvent
+class EventNativeMethodSample : public JfrEvent<EventNativeMethodSample>
 {
  public:
-  EventNativeMethodSample(EventStartTime ignore=TIMED) {}
+  EventNativeMethodSample(EventStartTime timing=TIMED) {}
+
+  void set_sampledThread(u8 new_value) {
+  }
+  void set_stackTrace(u8 new_value) {
+  }
+  void set_state(u8 new_value) {
+  }
+
+  using JfrEvent<EventNativeMethodSample>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventNativeMethodSample(
-    u8,
-    u8,
-    u8) { }
-  void set_sampledThread(u8) { }
-  void set_stackTrace(u8) { }
-  void set_state(u8) { }
+    u8 sampledThread,
+    u8 stackTrace,
+    u8 state) {
+  }
+
+  void commit(u8 sampledThread,
+              u8 stackTrace,
+              u8 state) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 sampledThread,
+                     u8 stackTrace,
+                     u8 state) {
+  }
 };
 
-class EventThreadDump : public JfrEvent
+class EventThreadDump : public JfrEvent<EventThreadDump>
 {
  public:
-  EventThreadDump(EventStartTime ignore=TIMED) {}
+  EventThreadDump(EventStartTime timing=TIMED) {}
+
+  void set_result(const char* new_value) {
+  }
+
+  using JfrEvent<EventThreadDump>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventThreadDump(
-    const char*) { }
-  void set_result(const char*) { }
+    const char* result) {
+  }
+
+  void commit(const char* result) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* result) {
+  }
 };
 
-class EventNativeLibrary : public JfrEvent
+class EventNativeLibrary : public JfrEvent<EventNativeLibrary>
 {
  public:
-  EventNativeLibrary(EventStartTime ignore=TIMED) {}
+  EventNativeLibrary(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_baseAddress(u8 new_value) {
+  }
+  void set_topAddress(u8 new_value) {
+  }
+
+  using JfrEvent<EventNativeLibrary>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventNativeLibrary(
-    const char*,
-    u8,
-    u8) { }
-  void set_name(const char*) { }
-  void set_baseAddress(u8) { }
-  void set_topAddress(u8) { }
+    const char* name,
+    u8 baseAddress,
+    u8 topAddress) {
+  }
+
+  void commit(const char* name,
+              u8 baseAddress,
+              u8 topAddress) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     u8 baseAddress,
+                     u8 topAddress) {
+  }
 };
 
-class EventModuleRequire : public JfrEvent
+class EventModuleRequire : public JfrEvent<EventModuleRequire>
 {
  public:
-  EventModuleRequire(EventStartTime ignore=TIMED) {}
+  EventModuleRequire(EventStartTime timing=TIMED) {}
+
+  void set_source(const ModuleEntry* new_value) {
+  }
+  void set_requiredModule(const ModuleEntry* new_value) {
+  }
+
+  using JfrEvent<EventModuleRequire>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventModuleRequire(
-    const ModuleEntry*,
-    const ModuleEntry*) { }
-  void set_source(const ModuleEntry*) { }
-  void set_requiredModule(const ModuleEntry*) { }
+    const ModuleEntry* source,
+    const ModuleEntry* requiredModule) {
+  }
+
+  void commit(const ModuleEntry* source,
+              const ModuleEntry* requiredModule) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const ModuleEntry* source,
+                     const ModuleEntry* requiredModule) {
+  }
 };
 
-class EventModuleExport : public JfrEvent
+class EventModuleExport : public JfrEvent<EventModuleExport>
 {
  public:
-  EventModuleExport(EventStartTime ignore=TIMED) {}
+  EventModuleExport(EventStartTime timing=TIMED) {}
+
+  void set_exportedPackage(const PackageEntry* new_value) {
+  }
+  void set_targetModule(const ModuleEntry* new_value) {
+  }
+
+  using JfrEvent<EventModuleExport>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventModuleExport(
-    const PackageEntry*,
-    const ModuleEntry*) { }
-  void set_exportedPackage(const PackageEntry*) { }
-  void set_targetModule(const ModuleEntry*) { }
+    const PackageEntry* exportedPackage,
+    const ModuleEntry* targetModule) {
+  }
+
+  void commit(const PackageEntry* exportedPackage,
+              const ModuleEntry* targetModule) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const PackageEntry* exportedPackage,
+                     const ModuleEntry* targetModule) {
+  }
 };
 
-class EventCompilerStatistics : public JfrEvent
+class EventCompilerStatistics : public JfrEvent<EventCompilerStatistics>
 {
  public:
-  EventCompilerStatistics(EventStartTime ignore=TIMED) {}
-  void set_compileCount(s4) { }
-  void set_bailoutCount(s4) { }
-  void set_invalidatedCount(s4) { }
-  void set_osrCompileCount(s4) { }
-  void set_standardCompileCount(s4) { }
-  void set_osrBytesCompiled(u8) { }
-  void set_standardBytesCompiled(u8) { }
-  void set_nmetodsSize(u8) { }
-  void set_nmetodCodeSize(u8) { }
-  void set_peakTimeSpent(s8) { }
-  void set_totalTimeSpent(s8) { }
+  EventCompilerStatistics(EventStartTime timing=TIMED) {}
+
+  void set_compileCount(s4 new_value) {
+  }
+  void set_bailoutCount(s4 new_value) {
+  }
+  void set_invalidatedCount(s4 new_value) {
+  }
+  void set_osrCompileCount(s4 new_value) {
+  }
+  void set_standardCompileCount(s4 new_value) {
+  }
+  void set_osrBytesCompiled(u8 new_value) {
+  }
+  void set_standardBytesCompiled(u8 new_value) {
+  }
+  void set_nmethodsSize(u8 new_value) {
+  }
+  void set_nmethodCodeSize(u8 new_value) {
+  }
+  void set_peakTimeSpent(s8 new_value) {
+  }
+  void set_totalTimeSpent(s8 new_value) {
+  }
+
+  using JfrEvent<EventCompilerStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(s4 compileCount,
+                     s4 bailoutCount,
+                     s4 invalidatedCount,
+                     s4 osrCompileCount,
+                     s4 standardCompileCount,
+                     u8 osrBytesCompiled,
+                     u8 standardBytesCompiled,
+                     u8 nmethodsSize,
+                     u8 nmethodCodeSize,
+                     s8 peakTimeSpent,
+                     s8 totalTimeSpent) {
+  }
 };
 
-class EventCompilerConfiguration : public JfrEvent
+class EventCompilerConfiguration : public JfrEvent<EventCompilerConfiguration>
 {
  public:
-  EventCompilerConfiguration(EventStartTime ignore=TIMED) {}
-  void set_threadCount(s4) { }
-  void set_tieredCompilation(bool) { }
+  EventCompilerConfiguration(EventStartTime timing=TIMED) {}
+
+  void set_threadCount(s4 new_value) {
+  }
+  void set_tieredCompilation(bool new_value) {
+  }
+  void set_dynamicCompilerThreadCount(bool new_value) {
+  }
+
+  using JfrEvent<EventCompilerConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(s4 threadCount,
+                     bool tieredCompilation,
+                     bool dynamicCompilerThreadCount) {
+  }
 };
 
-class EventCodeCacheStatistics : public JfrEvent
+class EventCodeCacheStatistics : public JfrEvent<EventCodeCacheStatistics>
 {
  public:
-  EventCodeCacheStatistics(EventStartTime ignore=TIMED) {}
-  void set_codeBlobType(u8) { }
-  void set_startAddress(u8) { }
-  void set_reservedTopAddress(u8) { }
-  void set_entryCount(s4) { }
-  void set_methodCount(s4) { }
-  void set_adaptorCount(s4) { }
-  void set_unallocatedCapacity(u8) { }
-  void set_fullCount(s4) { }
+  EventCodeCacheStatistics(EventStartTime timing=TIMED) {}
+
+  void set_codeBlobType(u8 new_value) {
+  }
+  void set_startAddress(u8 new_value) {
+  }
+  void set_reservedTopAddress(u8 new_value) {
+  }
+  void set_entryCount(s4 new_value) {
+  }
+  void set_methodCount(s4 new_value) {
+  }
+  void set_adaptorCount(s4 new_value) {
+  }
+  void set_unallocatedCapacity(u8 new_value) {
+  }
+  void set_fullCount(s4 new_value) {
+  }
+
+  using JfrEvent<EventCodeCacheStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 codeBlobType,
+                     u8 startAddress,
+                     u8 reservedTopAddress,
+                     s4 entryCount,
+                     s4 methodCount,
+                     s4 adaptorCount,
+                     u8 unallocatedCapacity,
+                     s4 fullCount) {
+  }
 };
 
-class EventCodeCacheConfiguration : public JfrEvent
+class EventCodeCacheConfiguration : public JfrEvent<EventCodeCacheConfiguration>
 {
  public:
-  EventCodeCacheConfiguration(EventStartTime ignore=TIMED) {}
-  void set_initialSize(u8) { }
-  void set_reservedSize(u8) { }
-  void set_nonNMethodSize(u8) { }
-  void set_profiledSize(u8) { }
-  void set_nonProfiledSize(u8) { }
-  void set_expansionSize(u8) { }
-  void set_minBlockLength(u8) { }
-  void set_startAddress(u8) { }
-  void set_reservedTopAddress(u8) { }
+  EventCodeCacheConfiguration(EventStartTime timing=TIMED) {}
+
+  void set_initialSize(u8 new_value) {
+  }
+  void set_reservedSize(u8 new_value) {
+  }
+  void set_nonNMethodSize(u8 new_value) {
+  }
+  void set_profiledSize(u8 new_value) {
+  }
+  void set_nonProfiledSize(u8 new_value) {
+  }
+  void set_expansionSize(u8 new_value) {
+  }
+  void set_minBlockLength(u8 new_value) {
+  }
+  void set_startAddress(u8 new_value) {
+  }
+  void set_reservedTopAddress(u8 new_value) {
+  }
+
+  using JfrEvent<EventCodeCacheConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(u8 initialSize,
+                     u8 reservedSize,
+                     u8 nonNMethodSize,
+                     u8 profiledSize,
+                     u8 nonProfiledSize,
+                     u8 expansionSize,
+                     u8 minBlockLength,
+                     u8 startAddress,
+                     u8 reservedTopAddress) {
+  }
 };
 
-class EventCodeSweeperStatistics : public JfrEvent
+class EventIntFlag : public JfrEvent<EventIntFlag>
 {
  public:
-  EventCodeSweeperStatistics(EventStartTime ignore=TIMED) {}
-  void set_sweepCount(s4) { }
-  void set_methodReclaimedCount(s4) { }
-  void set_totalSweepTime(const Tickspan&) { }
-  void set_peakFractionTime(const Tickspan&) { }
-  void set_peakSweepTime(const Tickspan&) { }
-};
+  EventIntFlag(EventStartTime timing=TIMED) {}
 
-class EventCodeSweeperConfiguration : public JfrEvent
-{
- public:
-  EventCodeSweeperConfiguration(EventStartTime ignore=TIMED) {}
-  void set_sweeperEnabled(bool) { }
-  void set_flushingEnabled(bool) { }
-};
+  void set_name(const char* new_value) {
+  }
+  void set_value(s4 new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
 
-class EventIntFlag : public JfrEvent
-{
- public:
-  EventIntFlag(EventStartTime ignore=TIMED) {}
+  using JfrEvent<EventIntFlag>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventIntFlag(
-    const char*,
-    s4,
-    u8) { }
-  void set_name(const char*) { }
-  void set_value(s4) { }
-  void set_origin(u8) { }
+    const char* name,
+    s4 value,
+    u8 origin) {
+  }
+
+  void commit(const char* name,
+              s4 value,
+              u8 origin) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     s4 value,
+                     u8 origin) {
+  }
 };
 
-class EventUnsignedIntFlag : public JfrEvent
+class EventUnsignedIntFlag : public JfrEvent<EventUnsignedIntFlag>
 {
  public:
-  EventUnsignedIntFlag(EventStartTime ignore=TIMED) {}
+  EventUnsignedIntFlag(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_value(unsigned new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventUnsignedIntFlag>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventUnsignedIntFlag(
-    const char*,
-    unsigned,
-    u8) { }
-  void set_name(const char*) { }
-  void set_value(unsigned) { }
-  void set_origin(u8) { }
+    const char* name,
+    unsigned value,
+    u8 origin) {
+  }
+
+  void commit(const char* name,
+              unsigned value,
+              u8 origin) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     unsigned value,
+                     u8 origin) {
+  }
 };
 
-class EventLongFlag : public JfrEvent
+class EventLongFlag : public JfrEvent<EventLongFlag>
 {
  public:
-  EventLongFlag(EventStartTime ignore=TIMED) {}
+  EventLongFlag(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_value(s8 new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventLongFlag>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventLongFlag(
-    const char*,
-    s8,
-    u8) { }
-  void set_name(const char*) { }
-  void set_value(s8) { }
-  void set_origin(u8) { }
+    const char* name,
+    s8 value,
+    u8 origin) {
+  }
+
+  void commit(const char* name,
+              s8 value,
+              u8 origin) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     s8 value,
+                     u8 origin) {
+  }
 };
 
-class EventUnsignedLongFlag : public JfrEvent
+class EventUnsignedLongFlag : public JfrEvent<EventUnsignedLongFlag>
 {
  public:
-  EventUnsignedLongFlag(EventStartTime ignore=TIMED) {}
+  EventUnsignedLongFlag(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_value(u8 new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventUnsignedLongFlag>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventUnsignedLongFlag(
-    const char*,
-    u8,
-    u8) { }
-  void set_name(const char*) { }
-  void set_value(u8) { }
-  void set_origin(u8) { }
+    const char* name,
+    u8 value,
+    u8 origin) {
+  }
+
+  void commit(const char* name,
+              u8 value,
+              u8 origin) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     u8 value,
+                     u8 origin) {
+  }
 };
 
-class EventDoubleFlag : public JfrEvent
+class EventDoubleFlag : public JfrEvent<EventDoubleFlag>
 {
  public:
-  EventDoubleFlag(EventStartTime ignore=TIMED) {}
+  EventDoubleFlag(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_value(double new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventDoubleFlag>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventDoubleFlag(
-    const char*,
-    double,
-    u8) { }
-  void set_name(const char*) { }
-  void set_value(double) { }
-  void set_origin(u8) { }
+    const char* name,
+    double value,
+    u8 origin) {
+  }
+
+  void commit(const char* name,
+              double value,
+              u8 origin) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     double value,
+                     u8 origin) {
+  }
 };
 
-class EventBooleanFlag : public JfrEvent
+class EventBooleanFlag : public JfrEvent<EventBooleanFlag>
 {
  public:
-  EventBooleanFlag(EventStartTime ignore=TIMED) {}
+  EventBooleanFlag(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_value(bool new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventBooleanFlag>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventBooleanFlag(
-    const char*,
-    bool,
-    u8) { }
-  void set_name(const char*) { }
-  void set_value(bool) { }
-  void set_origin(u8) { }
+    const char* name,
+    bool value,
+    u8 origin) {
+  }
+
+  void commit(const char* name,
+              bool value,
+              u8 origin) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     bool value,
+                     u8 origin) {
+  }
 };
 
-class EventStringFlag : public JfrEvent
+class EventStringFlag : public JfrEvent<EventStringFlag>
 {
  public:
-  EventStringFlag(EventStartTime ignore=TIMED) {}
+  EventStringFlag(EventStartTime timing=TIMED) {}
+
+  void set_name(const char* new_value) {
+  }
+  void set_value(const char* new_value) {
+  }
+  void set_origin(u8 new_value) {
+  }
+
+  using JfrEvent<EventStringFlag>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventStringFlag(
-    const char*,
-    const char*,
-    u8) { }
-  void set_name(const char*) { }
-  void set_value(const char*) { }
-  void set_origin(u8) { }
+    const char* name,
+    const char* value,
+    u8 origin) {
+  }
+
+  void commit(const char* name,
+              const char* value,
+              u8 origin) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* name,
+                     const char* value,
+                     u8 origin) {
+  }
 };
 
-class EventObjectCount : public JfrEvent
+class EventObjectCount : public JfrEvent<EventObjectCount>
 {
  public:
-  EventObjectCount(EventStartTime ignore=TIMED) {}
-  void set_gcId(unsigned) { }
-  void set_objectClass(const Klass*) { }
-  void set_count(s8) { }
-  void set_totalSize(u8) { }
+  EventObjectCount(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_objectClass(const Klass* new_value) {
+  }
+  void set_count(s8 new_value) {
+  }
+  void set_totalSize(u8 new_value) {
+  }
+
+  using JfrEvent<EventObjectCount>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     const Klass* objectClass,
+                     s8 count,
+                     u8 totalSize) {
+  }
 };
 
-class EventG1HeapRegionInformation : public JfrEvent
+class EventG1HeapRegionInformation : public JfrEvent<EventG1HeapRegionInformation>
 {
  public:
-  EventG1HeapRegionInformation(EventStartTime ignore=TIMED) {}
+  EventG1HeapRegionInformation(EventStartTime timing=TIMED) {}
+
+  void set_index(unsigned new_value) {
+  }
+  void set_type(u8 new_value) {
+  }
+  void set_start(u8 new_value) {
+  }
+  void set_used(u8 new_value) {
+  }
+
+  using JfrEvent<EventG1HeapRegionInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventG1HeapRegionInformation(
-    unsigned,
-    u8,
-    u8,
-    u8) { }
-  void set_index(unsigned) { }
-  void set_type(u8) { }
-  void set_start(u8) { }
-  void set_used(u8) { }
+    unsigned index,
+    u8 type,
+    u8 start,
+    u8 used) {
+  }
+
+  void commit(unsigned index,
+              u8 type,
+              u8 start,
+              u8 used) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned index,
+                     u8 type,
+                     u8 start,
+                     u8 used) {
+  }
 };
 
-class EventGCConfiguration : public JfrEvent
+class EventGCConfiguration : public JfrEvent<EventGCConfiguration>
 {
  public:
-  EventGCConfiguration(EventStartTime ignore=TIMED) {}
+  EventGCConfiguration(EventStartTime timing=TIMED) {}
+
+  void set_youngCollector(u8 new_value) {
+  }
+  void set_oldCollector(u8 new_value) {
+  }
+  void set_parallelGCThreads(unsigned new_value) {
+  }
+  void set_concurrentGCThreads(unsigned new_value) {
+  }
+  void set_usesDynamicGCThreads(bool new_value) {
+  }
+  void set_isExplicitGCConcurrent(bool new_value) {
+  }
+  void set_isExplicitGCDisabled(bool new_value) {
+  }
+  void set_pauseTarget(s8 new_value) {
+  }
+  void set_gcTimeRatio(unsigned new_value) {
+  }
+
+  using JfrEvent<EventGCConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCConfiguration(
-    u8,
-    u8,
-    unsigned,
-    unsigned,
-    bool,
-    bool,
-    bool,
-    s8,
-    unsigned) { }
-  void set_youngCollector(u8) { }
-  void set_oldCollector(u8) { }
-  void set_parallelGCThreads(unsigned) { }
-  void set_concurrentGCThreads(unsigned) { }
-  void set_usesDynamicGCThreads(bool) { }
-  void set_isExplicitGCConcurrent(bool) { }
-  void set_isExplicitGCDisabled(bool) { }
-  void set_pauseTarget(s8) { }
-  void set_gcTimeRatio(unsigned) { }
+    u8 youngCollector,
+    u8 oldCollector,
+    unsigned parallelGCThreads,
+    unsigned concurrentGCThreads,
+    bool usesDynamicGCThreads,
+    bool isExplicitGCConcurrent,
+    bool isExplicitGCDisabled,
+    s8 pauseTarget,
+    unsigned gcTimeRatio) {
+  }
+
+  void commit(u8 youngCollector,
+              u8 oldCollector,
+              unsigned parallelGCThreads,
+              unsigned concurrentGCThreads,
+              bool usesDynamicGCThreads,
+              bool isExplicitGCConcurrent,
+              bool isExplicitGCDisabled,
+              s8 pauseTarget,
+              unsigned gcTimeRatio) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 youngCollector,
+                     u8 oldCollector,
+                     unsigned parallelGCThreads,
+                     unsigned concurrentGCThreads,
+                     bool usesDynamicGCThreads,
+                     bool isExplicitGCConcurrent,
+                     bool isExplicitGCDisabled,
+                     s8 pauseTarget,
+                     unsigned gcTimeRatio) {
+  }
 };
 
-class EventGCSurvivorConfiguration : public JfrEvent
+class EventGCSurvivorConfiguration : public JfrEvent<EventGCSurvivorConfiguration>
 {
  public:
-  EventGCSurvivorConfiguration(EventStartTime ignore=TIMED) {}
+  EventGCSurvivorConfiguration(EventStartTime timing=TIMED) {}
+
+  void set_maxTenuringThreshold(u1 new_value) {
+  }
+  void set_initialTenuringThreshold(u1 new_value) {
+  }
+
+  using JfrEvent<EventGCSurvivorConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCSurvivorConfiguration(
-    u1,
-    u1) { }
-  void set_maxTenuringThreshold(u1) { }
-  void set_initialTenuringThreshold(u1) { }
+    u1 maxTenuringThreshold,
+    u1 initialTenuringThreshold) {
+  }
+
+  void commit(u1 maxTenuringThreshold,
+              u1 initialTenuringThreshold) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u1 maxTenuringThreshold,
+                     u1 initialTenuringThreshold) {
+  }
 };
 
-class EventGCTLABConfiguration : public JfrEvent
+class EventGCTLABConfiguration : public JfrEvent<EventGCTLABConfiguration>
 {
  public:
-  EventGCTLABConfiguration(EventStartTime ignore=TIMED) {}
+  EventGCTLABConfiguration(EventStartTime timing=TIMED) {}
+
+  void set_usesTLABs(bool new_value) {
+  }
+  void set_minTLABSize(u8 new_value) {
+  }
+  void set_tlabRefillWasteLimit(u8 new_value) {
+  }
+
+  using JfrEvent<EventGCTLABConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCTLABConfiguration(
-    bool,
-    u8,
-    u8) { }
-  void set_usesTLABs(bool) { }
-  void set_minTLABSize(u8) { }
-  void set_tlabRefillWasteLimit(u8) { }
+    bool usesTLABs,
+    u8 minTLABSize,
+    u8 tlabRefillWasteLimit) {
+  }
+
+  void commit(bool usesTLABs,
+              u8 minTLABSize,
+              u8 tlabRefillWasteLimit) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     bool usesTLABs,
+                     u8 minTLABSize,
+                     u8 tlabRefillWasteLimit) {
+  }
 };
 
-class EventGCHeapConfiguration : public JfrEvent
+class EventGCHeapConfiguration : public JfrEvent<EventGCHeapConfiguration>
 {
  public:
-  EventGCHeapConfiguration(EventStartTime ignore=TIMED) {}
+  EventGCHeapConfiguration(EventStartTime timing=TIMED) {}
+
+  void set_minSize(u8 new_value) {
+  }
+  void set_maxSize(u8 new_value) {
+  }
+  void set_initialSize(u8 new_value) {
+  }
+  void set_usesCompressedOops(bool new_value) {
+  }
+  void set_compressedOopsMode(u8 new_value) {
+  }
+  void set_objectAlignment(u8 new_value) {
+  }
+  void set_heapAddressBits(u1 new_value) {
+  }
+
+  using JfrEvent<EventGCHeapConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventGCHeapConfiguration(
-    u8,
-    u8,
-    u8,
-    bool,
-    u8,
-    u8,
-    u1) { }
-  void set_minSize(u8) { }
-  void set_maxSize(u8) { }
-  void set_initialSize(u8) { }
-  void set_usesCompressedOops(bool) { }
-  void set_compressedOopsMode(u8) { }
-  void set_objectAlignment(u8) { }
-  void set_heapAddressBits(u1) { }
+    u8 minSize,
+    u8 maxSize,
+    u8 initialSize,
+    bool usesCompressedOops,
+    u8 compressedOopsMode,
+    u8 objectAlignment,
+    u1 heapAddressBits) {
+  }
+
+  void commit(u8 minSize,
+              u8 maxSize,
+              u8 initialSize,
+              bool usesCompressedOops,
+              u8 compressedOopsMode,
+              u8 objectAlignment,
+              u1 heapAddressBits) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 minSize,
+                     u8 maxSize,
+                     u8 initialSize,
+                     bool usesCompressedOops,
+                     u8 compressedOopsMode,
+                     u8 objectAlignment,
+                     u1 heapAddressBits) {
+  }
 };
 
-class EventYoungGenerationConfiguration : public JfrEvent
+class EventYoungGenerationConfiguration : public JfrEvent<EventYoungGenerationConfiguration>
 {
  public:
-  EventYoungGenerationConfiguration(EventStartTime ignore=TIMED) {}
+  EventYoungGenerationConfiguration(EventStartTime timing=TIMED) {}
+
+  void set_minSize(u8 new_value) {
+  }
+  void set_maxSize(u8 new_value) {
+  }
+  void set_newRatio(unsigned new_value) {
+  }
+
+  using JfrEvent<EventYoungGenerationConfiguration>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventYoungGenerationConfiguration(
-    u8,
-    u8,
-    unsigned) { }
-  void set_minSize(u8) { }
-  void set_maxSize(u8) { }
-  void set_newRatio(unsigned) { }
+    u8 minSize,
+    u8 maxSize,
+    unsigned newRatio) {
+  }
+
+  void commit(u8 minSize,
+              u8 maxSize,
+              unsigned newRatio) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 minSize,
+                     u8 maxSize,
+                     unsigned newRatio) {
+  }
 };
 
-class EventZPageAllocation : public JfrEvent
+class EventZAllocationStall : public JfrEvent<EventZAllocationStall>
 {
  public:
-  EventZPageAllocation(EventStartTime ignore=TIMED) {}
+  EventZAllocationStall(EventStartTime timing=TIMED) {}
+
+  void set_type(u8 new_value) {
+  }
+  void set_size(u8 new_value) {
+  }
+
+  using JfrEvent<EventZAllocationStall>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZAllocationStall(
+    u8 type,
+    u8 size) {
+  }
+
+  void commit(u8 type,
+              u8 size) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 type,
+                     u8 size) {
+  }
+};
+
+class EventZPageAllocation : public JfrEvent<EventZPageAllocation>
+{
+ public:
+  EventZPageAllocation(EventStartTime timing=TIMED) {}
+
+  void set_type(u8 new_value) {
+  }
+  void set_size(u8 new_value) {
+  }
+  void set_flushed(u8 new_value) {
+  }
+  void set_committed(u8 new_value) {
+  }
+  void set_segments(unsigned new_value) {
+  }
+  void set_nonBlocking(bool new_value) {
+  }
+
+  using JfrEvent<EventZPageAllocation>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventZPageAllocation(
-    u8,
-    u8,
-    u8,
-    u8,
-    bool,
-    bool) { }
-  void set_pageSize(u8) { }
-  void set_usedAfter(u8) { }
-  void set_freeAfter(u8) { }
-  void set_inCacheAfter(u8) { }
-  void set_nonBlocking(bool) { }
-  void set_noReserve(bool) { }
+    u8 type,
+    u8 size,
+    u8 flushed,
+    u8 committed,
+    unsigned segments,
+    bool nonBlocking) {
+  }
+
+  void commit(u8 type,
+              u8 size,
+              u8 flushed,
+              u8 committed,
+              unsigned segments,
+              bool nonBlocking) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 type,
+                     u8 size,
+                     u8 flushed,
+                     u8 committed,
+                     unsigned segments,
+                     bool nonBlocking) {
+  }
 };
 
-class EventZThreadPhase : public JfrEvent
+class EventZRelocationSet : public JfrEvent<EventZRelocationSet>
 {
  public:
-  EventZThreadPhase(EventStartTime ignore=TIMED) {}
-  EventZThreadPhase(
-    unsigned,
-    const char*) { }
-  void set_gcId(unsigned) { }
-  void set_name(const char*) { }
+  EventZRelocationSet(EventStartTime timing=TIMED) {}
+
+  void set_total(u8 new_value) {
+  }
+  void set_empty(u8 new_value) {
+  }
+  void set_relocate(u8 new_value) {
+  }
+
+  using JfrEvent<EventZRelocationSet>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZRelocationSet(
+    u8 total,
+    u8 empty,
+    u8 relocate) {
+  }
+
+  void commit(u8 total,
+              u8 empty,
+              u8 relocate) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 total,
+                     u8 empty,
+                     u8 relocate) {
+  }
 };
 
-class EventZStatisticsCounter : public JfrEvent
+class EventZRelocationSetGroup : public JfrEvent<EventZRelocationSetGroup>
 {
  public:
-  EventZStatisticsCounter(EventStartTime ignore=TIMED) {}
+  EventZRelocationSetGroup(EventStartTime timing=TIMED) {}
+
+  void set_type(u8 new_value) {
+  }
+  void set_pages(u8 new_value) {
+  }
+  void set_total(u8 new_value) {
+  }
+  void set_empty(u8 new_value) {
+  }
+  void set_relocate(u8 new_value) {
+  }
+
+  using JfrEvent<EventZRelocationSetGroup>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZRelocationSetGroup(
+    u8 type,
+    u8 pages,
+    u8 total,
+    u8 empty,
+    u8 relocate) {
+  }
+
+  void commit(u8 type,
+              u8 pages,
+              u8 total,
+              u8 empty,
+              u8 relocate) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 type,
+                     u8 pages,
+                     u8 total,
+                     u8 empty,
+                     u8 relocate) {
+  }
+};
+
+class EventZStatisticsCounter : public JfrEvent<EventZStatisticsCounter>
+{
+ public:
+  EventZStatisticsCounter(EventStartTime timing=TIMED) {}
+
+  void set_id(u8 new_value) {
+  }
+  void set_increment(u8 new_value) {
+  }
+  void set_value(u8 new_value) {
+  }
+
+  using JfrEvent<EventZStatisticsCounter>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventZStatisticsCounter(
-    u8,
-    u8,
-    u8) { }
-  void set_id(u8) { }
-  void set_increment(u8) { }
-  void set_value(u8) { }
+    u8 id,
+    u8 increment,
+    u8 value) {
+  }
+
+  void commit(u8 id,
+              u8 increment,
+              u8 value) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 id,
+                     u8 increment,
+                     u8 value) {
+  }
 };
 
-class EventZStatisticsSampler : public JfrEvent
+class EventZStatisticsSampler : public JfrEvent<EventZStatisticsSampler>
 {
  public:
-  EventZStatisticsSampler(EventStartTime ignore=TIMED) {}
+  EventZStatisticsSampler(EventStartTime timing=TIMED) {}
+
+  void set_id(u8 new_value) {
+  }
+  void set_value(u8 new_value) {
+  }
+
+  using JfrEvent<EventZStatisticsSampler>::commit; // else commit() is hidden by overloaded versions in this class
+
   EventZStatisticsSampler(
-    u8,
-    u8) { }
-  void set_id(u8) { }
-  void set_value(u8) { }
+    u8 id,
+    u8 value) {
+  }
+
+  void commit(u8 id,
+              u8 value) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 id,
+                     u8 value) {
+  }
+};
+
+class EventZThreadPhase : public JfrEvent<EventZThreadPhase>
+{
+ public:
+  EventZThreadPhase(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_name(const char* new_value) {
+  }
+
+  using JfrEvent<EventZThreadPhase>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZThreadPhase(
+    unsigned gcId,
+    const char* name) {
+  }
+
+  void commit(unsigned gcId,
+              const char* name) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned gcId,
+                     const char* name) {
+  }
+};
+
+class EventZUncommit : public JfrEvent<EventZUncommit>
+{
+ public:
+  EventZUncommit(EventStartTime timing=TIMED) {}
+
+  void set_uncommitted(u8 new_value) {
+  }
+
+  using JfrEvent<EventZUncommit>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZUncommit(
+    u8 uncommitted) {
+  }
+
+  void commit(u8 uncommitted) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 uncommitted) {
+  }
+};
+
+class EventZUnmap : public JfrEvent<EventZUnmap>
+{
+ public:
+  EventZUnmap(EventStartTime timing=TIMED) {}
+
+  void set_unmapped(u8 new_value) {
+  }
+
+  using JfrEvent<EventZUnmap>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventZUnmap(
+    u8 unmapped) {
+  }
+
+  void commit(u8 unmapped) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 unmapped) {
+  }
+};
+
+class EventShenandoahHeapRegionStateChange : public JfrEvent<EventShenandoahHeapRegionStateChange>
+{
+ public:
+  EventShenandoahHeapRegionStateChange(EventStartTime timing=TIMED) {}
+
+  void set_index(unsigned new_value) {
+  }
+  void set_from(u8 new_value) {
+  }
+  void set_to(u8 new_value) {
+  }
+  void set_start(u8 new_value) {
+  }
+  void set_used(u8 new_value) {
+  }
+
+  using JfrEvent<EventShenandoahHeapRegionStateChange>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned index,
+                     u8 from,
+                     u8 to,
+                     u8 start,
+                     u8 used) {
+  }
+};
+
+class EventShenandoahHeapRegionInformation : public JfrEvent<EventShenandoahHeapRegionInformation>
+{
+ public:
+  EventShenandoahHeapRegionInformation(EventStartTime timing=TIMED) {}
+
+  void set_index(unsigned new_value) {
+  }
+  void set_state(u8 new_value) {
+  }
+  void set_start(u8 new_value) {
+  }
+  void set_used(u8 new_value) {
+  }
+
+  using JfrEvent<EventShenandoahHeapRegionInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventShenandoahHeapRegionInformation(
+    unsigned index,
+    u8 state,
+    u8 start,
+    u8 used) {
+  }
+
+  void commit(unsigned index,
+              u8 state,
+              u8 start,
+              u8 used) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned index,
+                     u8 state,
+                     u8 start,
+                     u8 used) {
+  }
+};
+
+class EventFlush : public JfrEvent<EventFlush>
+{
+ public:
+  EventFlush(EventStartTime timing=TIMED) {}
+
+  void set_flushId(u8 new_value) {
+  }
+  void set_elements(u8 new_value) {
+  }
+  void set_size(u8 new_value) {
+  }
+
+  using JfrEvent<EventFlush>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventFlush(
+    u8 flushId,
+    u8 elements,
+    u8 size) {
+  }
+
+  void commit(u8 flushId,
+              u8 elements,
+              u8 size) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 flushId,
+                     u8 elements,
+                     u8 size) {
+  }
+};
+
+class EventHeapDump : public JfrEvent<EventHeapDump>
+{
+ public:
+  EventHeapDump(EventStartTime timing=TIMED) {}
+
+  void set_destination(const char* new_value) {
+  }
+  void set_size(s8 new_value) {
+  }
+  void set_gcBeforeDump(bool new_value) {
+  }
+  void set_onOutOfMemoryError(bool new_value) {
+  }
+  void set_overwrite(bool new_value) {
+  }
+  void set_compression(s4 new_value) {
+  }
+
+  using JfrEvent<EventHeapDump>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventHeapDump(
+    const char* destination,
+    s8 size,
+    bool gcBeforeDump,
+    bool onOutOfMemoryError,
+    bool overwrite,
+    s4 compression) {
+  }
+
+  void commit(const char* destination,
+              s8 size,
+              bool gcBeforeDump,
+              bool onOutOfMemoryError,
+              bool overwrite,
+              s4 compression) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* destination,
+                     s8 size,
+                     bool gcBeforeDump,
+                     bool onOutOfMemoryError,
+                     bool overwrite,
+                     s4 compression) {
+  }
+};
+
+class EventGCLocker : public JfrEvent<EventGCLocker>
+{
+ public:
+  EventGCLocker(EventStartTime timing=TIMED) {}
+
+  void set_lockCount(unsigned new_value) {
+  }
+  void set_stallCount(unsigned new_value) {
+  }
+
+  using JfrEvent<EventGCLocker>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventGCLocker(
+    unsigned lockCount,
+    unsigned stallCount) {
+  }
+
+  void commit(unsigned lockCount,
+              unsigned stallCount) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     unsigned lockCount,
+                     unsigned stallCount) {
+  }
+};
+
+class EventFinalizerStatistics : public JfrEvent<EventFinalizerStatistics>
+{
+ public:
+  EventFinalizerStatistics(EventStartTime timing=TIMED) {}
+
+  void set_finalizableClass(const Klass* new_value) {
+  }
+  void set_codeSource(u8 new_value) {
+  }
+  void set_objects(u8 new_value) {
+  }
+  void set_totalFinalizersRun(u8 new_value) {
+  }
+
+  using JfrEvent<EventFinalizerStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(const Klass* finalizableClass,
+                     u8 codeSource,
+                     u8 objects,
+                     u8 totalFinalizersRun) {
+  }
 };
 
 

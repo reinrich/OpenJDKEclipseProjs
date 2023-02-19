@@ -1,7 +1,7 @@
 #line 1 "ad_ppc_clone.cpp"
 //
-// Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2012, 2017 SAP SE. All rights reserved.
+// Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012, 2022 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -60,6 +60,9 @@ MachOper *immI16Oper::clone() const {
 }
 MachOper *immIhi16Oper::clone() const {
   return new immIhi16Oper(_c0);
+}
+MachOper *immI32Oper::clone() const {
+  return new immI32Oper(_c0);
 }
 MachOper *immInegpow2Oper::clone() const {
   return new immInegpow2Oper(_c0);
@@ -142,6 +145,9 @@ MachOper *immL32hi16Oper::clone() const {
 MachOper *immL32Oper::clone() const {
   return new immL32Oper(_c0);
 }
+MachOper *immL34Oper::clone() const {
+  return new immL34Oper(_c0);
+}
 MachOper *immLhighest16Oper::clone() const {
   return new immLhighest16Oper(_c0);
 }
@@ -171,6 +177,9 @@ MachOper *immF_0Oper::clone() const {
 }
 MachOper *immDOper::clone() const {
   return new immDOper(_c0);
+}
+MachOper *immD_0Oper::clone() const {
+  return new immD_0Oper(_c0);
 }
 MachOper *iRegIdstOper::clone() const {
   return new iRegIdstOper();
@@ -285,12 +294,6 @@ MachOper *regFOper::clone() const {
 }
 MachOper *inline_cache_regPOper::clone() const {
   return new inline_cache_regPOper();
-}
-MachOper *compiler_method_oop_regPOper::clone() const {
-  return new compiler_method_oop_regPOper();
-}
-MachOper *interpreter_method_oop_regPOper::clone() const {
-  return new interpreter_method_oop_regPOper();
 }
 MachOper *iRegP2NOper::clone() const {
   return new iRegP2NOper();

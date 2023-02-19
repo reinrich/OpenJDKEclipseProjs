@@ -1,7 +1,7 @@
 #line 1 "ad_ppc_format.cpp"
 //
-// Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2012, 2017 SAP SE. All rights reserved.
+// Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012, 2022 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -28,6 +28,7 @@
 
 #include "precompiled.hpp"
 #include "adfiles/ad_ppc.hpp"
+#include "compiler/oopMap.hpp"
 
 #ifndef PRODUCT
 void UniverseOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
@@ -76,13 +77,13 @@ void sRegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, out
 #ifndef PRODUCT
 void vecXOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void vecXOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -120,6 +121,15 @@ void immIhi16Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStr
   st->print("#%d", _c0);
 }
 void immIhi16Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
+  st->print("#%d", _c0);
+}
+#endif
+
+#ifndef PRODUCT
+void immI32Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
+  st->print("#%d", _c0);
+}
+void immI32Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print("#%d", _c0);
 }
 #endif
@@ -368,6 +378,15 @@ void immL32Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, ou
 #endif
 
 #ifndef PRODUCT
+void immL34Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
+  st->print("#" INT64_FORMAT, (int64_t)_c0);
+}
+void immL34Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
+  st->print("#" INT64_FORMAT, (int64_t)_c0);
+}
+#endif
+
+#ifndef PRODUCT
 void immLhighest16Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print("#" INT64_FORMAT, (int64_t)_c0);
 }
@@ -458,15 +477,24 @@ void immDOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outp
 #endif
 
 #ifndef PRODUCT
+void immD_0Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
+  st->print("#%f", _c0);
+}
+void immD_0Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
+  st->print("#%f", _c0);
+}
+#endif
+
+#ifndef PRODUCT
 void iRegIdstOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegIdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -475,13 +503,13 @@ void iRegIdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 #ifndef PRODUCT
 void iRegIsrcOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegIsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -490,13 +518,13 @@ void iRegIsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 #ifndef PRODUCT
 void rscratch1RegIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rscratch1RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -505,13 +533,13 @@ void rscratch1RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int 
 #ifndef PRODUCT
 void rscratch2RegIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rscratch2RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -520,13 +548,13 @@ void rscratch2RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int 
 #ifndef PRODUCT
 void rarg1RegIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg1RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -535,13 +563,13 @@ void rarg1RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg2RegIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg2RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -550,13 +578,13 @@ void rarg2RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg3RegIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg3RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -565,13 +593,13 @@ void rarg3RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg4RegIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg4RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -580,13 +608,13 @@ void rarg4RegIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg1RegLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg1RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -595,13 +623,13 @@ void rarg1RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg2RegLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg2RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -610,13 +638,13 @@ void rarg2RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg3RegLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg3RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -625,13 +653,13 @@ void rarg3RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg4RegLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg4RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -640,13 +668,13 @@ void rarg4RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void iRegPdstOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegPdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -655,13 +683,13 @@ void iRegPdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 #ifndef PRODUCT
 void iRegPdstNoScratchOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegPdstNoScratchOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -670,13 +698,13 @@ void iRegPdstNoScratchOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, 
 #ifndef PRODUCT
 void iRegPsrcOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegPsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -703,13 +731,13 @@ void rscratch1RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int 
 #ifndef PRODUCT
 void rscratch2RegPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rscratch2RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -718,13 +746,13 @@ void rscratch2RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int 
 #ifndef PRODUCT
 void rarg1RegPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg1RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -733,13 +761,13 @@ void rarg1RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg2RegPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg2RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -748,13 +776,13 @@ void rarg2RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg3RegPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg3RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -763,13 +791,13 @@ void rarg3RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void rarg4RegPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rarg4RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -778,13 +806,13 @@ void rarg4RegPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx,
 #ifndef PRODUCT
 void iRegNsrcOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegNsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -793,13 +821,13 @@ void iRegNsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 #ifndef PRODUCT
 void iRegNdstOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegNdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -808,13 +836,13 @@ void iRegNdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 #ifndef PRODUCT
 void iRegLdstOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegLdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -823,13 +851,13 @@ void iRegLdstOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 #ifndef PRODUCT
 void iRegLsrcOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegLsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -839,7 +867,7 @@ void iRegLsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 void iRegL2IsrcOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("ConvL2I(");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(")");
@@ -847,7 +875,7 @@ void iRegL2IsrcOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputS
 void iRegL2IsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("ConvL2I(");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(")");
@@ -857,13 +885,13 @@ void iRegL2IsrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx
 #ifndef PRODUCT
 void rscratch1RegLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rscratch1RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -872,13 +900,13 @@ void rscratch1RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int 
 #ifndef PRODUCT
 void rscratch2RegLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void rscratch2RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -887,13 +915,13 @@ void rscratch2RegLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int 
 #ifndef PRODUCT
 void flagsRegOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void flagsRegOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -902,13 +930,13 @@ void flagsRegOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 #ifndef PRODUCT
 void flagsRegSrcOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void flagsRegSrcOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -953,13 +981,13 @@ void regCTROper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, ou
 #ifndef PRODUCT
 void regDOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void regDOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -968,13 +996,13 @@ void regDOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outp
 #ifndef PRODUCT
 void regFOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void regFOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -983,43 +1011,13 @@ void regFOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outp
 #ifndef PRODUCT
 void inline_cache_regPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void inline_cache_regPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
-    st->print("%s",reg_str);
-  }
-}
-#endif
-
-#ifndef PRODUCT
-void compiler_method_oop_regPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
-  { char reg_str[128];
-    ra->dump_register(node,reg_str);
-    st->print("%s",reg_str);
-  }
-}
-void compiler_method_oop_regPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
-  { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
-    st->print("%s",reg_str);
-  }
-}
-#endif
-
-#ifndef PRODUCT
-void interpreter_method_oop_regPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
-  { char reg_str[128];
-    ra->dump_register(node,reg_str);
-    st->print("%s",reg_str);
-  }
-}
-void interpreter_method_oop_regPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
-  { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -1028,13 +1026,13 @@ void interpreter_method_oop_regPOper::ext_format(PhaseRegAlloc *ra, const MachNo
 #ifndef PRODUCT
 void iRegP2NOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegP2NOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -1043,13 +1041,13 @@ void iRegP2NOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, o
 #ifndef PRODUCT
 void iRegN2POper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegN2POper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -1058,13 +1056,13 @@ void iRegN2POper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, o
 #ifndef PRODUCT
 void iRegN2P_klassOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
 void iRegN2P_klassOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
 }
@@ -1074,7 +1072,7 @@ void iRegN2P_klassOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int 
 void indirectOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1082,7 +1080,7 @@ void indirectOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStr
 void indirectOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1093,7 +1091,7 @@ void indirectOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, 
 void indOffset16Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1103,7 +1101,7 @@ void indOffset16Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, output
 void indOffset16Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1116,7 +1114,7 @@ void indOffset16Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int id
 void indOffset16Alg4Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1126,7 +1124,7 @@ void indOffset16Alg4Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, ou
 void indOffset16Alg4Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1139,7 +1137,7 @@ void indOffset16Alg4Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, in
 void indirectNarrowOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1147,7 +1145,7 @@ void indirectNarrowOper::int_format(PhaseRegAlloc *ra, const MachNode *node, out
 void indirectNarrowOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1158,7 +1156,7 @@ void indirectNarrowOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int
 void indirectNarrow_klassOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1166,7 +1164,7 @@ void indirectNarrow_klassOper::int_format(PhaseRegAlloc *ra, const MachNode *nod
 void indirectNarrow_klassOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1177,7 +1175,7 @@ void indirectNarrow_klassOper::ext_format(PhaseRegAlloc *ra, const MachNode *nod
 void indOffset16NarrowOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1187,7 +1185,7 @@ void indOffset16NarrowOper::int_format(PhaseRegAlloc *ra, const MachNode *node, 
 void indOffset16NarrowOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1200,7 +1198,7 @@ void indOffset16NarrowOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, 
 void indOffset16Narrow_klassOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1210,7 +1208,7 @@ void indOffset16Narrow_klassOper::int_format(PhaseRegAlloc *ra, const MachNode *
 void indOffset16Narrow_klassOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1223,7 +1221,7 @@ void indOffset16Narrow_klassOper::ext_format(PhaseRegAlloc *ra, const MachNode *
 void indOffset16NarrowAlg4Oper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1233,7 +1231,7 @@ void indOffset16NarrowAlg4Oper::int_format(PhaseRegAlloc *ra, const MachNode *no
 void indOffset16NarrowAlg4Oper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1246,7 +1244,7 @@ void indOffset16NarrowAlg4Oper::ext_format(PhaseRegAlloc *ra, const MachNode *no
 void indOffset16NarrowAlg4_klassOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1256,7 +1254,7 @@ void indOffset16NarrowAlg4_klassOper::int_format(PhaseRegAlloc *ra, const MachNo
 void indOffset16NarrowAlg4_klassOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw(" + ");
@@ -1269,7 +1267,7 @@ void indOffset16NarrowAlg4_klassOper::ext_format(PhaseRegAlloc *ra, const MachNo
 void stackSlotIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1277,7 +1275,7 @@ void stackSlotIOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputS
 void stackSlotIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1288,7 +1286,7 @@ void stackSlotIOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx
 void stackSlotLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1296,7 +1294,7 @@ void stackSlotLOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputS
 void stackSlotLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1307,7 +1305,7 @@ void stackSlotLOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx
 void stackSlotPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1315,7 +1313,7 @@ void stackSlotPOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputS
 void stackSlotPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1326,7 +1324,7 @@ void stackSlotPOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx
 void stackSlotFOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1334,7 +1332,7 @@ void stackSlotFOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputS
 void stackSlotFOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1345,7 +1343,7 @@ void stackSlotFOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx
 void stackSlotDOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node,reg_str);
+    ra->dump_register(node,reg_str, sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -1353,7 +1351,7 @@ void stackSlotDOper::int_format(PhaseRegAlloc *ra, const MachNode *node, outputS
 void stackSlotDOper::ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const {
   st->print_raw("[sp+");
   { char reg_str[128];
-    ra->dump_register(node->in(idx),reg_str);
+    ra->dump_register(node->in(idx),reg_str,sizeof(reg_str));
     st->print("%s",reg_str);
   }
   st->print_raw("]");
@@ -2462,6 +2460,17 @@ void loadConI32_lo16Node::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void loadConI32Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("PLI     ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+}
+#endif
+#ifndef PRODUCT
 void loadConI_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
@@ -2506,6 +2515,18 @@ void loadConL32_lo16Node::format(PhaseRegAlloc *ra, outputStream *st) const {
 #endif
 #ifndef PRODUCT
 void loadConL32_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void loadConL34Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("PLI     ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(" \t// long");
 }
 #endif
 #ifndef PRODUCT
@@ -2565,7 +2586,7 @@ void loadConL_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw("LD      ");
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", offset, ");
-  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg);
+  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg, sizeof(reg));
     st->print("%s", reg);
   st->print_raw("\t// load long ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
@@ -2766,7 +2787,7 @@ void loadConP_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw("LD    ");
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", offset, ");
-  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg);
+  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg, sizeof(reg));
     st->print("%s", reg);
   st->print_raw(" \t//  load ptr ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
@@ -2821,7 +2842,7 @@ void loadConF_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw("LFS     ");
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", offset, ");
-  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg);
+  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg, sizeof(reg));
     st->print("%s", reg);
   st->print_raw(" \t// load ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
@@ -2876,7 +2897,7 @@ void loadConD_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw("ConD    ");
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", offset, ");
-  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg);
+  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg, sizeof(reg));
     st->print("%s", reg);
   st->print_raw(" \t// load ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
@@ -3117,6 +3138,24 @@ void storeV16Node::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void reinterpretLNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  st->print_raw("reinterpret ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+}
+#endif
+#ifndef PRODUCT
+void reinterpretXNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  st->print_raw("reinterpret ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+}
+#endif
+#ifndef PRODUCT
 void storeNNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
@@ -3250,60 +3289,14 @@ void storeDNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
-void storeCM_CMSNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// releaseFieldAddr
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
-  st->print_raw("STB     #0, ");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
-  st->print_raw(" \t// CMS card-mark byte (must be 0!), checking requires_release in [");
-  opnd_array(2)->ext_format(ra, this,idx2, st); // releaseFieldAddr
-  st->print_raw("]");
-  if (ra->C->alias_type(adr_type())->field() != NULL) {
-    ciField* f = ra->C->alias_type(adr_type())->field();
-    st->print(" 	// Field: ");
-    if (f->is_volatile())
-      st->print("volatile ");
-    f->holder()->name()->print_symbol_on(st);
-    st->print(".");
-    f->name()->print_symbol_on(st);
-    if (f->is_constant())
-      st->print(" (constant)");
-  } else {
-    if (ra->C->alias_type(adr_type())->is_volatile())
-      st->print(" volatile!");
-  }
-}
-#endif
-#ifndef PRODUCT
-void storeCM_CMS_ExExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  if (ra->C->alias_type(adr_type())->field() != NULL) {
-    ciField* f = ra->C->alias_type(adr_type())->field();
-    st->print(" 	// Field: ");
-    if (f->is_volatile())
-      st->print("volatile ");
-    f->holder()->name()->print_symbol_on(st);
-    st->print(".");
-    f->name()->print_symbol_on(st);
-    if (f->is_constant())
-      st->print(" (constant)");
-  } else {
-    if (ra->C->alias_type(adr_type())->is_volatile())
-      st->print(" volatile!");
-  }
-}
-#endif
-#ifndef PRODUCT
-void storeCM_G1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+void storeCMNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// mem
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// zero
   st->print_raw("STB     #0, ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // mem
-  st->print_raw(" \t// CMS card-mark byte store (G1)");
+  st->print_raw(" \t// CMS card-mark byte store");
   if (ra->C->alias_type(adr_type())->field() != NULL) {
     ciField* f = ra->C->alias_type(adr_type())->field();
     st->print(" 	// Field: ");
@@ -3746,6 +3739,11 @@ void membar_storestoreNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void membar_storestore_0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  st->print_raw("MEMBAR-store-store");
+}
+#endif
+#ifndef PRODUCT
 void membar_release_lockNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw(" -- \t// redundant MEMBAR-release - empty (release in FastUnlock)");
 }
@@ -4024,69 +4022,6 @@ void cmovD_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw(", ");
   opnd_array(4)->ext_format(ra, this,idx4, st); // src
   st->print_raw("\n\t");
-}
-#endif
-#ifndef PRODUCT
-void storeLConditional_regP_regL_regLNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem_ptr
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldVal
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newVal
-  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// cr0
-  st->print_raw("CMPXCHGD if (");
-  opnd_array(0)->int_format(ra, this, st); // crx
-  st->print_raw(" = (");
-  opnd_array(2)->ext_format(ra, this,idx2, st); // oldVal
-  st->print_raw(" == *");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // mem_ptr
-  st->print_raw(")) *mem_ptr = ");
-  opnd_array(3)->ext_format(ra, this,idx3, st); // newVal
-  st->print_raw("; as bool");
-}
-#endif
-#ifndef PRODUCT
-void storePConditional_regP_regP_regPNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem_ptr
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldVal
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newVal
-  st->print_raw("STDCX_  if (");
-  opnd_array(0)->int_format(ra, this, st); // cr0
-  st->print_raw(" = (");
-  opnd_array(2)->ext_format(ra, this,idx2, st); // oldVal
-  st->print_raw(" == *");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // mem_ptr
-  st->print_raw(")) *mem_ptr = ");
-  opnd_array(3)->ext_format(ra, this,idx3, st); // newVal
-  st->print_raw("; as bool");
-}
-#endif
-#ifndef PRODUCT
-void loadPLockedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 2;
-  unsigned idx1 = 2; 	// mem
-  st->print_raw("LDARX   ");
-  opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", ");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
-  st->print_raw(" \t// loadPLocked\n\t");
-  if (ra->C->alias_type(adr_type())->field() != NULL) {
-    ciField* f = ra->C->alias_type(adr_type())->field();
-    st->print(" 	// Field: ");
-    if (f->is_volatile())
-      st->print("volatile ");
-    f->holder()->name()->print_symbol_on(st);
-    st->print(".");
-    f->name()->print_symbol_on(st);
-    if (f->is_constant())
-      st->print(" (constant)");
-  } else {
-    if (ra->C->alias_type(adr_type())->is_volatile())
-      st->print(" volatile!");
-  }
 }
 #endif
 #ifndef PRODUCT
@@ -5210,6 +5145,20 @@ void addI_reg_immhi16Node::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void addI_reg_imm32Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("PADDI   ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+}
+#endif
+#ifndef PRODUCT
 void addL_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
@@ -5299,6 +5248,20 @@ void addL_reg_immhi16Node::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void addL_reg_imm34Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("PADDI   ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+}
+#endif
+#ifndef PRODUCT
 void addP_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
@@ -5333,6 +5296,20 @@ void addP_reg_immhi16Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx1 = 2; 	// src1
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
   st->print_raw("ADDIS   ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void addP_reg_imm34Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("PADDI    ");
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src1
@@ -5448,6 +5425,10 @@ void signmask64L_regLNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw(", ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
   st->print_raw(", #63");
+}
+#endif
+#ifndef PRODUCT
+void absL_reg_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
@@ -5648,6 +5629,42 @@ void modI_reg_reg_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 #endif
 #ifndef PRODUCT
 void modL_reg_reg_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void udivI_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("DIVWU   ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void umodI_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void udivL_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("DIVDU   ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void umodL_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
@@ -7176,6 +7193,51 @@ void castIINode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void castLLNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  st->print_raw(" -- \t// castLL of ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+}
+#endif
+#ifndef PRODUCT
+void castFFNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  st->print_raw(" -- \t// castFF of ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+}
+#endif
+#ifndef PRODUCT
+void castDDNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  st->print_raw(" -- \t// castDD of ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+}
+#endif
+#ifndef PRODUCT
+void castVV8Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  st->print_raw(" -- \t// castVV of ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+}
+#endif
+#ifndef PRODUCT
+void castVV16Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  st->print_raw(" -- \t// castVV of ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+}
+#endif
+#ifndef PRODUCT
 void checkCastPPNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
@@ -7847,31 +7909,17 @@ void testL_reg_immNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
-void cmovI_conIvalueMinus1_conIvalue1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+void cmpL3_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
-  st->print_raw("cmovI   ");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // crx
-  st->print_raw(", ");
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("cmpL3_reg_reg ");
   opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", -1, 0, +1");
-}
-#endif
-#ifndef PRODUCT
-void cmovI_conIvalueMinus1_conIvalue0_conIvalue1_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
-  st->print_raw("CmovI    ");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // crx
   st->print_raw(", ");
-  opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", -1, 0, +1 \t// postalloc expanded");
-}
-#endif
-#ifndef PRODUCT
-void cmpL3_reg_reg_ExExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
 }
 #endif
 #ifndef PRODUCT
@@ -8111,7 +8159,17 @@ void cmpF_reg_reg_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
-void cmpF3_reg_reg_ExExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+void cmpF3_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("cmpF3_reg_reg ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
 }
 #endif
 #ifndef PRODUCT
@@ -8144,7 +8202,196 @@ void cmpD_reg_reg_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
-void cmpD3_reg_reg_ExExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+void cmpD3_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("cmpD3_reg_reg ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void cmprb_Digit_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  st->print_raw("LI      ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0x3930\n\t");
+  st->print_raw("CMPRB   ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 0, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n\t");
+  st->print_raw("SETB    ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+}
+#endif
+#ifndef PRODUCT
+void cmprb_LowerCase_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  st->print_raw("LI      ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0x7A61\n\t");
+  st->print_raw("CMPRB   ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 0, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n\t");
+  st->print_raw("BGT     ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", done\n\t");
+  st->print_raw("LIS     ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", (signed short)0xF6DF\n\t");
+  st->print_raw("ORI     ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0xFFF8\n\t");
+  st->print_raw("CMPRB   ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 1, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n\t");
+  st->print_raw("BGT     ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", done\n\t");
+  st->print_raw("LIS     ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", (signed short)0xAAB5\n\t");
+  st->print_raw("ORI     ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0xBABA\n\t");
+  st->print_raw("INSRDI  ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 32, 0\n\t");
+  st->print_raw("CMPEQB  ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 1, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n");
+  st->print_raw("done:\n\t");
+  st->print_raw("SETB    ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+}
+#endif
+#ifndef PRODUCT
+void cmprb_UpperCase_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  st->print_raw("LI      ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0x5A41\n\t");
+  st->print_raw("CMPRB   ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 0, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n\t");
+  st->print_raw("BGT     ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", done\n\t");
+  st->print_raw("LIS     ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", (signed short)0xD6C0\n\t");
+  st->print_raw("ORI     ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0xDED8\n\t");
+  st->print_raw("CMPRB   ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 1, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n");
+  st->print_raw("done:\n\t");
+  st->print_raw("SETB    ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+}
+#endif
+#ifndef PRODUCT
+void cmprb_Whitespace_reg_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  st->print_raw("LI      ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0x0D09\n\t");
+  st->print_raw("ADDIS   ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0x201C\n\t");
+  st->print_raw("CMPRB   ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 1, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n\t");
+  st->print_raw("SETB    ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+}
+#endif
+#ifndef PRODUCT
+void cmprb_Whitespace_reg_reg_prefixedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// crx
+  st->print_raw("PLI     ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw(", 0x201C0D09\n\t");
+  st->print_raw("CMPRB   ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
+  st->print_raw(", 1, ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\n\t");
+  st->print_raw("SETB    ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // crx
 }
 #endif
 #ifndef PRODUCT
@@ -8189,22 +8436,6 @@ void branchConFarNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
-void branchConSchedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// lbl
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
-  st->print_raw("B_FAR");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // cmp
-  st->print_raw(" ");
-  opnd_array(2)->ext_format(ra, this,idx2, st); // crx
-  st->print_raw(", ");
-  opnd_array(3)->ext_format(ra, this,idx3, st); // lbl
-  st->print("  P=%f C=%f",_prob,_fcnt);
-}
-#endif
-#ifndef PRODUCT
 void branchLoopEndNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
@@ -8223,23 +8454,6 @@ void branchLoopEndNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 #endif
 #ifndef PRODUCT
 void branchLoopEndFarNode::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// crx
-  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// labl
-  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// 
-  st->print_raw("B_FAR");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // cmp
-  st->print_raw(" ");
-  opnd_array(2)->ext_format(ra, this,idx2, st); // crx
-  st->print_raw(", ");
-  opnd_array(3)->ext_format(ra, this,idx3, st); // labl
-  st->print_raw(" \t// counted loop end");
-  st->print("  P=%f C=%f",_prob,_fcnt);
-}
-#endif
-#ifndef PRODUCT
-void branchLoopEndSchedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// crx
@@ -8826,7 +9040,36 @@ void indexOfChar_UNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// ch
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
-  st->print_raw("String IndexOfChar ");
+  st->print_raw("StringUTF16 IndexOfChar ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // haystack
+  st->print_raw("[0..");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // haycnt
+  st->print_raw("], ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // ch
+  st->print_raw(" -> ");
+  opnd_array(0)->int_format(ra, this, st); // result
+  st->print_raw(" \t// KILL ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // haycnt
+  st->print_raw(", ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // tmp1
+  st->print_raw(", ");
+  opnd_array(5)->ext_format(ra, this,idx5, st); // tmp2
+  st->print_raw(", ");
+      st->print_raw("CCR0");
+  st->print_raw(", ");
+      st->print_raw("CCR1");
+}
+#endif
+#ifndef PRODUCT
+void indexOfChar_LNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// haystack
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// haycnt
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// ch
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
+  st->print_raw("StringLatin1 IndexOfChar ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // haystack
   st->print_raw("[0..");
   opnd_array(2)->ext_format(ra, this,idx2, st); // haycnt
@@ -9165,7 +9408,7 @@ void string_inflateNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
-void has_negativesNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+void count_positivesNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 2;
   unsigned idx1 = 2; 	// ary1
@@ -9173,7 +9416,7 @@ void has_negativesNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// result
   unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp1
   unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp2
-  st->print_raw("has negatives byte[] ");
+  st->print_raw("count positives byte[] ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // ary1
   st->print_raw(",");
   opnd_array(2)->ext_format(ra, this,idx2, st); // len
@@ -9198,7 +9441,40 @@ void encode_iso_arrayNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// tmp3
   unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp4
   unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp5
-  st->print_raw("Encode array ");
+  st->print_raw("Encode iso array ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // dst
+  st->print_raw(",");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // len
+  st->print_raw(" -> ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // result
+  st->print_raw(" \t// KILL ");
+  opnd_array(5)->ext_format(ra, this,idx5, st); // tmp1
+  st->print_raw(", ");
+  opnd_array(6)->ext_format(ra, this,idx6, st); // tmp2
+  st->print_raw(", ");
+  opnd_array(7)->ext_format(ra, this,idx7, st); // tmp3
+  st->print_raw(", ");
+  opnd_array(8)->ext_format(ra, this,idx8, st); // tmp4
+  st->print_raw(", ");
+  opnd_array(9)->ext_format(ra, this,idx9, st); // tmp5
+}
+#endif
+#ifndef PRODUCT
+void encode_ascii_arrayNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// dst
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// len
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// result
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  unsigned idx7 = idx6 + opnd_array(6)->num_edges(); 	// tmp3
+  unsigned idx8 = idx7 + opnd_array(7)->num_edges(); 	// tmp4
+  unsigned idx9 = idx8 + opnd_array(8)->num_edges(); 	// tmp5
+  st->print_raw("Encode ascii array ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
   st->print_raw(",");
   opnd_array(2)->ext_format(ra, this,idx2, st); // dst
@@ -9294,7 +9570,29 @@ void countTrailingZerosI_ExNode::format(PhaseRegAlloc *ra, outputStream *st) con
 }
 #endif
 #ifndef PRODUCT
+void countTrailingZerosI_cnttzwNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("CNTTZW  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+}
+#endif
+#ifndef PRODUCT
 void countTrailingZerosL_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void countTrailingZerosL_cnttzdNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("CNTTZD  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
 }
 #endif
 #ifndef PRODUCT
@@ -9337,7 +9635,73 @@ void bytes_reverse_int_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const
 }
 #endif
 #ifndef PRODUCT
+void bytes_reverse_int_vecNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// tmpV
+  st->print_raw("MTVSRWZ ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\n");
+  st->print_raw("\tXXBRW   ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+  st->print_raw("\n");
+  st->print_raw("\tMFVSRWZ ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+}
+#endif
+#ifndef PRODUCT
+void bytes_reverse_intNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("BRW  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+}
+#endif
+#ifndef PRODUCT
 void bytes_reverse_long_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void bytes_reverse_long_vecNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// tmpV
+  st->print_raw("MTVSRD  ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\n");
+  st->print_raw("\tXXBRD   ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+  st->print_raw("\n");
+  st->print_raw("\tMFVSRD  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // tmpV
+}
+#endif
+#ifndef PRODUCT
+void bytes_reverse_longNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("BRD  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
 }
 #endif
 #ifndef PRODUCT
@@ -9345,7 +9709,34 @@ void bytes_reverse_ushort_ExNode::format(PhaseRegAlloc *ra, outputStream *st) co
 }
 #endif
 #ifndef PRODUCT
+void bytes_reverse_ushortNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("BRH  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+}
+#endif
+#ifndef PRODUCT
 void bytes_reverse_short_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void bytes_reverse_shortNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("BRH   ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\n\t");
+  st->print_raw("EXTSH ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(0)->int_format(ra, this, st); // dst
 }
 #endif
 #ifndef PRODUCT
@@ -9353,7 +9744,15 @@ void loadI_reversedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void loadI_reversed_acquireNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
 void loadL_reversedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void loadL_reversed_acquireNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
@@ -9361,7 +9760,15 @@ void loadUS_reversedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
+void loadUS_reversed_acquireNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
 void loadS_reversedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+}
+#endif
+#ifndef PRODUCT
+void loadS_reversed_acquireNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 }
 #endif
 #ifndef PRODUCT
@@ -9438,10 +9845,41 @@ void storeS_reversedNode::format(PhaseRegAlloc *ra, outputStream *st) const {
 #endif
 #ifndef PRODUCT
 void mtvsrwzNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("MTVSRWZ ");
+  opnd_array(0)->int_format(ra, this, st); // temp1
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(" \t// Move to 16-byte register");
 }
 #endif
 #ifndef PRODUCT
 void xxspltwNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// imm1
+  st->print_raw("XXSPLTW ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // imm1
+  st->print_raw(" \t// Splat word");
+}
+#endif
+#ifndef PRODUCT
+void xscvdpspn_regFNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XSCVDPSPN ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(" \t// Convert scalar single precision to vector single precision");
 }
 #endif
 #ifndef PRODUCT
@@ -9543,7 +9981,7 @@ void repl4S_immI0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx1 = 1; 	// zero
   st->print_raw("LI      ");
   opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", #0 \t// replicate4C");
+  st->print_raw(", #0 \t// replicate4S");
 }
 #endif
 #ifndef PRODUCT
@@ -9553,7 +9991,7 @@ void repl4S_immIminus1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx1 = 1; 	// src
   st->print_raw("LI      ");
   opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", -1 \t// replicate4C");
+  st->print_raw(", -1 \t// replicate4S");
 }
 #endif
 #ifndef PRODUCT
@@ -9581,7 +10019,7 @@ void repl8S_immIminus1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
-  st->print_raw(" \t// replicate16B");
+  st->print_raw(" \t// replicate8S");
 }
 #endif
 #ifndef PRODUCT
@@ -9595,7 +10033,7 @@ void repl2I_immI0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx1 = 1; 	// zero
   st->print_raw("LI      ");
   opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", #0 \t// replicate4C");
+  st->print_raw(", #0 \t// replicate2I");
 }
 #endif
 #ifndef PRODUCT
@@ -9605,7 +10043,7 @@ void repl2I_immIminus1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   unsigned idx1 = 1; 	// src
   st->print_raw("LI      ");
   opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", -1 \t// replicate4C");
+  st->print_raw(", -1 \t// replicate2I");
 }
 #endif
 #ifndef PRODUCT
@@ -9650,7 +10088,7 @@ void repl2F_immF_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw("LD      ");
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", offset, ");
-  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg);
+  char reg[128];  ra->dump_register(in(mach_constant_base_node_input()), reg, sizeof(reg));
     st->print("%s", reg);
   st->print_raw("\t// load replicated float ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
@@ -9667,6 +10105,505 @@ void repl2F_immF0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw("LI      ");
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", #0 \t// replicate2F");
+}
+#endif
+#ifndef PRODUCT
+void vadd16B_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VADDUBM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// add packed16B");
+}
+#endif
+#ifndef PRODUCT
+void vadd8S_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VADDUHM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// add packed8S");
+}
+#endif
+#ifndef PRODUCT
+void vadd4I_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VADDUWM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// add packed4I");
+}
+#endif
+#ifndef PRODUCT
+void vadd4F_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VADDFP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// add packed4F");
+}
+#endif
+#ifndef PRODUCT
+void vadd2L_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VADDUDM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// add packed2L");
+}
+#endif
+#ifndef PRODUCT
+void vadd2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("XVADDDP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// add packed2D");
+}
+#endif
+#ifndef PRODUCT
+void vsub16B_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VSUBUBM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// sub packed16B");
+}
+#endif
+#ifndef PRODUCT
+void vsub8S_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VSUBUHM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// sub packed8S");
+}
+#endif
+#ifndef PRODUCT
+void vsub4I_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VSUBUWM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// sub packed4I");
+}
+#endif
+#ifndef PRODUCT
+void vsub4F_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VSUBFP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// sub packed4F");
+}
+#endif
+#ifndef PRODUCT
+void vsub2L_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VSUBUDM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// sub packed2L");
+}
+#endif
+#ifndef PRODUCT
+void vsub2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("XVSUBDP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// sub packed2D");
+}
+#endif
+#ifndef PRODUCT
+void vmul8S_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp
+  st->print_raw("VMLADDUHM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// mul packed8S");
+}
+#endif
+#ifndef PRODUCT
+void vmul4I_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("VMULUWM  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// mul packed4I");
+}
+#endif
+#ifndef PRODUCT
+void vmul4F_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("XVMULSP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// mul packed4F");
+}
+#endif
+#ifndef PRODUCT
+void vmul2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("XVMULDP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// mul packed2D");
+}
+#endif
+#ifndef PRODUCT
+void vdiv4F_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("XVDIVSP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// div packed4F");
+}
+#endif
+#ifndef PRODUCT
+void vdiv2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src1
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src2
+  st->print_raw("XVDIVDP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src1
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src2
+  st->print_raw("\t// div packed2D");
+}
+#endif
+#ifndef PRODUCT
+void vabs4F_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XVABSSP ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\t// absolute packed4F");
+}
+#endif
+#ifndef PRODUCT
+void vabs2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XVABSDP ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\t// absolute packed2D");
+}
+#endif
+#ifndef PRODUCT
+void roundD_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// rmode
+  st->print_raw("RoundDoubleMode ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // rmode
+}
+#endif
+#ifndef PRODUCT
+void vround2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// rmode
+  st->print_raw("RoundDoubleModeV ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(",");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // rmode
+}
+#endif
+#ifndef PRODUCT
+void vneg4F_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XVNEGSP ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\t// negate packed4F");
+}
+#endif
+#ifndef PRODUCT
+void vneg2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XVNEGDP ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\t// negate packed2D");
+}
+#endif
+#ifndef PRODUCT
+void vsqrt4F_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XVSQRTSP ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\t// sqrt packed4F");
+}
+#endif
+#ifndef PRODUCT
+void vsqrt2D_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XVSQRTDP  ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\t// sqrt packed2D");
+}
+#endif
+#ifndef PRODUCT
+void vpopcnt_regNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("VPOPCNT ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(",");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw("\t// pop count packed");
+}
+#endif
+#ifndef PRODUCT
+void vfma4FNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVMADDASP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void vfma4F_neg1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVNMSUBASP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void vfma4F_neg1_0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVNMSUBASP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void vfma4F_neg2Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVMSUBASP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void vfma2DNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVMADDADP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void vfma2D_neg1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVNMSUBADP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void vfma2D_neg1_0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVNMSUBADP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
+}
+#endif
+#ifndef PRODUCT
+void vfma2D_neg2Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// dst
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// src1
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// src2
+  st->print_raw("XVMSUBADP   ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // dst
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // src1
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // src2
 }
 #endif
 #ifndef PRODUCT
@@ -9741,10 +10678,20 @@ void repl4F_immF0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
 #endif
 #ifndef PRODUCT
 void repl2D_reg_ExNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 1;
+  unsigned idx1 = 1; 	// src
+  st->print_raw("XXPERMDI      ");
+  opnd_array(0)->int_format(ra, this, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // src
+  st->print_raw(", 0 \t// Splat doubleword");
 }
 #endif
 #ifndef PRODUCT
-void repl2D_immI0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+void repl2D_immD0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 1;
   unsigned idx1 = 1; 	// zero
@@ -9753,18 +10700,6 @@ void repl2D_immI0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw(", ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // zero
   st->print_raw(" \t// replicate2D");
-}
-#endif
-#ifndef PRODUCT
-void repl2D_immIminus1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
-  // Start at oper_input_base() and count operands
-  unsigned idx0 = 1;
-  unsigned idx1 = 1; 	// src
-  st->print_raw("XXLEQV      ");
-  opnd_array(0)->int_format(ra, this, st); // dst
-  st->print_raw(", ");
-  opnd_array(1)->ext_format(ra, this,idx1, st); // src
-  st->print_raw(" \t// replicate16B");
 }
 #endif
 #ifndef PRODUCT
@@ -9791,7 +10726,7 @@ void xxspltdNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
   st->print_raw(", ");
   opnd_array(2)->ext_format(ra, this,idx2, st); // zero
-  st->print_raw(" \t// Permute 16-byte register");
+  st->print_raw(" \t// Splat doubleword");
 }
 #endif
 #ifndef PRODUCT
@@ -9809,7 +10744,7 @@ void xxpermdiNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   opnd_array(2)->ext_format(ra, this,idx2, st); // src2
   st->print_raw(", ");
   opnd_array(3)->ext_format(ra, this,idx3, st); // zero
-  st->print_raw(" \t// Permute 16-byte register");
+  st->print_raw(" \t// Splat doubleword");
 }
 #endif
 #ifndef PRODUCT
@@ -9837,7 +10772,7 @@ void repl2L_immIminus1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   opnd_array(0)->int_format(ra, this, st); // dst
   st->print_raw(", ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // src
-  st->print_raw(" \t// replicate16B");
+  st->print_raw(" \t// replicate2L");
 }
 #endif
 #ifndef PRODUCT
@@ -9980,13 +10915,13 @@ void CallLeafNoFPDirect_ExNode::format(PhaseRegAlloc *ra, outputStream *st) cons
 void TailCalljmpIndNode::format(PhaseRegAlloc *ra, outputStream *st) const {
   // Start at oper_input_base() and count operands
   unsigned idx0 = 5;
-  unsigned idx1 = 5; 	// method_oop
+  unsigned idx1 = 5; 	// method_ptr
   unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// 
   st->print_raw("MTCTR   ");
   opnd_array(1)->ext_format(ra, this,idx1, st); // jump_target
   st->print_raw(" \t// ");
-  opnd_array(2)->ext_format(ra, this,idx2, st); // method_oop
-  st->print_raw(" holds method oop\n\t");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // method_ptr
+  st->print_raw(" holds method\n\t");
   st->print_raw("BCTR         \t// tail call");
 }
 #endif
@@ -10067,6 +11002,471 @@ void brNop1Node::format(PhaseRegAlloc *ra, outputStream *st) const {
 #ifndef PRODUCT
 void brNop2Node::format(PhaseRegAlloc *ra, outputStream *st) const {
   st->print_raw("brNop2");
+}
+#endif
+#ifndef PRODUCT
+void cacheWBNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// 
+  st->print_raw("cache writeback, address = ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // addr
+}
+#endif
+#ifndef PRODUCT
+void cacheWBPreSyncNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  st->print_raw("cache writeback presync");
+}
+#endif
+#ifndef PRODUCT
+void cacheWBPostSyncNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  st->print_raw("cache writeback postsync");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapP_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHG ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapP_shenandoah_0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHG ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapN_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHG ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapN_shenandoah_0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHG ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapP_acq_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapP_acq_shenandoah_0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapN_acq_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndSwapN_acq_shenandoah_0Node::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndExchangeP_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as ptr; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndExchangeN_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as ptr; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndExchangePAcq_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as ptr; ptr");
+}
+#endif
+#ifndef PRODUCT
+void compareAndExchangeNAcq_shenandoahNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp1
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp2
+  st->print_raw("CMPXCHGD acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as ptr; ptr");
+}
+#endif
+#ifndef PRODUCT
+void zLoadPNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// dst
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp
+  st->print_raw("LD ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  if (ra->C->alias_type(adr_type())->field() != NULL) {
+    ciField* f = ra->C->alias_type(adr_type())->field();
+    st->print(" 	// Field: ");
+    if (f->is_volatile())
+      st->print("volatile ");
+    f->holder()->name()->print_symbol_on(st);
+    st->print(".");
+    f->name()->print_symbol_on(st);
+    if (f->is_constant())
+      st->print(" (constant)");
+  } else {
+    if (ra->C->alias_type(adr_type())->is_volatile())
+      st->print(" volatile!");
+  }
+}
+#endif
+#ifndef PRODUCT
+void zLoadP_acqNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// dst
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// tmp
+  st->print_raw("LD acq ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // dst
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  if (ra->C->alias_type(adr_type())->field() != NULL) {
+    ciField* f = ra->C->alias_type(adr_type())->field();
+    st->print(" 	// Field: ");
+    if (f->is_volatile())
+      st->print("volatile ");
+    f->holder()->name()->print_symbol_on(st);
+    st->print(".");
+    f->name()->print_symbol_on(st);
+    if (f->is_constant())
+      st->print(" (constant)");
+  } else {
+    if (ra->C->alias_type(adr_type())->is_volatile())
+      st->print(" volatile!");
+  }
+}
+#endif
+#ifndef PRODUCT
+void zCompareAndSwapPNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  st->print_raw("CMPXCHG ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void zCompareAndSwapP_acqNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  st->print_raw("CMPXCHG acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void zCompareAndSwapPWeakNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  st->print_raw("weak CMPXCHG ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void zCompareAndSwapPWeak_acqNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp_xchg
+  unsigned idx6 = idx5 + opnd_array(5)->num_edges(); 	// tmp_mask
+  st->print_raw("weak CMPXCHG acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as bool; ptr");
+}
+#endif
+#ifndef PRODUCT
+void zCompareAndExchangePNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp
+  st->print_raw("CMPXCHG ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as ptr; ptr");
+}
+#endif
+#ifndef PRODUCT
+void zCompareAndExchangeP_acqNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// oldval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// newval
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// res
+  unsigned idx5 = idx4 + opnd_array(4)->num_edges(); 	// tmp
+  st->print_raw("CMPXCHG acq ");
+  opnd_array(4)->ext_format(ra, this,idx4, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // oldval
+  st->print_raw(", ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // newval
+  st->print_raw("; as ptr; ptr");
+}
+#endif
+#ifndef PRODUCT
+void zGetAndSetPNode::format(PhaseRegAlloc *ra, outputStream *st) const {
+  // Start at oper_input_base() and count operands
+  unsigned idx0 = 2;
+  unsigned idx1 = 2; 	// mem
+  unsigned idx2 = idx1 + opnd_array(1)->num_edges(); 	// newval
+  unsigned idx3 = idx2 + opnd_array(2)->num_edges(); 	// res
+  unsigned idx4 = idx3 + opnd_array(3)->num_edges(); 	// tmp
+  st->print_raw("GetAndSetP ");
+  opnd_array(3)->ext_format(ra, this,idx3, st); // res
+  st->print_raw(", ");
+  opnd_array(1)->ext_format(ra, this,idx1, st); // mem
+  st->print_raw(", ");
+  opnd_array(2)->ext_format(ra, this,idx2, st); // newval
 }
 #endif
 // Check consistency of C++ compilation with ADLC options:

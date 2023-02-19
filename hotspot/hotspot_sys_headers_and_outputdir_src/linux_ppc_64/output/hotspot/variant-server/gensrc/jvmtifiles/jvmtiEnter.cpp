@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2002, 2018, Oracle and/or its affiliates. All rights reserved.
+ Copyright (c) 2002, 2022, Oracle and/or its affiliates. All rights reserved.
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 
  This code is free software; you can redistribute it and/or modify it
@@ -24,6 +24,8 @@
  // AUTOMATICALLY GENERATED FILE - DO NOT EDIT
 
 # include "precompiled.hpp"
+# include "classfile/javaClasses.inline.hpp"
+# include "classfile/vmClasses.hpp"
 # include "memory/resourceArea.hpp"
 # include "utilities/macros.hpp"
 #if INCLUDE_JVMTI
@@ -32,6 +34,10 @@
 # include "prims/jvmtiEnter.inline.hpp"
 # include "prims/jvmtiRawMonitor.hpp"
 # include "prims/jvmtiUtil.hpp"
+# include "runtime/fieldDescriptor.inline.hpp"
+# include "runtime/jniHandles.hpp"
+# include "runtime/thread.inline.hpp"
+# include "runtime/threads.hpp"
 # include "runtime/threadSMR.hpp"
 
 
@@ -111,7 +117,7 @@ const char* JvmtiUtil::_error_names[] = {
   "JVMTI_ERROR_UNSUPPORTED_REDEFINITION_CLASS_MODIFIERS_CHANGED",
   "JVMTI_ERROR_UNSUPPORTED_REDEFINITION_METHOD_MODIFIERS_CHANGED",
   "JVMTI_ERROR_UNSUPPORTED_REDEFINITION_CLASS_ATTRIBUTE_CHANGED",
-  NULL,
+  "JVMTI_ERROR_UNSUPPORTED_OPERATION",
   NULL,
   NULL,
   NULL,
@@ -246,7 +252,9 @@ const bool JvmtiUtil::_event_threaded[] = {
   false,
   false,
   false,
-  false
+  true,
+  true,
+  true
 };
 
 
@@ -274,6 +282,10 @@ const bool JvmtiUtil::has_event_capability(jvmtiEvent event_type, const jvmtiCap
       return capabilities_ptr->can_generate_exception_events != 0;
     case JVMTI_EVENT_EXCEPTION_CATCH:
       return capabilities_ptr->can_generate_exception_events != 0;
+    case JVMTI_EVENT_VIRTUAL_THREAD_START:
+      return capabilities_ptr->can_support_virtual_threads != 0;
+    case JVMTI_EVENT_VIRTUAL_THREAD_END:
+      return capabilities_ptr->can_support_virtual_threads != 0;
     case JVMTI_EVENT_COMPILED_METHOD_LOAD:
       return capabilities_ptr->can_generate_compiled_method_load_events != 0;
     case JVMTI_EVENT_COMPILED_METHOD_UNLOAD:
@@ -307,7 +319,7 @@ extern "C" {
 
   //
   // Memory Management functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_Allocate(jvmtiEnv* env,
@@ -331,7 +343,8 @@ jvmti_Allocate(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_Allocate , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -369,7 +382,8 @@ jvmti_Deallocate(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_Deallocate , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -382,7 +396,7 @@ jvmti_Deallocate(jvmtiEnv* env,
 
   //
   // Thread functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetThreadState(jvmtiEnv* env,
@@ -394,16 +408,17 @@ jvmti_GetThreadState(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadState , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -431,11 +446,12 @@ jvmti_GetCurrentThread(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetCurrentThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -459,16 +475,17 @@ jvmti_GetAllThreads(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllThreads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -494,16 +511,17 @@ jvmti_SuspendThread(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -513,17 +531,7 @@ jvmti_SuspendThread(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->SuspendThread(java_thread);
+  err = jvmti_env->SuspendThread(thread);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -539,16 +547,17 @@ jvmti_SuspendThreadList(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendThreadList , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -573,6 +582,48 @@ jvmti_SuspendThreadList(jvmtiEnv* env,
 }
 
 static jvmtiError JNICALL
+jvmti_SuspendAllVirtualThreads(jvmtiEnv* env,
+            jint except_count,
+            const jthread* except_list) {
+
+#if !INCLUDE_JVMTI 
+  return JVMTI_ERROR_NOT_AVAILABLE; 
+#else 
+  if(!JvmtiEnv::is_vm_live()) {
+    return JVMTI_ERROR_WRONG_PHASE;
+  }
+  Thread* this_thread = Thread::current_or_null(); 
+  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    return JVMTI_ERROR_UNATTACHED_THREAD;
+  }
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
+  ThreadInVMfromNative __tiv(current_thread);
+  VM_ENTRY_BASE(jvmtiError, jvmti_SuspendAllVirtualThreads , current_thread)
+  debug_only(VMNativeEntryWrapper __vew;)
+  PreserveExceptionMark __em(this_thread);
+  JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
+  if (!jvmti_env->is_valid()) {
+    return JVMTI_ERROR_INVALID_ENVIRONMENT;
+  }
+
+  if (jvmti_env->get_capabilities()->can_suspend == 0) {
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+
+  if (jvmti_env->get_capabilities()->can_support_virtual_threads == 0) {
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+  jvmtiError err;
+  if (except_count < 0) {
+      return JVMTI_ERROR_ILLEGAL_ARGUMENT;
+  }
+  err = jvmti_env->SuspendAllVirtualThreads(except_count, except_list);
+  return err;
+#endif // INCLUDE_JVMTI
+}
+
+static jvmtiError JNICALL
 jvmti_ResumeThread(jvmtiEnv* env,
             jthread thread) {
 
@@ -581,16 +632,17 @@ jvmti_ResumeThread(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -600,13 +652,7 @@ jvmti_ResumeThread(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  err = jvmti_env->ResumeThread(java_thread);
+  err = jvmti_env->ResumeThread(thread);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -622,16 +668,17 @@ jvmti_ResumeThreadList(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeThreadList , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -656,6 +703,48 @@ jvmti_ResumeThreadList(jvmtiEnv* env,
 }
 
 static jvmtiError JNICALL
+jvmti_ResumeAllVirtualThreads(jvmtiEnv* env,
+            jint except_count,
+            const jthread* except_list) {
+
+#if !INCLUDE_JVMTI 
+  return JVMTI_ERROR_NOT_AVAILABLE; 
+#else 
+  if(!JvmtiEnv::is_vm_live()) {
+    return JVMTI_ERROR_WRONG_PHASE;
+  }
+  Thread* this_thread = Thread::current_or_null(); 
+  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    return JVMTI_ERROR_UNATTACHED_THREAD;
+  }
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
+  ThreadInVMfromNative __tiv(current_thread);
+  VM_ENTRY_BASE(jvmtiError, jvmti_ResumeAllVirtualThreads , current_thread)
+  debug_only(VMNativeEntryWrapper __vew;)
+  PreserveExceptionMark __em(this_thread);
+  JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
+  if (!jvmti_env->is_valid()) {
+    return JVMTI_ERROR_INVALID_ENVIRONMENT;
+  }
+
+  if (jvmti_env->get_capabilities()->can_suspend == 0) {
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+
+  if (jvmti_env->get_capabilities()->can_support_virtual_threads == 0) {
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+  jvmtiError err;
+  if (except_count < 0) {
+      return JVMTI_ERROR_ILLEGAL_ARGUMENT;
+  }
+  err = jvmti_env->ResumeAllVirtualThreads(except_count, except_list);
+  return err;
+#endif // INCLUDE_JVMTI
+}
+
+static jvmtiError JNICALL
 jvmti_StopThread(jvmtiEnv* env,
             jthread thread,
             jobject exception) {
@@ -665,16 +754,17 @@ jvmti_StopThread(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_StopThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -684,13 +774,7 @@ jvmti_StopThread(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  err = jvmti_env->StopThread(java_thread, exception);
+  err = jvmti_env->StopThread(thread, exception);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -704,16 +788,17 @@ jvmti_InterruptThread(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_InterruptThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -738,16 +823,17 @@ jvmti_GetThreadInfo(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -772,16 +858,17 @@ jvmti_GetOwnedMonitorInfo(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetOwnedMonitorInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -791,23 +878,13 @@ jvmti_GetOwnedMonitorInfo(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
   if (owned_monitor_count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
   if (owned_monitors_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetOwnedMonitorInfo(java_thread, owned_monitor_count_ptr, owned_monitors_ptr);
+  err = jvmti_env->GetOwnedMonitorInfo(thread, owned_monitor_count_ptr, owned_monitors_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -823,16 +900,17 @@ jvmti_GetOwnedMonitorStackDepthInfo(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetOwnedMonitorStackDepthInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -842,23 +920,13 @@ jvmti_GetOwnedMonitorStackDepthInfo(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
   if (monitor_info_count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
   if (monitor_info_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetOwnedMonitorStackDepthInfo(java_thread, monitor_info_count_ptr, monitor_info_ptr);
+  err = jvmti_env->GetOwnedMonitorStackDepthInfo(thread, monitor_info_count_ptr, monitor_info_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -873,16 +941,17 @@ jvmti_GetCurrentContendedMonitor(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetCurrentContendedMonitor , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -892,20 +961,10 @@ jvmti_GetCurrentContendedMonitor(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
   if (monitor_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetCurrentContendedMonitor(java_thread, monitor_ptr);
+  err = jvmti_env->GetCurrentContendedMonitor(thread, monitor_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -922,16 +981,17 @@ jvmti_RunAgentThread(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_RunAgentThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -956,27 +1016,18 @@ jvmti_SetThreadLocalStorage(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetThreadLocalStorage , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->SetThreadLocalStorage(java_thread, data);
+  err = jvmti_env->SetThreadLocalStorage(thread, data);
   return err;
 }
 
@@ -1006,7 +1057,7 @@ jvmti_GetThreadLocalStorage(jvmtiEnv* env,
 
   //
   // Thread Group functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetTopThreadGroups(jvmtiEnv* env,
@@ -1018,16 +1069,17 @@ jvmti_GetTopThreadGroups(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetTopThreadGroups , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1054,16 +1106,17 @@ jvmti_GetThreadGroupInfo(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadGroupInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1090,16 +1143,17 @@ jvmti_GetThreadGroupChildren(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadGroupChildren , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1124,7 +1178,7 @@ jvmti_GetThreadGroupChildren(jvmtiEnv* env,
 
   //
   // Stack Frame functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetStackTrace(jvmtiEnv* env,
@@ -1139,31 +1193,22 @@ jvmti_GetStackTrace(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetStackTrace , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
   if (max_frame_count < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
@@ -1173,7 +1218,7 @@ jvmti_GetStackTrace(jvmtiEnv* env,
   if (count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetStackTrace(java_thread, start_depth, max_frame_count, frame_buffer, count_ptr);
+  err = jvmti_env->GetStackTrace(thread, start_depth, max_frame_count, frame_buffer, count_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1189,16 +1234,17 @@ jvmti_GetAllStackTraces(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllStackTraces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1230,16 +1276,17 @@ jvmti_GetThreadListStackTraces(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadListStackTraces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1272,35 +1319,26 @@ jvmti_GetFrameCount(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFrameCount , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
   if (count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetFrameCount(java_thread, count_ptr);
+  err = jvmti_env->GetFrameCount(thread, count_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1314,16 +1352,17 @@ jvmti_PopFrame(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_PopFrame , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1333,13 +1372,7 @@ jvmti_PopFrame(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  err = jvmti_env->PopFrame(java_thread);
+  err = jvmti_env->PopFrame(thread);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1356,31 +1389,22 @@ jvmti_GetFrameLocation(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFrameLocation , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -1391,7 +1415,7 @@ jvmti_GetFrameLocation(jvmtiEnv* env,
   if (location_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetFrameLocation(java_thread, depth, method_ptr, location_ptr);
+  err = jvmti_env->GetFrameLocation(thread, depth, method_ptr, location_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1406,16 +1430,17 @@ jvmti_NotifyFramePop(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_NotifyFramePop , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1425,28 +1450,18 @@ jvmti_NotifyFramePop(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  err = jvmti_env->NotifyFramePop(java_thread, depth);
+  err = jvmti_env->NotifyFramePop(thread, depth);
   return err;
 #endif // INCLUDE_JVMTI
 }
 
   //
   // Force Early Return functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_ForceEarlyReturnObject(jvmtiEnv* env,
@@ -1458,16 +1473,17 @@ jvmti_ForceEarlyReturnObject(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1477,17 +1493,7 @@ jvmti_ForceEarlyReturnObject(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->ForceEarlyReturnObject(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnObject(thread, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1502,16 +1508,17 @@ jvmti_ForceEarlyReturnInt(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1521,17 +1528,7 @@ jvmti_ForceEarlyReturnInt(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->ForceEarlyReturnInt(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnInt(thread, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1546,16 +1543,17 @@ jvmti_ForceEarlyReturnLong(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1565,17 +1563,7 @@ jvmti_ForceEarlyReturnLong(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->ForceEarlyReturnLong(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnLong(thread, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1590,16 +1578,17 @@ jvmti_ForceEarlyReturnFloat(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1609,17 +1598,7 @@ jvmti_ForceEarlyReturnFloat(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->ForceEarlyReturnFloat(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnFloat(thread, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1634,16 +1613,17 @@ jvmti_ForceEarlyReturnDouble(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1653,17 +1633,7 @@ jvmti_ForceEarlyReturnDouble(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->ForceEarlyReturnDouble(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnDouble(thread, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1677,16 +1647,17 @@ jvmti_ForceEarlyReturnVoid(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnVoid , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1696,24 +1667,14 @@ jvmti_ForceEarlyReturnVoid(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  err = jvmti_env->ForceEarlyReturnVoid(java_thread);
+  err = jvmti_env->ForceEarlyReturnVoid(thread);
   return err;
 #endif // INCLUDE_JVMTI
 }
 
   //
   // Heap functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_FollowReferences(jvmtiEnv* env,
@@ -1728,16 +1689,17 @@ jvmti_FollowReferences(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_FollowReferences , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1767,16 +1729,17 @@ jvmti_IterateThroughHeap(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateThroughHeap , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1809,11 +1772,12 @@ jvmti_GetTag(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetTag , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1846,11 +1810,12 @@ jvmti_SetTag(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetTag , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1878,16 +1843,17 @@ jvmti_GetObjectsWithTags(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectsWithTags , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1919,16 +1885,17 @@ jvmti_ForceGarbageCollection(jvmtiEnv* env) {
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceGarbageCollection , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1941,7 +1908,7 @@ jvmti_ForceGarbageCollection(jvmtiEnv* env) {
 
   //
   // Heap (1.0) functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
@@ -1954,16 +1921,17 @@ jvmti_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverObjectsReachableFromObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1993,16 +1961,17 @@ jvmti_IterateOverReachableObjects(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverReachableObjects , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2028,16 +1997,17 @@ jvmti_IterateOverHeap(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverHeap , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2067,16 +2037,17 @@ jvmti_IterateOverInstancesOfClass(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverInstancesOfClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2090,7 +2061,7 @@ jvmti_IterateOverInstancesOfClass(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (heap_object_callback == NULL) {
@@ -2103,7 +2074,7 @@ jvmti_IterateOverInstancesOfClass(jvmtiEnv* env,
 
   //
   // Local Variable functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetLocalObject(jvmtiEnv* env,
@@ -2117,16 +2088,17 @@ jvmti_GetLocalObject(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2136,16 +2108,6 @@ jvmti_GetLocalObject(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -2153,7 +2115,7 @@ jvmti_GetLocalObject(jvmtiEnv* env,
   if (value_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLocalObject(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalObject(thread, depth, slot, value_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2169,16 +2131,17 @@ jvmti_GetLocalInstance(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalInstance , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2188,16 +2151,6 @@ jvmti_GetLocalInstance(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -2205,7 +2158,7 @@ jvmti_GetLocalInstance(jvmtiEnv* env,
   if (value_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLocalInstance(java_thread, depth, value_ptr);
+  err = jvmti_env->GetLocalInstance(thread, depth, value_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2222,16 +2175,17 @@ jvmti_GetLocalInt(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2241,16 +2195,6 @@ jvmti_GetLocalInt(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -2258,7 +2202,7 @@ jvmti_GetLocalInt(jvmtiEnv* env,
   if (value_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLocalInt(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalInt(thread, depth, slot, value_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2275,16 +2219,17 @@ jvmti_GetLocalLong(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2294,16 +2239,6 @@ jvmti_GetLocalLong(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -2311,7 +2246,7 @@ jvmti_GetLocalLong(jvmtiEnv* env,
   if (value_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLocalLong(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalLong(thread, depth, slot, value_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2328,16 +2263,17 @@ jvmti_GetLocalFloat(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2347,16 +2283,6 @@ jvmti_GetLocalFloat(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -2364,7 +2290,7 @@ jvmti_GetLocalFloat(jvmtiEnv* env,
   if (value_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLocalFloat(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalFloat(thread, depth, slot, value_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2381,16 +2307,17 @@ jvmti_GetLocalDouble(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2400,16 +2327,6 @@ jvmti_GetLocalDouble(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -2417,7 +2334,7 @@ jvmti_GetLocalDouble(jvmtiEnv* env,
   if (value_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLocalDouble(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalDouble(thread, depth, slot, value_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2434,16 +2351,17 @@ jvmti_SetLocalObject(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2453,21 +2371,11 @@ jvmti_SetLocalObject(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  err = jvmti_env->SetLocalObject(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalObject(thread, depth, slot, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2484,16 +2392,17 @@ jvmti_SetLocalInt(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2503,21 +2412,11 @@ jvmti_SetLocalInt(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  err = jvmti_env->SetLocalInt(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalInt(thread, depth, slot, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2534,16 +2433,17 @@ jvmti_SetLocalLong(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2553,21 +2453,11 @@ jvmti_SetLocalLong(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  err = jvmti_env->SetLocalLong(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalLong(thread, depth, slot, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2584,16 +2474,17 @@ jvmti_SetLocalFloat(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2603,21 +2494,11 @@ jvmti_SetLocalFloat(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  err = jvmti_env->SetLocalFloat(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalFloat(thread, depth, slot, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2634,16 +2515,17 @@ jvmti_SetLocalDouble(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2653,28 +2535,18 @@ jvmti_SetLocalDouble(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
 
   if (depth < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  err = jvmti_env->SetLocalDouble(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalDouble(thread, depth, slot, value);
   return err;
 #endif // INCLUDE_JVMTI
 }
 
   //
   // Breakpoint functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_SetBreakpoint(jvmtiEnv* env,
@@ -2686,16 +2558,17 @@ jvmti_SetBreakpoint(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetBreakpoint , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2705,11 +2578,11 @@ jvmti_SetBreakpoint(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  err = jvmti_env->SetBreakpoint(method_oop, location);
+  err = jvmti_env->SetBreakpoint(checked_method, location);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -2724,16 +2597,17 @@ jvmti_ClearBreakpoint(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearBreakpoint , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2743,18 +2617,18 @@ jvmti_ClearBreakpoint(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  err = jvmti_env->ClearBreakpoint(method_oop, location);
+  err = jvmti_env->ClearBreakpoint(checked_method, location);
   return err;
 #endif // INCLUDE_JVMTI
 }
 
   //
   // Watched Field functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_SetFieldAccessWatch(jvmtiEnv* env,
@@ -2766,16 +2640,17 @@ jvmti_SetFieldAccessWatch(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetFieldAccessWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2789,7 +2664,7 @@ jvmti_SetFieldAccessWatch(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -2820,16 +2695,17 @@ jvmti_ClearFieldAccessWatch(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearFieldAccessWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2843,7 +2719,7 @@ jvmti_ClearFieldAccessWatch(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -2874,16 +2750,17 @@ jvmti_SetFieldModificationWatch(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetFieldModificationWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2897,7 +2774,7 @@ jvmti_SetFieldModificationWatch(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -2928,16 +2805,17 @@ jvmti_ClearFieldModificationWatch(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearFieldModificationWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2951,7 +2829,7 @@ jvmti_ClearFieldModificationWatch(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -2974,7 +2852,7 @@ jvmti_ClearFieldModificationWatch(jvmtiEnv* env,
 
   //
   // Module functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetAllModules(jvmtiEnv* env,
@@ -2986,16 +2864,17 @@ jvmti_GetAllModules(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllModules , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3023,16 +2902,17 @@ jvmti_GetNamedModule(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetNamedModule , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3059,16 +2939,17 @@ jvmti_AddModuleReads(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleReads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3096,16 +2977,17 @@ jvmti_AddModuleExports(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleExports , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3136,16 +3018,17 @@ jvmti_AddModuleOpens(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleOpens , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3175,16 +3058,17 @@ jvmti_AddModuleUses(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleUses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3212,16 +3096,17 @@ jvmti_AddModuleProvides(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleProvides , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3251,16 +3136,17 @@ jvmti_IsModifiableModule(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsModifiableModule , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3279,7 +3165,7 @@ jvmti_IsModifiableModule(jvmtiEnv* env,
 
   //
   // Class functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetLoadedClasses(jvmtiEnv* env,
@@ -3287,16 +3173,17 @@ jvmti_GetLoadedClasses(jvmtiEnv* env,
             jclass** classes_ptr) {
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLoadedClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3319,16 +3206,17 @@ jvmti_GetClassLoaderClasses(jvmtiEnv* env,
             jclass** classes_ptr) {
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassLoaderClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3360,11 +3248,12 @@ jvmti_GetClassSignature(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassSignature , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3374,7 +3263,7 @@ jvmti_GetClassSignature(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   err = jvmti_env->GetClassSignature(k_mirror, signature_ptr, generic_ptr);
@@ -3397,11 +3286,12 @@ jvmti_GetClassStatus(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassStatus , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3411,7 +3301,7 @@ jvmti_GetClassStatus(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (status_ptr == NULL) {
@@ -3437,11 +3327,12 @@ jvmti_GetSourceFileName(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetSourceFileName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3455,7 +3346,7 @@ jvmti_GetSourceFileName(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (source_name_ptr == NULL) {
@@ -3481,11 +3372,12 @@ jvmti_GetClassModifiers(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3495,7 +3387,7 @@ jvmti_GetClassModifiers(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (modifiers_ptr == NULL) {
@@ -3522,11 +3414,12 @@ jvmti_GetClassMethods(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassMethods , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3536,7 +3429,7 @@ jvmti_GetClassMethods(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (method_count_ptr == NULL) {
@@ -3566,11 +3459,12 @@ jvmti_GetClassFields(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassFields , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3580,7 +3474,7 @@ jvmti_GetClassFields(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (field_count_ptr == NULL) {
@@ -3610,11 +3504,12 @@ jvmti_GetImplementedInterfaces(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetImplementedInterfaces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3624,7 +3519,7 @@ jvmti_GetImplementedInterfaces(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (interface_count_ptr == NULL) {
@@ -3654,11 +3549,12 @@ jvmti_GetClassVersionNumbers(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassVersionNumbers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3668,7 +3564,7 @@ jvmti_GetClassVersionNumbers(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (minor_version_ptr == NULL) {
@@ -3699,11 +3595,12 @@ jvmti_GetConstantPool(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetConstantPool , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3717,7 +3614,7 @@ jvmti_GetConstantPool(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (constant_pool_count_ptr == NULL) {
@@ -3749,11 +3646,12 @@ jvmti_IsInterface(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsInterface , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3763,7 +3661,7 @@ jvmti_IsInterface(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (is_interface_ptr == NULL) {
@@ -3789,11 +3687,12 @@ jvmti_IsArrayClass(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsArrayClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3803,7 +3702,7 @@ jvmti_IsArrayClass(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (is_array_class_ptr == NULL) {
@@ -3825,11 +3724,12 @@ jvmti_IsModifiableClass(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsModifiableClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3839,7 +3739,7 @@ jvmti_IsModifiableClass(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (is_modifiable_class_ptr == NULL) {
@@ -3864,11 +3764,12 @@ jvmti_GetClassLoader(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassLoader , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3878,7 +3779,7 @@ jvmti_GetClassLoader(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (classloader_ptr == NULL) {
@@ -3904,11 +3805,12 @@ jvmti_GetSourceDebugExtension(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetSourceDebugExtension , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3922,7 +3824,7 @@ jvmti_GetSourceDebugExtension(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
   if (source_debug_extension_ptr == NULL) {
@@ -3939,16 +3841,17 @@ jvmti_RetransformClasses(jvmtiEnv* env,
             const jclass* classes) {
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_RetransformClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3974,16 +3877,17 @@ jvmti_RedefineClasses(jvmtiEnv* env,
             const jvmtiClassDefinition* class_definitions) {
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_RedefineClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4005,7 +3909,7 @@ jvmti_RedefineClasses(jvmtiEnv* env,
 
   //
   // Object functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetObjectSize(jvmtiEnv* env,
@@ -4018,11 +3922,12 @@ jvmti_GetObjectSize(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectSize , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4050,11 +3955,12 @@ jvmti_GetObjectHashCode(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectHashCode , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4078,16 +3984,17 @@ jvmti_GetObjectMonitorUsage(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectMonitorUsage , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4107,7 +4014,7 @@ jvmti_GetObjectMonitorUsage(jvmtiEnv* env,
 
   //
   // Field functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetFieldName(jvmtiEnv* env,
@@ -4127,11 +4034,12 @@ jvmti_GetFieldName(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4141,7 +4049,7 @@ jvmti_GetFieldName(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -4178,11 +4086,12 @@ jvmti_GetFieldDeclaringClass(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldDeclaringClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4192,7 +4101,7 @@ jvmti_GetFieldDeclaringClass(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -4232,11 +4141,12 @@ jvmti_GetFieldModifiers(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4246,7 +4156,7 @@ jvmti_GetFieldModifiers(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -4286,11 +4196,12 @@ jvmti_IsFieldSynthetic(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsFieldSynthetic , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4304,7 +4215,7 @@ jvmti_IsFieldSynthetic(jvmtiEnv* env,
   if (k_mirror == NULL) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
@@ -4330,7 +4241,7 @@ jvmti_IsFieldSynthetic(jvmtiEnv* env,
 
   //
   // Method functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetMethodName(jvmtiEnv* env,
@@ -4349,21 +4260,22 @@ jvmti_GetMethodName(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  err = jvmti_env->GetMethodName(method_oop, name_ptr, signature_ptr, generic_ptr);
+  err = jvmti_env->GetMethodName(checked_method, name_ptr, signature_ptr, generic_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4383,24 +4295,25 @@ jvmti_GetMethodDeclaringClass(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodDeclaringClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
   if (declaring_class_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetMethodDeclaringClass(method_oop, declaring_class_ptr);
+  err = jvmti_env->GetMethodDeclaringClass(checked_method, declaring_class_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4420,24 +4333,25 @@ jvmti_GetMethodModifiers(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
   if (modifiers_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetMethodModifiers(method_oop, modifiers_ptr);
+  err = jvmti_env->GetMethodModifiers(checked_method, modifiers_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4457,27 +4371,28 @@ jvmti_GetMaxLocals(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMaxLocals , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
   if (max_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetMaxLocals(method_oop, max_ptr);
+  err = jvmti_env->GetMaxLocals(checked_method, max_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4497,27 +4412,28 @@ jvmti_GetArgumentsSize(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetArgumentsSize , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
   if (size_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetArgumentsSize(method_oop, size_ptr);
+  err = jvmti_env->GetArgumentsSize(checked_method, size_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4538,11 +4454,12 @@ jvmti_GetLineNumberTable(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLineNumberTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4552,11 +4469,11 @@ jvmti_GetLineNumberTable(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
   if (entry_count_ptr == NULL) {
@@ -4565,7 +4482,7 @@ jvmti_GetLineNumberTable(jvmtiEnv* env,
   if (table_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLineNumberTable(method_oop, entry_count_ptr, table_ptr);
+  err = jvmti_env->GetLineNumberTable(checked_method, entry_count_ptr, table_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4586,21 +4503,22 @@ jvmti_GetMethodLocation(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodLocation , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
   if (start_location_ptr == NULL) {
@@ -4609,7 +4527,7 @@ jvmti_GetMethodLocation(jvmtiEnv* env,
   if (end_location_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetMethodLocation(method_oop, start_location_ptr, end_location_ptr);
+  err = jvmti_env->GetMethodLocation(checked_method, start_location_ptr, end_location_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4625,16 +4543,17 @@ jvmti_GetLocalVariableTable(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalVariableTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4644,11 +4563,11 @@ jvmti_GetLocalVariableTable(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
   if (entry_count_ptr == NULL) {
@@ -4657,7 +4576,7 @@ jvmti_GetLocalVariableTable(jvmtiEnv* env,
   if (table_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetLocalVariableTable(method_oop, entry_count_ptr, table_ptr);
+  err = jvmti_env->GetLocalVariableTable(checked_method, entry_count_ptr, table_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4678,11 +4597,12 @@ jvmti_GetBytecodes(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetBytecodes , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4692,11 +4612,11 @@ jvmti_GetBytecodes(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
   if (bytecode_count_ptr == NULL) {
@@ -4705,7 +4625,7 @@ jvmti_GetBytecodes(jvmtiEnv* env,
   if (bytecodes_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->GetBytecodes(method_oop, bytecode_count_ptr, bytecodes_ptr);
+  err = jvmti_env->GetBytecodes(checked_method, bytecode_count_ptr, bytecodes_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4725,24 +4645,25 @@ jvmti_IsMethodNative(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodNative , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
   if (is_native_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->IsMethodNative(method_oop, is_native_ptr);
+  err = jvmti_env->IsMethodNative(checked_method, is_native_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4762,11 +4683,12 @@ jvmti_IsMethodSynthetic(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodSynthetic , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4776,14 +4698,14 @@ jvmti_IsMethodSynthetic(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
   if (is_synthetic_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->IsMethodSynthetic(method_oop, is_synthetic_ptr);
+  err = jvmti_env->IsMethodSynthetic(checked_method, is_synthetic_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4803,24 +4725,25 @@ jvmti_IsMethodObsolete(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodObsolete , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == NULL) {
       return JVMTI_ERROR_INVALID_METHODID;
   }
   if (is_obsolete_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
-  err = jvmti_env->IsMethodObsolete(method_oop, is_obsolete_ptr);
+  err = jvmti_env->IsMethodObsolete(checked_method, is_obsolete_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -4843,11 +4766,12 @@ jvmti_SetNativeMethodPrefix(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetNativeMethodPrefix , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     err = jvmti_env->SetNativeMethodPrefix(prefix);
   } else {
     err = jvmti_env->SetNativeMethodPrefix(prefix);
@@ -4874,11 +4798,12 @@ jvmti_SetNativeMethodPrefixes(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetNativeMethodPrefixes , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (prefix_count < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
@@ -4900,7 +4825,7 @@ jvmti_SetNativeMethodPrefixes(jvmtiEnv* env,
 
   //
   // Raw Monitor functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_CreateRawMonitor(jvmtiEnv* env,
@@ -4930,7 +4855,8 @@ jvmti_CreateRawMonitor(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_CreateRawMonitor , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -4981,7 +4907,8 @@ jvmti_DestroyRawMonitor(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_DestroyRawMonitor , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -5177,7 +5104,8 @@ jvmti_RawMonitorNotify(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RawMonitorNotify , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -5228,7 +5156,8 @@ jvmti_RawMonitorNotifyAll(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RawMonitorNotifyAll , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -5256,7 +5185,7 @@ jvmti_RawMonitorNotifyAll(jvmtiEnv* env,
 
   //
   // JNI Function Interception functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_SetJNIFunctionTable(jvmtiEnv* env,
@@ -5272,11 +5201,12 @@ jvmti_SetJNIFunctionTable(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetJNIFunctionTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5304,11 +5234,12 @@ jvmti_GetJNIFunctionTable(jvmtiEnv* env,
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetJNIFunctionTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5324,7 +5255,7 @@ jvmti_GetJNIFunctionTable(jvmtiEnv* env,
 
   //
   // Event Management functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_SetEventCallbacks(jvmtiEnv* env,
@@ -5343,11 +5274,12 @@ jvmti_SetEventCallbacks(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetEventCallbacks , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (size_of_callbacks < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
@@ -5380,11 +5312,12 @@ jvmti_SetEventNotificationMode(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetEventNotificationMode , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, NULL);
   } else {
     err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, NULL);
@@ -5401,16 +5334,17 @@ jvmti_GenerateEvents(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GenerateEvents , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5423,7 +5357,7 @@ jvmti_GenerateEvents(jvmtiEnv* env,
 
   //
   // Extension Mechanism functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetExtensionFunctions(jvmtiEnv* env,
@@ -5446,11 +5380,12 @@ jvmti_GetExtensionFunctions(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetExtensionFunctions , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (extension_count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5492,11 +5427,12 @@ jvmti_GetExtensionEvents(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetExtensionEvents , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (extension_count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5538,11 +5474,12 @@ jvmti_SetExtensionEventCallback(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetExtensionEventCallback , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     err = jvmti_env->SetExtensionEventCallback(extension_event_index, callback);
   } else {
     err = jvmti_env->SetExtensionEventCallback(extension_event_index, callback);
@@ -5553,7 +5490,7 @@ jvmti_SetExtensionEventCallback(jvmtiEnv* env,
 
   //
   // Capability functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetPotentialCapabilities(jvmtiEnv* env,
@@ -5571,11 +5508,12 @@ jvmti_GetPotentialCapabilities(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetPotentialCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (capabilities_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5605,11 +5543,12 @@ jvmti_AddCapabilities(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_AddCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (capabilities_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5643,11 +5582,12 @@ jvmti_RelinquishCapabilities(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RelinquishCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (capabilities_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5676,11 +5616,12 @@ jvmti_GetCapabilities(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (capabilities_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5696,7 +5637,7 @@ jvmti_GetCapabilities(jvmtiEnv* env,
 
   //
   // Timers functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetCurrentThreadCpuTimerInfo(jvmtiEnv* env,
@@ -5709,7 +5650,7 @@ jvmti_GetCurrentThreadCpuTimerInfo(jvmtiEnv* env,
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || (!this_thread->is_Java_thread() && !this_thread->is_VM_thread())) {
+  if (this_thread == NULL || (!this_thread->is_Java_thread() && !this_thread->is_Named_thread())) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
   
@@ -5741,7 +5682,7 @@ jvmti_GetCurrentThreadCpuTime(jvmtiEnv* env,
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || (!this_thread->is_Java_thread() && !this_thread->is_VM_thread())) {
+  if (this_thread == NULL || (!this_thread->is_Java_thread() && !this_thread->is_Named_thread())) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
   
@@ -5771,16 +5712,17 @@ jvmti_GetThreadCpuTimerInfo(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadCpuTimerInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5808,16 +5750,17 @@ jvmti_GetThreadCpuTime(jvmtiEnv* env,
 #else 
   if(!JvmtiEnv::is_vm_live()) {
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
   if (this_thread == NULL || !this_thread->is_Java_thread()) {
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadCpuTime , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5827,20 +5770,7 @@ jvmti_GetThreadCpuTime(jvmtiEnv* env,
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      return err;
-    }
-  }
-  if (nanos_ptr == NULL) {
-      return JVMTI_ERROR_NULL_POINTER;
-  }
-  err = jvmti_env->GetThreadCpuTime(java_thread, nanos_ptr);
+  err = jvmti_env->GetThreadCpuTime(thread, nanos_ptr);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -5870,7 +5800,8 @@ jvmti_GetTimerInfo(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetTimerInfo , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -5913,7 +5844,8 @@ jvmti_GetTime(jvmtiEnv* env,
     if (!this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetTime , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -5949,11 +5881,12 @@ jvmti_GetAvailableProcessors(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetAvailableProcessors , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (processor_count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5970,7 +5903,7 @@ jvmti_GetAvailableProcessors(jvmtiEnv* env,
 
   //
   // Class Loader Search functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
@@ -5988,11 +5921,12 @@ jvmti_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_AddToBootstrapClassLoaderSearch , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (segment == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6022,11 +5956,12 @@ jvmti_AddToSystemClassLoaderSearch(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_AddToSystemClassLoaderSearch , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (segment == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6042,7 +5977,7 @@ jvmti_AddToSystemClassLoaderSearch(jvmtiEnv* env,
 
   //
   // System Properties functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetSystemProperties(jvmtiEnv* env,
@@ -6065,11 +6000,12 @@ jvmti_GetSystemProperties(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetSystemProperties , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (count_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6111,11 +6047,12 @@ jvmti_GetSystemProperty(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetSystemProperty , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (property == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6157,11 +6094,12 @@ jvmti_SetSystemProperty(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetSystemProperty , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (property == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6178,7 +6116,7 @@ jvmti_SetSystemProperty(jvmtiEnv* env,
 
   //
   // General functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmti_GetPhase(jvmtiEnv* env,
@@ -6194,11 +6132,12 @@ jvmti_GetPhase(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetPhase , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (phase_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6225,11 +6164,12 @@ jvmti_DisposeEnvironment(jvmtiEnv* env) {
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_DisposeEnvironment , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     err = jvmti_env->DisposeEnvironment();
   } else {
     err = jvmti_env->DisposeEnvironment();
@@ -6315,11 +6255,12 @@ jvmti_GetVersionNumber(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetVersionNumber , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (version_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6352,11 +6293,12 @@ jvmti_GetErrorName(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetErrorName , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (name_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6390,11 +6332,12 @@ jvmti_SetVerboseFlag(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetVerboseFlag , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     err = jvmti_env->SetVerboseFlag(flag, value);
   } else {
     err = jvmti_env->SetVerboseFlag(flag, value);
@@ -6421,11 +6364,12 @@ jvmti_GetJLocationFormat(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetJLocationFormat , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (format_ptr == NULL) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6442,11 +6386,11 @@ jvmti_GetJLocationFormat(jvmtiEnv* env,
 
   //
   // Heap Monitoring functions
-  // 
+  //
 
 static jvmtiError JNICALL
-jvmti_SetHeapSamplingRate(jvmtiEnv* env,
-            jint sampling_rate) {
+jvmti_SetHeapSamplingInterval(jvmtiEnv* env,
+            jint sampling_interval) {
 
 #if !INCLUDE_JVMTI 
   return JVMTI_ERROR_NOT_AVAILABLE; 
@@ -6468,14 +6412,15 @@ jvmti_SetHeapSamplingRate(jvmtiEnv* env,
     if (this_thread == NULL || !this_thread->is_Java_thread()) {
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
-    VM_ENTRY_BASE(jvmtiError, jvmti_SetHeapSamplingRate , current_thread)
+    VM_ENTRY_BASE(jvmtiError, jvmti_SetHeapSamplingInterval , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    err = jvmti_env->SetHeapSamplingRate(sampling_rate);
+    PreserveExceptionMark __em(this_thread);
+    err = jvmti_env->SetHeapSamplingInterval(sampling_interval);
   } else {
-    err = jvmti_env->SetHeapSamplingRate(sampling_rate);
+    err = jvmti_env->SetHeapSamplingInterval(sampling_interval);
   }
   return err;
 #endif // INCLUDE_JVMTI
@@ -6719,10 +6664,10 @@ struct jvmtiInterface_1_ jvmti_Interface = {
       jvmti_IterateThroughHeap,
                               /*   117 :  RESERVED */
       NULL,
-                              /*   118 :  RESERVED */
-      NULL,
-                              /*   119 :  RESERVED */
-      NULL,
+                              /*   118 : Suspend All Virtual Threads */
+      jvmti_SuspendAllVirtualThreads,
+                              /*   119 : Resume All Virtual Threads */
+      jvmti_ResumeAllVirtualThreads,
                               /*   120 : Set JNI Function Table */
       jvmti_SetJNIFunctionTable,
                               /*   121 : Get JNI Function Table */
@@ -6795,7 +6740,7 @@ struct jvmtiInterface_1_ jvmti_Interface = {
       jvmti_GetObjectSize,
                               /*   155 : Get Local Instance */
       jvmti_GetLocalInstance,
-                              /*   156 : Set Heap Sampling Rate */
-      jvmti_SetHeapSamplingRate
+                              /*   156 : Set Heap Sampling Interval */
+      jvmti_SetHeapSamplingInterval
 };
 #endif // INCLUDE_JVMTI

@@ -1,7 +1,7 @@
 #line 1 "ad_ppc_misc.cpp"
 //
-// Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2012, 2017 SAP SE. All rights reserved.
+// Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012, 2022 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -77,11 +77,13 @@ const RegMask &loadToc_loNode::out_RegMask() const { return (BITS64_REG_RW_mask(
 const RegMask &loadConI16Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &loadConIhi16Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &loadConI32_lo16Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &loadConI32Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &loadConI_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &loadConL16Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &loadConL32hi16Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &loadConL32_lo16Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &loadConL32_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &loadConL34Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &loadConLhighest16_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &loadConLNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &loadConL_hiNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
@@ -120,14 +122,14 @@ const RegMask &storeI_convL2INode::out_RegMask() const { return (RegMask::Empty)
 const RegMask &storeLNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeA8BNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeV16Node::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &reinterpretLNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &reinterpretXNode::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &storeNNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeNKlassNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storePNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeFNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeDNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &storeCM_CMSNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &storeCM_CMS_ExExNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &storeCM_G1Node::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &storeCMNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &encodeP_shiftNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &encodeP_subNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &cond_sub_baseNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -164,6 +166,7 @@ const RegMask &membar_acquire_lockNode::out_RegMask() const { return (RegMask::E
 const RegMask &membar_releaseNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &membar_release_0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &membar_storestoreNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &membar_storestore_0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &membar_release_lockNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &membar_volatileNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &membar_CPUOrderNode::out_RegMask() const { return (RegMask::Empty); }
@@ -181,9 +184,6 @@ const RegMask &cmovP_regNode::out_RegMask() const { return (BITS64_REG_RW_mask()
 const RegMask &cmovP_immNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &cmovF_regNode::out_RegMask() const { return (FLT_REG_mask()); }
 const RegMask &cmovD_regNode::out_RegMask() const { return (DBL_REG_mask()); }
-const RegMask &storeLConditional_regP_regL_regLNode::out_RegMask() const { return (INT_FLAGS_mask()); }
-const RegMask &storePConditional_regP_regP_regPNode::out_RegMask() const { return (INT_FLAGS_CR0_mask()); }
-const RegMask &loadPLockedNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &compareAndSwapB_regP_regI_regINode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &compareAndSwapB4_regP_regI_regINode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &compareAndSwapS_regP_regI_regINode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -246,6 +246,7 @@ const RegMask &tree_addI_addI_addI_reg_reg_Ex_0Node::out_RegMask() const { retur
 const RegMask &tree_addI_addI_addI_reg_reg_Ex_2Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &addI_reg_imm16Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &addI_reg_immhi16Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &addI_reg_imm32Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &addL_reg_regNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &addL_reg_reg_2Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &tree_addL_addL_addL_reg_reg_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
@@ -255,9 +256,11 @@ const RegMask &tree_addL_addL_addL_reg_reg_Ex_2Node::out_RegMask() const { retur
 const RegMask &addI_regL_regLNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &addL_reg_imm16Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &addL_reg_immhi16Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &addL_reg_imm34Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &addP_reg_regNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &addP_reg_imm16Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &addP_reg_immhi16Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &addP_reg_imm34Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &subI_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &subI_imm16_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &signmask32I_regINode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -267,6 +270,7 @@ const RegMask &subL_reg_regNode::out_RegMask() const { return (BITS64_REG_RW_mas
 const RegMask &subI_regL_regLNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &signmask64I_regLNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &signmask64L_regLNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &absL_reg_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &negL_reg_regNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &negI_con0_regLNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &mulI_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -284,6 +288,10 @@ const RegMask &cmovL_bne_negL_regNode::out_RegMask() const { return (BITS64_REG_
 const RegMask &divL_reg_reg_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &modI_reg_reg_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &modL_reg_reg_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &udivI_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &umodI_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &udivL_reg_regNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &umodL_reg_regNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &maskI_reg_immNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &lShiftI_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &lShiftI_reg_reg_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -403,6 +411,11 @@ const RegMask &castX2PNode::out_RegMask() const { return (BITS64_REG_RW_mask());
 const RegMask &castP2XNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &castPPNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &castIINode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &castLLNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &castFFNode::out_RegMask() const { return (FLT_REG_mask()); }
+const RegMask &castDDNode::out_RegMask() const { return (DBL_REG_mask()); }
+const RegMask &castVV8Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &castVV16Node::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &checkCastPPNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &convI2Bool_reg__cntlz_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &convI2Bool_reg__cmoveNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -465,9 +478,7 @@ const RegMask &cmpUL_reg_regNode::out_RegMask() const { return (INT_FLAGS_mask()
 const RegMask &cmpUL_reg_imm16Node::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &testL_reg_regNode::out_RegMask() const { return (INT_FLAGS_CR0_mask()); }
 const RegMask &testL_reg_immNode::out_RegMask() const { return (INT_FLAGS_CR0_mask()); }
-const RegMask &cmovI_conIvalueMinus1_conIvalue1Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
-const RegMask &cmovI_conIvalueMinus1_conIvalue0_conIvalue1_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
-const RegMask &cmpL3_reg_reg_ExExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmpL3_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &rangeCheck_iReg_uimm15Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &rangeCheck_iReg_iRegNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &rangeCheck_uimm15_iRegNode::out_RegMask() const { return (RegMask::Empty); }
@@ -483,17 +494,20 @@ const RegMask &cmpP_reg_imm16Node::out_RegMask() const { return (INT_FLAGS_mask(
 const RegMask &cmpFUnordered_reg_regNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &cmov_bns_lessNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &cmpF_reg_reg_ExNode::out_RegMask() const { return (INT_FLAGS_mask()); }
-const RegMask &cmpF3_reg_reg_ExExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmpF3_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &cmpDUnordered_reg_regNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &cmpD_reg_reg_ExNode::out_RegMask() const { return (INT_FLAGS_mask()); }
-const RegMask &cmpD3_reg_reg_ExExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmpD3_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmprb_Digit_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmprb_LowerCase_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmprb_UpperCase_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmprb_Whitespace_reg_regNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &cmprb_Whitespace_reg_reg_prefixedNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &branchNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &branchConNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &branchConFarNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &branchConSchedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &branchLoopEndNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &branchLoopEndFarNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &branchLoopEndSchedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &partialSubtypeCheckNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &cmpFastLockNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &cmpFastLock_tmNode::out_RegMask() const { return (INT_FLAGS_mask()); }
@@ -519,6 +533,7 @@ const RegMask &indexOf_imm1_UNode::out_RegMask() const { return (BITS32_REG_RW_m
 const RegMask &indexOf_imm1_LNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &indexOf_imm1_ULNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &indexOfChar_UNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &indexOfChar_LNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &indexOf_imm_UNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &indexOf_imm_LNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &indexOf_imm_ULNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -527,8 +542,9 @@ const RegMask &indexOf_LNode::out_RegMask() const { return (BITS32_REG_RW_mask()
 const RegMask &indexOf_ULNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &string_compressNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &string_inflateNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &has_negativesNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &count_positivesNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &encode_iso_arrayNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &encode_ascii_arrayNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &minI_reg_reg_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &minI_reg_reg_iselNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &maxI_reg_reg_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
@@ -539,23 +555,36 @@ const RegMask &countLeadingZerosINode::out_RegMask() const { return (BITS32_REG_
 const RegMask &countLeadingZerosLNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &countLeadingZerosPNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &countTrailingZerosI_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &countTrailingZerosI_cnttzwNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &countTrailingZerosL_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &countTrailingZerosL_cnttzdNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &insrwi_aNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &insrwiNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &bytes_reverse_int_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &bytes_reverse_int_vecNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &bytes_reverse_intNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &bytes_reverse_long_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &bytes_reverse_long_vecNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &bytes_reverse_longNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &bytes_reverse_ushort_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &bytes_reverse_ushortNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &bytes_reverse_short_ExNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &bytes_reverse_shortNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &loadI_reversedNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &loadI_reversed_acquireNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &loadL_reversedNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &loadL_reversed_acquireNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &loadUS_reversedNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &loadUS_reversed_acquireNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &loadS_reversedNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &loadS_reversed_acquireNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
 const RegMask &storeI_reversedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeL_reversedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeUS_reversedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeS_reversedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &mtvsrwzNode::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &xxspltwNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &xscvdpspn_regFNode::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &repl32Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &repl48Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &repl56Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
@@ -580,6 +609,41 @@ const RegMask &repl4I_immIminus1Node::out_RegMask() const { return (VS_REG_mask(
 const RegMask &repl2F_reg_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &repl2F_immF_ExNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 const RegMask &repl2F_immF0Node::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &vadd16B_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vadd8S_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vadd4I_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vadd4F_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vadd2L_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vadd2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsub16B_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsub8S_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsub4I_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsub4F_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsub2L_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsub2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vmul8S_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vmul4I_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vmul4F_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vmul2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vdiv4F_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vdiv2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vabs4F_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vabs2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &roundD_regNode::out_RegMask() const { return (DBL_REG_mask()); }
+const RegMask &vround2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vneg4F_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vneg2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsqrt4F_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vsqrt2D_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vpopcnt_regNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma4FNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma4F_neg1Node::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma4F_neg1_0Node::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma4F_neg2Node::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma2DNode::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma2D_neg1Node::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma2D_neg1_0Node::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &vfma2D_neg2Node::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &overflowAddL_reg_regNode::out_RegMask() const { return (INT_FLAGS_CR0_mask()); }
 const RegMask &overflowSubL_reg_regNode::out_RegMask() const { return (INT_FLAGS_CR0_mask()); }
 const RegMask &overflowNegL_regNode::out_RegMask() const { return (INT_FLAGS_CR0_mask()); }
@@ -588,8 +652,7 @@ const RegMask &repl4F_reg_ExNode::out_RegMask() const { return (VS_REG_mask()); 
 const RegMask &repl4F_immF_ExNode::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &repl4F_immF0Node::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &repl2D_reg_ExNode::out_RegMask() const { return (VS_REG_mask()); }
-const RegMask &repl2D_immI0Node::out_RegMask() const { return (VS_REG_mask()); }
-const RegMask &repl2D_immIminus1Node::out_RegMask() const { return (VS_REG_mask()); }
+const RegMask &repl2D_immD0Node::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &mtvsrdNode::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &xxspltdNode::out_RegMask() const { return (VS_REG_mask()); }
 const RegMask &xxpermdiNode::out_RegMask() const { return (VS_REG_mask()); }
@@ -620,6 +683,30 @@ const RegMask &fpNop1Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &brNop0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &brNop1Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &brNop2Node::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &cacheWBNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &cacheWBPreSyncNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &cacheWBPostSyncNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &compareAndSwapP_shenandoahNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndSwapP_shenandoah_0Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndSwapN_shenandoahNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndSwapN_shenandoah_0Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndSwapP_acq_shenandoahNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndSwapP_acq_shenandoah_0Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndSwapN_acq_shenandoahNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndSwapN_acq_shenandoah_0Node::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndExchangeP_shenandoahNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &compareAndExchangeN_shenandoahNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &compareAndExchangePAcq_shenandoahNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &compareAndExchangeNAcq_shenandoahNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &zLoadPNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &zLoadP_acqNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &zCompareAndSwapPNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &zCompareAndSwapP_acqNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &zCompareAndSwapPWeakNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &zCompareAndSwapPWeak_acqNode::out_RegMask() const { return (BITS32_REG_RW_mask()); }
+const RegMask &zCompareAndExchangePNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &zCompareAndExchangeP_acqNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
+const RegMask &zGetAndSetPNode::out_RegMask() const { return (BITS64_REG_RW_mask()); }
 // Check consistency of C++ compilation with ADLC options:
 // Check adlc -DLINUX=1
 #ifndef LINUX

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2002, 2018, Oracle and/or its affiliates. All rights reserved.
+ Copyright (c) 2002, 2022, Oracle and/or its affiliates. All rights reserved.
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 
  This code is free software; you can redistribute it and/or modify it
@@ -32,7 +32,7 @@
 #include "prims/jvmtiImpl.hpp"
 
 enum {
-    JVMTI_INTERNAL_CAPABILITY_COUNT = 44
+    JVMTI_INTERNAL_CAPABILITY_COUNT = 45
 };
 
 
@@ -56,18 +56,20 @@ public:
     jvmtiError GetThreadState(jthread thread, jint* thread_state_ptr);
     jvmtiError GetCurrentThread(jthread* thread_ptr);
     jvmtiError GetAllThreads(jint* threads_count_ptr, jthread** threads_ptr);
-    jvmtiError SuspendThread(JavaThread* java_thread);
+    jvmtiError SuspendThread(jthread thread);
     jvmtiError SuspendThreadList(jint request_count, const jthread* request_list, jvmtiError* results);
-    jvmtiError ResumeThread(JavaThread* java_thread);
+    jvmtiError SuspendAllVirtualThreads(jint except_count, const jthread* except_list);
+    jvmtiError ResumeThread(jthread thread);
     jvmtiError ResumeThreadList(jint request_count, const jthread* request_list, jvmtiError* results);
-    jvmtiError StopThread(JavaThread* java_thread, jobject exception);
+    jvmtiError ResumeAllVirtualThreads(jint except_count, const jthread* except_list);
+    jvmtiError StopThread(jthread thread, jobject exception);
     jvmtiError InterruptThread(jthread thread);
     jvmtiError GetThreadInfo(jthread thread, jvmtiThreadInfo* info_ptr);
-    jvmtiError GetOwnedMonitorInfo(JavaThread* java_thread, jint* owned_monitor_count_ptr, jobject** owned_monitors_ptr);
-    jvmtiError GetOwnedMonitorStackDepthInfo(JavaThread* java_thread, jint* monitor_info_count_ptr, jvmtiMonitorStackDepthInfo** monitor_info_ptr);
-    jvmtiError GetCurrentContendedMonitor(JavaThread* java_thread, jobject* monitor_ptr);
+    jvmtiError GetOwnedMonitorInfo(jthread thread, jint* owned_monitor_count_ptr, jobject** owned_monitors_ptr);
+    jvmtiError GetOwnedMonitorStackDepthInfo(jthread thread, jint* monitor_info_count_ptr, jvmtiMonitorStackDepthInfo** monitor_info_ptr);
+    jvmtiError GetCurrentContendedMonitor(jthread thread, jobject* monitor_ptr);
     jvmtiError RunAgentThread(jthread thread, jvmtiStartFunction proc, const void* arg, jint priority);
-    jvmtiError SetThreadLocalStorage(JavaThread* java_thread, const void* data);
+    jvmtiError SetThreadLocalStorage(jthread thread, const void* data);
     jvmtiError GetThreadLocalStorage(jthread thread, void** data_ptr);
 
   // Thread Group functions
@@ -76,21 +78,21 @@ public:
     jvmtiError GetThreadGroupChildren(jthreadGroup group, jint* thread_count_ptr, jthread** threads_ptr, jint* group_count_ptr, jthreadGroup** groups_ptr);
 
   // Stack Frame functions
-    jvmtiError GetStackTrace(JavaThread* java_thread, jint start_depth, jint max_frame_count, jvmtiFrameInfo* frame_buffer, jint* count_ptr);
+    jvmtiError GetStackTrace(jthread thread, jint start_depth, jint max_frame_count, jvmtiFrameInfo* frame_buffer, jint* count_ptr);
     jvmtiError GetAllStackTraces(jint max_frame_count, jvmtiStackInfo** stack_info_ptr, jint* thread_count_ptr);
     jvmtiError GetThreadListStackTraces(jint thread_count, const jthread* thread_list, jint max_frame_count, jvmtiStackInfo** stack_info_ptr);
-    jvmtiError GetFrameCount(JavaThread* java_thread, jint* count_ptr);
-    jvmtiError PopFrame(JavaThread* java_thread);
-    jvmtiError GetFrameLocation(JavaThread* java_thread, jint depth, jmethodID* method_ptr, jlocation* location_ptr);
-    jvmtiError NotifyFramePop(JavaThread* java_thread, jint depth);
+    jvmtiError GetFrameCount(jthread thread, jint* count_ptr);
+    jvmtiError PopFrame(jthread thread);
+    jvmtiError GetFrameLocation(jthread thread, jint depth, jmethodID* method_ptr, jlocation* location_ptr);
+    jvmtiError NotifyFramePop(jthread thread, jint depth);
 
   // Force Early Return functions
-    jvmtiError ForceEarlyReturnObject(JavaThread* java_thread, jobject value);
-    jvmtiError ForceEarlyReturnInt(JavaThread* java_thread, jint value);
-    jvmtiError ForceEarlyReturnLong(JavaThread* java_thread, jlong value);
-    jvmtiError ForceEarlyReturnFloat(JavaThread* java_thread, jfloat value);
-    jvmtiError ForceEarlyReturnDouble(JavaThread* java_thread, jdouble value);
-    jvmtiError ForceEarlyReturnVoid(JavaThread* java_thread);
+    jvmtiError ForceEarlyReturnObject(jthread thread, jobject value);
+    jvmtiError ForceEarlyReturnInt(jthread thread, jint value);
+    jvmtiError ForceEarlyReturnLong(jthread thread, jlong value);
+    jvmtiError ForceEarlyReturnFloat(jthread thread, jfloat value);
+    jvmtiError ForceEarlyReturnDouble(jthread thread, jdouble value);
+    jvmtiError ForceEarlyReturnVoid(jthread thread);
 
   // Heap functions
     jvmtiError FollowReferences(jint heap_filter, jclass klass, jobject initial_object, const jvmtiHeapCallbacks* callbacks, const void* user_data);
@@ -107,21 +109,21 @@ public:
     jvmtiError IterateOverInstancesOfClass(oop k_mirror, jvmtiHeapObjectFilter object_filter, jvmtiHeapObjectCallback heap_object_callback, const void* user_data);
 
   // Local Variable functions
-    jvmtiError GetLocalObject(JavaThread* java_thread, jint depth, jint slot, jobject* value_ptr);
-    jvmtiError GetLocalInstance(JavaThread* java_thread, jint depth, jobject* value_ptr);
-    jvmtiError GetLocalInt(JavaThread* java_thread, jint depth, jint slot, jint* value_ptr);
-    jvmtiError GetLocalLong(JavaThread* java_thread, jint depth, jint slot, jlong* value_ptr);
-    jvmtiError GetLocalFloat(JavaThread* java_thread, jint depth, jint slot, jfloat* value_ptr);
-    jvmtiError GetLocalDouble(JavaThread* java_thread, jint depth, jint slot, jdouble* value_ptr);
-    jvmtiError SetLocalObject(JavaThread* java_thread, jint depth, jint slot, jobject value);
-    jvmtiError SetLocalInt(JavaThread* java_thread, jint depth, jint slot, jint value);
-    jvmtiError SetLocalLong(JavaThread* java_thread, jint depth, jint slot, jlong value);
-    jvmtiError SetLocalFloat(JavaThread* java_thread, jint depth, jint slot, jfloat value);
-    jvmtiError SetLocalDouble(JavaThread* java_thread, jint depth, jint slot, jdouble value);
+    jvmtiError GetLocalObject(jthread thread, jint depth, jint slot, jobject* value_ptr);
+    jvmtiError GetLocalInstance(jthread thread, jint depth, jobject* value_ptr);
+    jvmtiError GetLocalInt(jthread thread, jint depth, jint slot, jint* value_ptr);
+    jvmtiError GetLocalLong(jthread thread, jint depth, jint slot, jlong* value_ptr);
+    jvmtiError GetLocalFloat(jthread thread, jint depth, jint slot, jfloat* value_ptr);
+    jvmtiError GetLocalDouble(jthread thread, jint depth, jint slot, jdouble* value_ptr);
+    jvmtiError SetLocalObject(jthread thread, jint depth, jint slot, jobject value);
+    jvmtiError SetLocalInt(jthread thread, jint depth, jint slot, jint value);
+    jvmtiError SetLocalLong(jthread thread, jint depth, jint slot, jlong value);
+    jvmtiError SetLocalFloat(jthread thread, jint depth, jint slot, jfloat value);
+    jvmtiError SetLocalDouble(jthread thread, jint depth, jint slot, jdouble value);
 
   // Breakpoint functions
-    jvmtiError SetBreakpoint(Method* method_oop, jlocation location);
-    jvmtiError ClearBreakpoint(Method* method_oop, jlocation location);
+    jvmtiError SetBreakpoint(Method* checked_method, jlocation location);
+    jvmtiError ClearBreakpoint(Method* checked_method, jlocation location);
 
   // Watched Field functions
     jvmtiError SetFieldAccessWatch(fieldDescriptor* fdesc_ptr);
@@ -171,18 +173,18 @@ public:
     jvmtiError IsFieldSynthetic(fieldDescriptor* fdesc_ptr, jboolean* is_synthetic_ptr);
 
   // Method functions
-    jvmtiError GetMethodName(Method* method_oop, char** name_ptr, char** signature_ptr, char** generic_ptr);
-    jvmtiError GetMethodDeclaringClass(Method* method_oop, jclass* declaring_class_ptr);
-    jvmtiError GetMethodModifiers(Method* method_oop, jint* modifiers_ptr);
-    jvmtiError GetMaxLocals(Method* method_oop, jint* max_ptr);
-    jvmtiError GetArgumentsSize(Method* method_oop, jint* size_ptr);
-    jvmtiError GetLineNumberTable(Method* method_oop, jint* entry_count_ptr, jvmtiLineNumberEntry** table_ptr);
-    jvmtiError GetMethodLocation(Method* method_oop, jlocation* start_location_ptr, jlocation* end_location_ptr);
-    jvmtiError GetLocalVariableTable(Method* method_oop, jint* entry_count_ptr, jvmtiLocalVariableEntry** table_ptr);
-    jvmtiError GetBytecodes(Method* method_oop, jint* bytecode_count_ptr, unsigned char** bytecodes_ptr);
-    jvmtiError IsMethodNative(Method* method_oop, jboolean* is_native_ptr);
-    jvmtiError IsMethodSynthetic(Method* method_oop, jboolean* is_synthetic_ptr);
-    jvmtiError IsMethodObsolete(Method* method_oop, jboolean* is_obsolete_ptr);
+    jvmtiError GetMethodName(Method* checked_method, char** name_ptr, char** signature_ptr, char** generic_ptr);
+    jvmtiError GetMethodDeclaringClass(Method* checked_method, jclass* declaring_class_ptr);
+    jvmtiError GetMethodModifiers(Method* checked_method, jint* modifiers_ptr);
+    jvmtiError GetMaxLocals(Method* checked_method, jint* max_ptr);
+    jvmtiError GetArgumentsSize(Method* checked_method, jint* size_ptr);
+    jvmtiError GetLineNumberTable(Method* checked_method, jint* entry_count_ptr, jvmtiLineNumberEntry** table_ptr);
+    jvmtiError GetMethodLocation(Method* checked_method, jlocation* start_location_ptr, jlocation* end_location_ptr);
+    jvmtiError GetLocalVariableTable(Method* checked_method, jint* entry_count_ptr, jvmtiLocalVariableEntry** table_ptr);
+    jvmtiError GetBytecodes(Method* checked_method, jint* bytecode_count_ptr, unsigned char** bytecodes_ptr);
+    jvmtiError IsMethodNative(Method* checked_method, jboolean* is_native_ptr);
+    jvmtiError IsMethodSynthetic(Method* checked_method, jboolean* is_synthetic_ptr);
+    jvmtiError IsMethodObsolete(Method* checked_method, jboolean* is_obsolete_ptr);
     jvmtiError SetNativeMethodPrefix(const char* prefix);
     jvmtiError SetNativeMethodPrefixes(jint prefix_count, char** prefixes);
 
@@ -219,7 +221,7 @@ public:
     jvmtiError GetCurrentThreadCpuTimerInfo(jvmtiTimerInfo* info_ptr);
     jvmtiError GetCurrentThreadCpuTime(jlong* nanos_ptr);
     jvmtiError GetThreadCpuTimerInfo(jvmtiTimerInfo* info_ptr);
-    jvmtiError GetThreadCpuTime(JavaThread* java_thread, jlong* nanos_ptr);
+    jvmtiError GetThreadCpuTime(jthread thread, jlong* nanos_ptr);
     jvmtiError GetTimerInfo(jvmtiTimerInfo* info_ptr);
     jvmtiError GetTime(jlong* nanos_ptr);
     jvmtiError GetAvailableProcessors(jint* processor_count_ptr);
@@ -244,7 +246,7 @@ public:
     jvmtiError GetJLocationFormat(jvmtiJlocationFormat* format_ptr);
 
   // Heap Monitoring functions
-    jvmtiError SetHeapSamplingRate(jint sampling_rate);
+    jvmtiError SetHeapSamplingInterval(jint sampling_interval);
 
 };
 

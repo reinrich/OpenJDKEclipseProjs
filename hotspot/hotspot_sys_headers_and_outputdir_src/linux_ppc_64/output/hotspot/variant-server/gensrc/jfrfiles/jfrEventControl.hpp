@@ -17,29 +17,41 @@ struct jfrNativeEventSetting {
   jlong  cutoff_ticks;
   u1     stacktrace;
   u1     enabled;
-  u1     pad[6]; // Because GCC on linux ia32 at least tries to pack this.
+  u1     large;
+  u1     pad[5]; // Because GCC on linux ia32 at least tries to pack this.
 };
 
 union JfrNativeSettings {
   // Array version.
-  jfrNativeEventSetting bits[MaxJfrEventId];
+  jfrNativeEventSetting bits[NUMBER_OF_EVENTS];
   // Then, to make it easy to debug,
   // add named struct members also.
   struct {
-    jfrNativeEventSetting pad[NUM_RESERVED_EVENTS];
+    jfrNativeEventSetting pad[NUMBER_OF_RESERVED_EVENTS];
+    jfrNativeEventSetting Duration;
+    jfrNativeEventSetting Instant;
+    jfrNativeEventSetting Value;
+    jfrNativeEventSetting Text;
+    jfrNativeEventSetting ZThreadDebug;
     jfrNativeEventSetting ThreadStart;
     jfrNativeEventSetting ThreadEnd;
-    jfrNativeEventSetting ThreadSleep;
     jfrNativeEventSetting ThreadPark;
     jfrNativeEventSetting JavaMonitorEnter;
     jfrNativeEventSetting JavaMonitorWait;
     jfrNativeEventSetting JavaMonitorInflate;
-    jfrNativeEventSetting BiasedLockRevocation;
-    jfrNativeEventSetting BiasedLockSelfRevocation;
-    jfrNativeEventSetting BiasedLockClassRevocation;
+    jfrNativeEventSetting SyncOnValueBasedClass;
+    jfrNativeEventSetting ContinuationFreeze;
+    jfrNativeEventSetting ContinuationThaw;
+    jfrNativeEventSetting ContinuationFreezeFast;
+    jfrNativeEventSetting ContinuationFreezeSlow;
+    jfrNativeEventSetting ContinuationThawFast;
+    jfrNativeEventSetting ContinuationThawSlow;
     jfrNativeEventSetting ReservedStackActivation;
     jfrNativeEventSetting ClassLoad;
     jfrNativeEventSetting ClassDefine;
+    jfrNativeEventSetting ClassRedefinition;
+    jfrNativeEventSetting RedefineClasses;
+    jfrNativeEventSetting RetransformClasses;
     jfrNativeEventSetting ClassUnload;
     jfrNativeEventSetting IntFlagChanged;
     jfrNativeEventSetting UnsignedIntFlagChanged;
@@ -60,6 +72,7 @@ union JfrNativeSettings {
     jfrNativeEventSetting PSHeapSummary;
     jfrNativeEventSetting G1HeapSummary;
     jfrNativeEventSetting GarbageCollection;
+    jfrNativeEventSetting SystemGC;
     jfrNativeEventSetting ParallelOldGarbageCollection;
     jfrNativeEventSetting YoungGarbageCollection;
     jfrNativeEventSetting OldGarbageCollection;
@@ -79,25 +92,28 @@ union JfrNativeSettings {
     jfrNativeEventSetting PromotionFailed;
     jfrNativeEventSetting EvacuationFailed;
     jfrNativeEventSetting ConcurrentModeFailure;
+    jfrNativeEventSetting GCCPUTime;
     jfrNativeEventSetting GCPhasePause;
     jfrNativeEventSetting GCPhasePauseLevel1;
     jfrNativeEventSetting GCPhasePauseLevel2;
     jfrNativeEventSetting GCPhasePauseLevel3;
     jfrNativeEventSetting GCPhasePauseLevel4;
     jfrNativeEventSetting GCPhaseConcurrent;
+    jfrNativeEventSetting GCPhaseConcurrentLevel1;
+    jfrNativeEventSetting GCPhaseParallel;
     jfrNativeEventSetting AllocationRequiringGC;
     jfrNativeEventSetting TenuringDistribution;
     jfrNativeEventSetting G1HeapRegionTypeChange;
+    jfrNativeEventSetting JITRestart;
     jfrNativeEventSetting Compilation;
     jfrNativeEventSetting CompilerPhase;
     jfrNativeEventSetting CompilationFailure;
     jfrNativeEventSetting CalleeMethod;
     jfrNativeEventSetting CompilerInlining;
-    jfrNativeEventSetting SweepCodeCache;
     jfrNativeEventSetting CodeCacheFull;
+    jfrNativeEventSetting Deoptimization;
     jfrNativeEventSetting SafepointBegin;
     jfrNativeEventSetting SafepointStateSynchronization;
-    jfrNativeEventSetting SafepointWaitBlocked;
     jfrNativeEventSetting SafepointCleanup;
     jfrNativeEventSetting SafepointCleanupTask;
     jfrNativeEventSetting SafepointEnd;
@@ -105,11 +121,15 @@ union JfrNativeSettings {
     jfrNativeEventSetting Shutdown;
     jfrNativeEventSetting ObjectAllocationInNewTLAB;
     jfrNativeEventSetting ObjectAllocationOutsideTLAB;
+    jfrNativeEventSetting ObjectAllocationSample;
     jfrNativeEventSetting OldObjectSample;
+    jfrNativeEventSetting NativeMemoryUsage;
+    jfrNativeEventSetting NativeMemoryUsageTotal;
     jfrNativeEventSetting DumpReason;
     jfrNativeEventSetting DataLoss;
     jfrNativeEventSetting JVMInformation;
     jfrNativeEventSetting OSInformation;
+    jfrNativeEventSetting VirtualizationInformation;
     jfrNativeEventSetting InitialSystemProperty;
     jfrNativeEventSetting InitialEnvironmentVariable;
     jfrNativeEventSetting SystemProcess;
@@ -122,6 +142,8 @@ union JfrNativeSettings {
     jfrNativeEventSetting JavaThreadStatistics;
     jfrNativeEventSetting ClassLoadingStatistics;
     jfrNativeEventSetting ClassLoaderStatistics;
+    jfrNativeEventSetting SymbolTableStatistics;
+    jfrNativeEventSetting StringTableStatistics;
     jfrNativeEventSetting ThreadAllocationStatistics;
     jfrNativeEventSetting PhysicalMemory;
     jfrNativeEventSetting ExecutionSample;
@@ -134,8 +156,6 @@ union JfrNativeSettings {
     jfrNativeEventSetting CompilerConfiguration;
     jfrNativeEventSetting CodeCacheStatistics;
     jfrNativeEventSetting CodeCacheConfiguration;
-    jfrNativeEventSetting CodeSweeperStatistics;
-    jfrNativeEventSetting CodeSweeperConfiguration;
     jfrNativeEventSetting IntFlag;
     jfrNativeEventSetting UnsignedIntFlag;
     jfrNativeEventSetting LongFlag;
@@ -150,10 +170,21 @@ union JfrNativeSettings {
     jfrNativeEventSetting GCTLABConfiguration;
     jfrNativeEventSetting GCHeapConfiguration;
     jfrNativeEventSetting YoungGenerationConfiguration;
+    jfrNativeEventSetting ZAllocationStall;
     jfrNativeEventSetting ZPageAllocation;
-    jfrNativeEventSetting ZThreadPhase;
+    jfrNativeEventSetting ZRelocationSet;
+    jfrNativeEventSetting ZRelocationSetGroup;
     jfrNativeEventSetting ZStatisticsCounter;
     jfrNativeEventSetting ZStatisticsSampler;
+    jfrNativeEventSetting ZThreadPhase;
+    jfrNativeEventSetting ZUncommit;
+    jfrNativeEventSetting ZUnmap;
+    jfrNativeEventSetting ShenandoahHeapRegionStateChange;
+    jfrNativeEventSetting ShenandoahHeapRegionInformation;
+    jfrNativeEventSetting Flush;
+    jfrNativeEventSetting HeapDump;
+    jfrNativeEventSetting GCLocker;
+    jfrNativeEventSetting FinalizerStatistics;
     jfrNativeEventSetting StackFrame;
   } ev;
 };

@@ -8,10 +8,22 @@
 #include "jfrfiles/jfrEventIds.hpp"
 #include "memory/allocation.hpp"
 
+enum PeriodicType {BEGIN_CHUNK, INTERVAL, END_CHUNK};
+
 class JfrPeriodicEventSet : public AllStatic {
  public:
-  static void requestEvent(JfrEventId id) {
+  static void requestEvent(JfrEventId id, jlong timestamp, PeriodicType periodicType) {
+    _timestamp = Ticks(timestamp);
+    _type = periodicType;
     switch(id) {
+  
+      case JfrNativeMemoryUsageEvent:
+        requestNativeMemoryUsage();
+        break;
+  
+      case JfrNativeMemoryUsageTotalEvent:
+        requestNativeMemoryUsageTotal();
+        break;
   
       case JfrJVMInformationEvent:
         requestJVMInformation();
@@ -19,6 +31,10 @@ class JfrPeriodicEventSet : public AllStatic {
   
       case JfrOSInformationEvent:
         requestOSInformation();
+        break;
+  
+      case JfrVirtualizationInformationEvent:
+        requestVirtualizationInformation();
         break;
   
       case JfrInitialSystemPropertyEvent:
@@ -69,6 +85,14 @@ class JfrPeriodicEventSet : public AllStatic {
         requestClassLoaderStatistics();
         break;
   
+      case JfrSymbolTableStatisticsEvent:
+        requestSymbolTableStatistics();
+        break;
+  
+      case JfrStringTableStatisticsEvent:
+        requestStringTableStatistics();
+        break;
+  
       case JfrThreadAllocationStatisticsEvent:
         requestThreadAllocationStatistics();
         break;
@@ -115,14 +139,6 @@ class JfrPeriodicEventSet : public AllStatic {
   
       case JfrCodeCacheConfigurationEvent:
         requestCodeCacheConfiguration();
-        break;
-  
-      case JfrCodeSweeperStatisticsEvent:
-        requestCodeSweeperStatistics();
-        break;
-  
-      case JfrCodeSweeperConfigurationEvent:
-        requestCodeSweeperConfiguration();
         break;
   
       case JfrIntFlagEvent:
@@ -181,6 +197,14 @@ class JfrPeriodicEventSet : public AllStatic {
         requestYoungGenerationConfiguration();
         break;
   
+      case JfrShenandoahHeapRegionInformationEvent:
+        requestShenandoahHeapRegionInformation();
+        break;
+  
+      case JfrFinalizerStatisticsEvent:
+        requestFinalizerStatistics();
+        break;
+  
       default:
         break;
       }
@@ -188,9 +212,15 @@ class JfrPeriodicEventSet : public AllStatic {
 
  private:
 
+  static void requestNativeMemoryUsage(void);
+
+  static void requestNativeMemoryUsageTotal(void);
+
   static void requestJVMInformation(void);
 
   static void requestOSInformation(void);
+
+  static void requestVirtualizationInformation(void);
 
   static void requestInitialSystemProperty(void);
 
@@ -216,6 +246,10 @@ class JfrPeriodicEventSet : public AllStatic {
 
   static void requestClassLoaderStatistics(void);
 
+  static void requestSymbolTableStatistics(void);
+
+  static void requestStringTableStatistics(void);
+
   static void requestThreadAllocationStatistics(void);
 
   static void requestPhysicalMemory(void);
@@ -239,10 +273,6 @@ class JfrPeriodicEventSet : public AllStatic {
   static void requestCodeCacheStatistics(void);
 
   static void requestCodeCacheConfiguration(void);
-
-  static void requestCodeSweeperStatistics(void);
-
-  static void requestCodeSweeperConfiguration(void);
 
   static void requestIntFlag(void);
 
@@ -272,6 +302,14 @@ class JfrPeriodicEventSet : public AllStatic {
 
   static void requestYoungGenerationConfiguration(void);
 
+  static void requestShenandoahHeapRegionInformation(void);
+
+  static void requestFinalizerStatistics(void);
+
+ static Ticks timestamp(void);
+ static Ticks _timestamp;
+ static PeriodicType type(void);
+ static PeriodicType _type;
 };
 
 #endif // INCLUDE_JFR
