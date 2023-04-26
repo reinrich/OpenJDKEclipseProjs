@@ -6,7 +6,7 @@ This is a collection of Eclipse projects for OpenJDK:
 **C/C++ Projects**
 
 * **hotspot**: CDT project for hotspot sources. Platforms are modelled as CDT Build Configurations.
-* **jdk_native**: subset of native sources bisedes hotspot. E.g. java.base, jdk.jdwp.agent.
+* **jdk_native**: subset of native sources besides hotspot. E.g. java.base, jdk.jdwp.agent.
 
 **Java Projects**
 
