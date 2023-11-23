@@ -66,7 +66,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
 									<listOptionValue builtIn="false" value="TARGET_ARCH_x86=1"/>
@@ -365,7 +365,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
 									<listOptionValue builtIn="false" value="TARGET_ARCH_x86=1"/>
@@ -715,7 +715,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_visCPP"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_windows"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="NOMINMAX"/>
 									<listOptionValue builtIn="false" value="TARGET_ARCH_x86"/>
 									<listOptionValue builtIn="false" value="TARGET_COMPILER_visCPP"/>
@@ -794,7 +794,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_visCPP"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_windows"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="NOMINMAX"/>
 									<listOptionValue builtIn="false" value="TARGET_ARCH_x86"/>
 									<listOptionValue builtIn="false" value="TARGET_COMPILER_visCPP"/>
@@ -927,7 +927,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_bsd"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="MAC_OS_X_VERSION_MIN_REQUIRED=1090"/>
 									<listOptionValue builtIn="false" value="OBJC_NEW_PROPERTIES=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
@@ -1320,7 +1320,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_bsd"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="MAC_OS_X_VERSION_MIN_REQUIRED=1090"/>
 									<listOptionValue builtIn="false" value="OBJC_NEW_PROPERTIES=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
@@ -1732,6 +1732,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.664397006" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__nullptr=nullptr"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1612530700" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -1744,6 +1745,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.1640848484" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__nullptr=nullptr"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.826426800" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -1840,7 +1842,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_ppc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="PPC64=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
@@ -2187,7 +2189,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_ppc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="PPC64=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
@@ -2589,7 +2591,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_s390"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="NEEDS_LIBRT=1"/>
 									<listOptionValue builtIn="false" value="S390=1"/>
@@ -2869,7 +2871,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_s390"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="NEEDS_LIBRT=1"/>
 									<listOptionValue builtIn="false" value="S390=1"/>
@@ -3202,7 +3204,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_solstudio"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_sparc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_solaris"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="SOLARIS=1"/>
 									<listOptionValue builtIn="false" value="SPARC=1"/>
 									<listOptionValue builtIn="false" value="SPARC_WORKS=1"/>
@@ -3325,7 +3327,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_solstudio"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_sparc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_solaris"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="SOLARIS=1"/>
 									<listOptionValue builtIn="false" value="SPARC=1"/>
 									<listOptionValue builtIn="false" value="SPARC_WORKS=1"/>
@@ -3471,6 +3473,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.990034851" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__nullptr=nullptr"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1978644521" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -3483,6 +3486,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.366579720" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__nullptr=nullptr"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1258848701" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -3576,7 +3580,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
 									<listOptionValue builtIn="false" value="TARGET_ARCH_x86=1"/>
@@ -3875,7 +3879,7 @@
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
 									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
-									<listOptionValue builtIn="false" value="INCLUDE_ZGC=0"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 									<listOptionValue builtIn="false" value="LINUX=1"/>
 									<listOptionValue builtIn="false" value="SUPPORTS_CLOCK_MONOTONIC=1"/>
 									<listOptionValue builtIn="false" value="TARGET_ARCH_x86=1"/>
@@ -4239,6 +4243,7 @@
 									<listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
 									<listOptionValue builtIn="false" value="&quot;bash: /tmp/cdtgen/tmpdir/work/cxx_predefines.cmdline: No such file or directory&quot;"/>
 									<listOptionValue builtIn="false" value="__nullptr=nullptr"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1815991103" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -4295,6 +4300,7 @@
 									<listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS"/>
 									<listOptionValue builtIn="false" value="&quot;bash: /tmp/cdtgen/tmpdir/work/cxx_predefines.cmdline: No such file or directory&quot;"/>
 									<listOptionValue builtIn="false" value="__nullptr=nullptr"/>
+									<listOptionValue builtIn="false" value="INCLUDE_ZGC=1"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1893064859" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
