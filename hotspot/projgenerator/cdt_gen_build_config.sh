@@ -120,14 +120,6 @@ function initialize() {
     INCLUDE_SUFFIX_CPU=`$GSED -n '/.*INCLUDE_SUFFIX_CPU=\([^ ]*\).*/s//\1/p' <$cmdline_file`
     
 
-    # Greater than or equal JDK10 means,
-    #   - hotspot sources are located at ROOT/src/hotspot, before they used to be at ROOT/hotspot
-    #   - src directory under hotspot is eliminated
-    IS_GTE_JDK10=0
-    if [ "`$GSED -n '\%.*src/hotspot/share/utilities/globalDefinitions.cpp% s//DETECTED JDK10/p' <$cmdline_file`" != "" ] ; then
-        IS_GTE_JDK10=1
-    fi
-
     OS=`echo $INCLUDE_SUFFIX_OS   | $GSED 's/_\(.*\)/\1/'`
     CPU=`echo $INCLUDE_SUFFIX_CPU | $GSED 's/_\(.*\)/\1/'`
     case $OS in
@@ -565,19 +557,11 @@ function canonicalize_paths() {
 }
 
 function find_top_dir() {
-    if [ $IS_GTE_JDK10 -ne 0 ] ; then
-        # looks for a line ending with '/hotspot/share' in $ALL_INCLUDE_DIRS and uses the path before as top dir
-        JDK_DIR_ABS=`$GSED -n '\%^\(.*\)/src/hotspot/share$%s//\1/p' <$ALL_INCLUDE_DIRS`
-        echo "JDK_DIR_ABS is $JDK_DIR_ABS"
-        # >=JDK10: ROOT/src/hotspot
-        TOP_DIR_ABS=$JDK_DIR_ABS
-    else # <JDK10
-        # looks for a line ending with '/src/share/vm' in $ALL_INCLUDE_DIRS and uses the path before as top dir
-        HOTSPOT_DIR_ABS=`$GSED -n '\%^\(.*\)/src/share/vm$%s//\1/p' <$ALL_INCLUDE_DIRS`
-        echo "HOTSPOT_DIR_ABS is $HOTSPOT_DIR_ABS"
-        HOTSPOT_TO_TOP_PATH=..                                # if == JDK9  ROOT/hotspot
-        [ $IS_GTE_JDK10 -eq 0 ] || HOTSPOT_TO_TOP_PATH=../..  # if >= JDK10 ROOT/src/hotspot
-    fi
+    # looks for a line ending with '/hotspot/share' in $ALL_INCLUDE_DIRS and uses the path before as top dir
+    JDK_DIR_ABS=`$GSED -n '\%^\(.*\)/src/hotspot/share$%s//\1/p' <$ALL_INCLUDE_DIRS`
+    echo "JDK_DIR_ABS is $JDK_DIR_ABS"
+    # >=JDK10: ROOT/src/hotspot
+    TOP_DIR_ABS=$JDK_DIR_ABS
     echo "TOP_DIR_ABS is $TOP_DIR_ABS"
 }
 
@@ -598,13 +582,9 @@ function keep_only() {
 function generate_proj_settings {
     echo "generating $SETTINGS_XML"
     CDT_PROJECT_NAME="HotSpot"
-    if [ $IS_GTE_JDK10 -eq 0 ] ; then
-        MAP_HS_SRC="\%$HOTSPOT_DIR_ABS/src% s%%!$CDT_PROJECT_NAME/hotspot_src%"
-    else
-        MAP_HS_SRC="\%$JDK_DIR_ABS/src/hotspot% s%%!$CDT_PROJECT_NAME/hotspot_src%"
-        # jni.h and jvm.h
-        MAP_JAVA_BASE_INCLUDE="\%$JDK_DIR_ABS/src/java.base% s%%!$CDT_PROJECT_NAME/java_base_include%"
-    fi
+    MAP_HS_SRC="\%$JDK_DIR_ABS/src/hotspot% s%%!$CDT_PROJECT_NAME/hotspot_src%"
+    # jni.h and jvm.h
+    MAP_JAVA_BASE_INCLUDE="\%$JDK_DIR_ABS/src/java.base% s%%!$CDT_PROJECT_NAME/java_base_include%"
     MAP_GENSRC="\%$OUTPUTDIR% s%%!$CDT_PROJECT_NAME/hotspot_sys_headers_and_outputdir_src/${OS}_${CPU}_${BITS}/${OUTPUTDIR_IN_ARCHIVE_DIR}%"
     MAP_SYSINCLS="s%^/%!$CDT_PROJECT_NAME/hotspot_sys_headers_and_outputdir_src/${OS}_${CPU}_${BITS}/${SYS_HEADERS_ARCHIVE_DIR}/%"
     XML_DECO_INCLUDE="s%\(.*\)%<includepath workspace_path=\"true\">\1</includepath>%"
