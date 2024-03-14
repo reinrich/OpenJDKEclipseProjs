@@ -68,6 +68,7 @@ function print_stack() {
 
 # Mark Todos during development #
 function TODO() {
+    set +x
     echo
     report_and_exit "*** TODO" 2
 }
@@ -116,6 +117,60 @@ function initialize() {
         exit 1
     fi
 
+    READLINK=readlink
+    # readlink command to be used on build host
+    READLINK_BUILD_HOST=$READLINK
+    SORT=sort
+    FIND=find
+    XARGS=xargs
+    UNAME_OS=$(uname -o)
+    GENERATE_SYS_HEADERS_ARCHIVE=1
+    case $UNAME_OS in
+        TODOWindows)
+            # don't use find, sort, etc. in c:/WINDOWS/System32/ 
+            SORT=/bin/sort
+            FIND=/bin/find
+            ;;
+        Darwin)
+            READLINK=greadlink # https_proxy=http://proxy.wdf.sap.corp:8080/ brew install coreutils
+            READLINK_BUILD_HOST=$READLINK
+            SORT=gsort
+            XARGS=gxargs
+            FIND=gfind         # https_proxy=http://proxy.wdf.sap.corp:8080/ brew install findutils
+            GENERATE_SYS_HEADERS_ARCHIVE=0          # rather download and use Xcode.app
+            ;;
+        TODOsolaris|TODOaix)
+            # aix: /opt/freeware/bin/readlink
+            READLINK_BUILD_HOST=$($EXEC_ON_BUILD_HOST bash -c '"which readlink"')
+            debug_print "READLINK_BUILD_HOST:$READLINK_BUILD_HOST"
+            if [ "${READLINK_BUILD_HOST:0:11}" = "no readlink" ] ; then
+                READLINK_BUILD_HOST="/usr/work/d038402/bin/readlink_${BUILD_HOST}"
+            fi
+            $EXEC_ON_BUILD_HOST test -e $READLINK_BUILD_HOST || report_and_exit "$READLINK_BUILD_HOST does not exist on $BUILD_HOST"
+            debug_print "READLINK_BUILD_HOST:$READLINK_BUILD_HOST"
+            ;;
+        GNU/Linux)
+            ;;
+        *)
+            report_and_exit "Unknown UNAME_OS: $UNAME_OS"
+            ;;
+    esac
+
+    # find OUTPUTDIR looking for spec.gmk
+    OUTPUTDIR="$CMDLINE_DIR"
+    while [ ! -f "$OUTPUTDIR/spec.gmk" ] ; do
+        OUTPUTDIR="$($READLINK -f "$OUTPUTDIR/..")"
+        if [ "$OUTPUTDIR" = "/" ] ; then
+            report_and_exit "Could not determine OUTPUTDIR, because spec.gmk was not found looking upwards from $CMDLINE_DIR"
+        fi
+    done
+    echo "OUTPUTDIR is $OUTPUTDIR"
+
+    JDK_VERSION=$($GSED -n '/VERSION_FEATURE := \(.*\)/ s//\1/p' $OUTPUTDIR/spec.gmk)
+    TOPDIR_ABS=$($GSED -n '/TOPDIR := \(.*\)/ s//\1/p' $OUTPUTDIR/spec.gmk)
+
+    echo "TOPDIR_ABS is $TOPDIR_ABS"
+
     INCLUDE_SUFFIX_OS=`$GSED -n '/.*INCLUDE_SUFFIX_OS=\([^ ]*\).*/s//\1/p' <$cmdline_file`
     INCLUDE_SUFFIX_CPU=`$GSED -n '/.*INCLUDE_SUFFIX_CPU=\([^ ]*\).*/s//\1/p' <$cmdline_file`
     
@@ -129,7 +184,7 @@ function initialize() {
             BITS=`$GSED -n '/-q64/! s/.*/32/p; /-q64/ s/.*/64/p' <$cmdline_file`;;
         *)
             BITS=`$GSED -n '/_LP64/! s/.*/32/p; /_LP64/ s/.*/64/p' <$cmdline_file`;;
-        esac
+    esac
         
     echo "detected $OS $CPU $BITS"
 
@@ -140,49 +195,10 @@ function initialize() {
         EXEC_SCRIPT_ON_BUILD_HOST="ssh -x $BUILD_HOST $EXEC_SCRIPT_ON_BUILD_HOST"
     fi
     
-    READLINK=readlink
-    # readlink command to be used on build host
-    READLINK_BUILD_HOST=$READLINK
-    SORT=sort
-    FIND=find
-    XARGS=xargs
-    if [ $OS = windows ] ; then
-        # don't use find, sort, etc. in c:/WINDOWS/System32/ 
-        SORT=/bin/sort
-        FIND=/bin/find
-    fi
-    if [ $OS = bsd ] ; then
-        READLINK=greadlink # https_proxy=http://proxy.wdf.sap.corp:8080/ brew install coreutils
-        READLINK_BUILD_HOST=$READLINK
-        SORT=gsort
-        XARGS=gxargs
-        FIND=gfind         # https_proxy=http://proxy.wdf.sap.corp:8080/ brew install findutils
-    fi
-    if [ $OS = solaris -o $OS = aix ] ; then
-        # aix: /opt/freeware/bin/readlink
-        READLINK_BUILD_HOST=$($EXEC_ON_BUILD_HOST bash -c '"which readlink"')
-        debug_print "READLINK_BUILD_HOST:$READLINK_BUILD_HOST"
-        if [ "${READLINK_BUILD_HOST:0:11}" = "no readlink" ] ; then
-            READLINK_BUILD_HOST="/usr/work/d038402/bin/readlink_${BUILD_HOST}"
-        fi
-        $EXEC_ON_BUILD_HOST test -e $READLINK_BUILD_HOST || report_and_exit "$READLINK_BUILD_HOST does not exist on $BUILD_HOST"
-        debug_print "READLINK_BUILD_HOST:$READLINK_BUILD_HOST"
-    fi
-
     # use absolute paths
     TMP_DIR=`$READLINK -f $TMP_DIR`
     WORK_DIR=$TMP_DIR/work
     CMDLINE_DIR=`$READLINK -f $CMDLINE_DIR`
-
-    # find OUTPUTDIR looking for spec.gmk
-    OUTPUTDIR="$CMDLINE_DIR"
-    while [ ! -f "$OUTPUTDIR/spec.gmk" ] ; do
-        OUTPUTDIR="$($READLINK -f "$OUTPUTDIR/..")"
-        if [ "$OUTPUTDIR" = "/" ] ; then
-            report_and_exit "Could not determine OUTPUTDIR, because spec.gmk was not found looking upwards from $CMDLINE_DIR"
-        fi
-    done
-    echo "OUTPUTDIR is $OUTPUTDIR"
 
     ALL_INCLUDED_FILES=$WORK_DIR/all_included_files
     ALL_INCLUDE_DIRS=$WORK_DIR/all_include_dirs
@@ -328,7 +344,7 @@ function add_include_dirs_using_cxx_cmdline() {
             cmdline_file_mod=$WORK_DIR/cmdline_mod
             
             # modify cmdline to let the compiler print list of dirs searched for includes
-            $GSED 's%\(.*\) -c .* \([^ ]\+\.cpp\)%\1 -E -Wp,-v \2%' <$cmdline_file >$cmdline_file_mod
+            $GSED 's%\(.*\) -c .* \([^ ]\+\.cpp \)%\1 -E -Wp,-v \2%' <$cmdline_file >$cmdline_file_mod
 
             # execute modified cmdline
             $EXEC_SCRIPT_ON_BUILD_HOST $cmdline_file_mod 2>&1 1>/dev/null | $GSED -n '/^ *\//s/^ *//p' >> $ALL_INCLUDE_DIRS
@@ -368,7 +384,7 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
     echo
     echo "adding c++ compiler predefined macros"
     
-    os_cmdline=`$READLINK -f $CMDLINE_DIR/os_${OS}_${CPU}.*.cmdline`
+    os_cmdline=`$READLINK -f $CMDLINE_DIR/os_${OS}_${CPU}.+(o|obj).cmdline`
     echo "using $os_cmdline"
 
     if [ ! -e $os_cmdline ] ; then
@@ -530,9 +546,12 @@ function canonicalize_paths() {
     mv $ALL_INCLUDE_DIRS ${ALL_INCLUDE_DIRS}.old
     mv $ALL_INCLUDED_FILES ${ALL_INCLUDED_FILES}.old
     case $OS in
-        linux|bsd)
-            ( while read line ; do $READLINK -f $line ; done ) <${ALL_INCLUDE_DIRS}.old >$ALL_INCLUDE_DIRS
-            ( while read line ; do $READLINK -f $line ; done ) <${ALL_INCLUDED_FILES}.old >$ALL_INCLUDED_FILES
+        bsd)
+            sed 's/ (framework directory)//' -ibak ${ALL_INCLUDE_DIRS}.old
+            ;& # fallthrough
+        linux)
+            ( while read line ; do $READLINK -f "$line" ; done ) <${ALL_INCLUDE_DIRS}.old >$ALL_INCLUDE_DIRS
+            ( while read line ; do $READLINK -f "$line" ; done ) <${ALL_INCLUDED_FILES}.old >$ALL_INCLUDED_FILES
             ;;
         solaris|aix)
             $EXEC_SCRIPT_ON_BUILD_HOST -c "'while read line ; do $READLINK_BUILD_HOST -f \$line ; done'" <${ALL_INCLUDE_DIRS}.old >$ALL_INCLUDE_DIRS
@@ -556,15 +575,6 @@ function canonicalize_paths() {
     $SORT --output=${ALL_INCLUDED_FILES} -u ${ALL_INCLUDED_FILES}.unsorted
 }
 
-function find_top_dir() {
-    # looks for a line ending with '/hotspot/share' in $ALL_INCLUDE_DIRS and uses the path before as top dir
-    JDK_DIR_ABS=`$GSED -n '\%^\(.*\)/src/hotspot/share$%s//\1/p' <$ALL_INCLUDE_DIRS`
-    echo "JDK_DIR_ABS is $JDK_DIR_ABS"
-    # >=JDK10: ROOT/src/hotspot
-    TOP_DIR_ABS=$JDK_DIR_ABS
-    echo "TOP_DIR_ABS is $TOP_DIR_ABS"
-}
-
 function remove_from() {
     FILE_LIST=$1
     FILTER_PATH=$2
@@ -582,9 +592,9 @@ function keep_only() {
 function generate_proj_settings {
     echo "generating $SETTINGS_XML"
     CDT_PROJECT_NAME="HotSpot"
-    MAP_HS_SRC="\%$JDK_DIR_ABS/src/hotspot% s%%!$CDT_PROJECT_NAME/hotspot_src%"
+    MAP_HS_SRC="\%$TOPDIR_ABS/src/hotspot% s%%!$CDT_PROJECT_NAME/hotspot_src%"
     # jni.h and jvm.h
-    MAP_JAVA_BASE_INCLUDE="\%$JDK_DIR_ABS/src/java.base% s%%!$CDT_PROJECT_NAME/java_base_include%"
+    MAP_JAVA_BASE_INCLUDE="\%$TOPDIR_ABS/src/java.base% s%%!$CDT_PROJECT_NAME/java_base_include%"
     MAP_GENSRC="\%$OUTPUTDIR% s%%!$CDT_PROJECT_NAME/hotspot_sys_headers_and_outputdir_src/${OS}_${CPU}_${BITS}/${OUTPUTDIR_IN_ARCHIVE_DIR}%"
     MAP_SYSINCLS="s%^/%!$CDT_PROJECT_NAME/hotspot_sys_headers_and_outputdir_src/${OS}_${CPU}_${BITS}/${SYS_HEADERS_ARCHIVE_DIR}/%"
     XML_DECO_INCLUDE="s%\(.*\)%<includepath workspace_path=\"true\">\1</includepath>%"
@@ -641,14 +651,14 @@ EOF
 initialize
 
 CMDLINE_FILE_PATTERNS=(
-#     globalDefinitions.
-#     jni.
-#     g1CollectedHeap.
-#     concurrentMarkSweepGeneration.
+    globalDefinitions.
+    jni.
+    g1CollectedHeap.
+    concurrentMarkSweepGeneration.
+    thread
 # #    dependencyContext.
 # #    jvm.
 # #    os
-# #    thread
 )
 CMDLINE_FILE_PATTERNS=${CMDLINE_FILE_PATTERNS[*]}
 
@@ -661,18 +671,18 @@ fi
 CMDLINE_FILE_PATTERNS=$(
     set -f # no globbing
     for pattern in $CMDLINE_FILE_PATTERNS ; do
-        echo -n "$CMDLINE_DIR/$pattern*.cmdline "
+        echo -n "$CMDLINE_DIR/$pattern*+(o|obj).cmdline "
     done
 )
 
 # expand wildcards in $CMDLINE_FILE_PATTERNS
-CMDLINE_FILES=$(shopt -s nullglob ; ls -1 $CMDLINE_FILE_PATTERNS | $SORT -u)
+CMDLINE_FILES=$(shopt -s nullglob ; shopt -s extglob ; ls -1 $CMDLINE_FILE_PATTERNS | $SORT -u)
 
 # process *.cmdline files
 for cur_cmdline_file in $CMDLINE_FILES ; do
     if [ ! -e $cur_cmdline_file ] ; then continue ; fi
     echo -E "processing $cur_cmdline_file"
-    if ! $GSED -n '/\.cpp$/! q 1' <$cur_cmdline_file ; then
+    if ! $GSED -n '/\.cpp /! q 1' <$cur_cmdline_file ; then
         echo "no cpp compilation - skipping."
         continue
     fi
@@ -686,10 +696,9 @@ eliminate_duplicated_and_unwanted_macros
 canonicalize_paths
 
 echo
-find_top_dir
 # list of system headers
 cp $ALL_INCLUDED_FILES $ALL_SYSTEM_INCLUDES
-remove_from $ALL_SYSTEM_INCLUDES $TOP_DIR_ABS
+remove_from $ALL_SYSTEM_INCLUDES $TOPDIR_ABS
 remove_from $ALL_SYSTEM_INCLUDES $OUTPUTDIR
 # files included from output dir
 cp $ALL_INCLUDED_FILES $ALL_OUTPUTDIR_INCLUDES
@@ -701,21 +710,25 @@ mv $ALL_OUTPUTDIR_INCLUDES ${ALL_OUTPUTDIR_INCLUDES}.old
 sed "s:${OUTPUTDIR}/::g" ${ALL_OUTPUTDIR_INCLUDES}.old > $ALL_OUTPUTDIR_INCLUDES
 
 # create zip archives
-echo
-echo "creating $INCLUDED_SYS_HEADERS_ARCHIVE with referenced system headers "
-$EXEC_ON_BUILD_HOST zip -@ $INCLUDED_SYS_HEADERS_ARCHIVE <$ALL_SYSTEM_INCLUDES >${INCLUDED_SYS_HEADERS_ARCHIVE}.log
+if [ $GENERATE_SYS_HEADERS_ARCHIVE = 1 ] ; then
+    echo
+    echo "creating $INCLUDED_SYS_HEADERS_ARCHIVE with referenced system headers "
+    $EXEC_ON_BUILD_HOST zip -@ $INCLUDED_SYS_HEADERS_ARCHIVE <$ALL_SYSTEM_INCLUDES >${INCLUDED_SYS_HEADERS_ARCHIVE}.log
+fi
 echo "creating $OUTPUTDIR_SRC_FILES_ARCHIVE with source files from the output directory"
 (cd $OUTPUTDIR ; zip -@ $OUTPUTDIR_SRC_FILES_ARCHIVE <$ALL_OUTPUTDIR_INCLUDES) >${OUTPUTDIR_SRC_FILES_ARCHIVE}.log
 
 echo "creating $SYS_HEADERS_AND_OUTPUTDIR_SRC_ARCHIVE with the expected directory structure"
-mkdir -p $SYS_HEADERS_ARCHIVE_DIR_ABS
-mkdir -p $OUTPUTDIR_IN_ARCHIVE_DIR_ABS
-cd $SYS_HEADERS_ARCHIVE_DIR_ABS
-unzip -o $INCLUDED_SYS_HEADERS_ARCHIVE >${INCLUDED_SYS_HEADERS_ARCHIVE}_unzip.log
-#find and include symbolic links under include dirs
-if [ $OS != windows ] ; then
-    $EXEC_SCRIPT_ON_BUILD_HOST $ADD_SYMLINKS_TO_ARCHIVE_CMD $ALL_INCLUDE_DIRS $READLINK_BUILD_HOST $SYS_HEADERS_ARCHIVE_DIR_ABS
+if [ $GENERATE_SYS_HEADERS_ARCHIVE = 1 ] ; then
+    mkdir -p $SYS_HEADERS_ARCHIVE_DIR_ABS
+    cd $SYS_HEADERS_ARCHIVE_DIR_ABS
+    unzip -o $INCLUDED_SYS_HEADERS_ARCHIVE >${INCLUDED_SYS_HEADERS_ARCHIVE}_unzip.log
+    #find and include symbolic links under include dirs
+    if [ $OS != windows ] ; then
+        $EXEC_SCRIPT_ON_BUILD_HOST $ADD_SYMLINKS_TO_ARCHIVE_CMD $ALL_INCLUDE_DIRS $READLINK_BUILD_HOST $SYS_HEADERS_ARCHIVE_DIR_ABS
+    fi
 fi
+mkdir -p $OUTPUTDIR_IN_ARCHIVE_DIR_ABS
 cd $OUTPUTDIR_IN_ARCHIVE_DIR_ABS
 unzip -o $OUTPUTDIR_SRC_FILES_ARCHIVE >${OUTPUTDIR_SRC_FILES_ARCHIVE}_unzip.log
 # zip system headers and referenced sources from outputdir
