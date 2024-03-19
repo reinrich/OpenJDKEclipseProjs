@@ -53,11 +53,33 @@ Setup
     * Select "../.."  for every project and click finish.
     * To check for success open for example jvm.cpp, then right click the line number column and select "Show Revision Information".
 
-11. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG Currently
-    `linux_x86_64`, `linux_ppc_64`, and `linux_s390_64` are the only supported build configurations.
-    You should be able to create hotspot build configurations for `windows_x86_64`, `bsd_x86_64`,
-    and `solaris_sparc_64` using `hotspot/projgenerator/cdt_gen_build_config.sh` yourself as I
-    cannot redistribute the required system and C++ compiler header files as part of this repository.
+11. Select a build configuration: Menu > Project > Build Configurations > Set Active > CONFIG. Currently
+    `linux_x86_64`, `linux_ppc_64`, `bsd_aarch64`, and `linux_s390_64` are the only supported build
+    configurations.  You should be able to create hotspot build configurations for other platforms using
+    `hotspot/projgenerator/cdt_gen_build_config.sh` yourself as I cannot redistribute the required
+    system and C++ compiler header files as part of this repository.
+
+12. Mac OS on AARCH64
+    
+    `bsd_aarch64` is the configuration for macOS on aarch64. It requires Xcode. I'd recommend to do the following:
+    * Download Xcode 13.4.1 from https://developer.apple.com/xcode/.
+      Alternatively you can also use a newer version or just install Xcode from the app store (see below for that).
+    * Unpack the xip file to /opt/Xcode_13.4.1.app.  You can unpack also to a
+      different location. In that case you should let the symbolic link
+      `hotspot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/sys_headers/Xcode_13.4.1.app`
+      point to that location.
+    * I recommend stripping Xcode and keep only the following directories:
+      ```
+      Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr
+      Contents/Developer/Toolchains/XcodeDefault.xctoolchain
+      ```
+      Otherwise importing and refreshing the hotspot project takes several minutes.
+    * Using other Xcode versions
+      - If you installed Xcode from the app store, you should change the
+        symbolic link `hotspot/projgenerator/cdt_gen_build_config.sh` and let it
+        point to `/Applications/Xcode.app`
+      - Open `hotspot/.cproject` and change the version number `13.1.6` in all occurrences of `XcodeDefault.xctoolchain/usr/lib/clang/13.1.6/` to match your version.
+    
 
 Troubleshooting
 ===============
