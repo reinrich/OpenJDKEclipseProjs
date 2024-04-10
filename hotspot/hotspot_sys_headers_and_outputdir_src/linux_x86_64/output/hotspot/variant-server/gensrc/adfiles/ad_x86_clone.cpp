@@ -1,6 +1,6 @@
 #line 1 "ad_x86_clone.cpp"
 //
-// Copyright (c) 2003, 2017, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -48,17 +48,29 @@ MachOper *sRegLOper::clone() const {
 MachOper *immIOper::clone() const {
   return new immIOper(_c0);
 }
-MachOper *immI0Oper::clone() const {
-  return new immI0Oper(_c0);
+MachOper *immI_0Oper::clone() const {
+  return new immI_0Oper(_c0);
 }
-MachOper *immI1Oper::clone() const {
-  return new immI1Oper(_c0);
+MachOper *immI_1Oper::clone() const {
+  return new immI_1Oper(_c0);
 }
 MachOper *immI_M1Oper::clone() const {
   return new immI_M1Oper(_c0);
 }
+MachOper *immI_2Oper::clone() const {
+  return new immI_2Oper(_c0);
+}
+MachOper *immI_4Oper::clone() const {
+  return new immI_4Oper(_c0);
+}
+MachOper *immI_8Oper::clone() const {
+  return new immI_8Oper(_c0);
+}
 MachOper *immI2Oper::clone() const {
   return new immI2Oper(_c0);
+}
+MachOper *immU7Oper::clone() const {
+  return new immU7Oper(_c0);
 }
 MachOper *immI8Oper::clone() const {
   return new immI8Oper(_c0);
@@ -71,12 +83,6 @@ MachOper *immI16Oper::clone() const {
 }
 MachOper *immU31Oper::clone() const {
   return new immU31Oper(_c0);
-}
-MachOper *immI_32Oper::clone() const {
-  return new immI_32Oper(_c0);
-}
-MachOper *immI_64Oper::clone() const {
-  return new immI_64Oper(_c0);
 }
 MachOper *immPOper::clone() const {
   return new immPOper(_c0);
@@ -108,6 +114,12 @@ MachOper *immUL32Oper::clone() const {
 MachOper *immL32Oper::clone() const {
   return new immL32Oper(_c0);
 }
+MachOper *immL_Pow2Oper::clone() const {
+  return new immL_Pow2Oper(_c0);
+}
+MachOper *immL_NotPow2Oper::clone() const {
+  return new immL_NotPow2Oper(_c0);
+}
 MachOper *immL0Oper::clone() const {
   return new immL0Oper(_c0);
 }
@@ -117,14 +129,11 @@ MachOper *immL1Oper::clone() const {
 MachOper *immL_M1Oper::clone() const {
   return new immL_M1Oper(_c0);
 }
-MachOper *immL10Oper::clone() const {
-  return new immL10Oper(_c0);
-}
-MachOper *immL_127Oper::clone() const {
-  return new immL_127Oper(_c0);
-}
 MachOper *immL_32bitsOper::clone() const {
   return new immL_32bitsOper(_c0);
+}
+MachOper *immI_Pow2M1Oper::clone() const {
+  return new immI_Pow2M1Oper(_c0);
 }
 MachOper *immF0Oper::clone() const {
   return new immF0Oper(_c0);
@@ -156,6 +165,9 @@ MachOper *immL_255Oper::clone() const {
 MachOper *immL_65535Oper::clone() const {
   return new immL_65535Oper(_c0);
 }
+MachOper *kRegOper::clone() const {
+  return new kRegOper();
+}
 MachOper *rRegIOper::clone() const {
   return new rRegIOper();
 }
@@ -174,11 +186,11 @@ MachOper *rdx_RegIOper::clone() const {
 MachOper *rdi_RegIOper::clone() const {
   return new rdi_RegIOper();
 }
-MachOper *no_rcx_RegIOper::clone() const {
-  return new no_rcx_RegIOper();
-}
 MachOper *no_rax_rdx_RegIOper::clone() const {
   return new no_rax_rdx_RegIOper();
+}
+MachOper *no_rbp_r13_RegIOper::clone() const {
+  return new no_rbp_r13_RegIOper();
 }
 MachOper *any_RegPOper::clone() const {
   return new any_RegPOper();
@@ -189,14 +201,8 @@ MachOper *rRegPOper::clone() const {
 MachOper *rRegNOper::clone() const {
   return new rRegNOper();
 }
-MachOper *no_rax_RegPOper::clone() const {
-  return new no_rax_RegPOper();
-}
 MachOper *no_rbp_RegPOper::clone() const {
   return new no_rbp_RegPOper();
-}
-MachOper *no_rax_rbx_RegPOper::clone() const {
-  return new no_rax_rbx_RegPOper();
 }
 MachOper *rax_RegPOper::clone() const {
   return new rax_RegPOper();
@@ -210,26 +216,20 @@ MachOper *rbx_RegPOper::clone() const {
 MachOper *rsi_RegPOper::clone() const {
   return new rsi_RegPOper();
 }
+MachOper *rbp_RegPOper::clone() const {
+  return new rbp_RegPOper();
+}
 MachOper *rdi_RegPOper::clone() const {
   return new rdi_RegPOper();
 }
 MachOper *r15_RegPOper::clone() const {
   return new r15_RegPOper();
 }
-MachOper *rex_RegPOper::clone() const {
-  return new rex_RegPOper();
-}
 MachOper *rRegLOper::clone() const {
   return new rRegLOper();
 }
 MachOper *no_rax_rdx_RegLOper::clone() const {
   return new no_rax_rdx_RegLOper();
-}
-MachOper *no_rax_RegLOper::clone() const {
-  return new no_rax_RegLOper();
-}
-MachOper *no_rcx_RegLOper::clone() const {
-  return new no_rcx_RegLOper();
 }
 MachOper *rax_RegLOper::clone() const {
   return new rax_RegLOper();
@@ -239,6 +239,9 @@ MachOper *rcx_RegLOper::clone() const {
 }
 MachOper *rdx_RegLOper::clone() const {
   return new rdx_RegLOper();
+}
+MachOper *no_rbp_r13_RegLOper::clone() const {
+  return new no_rbp_r13_RegLOper();
 }
 MachOper *rFlagsRegOper::clone() const {
   return new rFlagsRegOper();
@@ -252,20 +255,20 @@ MachOper *rFlagsRegUCFOper::clone() const {
 MachOper *regFOper::clone() const {
   return new regFOper();
 }
+MachOper *legRegFOper::clone() const {
+  return new legRegFOper();
+}
+MachOper *vlRegFOper::clone() const {
+  return new vlRegFOper();
+}
 MachOper *regDOper::clone() const {
   return new regDOper();
 }
-MachOper *vecSOper::clone() const {
-  return new vecSOper();
+MachOper *legRegDOper::clone() const {
+  return new legRegDOper();
 }
-MachOper *vecDOper::clone() const {
-  return new vecDOper();
-}
-MachOper *vecXOper::clone() const {
-  return new vecXOper();
-}
-MachOper *vecYOper::clone() const {
-  return new vecYOper();
+MachOper *vlRegDOper::clone() const {
+  return new vlRegDOper();
 }
 MachOper *indirectOper::clone() const {
   return new indirectOper();
@@ -357,104 +360,44 @@ MachOper *cmpOpUCF2Oper::clone() const {
 MachOper *rxmm0Oper::clone() const {
   return new rxmm0Oper();
 }
-MachOper *rxmm1Oper::clone() const {
-  return new rxmm1Oper();
+MachOper *vecOper::clone() const {
+  return new vecOper();
 }
-MachOper *rxmm2Oper::clone() const {
-  return new rxmm2Oper();
+MachOper *legVecOper::clone() const {
+  return new legVecOper();
 }
-MachOper *rxmm3Oper::clone() const {
-  return new rxmm3Oper();
+MachOper *vecSOper::clone() const {
+  return new vecSOper();
 }
-MachOper *rxmm4Oper::clone() const {
-  return new rxmm4Oper();
+MachOper *legVecSOper::clone() const {
+  return new legVecSOper();
 }
-MachOper *rxmm5Oper::clone() const {
-  return new rxmm5Oper();
+MachOper *vecDOper::clone() const {
+  return new vecDOper();
 }
-MachOper *rxmm6Oper::clone() const {
-  return new rxmm6Oper();
+MachOper *legVecDOper::clone() const {
+  return new legVecDOper();
 }
-MachOper *rxmm7Oper::clone() const {
-  return new rxmm7Oper();
+MachOper *vecXOper::clone() const {
+  return new vecXOper();
 }
-MachOper *rxmm8Oper::clone() const {
-  return new rxmm8Oper();
+MachOper *legVecXOper::clone() const {
+  return new legVecXOper();
 }
-MachOper *rxmm9Oper::clone() const {
-  return new rxmm9Oper();
+MachOper *vecYOper::clone() const {
+  return new vecYOper();
 }
-MachOper *rxmm10Oper::clone() const {
-  return new rxmm10Oper();
-}
-MachOper *rxmm11Oper::clone() const {
-  return new rxmm11Oper();
-}
-MachOper *rxmm12Oper::clone() const {
-  return new rxmm12Oper();
-}
-MachOper *rxmm13Oper::clone() const {
-  return new rxmm13Oper();
-}
-MachOper *rxmm14Oper::clone() const {
-  return new rxmm14Oper();
-}
-MachOper *rxmm15Oper::clone() const {
-  return new rxmm15Oper();
-}
-MachOper *rxmm16Oper::clone() const {
-  return new rxmm16Oper();
-}
-MachOper *rxmm17Oper::clone() const {
-  return new rxmm17Oper();
-}
-MachOper *rxmm18Oper::clone() const {
-  return new rxmm18Oper();
-}
-MachOper *rxmm19Oper::clone() const {
-  return new rxmm19Oper();
-}
-MachOper *rxmm20Oper::clone() const {
-  return new rxmm20Oper();
-}
-MachOper *rxmm21Oper::clone() const {
-  return new rxmm21Oper();
-}
-MachOper *rxmm22Oper::clone() const {
-  return new rxmm22Oper();
-}
-MachOper *rxmm23Oper::clone() const {
-  return new rxmm23Oper();
-}
-MachOper *rxmm24Oper::clone() const {
-  return new rxmm24Oper();
-}
-MachOper *rxmm25Oper::clone() const {
-  return new rxmm25Oper();
-}
-MachOper *rxmm26Oper::clone() const {
-  return new rxmm26Oper();
-}
-MachOper *rxmm27Oper::clone() const {
-  return new rxmm27Oper();
-}
-MachOper *rxmm28Oper::clone() const {
-  return new rxmm28Oper();
-}
-MachOper *rxmm29Oper::clone() const {
-  return new rxmm29Oper();
-}
-MachOper *rxmm30Oper::clone() const {
-  return new rxmm30Oper();
-}
-MachOper *rxmm31Oper::clone() const {
-  return new rxmm31Oper();
+MachOper *legVecYOper::clone() const {
+  return new legVecYOper();
 }
 MachOper *vecZOper::clone() const {
   return new vecZOper();
 }
-MachOper *cmpOp_vcmppdOper::clone() const {
-  return new cmpOp_vcmppdOper(_c0);
+MachOper *legVecZOper::clone() const {
+  return new legVecZOper();
+}
+MachOper *no_rax_RegPOper::clone() const {
+  return new no_rax_RegPOper();
 }
 // Check consistency of C++ compilation with ADLC options:
 // Check adlc -DLINUX=1
@@ -473,3 +416,7 @@ MachOper *cmpOp_vcmppdOper::clone() const {
 #ifndef _LP64
 #  error "_LP64 must be defined"
 #endif // _LP64
+// Check adlc -DASSERT=1
+#ifndef ASSERT
+#  error "ASSERT must be defined"
+#endif // ASSERT

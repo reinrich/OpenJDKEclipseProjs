@@ -1,6 +1,6 @@
 #line 1 "ad_x86_peephole.cpp"
 //
-// Copyright (c) 2003, 2017, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -27,134 +27,216 @@
 
 #include "precompiled.hpp"
 #include "adfiles/ad_x86.hpp"
-MachNode *loadINode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted) {
+int addI_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
   bool  matches = true;
   MachNode *inst0 = this;
-  MachNode *inst1 = NULL;
-  if( (OptoPeepholeAt == -1) || (OptoPeepholeAt==0) ) {
-    matches = true;
-  // Check instruction sub-tree
-  // Identify previous instruction if inside this block
-  if( block_index - 1 > 0 ) {
-    Node *n = block->get_node(block_index - 1);
-    inst1 = (n->is_Mach()) ? n->as_Mach() : NULL;
-  }
-  matches = matches && (inst1 != NULL) && (inst1->rule() == storeI_rule);
-    // If instruction subtree matches
-    if( matches ) {
-
-      // Check constraints on sub-tree-leaves
-      // Build map to register info
-  // Start at oper_input_base() and count operands
-  unsigned inst0_idx0 = 2;
-  unsigned inst0_idx1 = 2; 	// mem
-  unsigned inst0_idx2 = inst0->req(); 
-  // Start at oper_input_base() and count operands
-  unsigned inst1_idx0 = 2;
-  unsigned inst1_idx1 = 2; 	// mem
-  unsigned inst1_idx2 = inst1_idx1 + inst1->_opnds[1]->num_edges(); 	// src
-  unsigned inst1_idx3 = inst1->req(); 
-      matches = matches &&
-        (inst1->_opnds[2]->reg(ra_,inst1,inst1_idx2)  /* 1.src */ == /* 0.dst */ inst0->_opnds[0]->reg(ra_,inst0))
-      && ( 
-  (inst1->_opnds[1]->base(ra_,inst1,inst1_idx1)  /* 1.mem$$base */ == /* 0.mem$$base */ inst0->_opnds[1]->base(ra_,inst0,inst0_idx1)) &&
-  (inst1->_opnds[1]->index(ra_,inst1,inst1_idx1)  /* 1.mem$$index */ == /* 0.mem$$index */ inst0->_opnds[1]->index(ra_,inst0,inst0_idx1)) &&
-  (inst1->_opnds[1]->scale()  /* 1.mem$$scale */ == /* 0.mem$$scale */ inst0->_opnds[1]->scale()) &&
-  (inst1->_opnds[1]->disp(ra_,inst1,inst1_idx1)  /* 1.mem$$disp */ == /* 0.mem$$disp */ inst0->_opnds[1]->disp(ra_,inst0,inst0_idx1))
-) 
-;
-      // IF instructions and constraints matched
-      if( matches ) {
-        // generate the new sub-tree
-        assert( true, "Debug stopping point");
-        storeINode *root = new storeINode();
-        // ----- Initial setup -----
-        root->add_req(_in[0]);                // control edge
-        root->add_req(inst1->in(1));        // unmatched ideal edge
-        root->_bottom_type = inst1->bottom_type();
-        ra_->add_reference(root, inst1);
-        ra_->set_oop (root, ra_->is_oop(inst1));
-        ra_->set_pair(root->_idx, ra_->get_reg_second(inst1), ra_->get_reg_first(inst1));
-        root->_opnds[0] = inst1->_opnds[0]->clone(); // result
-        // ----- Done with initial setup -----
-        for( unsigned x1 = inst1_idx1; x1 < inst1_idx2; x1++ )
-          root->add_req( inst1->in(x1) );
-        root->_opnds[1] = inst1->_opnds[1]->clone();
-        for( unsigned x2 = inst1_idx2; x2 < inst1_idx3; x2++ )
-          root->add_req( inst1->in(x2) );
-        root->_opnds[2] = inst1->_opnds[2]->clone();
-        deleted = 2;
-        return root;  // return new root;
-      }
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==0)) && ( 
+#line 12729 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_2op_lea()
+#line 36 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_rReg_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_reg(block, block_index, cfg_, ra_, replacing, addI_rReg_rule);
+    if (replacement) {
+      return 0;
     }
   } // end of peephole rule #0
 
-  return NULL;  // No peephole rules matched
+  return -1;  // No peephole rules matched
 }
 
-MachNode *loadLNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted) {
+int addI_rReg_immNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
   bool  matches = true;
   MachNode *inst0 = this;
-  MachNode *inst1 = NULL;
-  if( (OptoPeepholeAt == -1) || (OptoPeepholeAt==1) ) {
-    matches = true;
-  // Check instruction sub-tree
-  // Identify previous instruction if inside this block
-  if( block_index - 1 > 0 ) {
-    Node *n = block->get_node(block_index - 1);
-    inst1 = (n->is_Mach()) ? n->as_Mach() : NULL;
-  }
-  matches = matches && (inst1 != NULL) && (inst1->rule() == storeL_rule);
-    // If instruction subtree matches
-    if( matches ) {
-
-      // Check constraints on sub-tree-leaves
-      // Build map to register info
-  // Start at oper_input_base() and count operands
-  unsigned inst0_idx0 = 2;
-  unsigned inst0_idx1 = 2; 	// mem
-  unsigned inst0_idx2 = inst0->req(); 
-  // Start at oper_input_base() and count operands
-  unsigned inst1_idx0 = 2;
-  unsigned inst1_idx1 = 2; 	// mem
-  unsigned inst1_idx2 = inst1_idx1 + inst1->_opnds[1]->num_edges(); 	// src
-  unsigned inst1_idx3 = inst1->req(); 
-      matches = matches &&
-        (inst1->_opnds[2]->reg(ra_,inst1,inst1_idx2)  /* 1.src */ == /* 0.dst */ inst0->_opnds[0]->reg(ra_,inst0))
-      && ( 
-  (inst1->_opnds[1]->base(ra_,inst1,inst1_idx1)  /* 1.mem$$base */ == /* 0.mem$$base */ inst0->_opnds[1]->base(ra_,inst0,inst0_idx1)) &&
-  (inst1->_opnds[1]->index(ra_,inst1,inst1_idx1)  /* 1.mem$$index */ == /* 0.mem$$index */ inst0->_opnds[1]->index(ra_,inst0,inst0_idx1)) &&
-  (inst1->_opnds[1]->scale()  /* 1.mem$$scale */ == /* 0.mem$$scale */ inst0->_opnds[1]->scale()) &&
-  (inst1->_opnds[1]->disp(ra_,inst1,inst1_idx1)  /* 1.mem$$disp */ == /* 0.mem$$disp */ inst0->_opnds[1]->disp(ra_,inst0,inst0_idx1))
-) 
-;
-      // IF instructions and constraints matched
-      if( matches ) {
-        // generate the new sub-tree
-        assert( true, "Debug stopping point");
-        storeLNode *root = new storeLNode();
-        // ----- Initial setup -----
-        root->add_req(_in[0]);                // control edge
-        root->add_req(inst1->in(1));        // unmatched ideal edge
-        root->_bottom_type = inst1->bottom_type();
-        ra_->add_reference(root, inst1);
-        ra_->set_oop (root, ra_->is_oop(inst1));
-        ra_->set_pair(root->_idx, ra_->get_reg_second(inst1), ra_->get_reg_first(inst1));
-        root->_opnds[0] = inst1->_opnds[0]->clone(); // result
-        // ----- Done with initial setup -----
-        for( unsigned x1 = inst1_idx1; x1 < inst1_idx2; x1++ )
-          root->add_req( inst1->in(x1) );
-        root->_opnds[1] = inst1->_opnds[1]->clone();
-        for( unsigned x2 = inst1_idx2; x2 < inst1_idx3; x2++ )
-          root->add_req( inst1->in(x2) );
-        root->_opnds[2] = inst1->_opnds[2]->clone();
-        deleted = 2;
-        return root;  // return new root;
-      }
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==1)) && ( 
+#line 12737 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_2op_lea()
+#line 54 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, addI_rReg_imm_rule);
+    if (replacement) {
+      return 1;
     }
   } // end of peephole rule #1
 
-  return NULL;  // No peephole rules matched
+  return -1;  // No peephole rules matched
+}
+
+int incI_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==2)) && ( 
+#line 12745 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_3op_lea() ||
+                VM_Version::is_intel_cascade_lake()
+#line 73 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, incI_rReg_rule);
+    if (replacement) {
+      return 2;
+    }
+  } // end of peephole rule #2
+
+  return -1;  // No peephole rules matched
+}
+
+int decI_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==3)) && ( 
+#line 12754 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_3op_lea() ||
+                VM_Version::is_intel_cascade_lake()
+#line 92 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, decI_rReg_rule);
+    if (replacement) {
+      return 3;
+    }
+  } // end of peephole rule #3
+
+  return -1;  // No peephole rules matched
+}
+
+int addL_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==5)) && ( 
+#line 12771 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_2op_lea()
+#line 110 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_rReg_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_reg(block, block_index, cfg_, ra_, replacing, addL_rReg_rule);
+    if (replacement) {
+      return 5;
+    }
+  } // end of peephole rule #5
+
+  return -1;  // No peephole rules matched
+}
+
+int addL_rReg_immNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==6)) && ( 
+#line 12779 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_2op_lea()
+#line 128 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immL32_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, addL_rReg_imm_rule);
+    if (replacement) {
+      return 6;
+    }
+  } // end of peephole rule #6
+
+  return -1;  // No peephole rules matched
+}
+
+int incL_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==7)) && ( 
+#line 12787 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_3op_lea() ||
+                VM_Version::is_intel_cascade_lake()
+#line 147 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immL32_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, incL_rReg_rule);
+    if (replacement) {
+      return 7;
+    }
+  } // end of peephole rule #7
+
+  return -1;  // No peephole rules matched
+}
+
+int decL_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==8)) && ( 
+#line 12796 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_3op_lea() ||
+                VM_Version::is_intel_cascade_lake()
+#line 166 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immL32_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, decL_rReg_rule);
+    if (replacement) {
+      return 8;
+    }
+  } // end of peephole rule #8
+
+  return -1;  // No peephole rules matched
+}
+
+int salI_rReg_immI2Node::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==4)) && ( 
+#line 12763 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_2op_lea()
+#line 184 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI2_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, salI_rReg_immI2_rule);
+    if (replacement) {
+      return 4;
+    }
+  } // end of peephole rule #4
+
+  return -1;  // No peephole rules matched
+}
+
+int salL_rReg_immI2Node::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==9)) && ( 
+#line 12805 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+VM_Version::supports_fast_2op_lea()
+#line 202 "ad_x86_peephole.cpp"
+ ) ) {
+    auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immI2_peepNode()); };
+    bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, salL_rReg_immI2_rule);
+    if (replacement) {
+      return 9;
+    }
+  } // end of peephole rule #9
+
+  return -1;  // No peephole rules matched
+}
+
+int testI_regNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==10)) && ( true ) ) {
+    auto replacing = nullptr;
+    bool replacement = Peephole::test_may_remove(block, block_index, cfg_, ra_, replacing, testI_reg_rule);
+    if (replacement) {
+      return 10;
+    }
+  } // end of peephole rule #10
+
+  return -1;  // No peephole rules matched
+}
+
+int testL_regNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
+  bool  matches = true;
+  MachNode *inst0 = this;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==11)) && ( true ) ) {
+    auto replacing = nullptr;
+    bool replacement = Peephole::test_may_remove(block, block_index, cfg_, ra_, replacing, testL_reg_rule);
+    if (replacement) {
+      return 11;
+    }
+  } // end of peephole rule #11
+
+  return -1;  // No peephole rules matched
 }
 
 // Check consistency of C++ compilation with ADLC options:
@@ -174,3 +256,7 @@ MachNode *loadLNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
 #ifndef _LP64
 #  error "_LP64 must be defined"
 #endif // _LP64
+// Check adlc -DASSERT=1
+#ifndef ASSERT
+#  error "ASSERT must be defined"
+#endif // ASSERT

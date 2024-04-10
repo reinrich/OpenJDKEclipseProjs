@@ -1,6 +1,6 @@
 #line 1 "adGlobals_x86.hpp"
 //
-// Copyright (c) 2003, 2017, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -31,7 +31,7 @@
 
 
 // the number of reserved registers + machine registers.
-#define REG_COUNT    545
+#define REG_COUNT    559
 
 // the number of save_on_entry + always_saved registers.
 #define MAX_SAVED_ON_ENTRY_REG_COUNT    12
@@ -585,8 +585,22 @@ enum MachRegisterNumbers {
   XMM31n_num,               // enum 541, regnum 541, reg encode  31
   XMM31o_num,               // enum 542, regnum 542, reg encode  31
   XMM31p_num,               // enum 543, regnum 543, reg encode  31
-  RFLAGS_num,               // enum 544, regnum 544, reg encode  16
-  _last_Mach_Reg            // 545
+  K7_num,                   // enum 544, regnum 544, reg encode   7
+  K7_H_num,                 // enum 545, regnum 545, reg encode   7
+  K6_num,                   // enum 546, regnum 546, reg encode   6
+  K6_H_num,                 // enum 547, regnum 547, reg encode   6
+  K5_num,                   // enum 548, regnum 548, reg encode   5
+  K5_H_num,                 // enum 549, regnum 549, reg encode   5
+  K4_num,                   // enum 550, regnum 550, reg encode   4
+  K4_H_num,                 // enum 551, regnum 551, reg encode   4
+  K3_num,                   // enum 552, regnum 552, reg encode   3
+  K3_H_num,                 // enum 553, regnum 553, reg encode   3
+  K2_num,                   // enum 554, regnum 554, reg encode   2
+  K2_H_num,                 // enum 555, regnum 555, reg encode   2
+  K1_num,                   // enum 556, regnum 556, reg encode   1
+  K1_H_num,                 // enum 557, regnum 557, reg encode   1
+  RFLAGS_num,               // enum 558, regnum 558, reg encode  16
+  _last_Mach_Reg            // 559
 };
 
 // Size of register-mask in ints

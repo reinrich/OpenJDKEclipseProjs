@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2002, 2018, Oracle and/or its affiliates. All rights reserved.
+ Copyright (c) 2002, 2024, Oracle and/or its affiliates. All rights reserved.
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 
  This code is free software; you can redistribute it and/or modify it
@@ -24,6 +24,8 @@
  // AUTOMATICALLY GENERATED FILE - DO NOT EDIT
 
 # include "precompiled.hpp"
+# include "classfile/javaClasses.inline.hpp"
+# include "classfile/vmClasses.hpp"
 # include "memory/resourceArea.hpp"
 # include "utilities/macros.hpp"
 #if INCLUDE_JVMTI
@@ -32,66 +34,70 @@
 # include "prims/jvmtiEnter.inline.hpp"
 # include "prims/jvmtiRawMonitor.hpp"
 # include "prims/jvmtiUtil.hpp"
+# include "runtime/fieldDescriptor.inline.hpp"
+# include "runtime/jniHandles.hpp"
+# include "runtime/thread.inline.hpp"
+# include "runtime/threads.hpp"
 # include "runtime/threadSMR.hpp"
 
 
 #ifdef JVMTI_TRACE
-jbyte JvmtiTrace::_event_trace_flags[87];
+jbyte JvmtiTrace::_event_trace_flags[89];
 
-jint JvmtiTrace::_max_event_index = 86;
+jint JvmtiTrace::_max_event_index = 88;
 
 // Event names
 const char* JvmtiTrace::_event_names[] = {
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
   "VMInit",
   "VMDeath",
   "ThreadStart",
@@ -114,21 +120,23 @@ const char* JvmtiTrace::_event_names[] = {
   "CompiledMethodUnload",
   "DynamicCodeGenerated",
   "DataDumpRequest",
-  NULL,
+  nullptr,
   "MonitorWait",
   "MonitorWaited",
   "MonitorContendedEnter",
   "MonitorContendedEntered",
-  NULL,
-  NULL,
-  NULL,
+  nullptr,
+  nullptr,
+  nullptr,
   "ResourceExhausted",
   "GarbageCollectionStart",
   "GarbageCollectionFinish",
   "ObjectFree",
   "VMObjectAlloc",
-  NULL,
-  "SampledObjectAlloc"
+  nullptr,
+  "SampledObjectAlloc",
+  "VirtualThreadStart",
+  "VirtualThreadEnd"
 };
 
 
@@ -151,7 +159,7 @@ const char* jvmtiHeapReferenceKindConstantNames[] = {
   "JVMTI_HEAP_REFERENCE_JNI_LOCAL",
   "JVMTI_HEAP_REFERENCE_THREAD",
   "JVMTI_HEAP_REFERENCE_OTHER",
-  NULL
+  nullptr
 };
 
 // Heap Reference Enumeration value
@@ -188,7 +196,7 @@ const char* jvmtiPrimitiveTypeConstantNames[] = {
   "JVMTI_PRIMITIVE_TYPE_LONG",
   "JVMTI_PRIMITIVE_TYPE_FLOAT",
   "JVMTI_PRIMITIVE_TYPE_DOUBLE",
-  NULL
+  nullptr
 };
 
 // Primitive Type Enumeration value
@@ -211,7 +219,7 @@ const char* jvmtiHeapObjectFilterConstantNames[] = {
   "JVMTI_HEAP_OBJECT_TAGGED",
   "JVMTI_HEAP_OBJECT_UNTAGGED",
   "JVMTI_HEAP_OBJECT_EITHER",
-  NULL
+  nullptr
 };
 
 // Heap Object Filter Enumeration value
@@ -233,7 +241,7 @@ const char* jvmtiHeapRootKindConstantNames[] = {
   "JVMTI_HEAP_ROOT_JNI_LOCAL",
   "JVMTI_HEAP_ROOT_THREAD",
   "JVMTI_HEAP_ROOT_OTHER",
-  NULL
+  nullptr
 };
 
 // Heap Root Kind Enumeration value
@@ -261,7 +269,7 @@ const char* jvmtiObjectReferenceKindConstantNames[] = {
   "JVMTI_REFERENCE_INTERFACE",
   "JVMTI_REFERENCE_STATIC_FIELD",
   "JVMTI_REFERENCE_CONSTANT_POOL",
-  NULL
+  nullptr
 };
 
 // Object Reference Enumeration value
@@ -285,7 +293,7 @@ const char* jvmtiIterationControlConstantNames[] = {
   "JVMTI_ITERATION_CONTINUE",
   "JVMTI_ITERATION_IGNORE",
   "JVMTI_ITERATION_ABORT",
-  NULL
+  nullptr
 };
 
 // Iteration Control Enumeration value
@@ -302,7 +310,7 @@ jint jvmtiIterationControlConstantValues[] = {
 const char* jvmtiEventModeConstantNames[] = {
   "JVMTI_ENABLE",
   "JVMTI_DISABLE",
-  NULL
+  nullptr
 };
 
 // Event Enable/Disable value
@@ -333,7 +341,7 @@ const char* jvmtiParamTypesConstantNames[] = {
   "JVMTI_TYPE_CCHAR",
   "JVMTI_TYPE_CVOID",
   "JVMTI_TYPE_JNIENV",
-  NULL
+  nullptr
 };
 
 // Extension Function/Event Parameter Types value
@@ -369,7 +377,7 @@ const char* jvmtiParamKindConstantNames[] = {
   "JVMTI_KIND_ALLOC_ALLOC_BUF",
   "JVMTI_KIND_OUT",
   "JVMTI_KIND_OUT_BUF",
-  NULL
+  nullptr
 };
 
 // Extension Function/Event Parameter Kinds value
@@ -391,7 +399,7 @@ const char* jvmtiTimerKindConstantNames[] = {
   "JVMTI_TIMER_USER_CPU",
   "JVMTI_TIMER_TOTAL_CPU",
   "JVMTI_TIMER_ELAPSED",
-  NULL
+  nullptr
 };
 
 // Timer Kinds value
@@ -411,7 +419,7 @@ const char* jvmtiPhaseConstantNames[] = {
   "JVMTI_PHASE_START",
   "JVMTI_PHASE_LIVE",
   "JVMTI_PHASE_DEAD",
-  NULL
+  nullptr
 };
 
 // Phases of execution value
@@ -432,7 +440,7 @@ const char* jvmtiVerboseFlagConstantNames[] = {
   "JVMTI_VERBOSE_GC",
   "JVMTI_VERBOSE_CLASS",
   "JVMTI_VERBOSE_JNI",
-  NULL
+  nullptr
 };
 
 // Verbose Flag Enumeration value
@@ -451,7 +459,7 @@ const char* jvmtiJlocationFormatConstantNames[] = {
   "JVMTI_JLOCATION_JVMBCI",
   "JVMTI_JLOCATION_MACHINEPC",
   "JVMTI_JLOCATION_OTHER",
-  NULL
+  nullptr
 };
 
 // JLocation Format Enumeration value
@@ -468,8 +476,8 @@ jint JvmtiTrace::_max_function_index = 156;
 
 // Function names
 const char* JvmtiTrace::_function_names[] = {
-  NULL,
-  NULL,
+  nullptr,
+  nullptr,
   "SetEventNotificationMode",
   "GetAllModules",
   "GetAllThreads",
@@ -535,7 +543,7 @@ const char* JvmtiTrace::_function_names[] = {
   "GetMethodName",
   "GetMethodDeclaringClass",
   "GetMethodModifiers",
-  NULL,
+  nullptr,
   "GetMaxLocals",
   "GetArgumentsSize",
   "GetLineNumberTable",
@@ -573,7 +581,7 @@ const char* JvmtiTrace::_function_names[] = {
   "GetThreadLocalStorage",
   "SetThreadLocalStorage",
   "GetStackTrace",
-  NULL,
+  nullptr,
   "GetTag",
   "SetTag",
   "ForceGarbageCollection",
@@ -581,13 +589,13 @@ const char* JvmtiTrace::_function_names[] = {
   "IterateOverReachableObjects",
   "IterateOverHeap",
   "IterateOverInstancesOfClass",
-  NULL,
+  nullptr,
   "GetObjectsWithTags",
   "FollowReferences",
   "IterateThroughHeap",
-  NULL,
-  NULL,
-  NULL,
+  nullptr,
+  "SuspendAllVirtualThreads",
+  "ResumeAllVirtualThreads",
   "SetJNIFunctionTable",
   "GetJNIFunctionTable",
   "SetEventCallbacks",
@@ -609,7 +617,7 @@ const char* JvmtiTrace::_function_names[] = {
   "GetTimerInfo",
   "GetTime",
   "GetPotentialCapabilities",
-  NULL,
+  nullptr,
   "AddCapabilities",
   "RelinquishCapabilities",
   "GetAvailableProcessors",
@@ -624,7 +632,7 @@ const char* JvmtiTrace::_function_names[] = {
   "GetOwnedMonitorStackDepthInfo",
   "GetObjectSize",
   "GetLocalInstance",
-  "SetHeapSamplingRate"
+  "SetHeapSamplingInterval"
 };
 
 // Exclude list
@@ -651,7 +659,7 @@ extern "C" {
 
   //
   // Memory Management functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_Allocate(jvmtiEnv* env,
@@ -659,8 +667,8 @@ jvmtiTrace_Allocate(jvmtiEnv* env,
             unsigned char** mem_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(46);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(46);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -669,19 +677,19 @@ jvmtiTrace_Allocate(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -691,16 +699,17 @@ jvmtiTrace_Allocate(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_Allocate , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    if (mem_ptr == NULL) {
+    if (mem_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  size=" JLONG_FORMAT "", curr_thread_name, func_name, size);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is mem_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is mem_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -714,18 +723,18 @@ jvmtiTrace_Allocate(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  size=" JLONG_FORMAT "", curr_thread_name, func_name, size);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (mem_ptr == NULL) {
+    if (mem_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  size=" JLONG_FORMAT "", curr_thread_name, func_name, size);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is mem_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is mem_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -739,7 +748,7 @@ jvmtiTrace_Allocate(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  size=" JLONG_FORMAT "", curr_thread_name, func_name, size);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -753,8 +762,8 @@ jvmtiTrace_Deallocate(jvmtiEnv* env,
             unsigned char* mem) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(47);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(47);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -763,19 +772,19 @@ jvmtiTrace_Deallocate(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -785,7 +794,8 @@ jvmtiTrace_Deallocate(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_Deallocate , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
@@ -798,7 +808,7 @@ jvmtiTrace_Deallocate(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -813,7 +823,7 @@ jvmtiTrace_Deallocate(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -824,7 +834,7 @@ jvmtiTrace_Deallocate(jvmtiEnv* env,
 
   //
   // Thread functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetThreadState(jvmtiEnv* env,
@@ -836,8 +846,8 @@ jvmtiTrace_GetThreadState(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(17);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(17);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -848,35 +858,36 @@ jvmtiTrace_GetThreadState(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetThreadState , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (thread_state_ptr == NULL) {
+  if (thread_state_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_state_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_state_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -890,7 +901,7 @@ jvmtiTrace_GetThreadState(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -908,47 +919,48 @@ jvmtiTrace_GetCurrentThread(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(18);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(18);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetCurrentThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (thread_ptr == NULL) {
+  if (thread_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -962,7 +974,7 @@ jvmtiTrace_GetCurrentThread(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -981,8 +993,8 @@ jvmtiTrace_GetAllThreads(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(4);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(4);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -993,45 +1005,46 @@ jvmtiTrace_GetAllThreads(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetAllThreads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (threads_count_ptr == NULL) {
+  if (threads_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is threads_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is threads_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (threads_ptr == NULL) {
+  if (threads_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is threads_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is threads_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -1045,7 +1058,7 @@ jvmtiTrace_GetAllThreads(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1063,8 +1076,8 @@ jvmtiTrace_SuspendThread(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(5);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(5);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1075,24 +1088,25 @@ jvmtiTrace_SuspendThread(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SuspendThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1100,41 +1114,22 @@ jvmtiTrace_SuspendThread(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_suspend == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->SuspendThread(java_thread);
+  err = jvmti_env->SuspendThread(thread);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1154,8 +1149,8 @@ jvmtiTrace_SuspendThreadList(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(92);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(92);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1166,24 +1161,25 @@ jvmtiTrace_SuspendThreadList(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SuspendThreadList , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1191,7 +1187,7 @@ jvmtiTrace_SuspendThreadList(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_suspend == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -1202,29 +1198,29 @@ jvmtiTrace_SuspendThreadList(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (request_list == NULL) {
+  if (request_list == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  request_count=" INT32_FORMAT "", curr_thread_name, func_name, request_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_list",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_list",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (results == NULL) {
+  if (results == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  request_count=" INT32_FORMAT " request_list=" PTR_FORMAT "", curr_thread_name, func_name, request_count, 
       p2i(request_list)
     );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is results",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is results",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -1242,7 +1238,101 @@ jvmtiTrace_SuspendThreadList(jvmtiEnv* env,
       p2i(request_list)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
+                  JvmtiUtil::error_name(err));
+  } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
+    log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
+  }
+  return err;
+#endif // INCLUDE_JVMTI
+}
+
+static jvmtiError JNICALL
+jvmtiTrace_SuspendAllVirtualThreads(jvmtiEnv* env,
+            jint except_count,
+            const jthread* except_list) {
+
+#if !INCLUDE_JVMTI 
+  return JVMTI_ERROR_NOT_AVAILABLE; 
+#else 
+  SafeResourceMark rm;
+  jint trace_flags = JvmtiTrace::trace_flags(118);
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
+  if (trace_flags) {
+    func_name = JvmtiTrace::function_name(118);
+    curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
+  }
+  if(!JvmtiEnv::is_vm_live()) {
+    if (trace_flags) {
+          log_trace(jvmti)("[-] %s %s(%d)", func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
+    }
+    return JVMTI_ERROR_WRONG_PHASE;
+  }
+  Thread* this_thread = Thread::current_or_null(); 
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
+    if (trace_flags) {
+      log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
+      JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
+    }
+    return JVMTI_ERROR_UNATTACHED_THREAD;
+  }
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
+  ThreadInVMfromNative __tiv(current_thread);
+  VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SuspendAllVirtualThreads , current_thread)
+  debug_only(VMNativeEntryWrapper __vew;)
+  PreserveExceptionMark __em(this_thread);
+  JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
+  if (!jvmti_env->is_valid()) {
+    if (trace_flags) {
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
+    }
+    return JVMTI_ERROR_INVALID_ENVIRONMENT;
+  }
+
+  if (jvmti_env->get_capabilities()->can_suspend == 0) {
+    if (trace_flags) {
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
+    }
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+
+  if (jvmti_env->get_capabilities()->can_support_virtual_threads == 0) {
+    if (trace_flags) {
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
+    }
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+  jvmtiError err;
+  if (except_count < 0) {
+      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
+        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
+      }
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is except_count",  curr_thread_name, func_name,
+                  JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
+      }
+      return JVMTI_ERROR_ILLEGAL_ARGUMENT;
+  }
+
+  if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
+              log_trace(jvmti)("[%s] %s {  except_count=" INT32_FORMAT " except_list=" PTR_FORMAT "", curr_thread_name, func_name, except_count, 
+      p2i(except_list)
+    );
+  }
+  err = jvmti_env->SuspendAllVirtualThreads(except_count, except_list);
+  if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
+      if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
+          log_trace(jvmti)("[%s] %s {  except_count=" INT32_FORMAT " except_list=" PTR_FORMAT "", curr_thread_name, func_name, except_count, 
+      p2i(except_list)
+    );
+    }
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1260,8 +1350,8 @@ jvmtiTrace_ResumeThread(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(6);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(6);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1272,24 +1362,25 @@ jvmtiTrace_ResumeThread(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ResumeThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1297,37 +1388,22 @@ jvmtiTrace_ResumeThread(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_suspend == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->ResumeThread(java_thread);
+  err = jvmti_env->ResumeThread(thread);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1347,8 +1423,8 @@ jvmtiTrace_ResumeThreadList(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(93);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(93);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1359,24 +1435,25 @@ jvmtiTrace_ResumeThreadList(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ResumeThreadList , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1384,7 +1461,7 @@ jvmtiTrace_ResumeThreadList(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_suspend == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -1395,29 +1472,29 @@ jvmtiTrace_ResumeThreadList(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (request_list == NULL) {
+  if (request_list == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  request_count=" INT32_FORMAT "", curr_thread_name, func_name, request_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_list",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is request_list",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (results == NULL) {
+  if (results == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  request_count=" INT32_FORMAT " request_list=" PTR_FORMAT "", curr_thread_name, func_name, request_count, 
       p2i(request_list)
     );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is results",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is results",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -1435,7 +1512,101 @@ jvmtiTrace_ResumeThreadList(jvmtiEnv* env,
       p2i(request_list)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
+                  JvmtiUtil::error_name(err));
+  } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
+    log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
+  }
+  return err;
+#endif // INCLUDE_JVMTI
+}
+
+static jvmtiError JNICALL
+jvmtiTrace_ResumeAllVirtualThreads(jvmtiEnv* env,
+            jint except_count,
+            const jthread* except_list) {
+
+#if !INCLUDE_JVMTI 
+  return JVMTI_ERROR_NOT_AVAILABLE; 
+#else 
+  SafeResourceMark rm;
+  jint trace_flags = JvmtiTrace::trace_flags(119);
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
+  if (trace_flags) {
+    func_name = JvmtiTrace::function_name(119);
+    curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
+  }
+  if(!JvmtiEnv::is_vm_live()) {
+    if (trace_flags) {
+          log_trace(jvmti)("[-] %s %s(%d)", func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
+    }
+    return JVMTI_ERROR_WRONG_PHASE;
+  }
+  Thread* this_thread = Thread::current_or_null(); 
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
+    if (trace_flags) {
+      log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
+      JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
+    }
+    return JVMTI_ERROR_UNATTACHED_THREAD;
+  }
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
+  ThreadInVMfromNative __tiv(current_thread);
+  VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ResumeAllVirtualThreads , current_thread)
+  debug_only(VMNativeEntryWrapper __vew;)
+  PreserveExceptionMark __em(this_thread);
+  JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
+  if (!jvmti_env->is_valid()) {
+    if (trace_flags) {
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
+    }
+    return JVMTI_ERROR_INVALID_ENVIRONMENT;
+  }
+
+  if (jvmti_env->get_capabilities()->can_suspend == 0) {
+    if (trace_flags) {
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
+    }
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+
+  if (jvmti_env->get_capabilities()->can_support_virtual_threads == 0) {
+    if (trace_flags) {
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
+                    JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
+    }
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+  jvmtiError err;
+  if (except_count < 0) {
+      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
+        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
+      }
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is except_count",  curr_thread_name, func_name,
+                  JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
+      }
+      return JVMTI_ERROR_ILLEGAL_ARGUMENT;
+  }
+
+  if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
+              log_trace(jvmti)("[%s] %s {  except_count=" INT32_FORMAT " except_list=" PTR_FORMAT "", curr_thread_name, func_name, except_count, 
+      p2i(except_list)
+    );
+  }
+  err = jvmti_env->ResumeAllVirtualThreads(except_count, except_list);
+  if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
+      if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
+          log_trace(jvmti)("[%s] %s {  except_count=" INT32_FORMAT " except_list=" PTR_FORMAT "", curr_thread_name, func_name, except_count, 
+      p2i(except_list)
+    );
+    }
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1454,8 +1625,8 @@ jvmtiTrace_StopThread(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(7);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(7);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1466,24 +1637,25 @@ jvmtiTrace_StopThread(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_StopThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1491,37 +1663,22 @@ jvmtiTrace_StopThread(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_signal_thread == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->StopThread(java_thread, exception);
+  err = jvmti_env->StopThread(thread, exception);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1539,8 +1696,8 @@ jvmtiTrace_InterruptThread(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(8);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(8);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1551,24 +1708,25 @@ jvmtiTrace_InterruptThread(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_InterruptThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1576,7 +1734,7 @@ jvmtiTrace_InterruptThread(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_signal_thread == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -1591,7 +1749,7 @@ jvmtiTrace_InterruptThread(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1610,8 +1768,8 @@ jvmtiTrace_GetThreadInfo(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(9);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(9);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1622,35 +1780,36 @@ jvmtiTrace_GetThreadInfo(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetThreadInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (info_ptr == NULL) {
+  if (info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -1664,7 +1823,7 @@ jvmtiTrace_GetThreadInfo(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1684,8 +1843,8 @@ jvmtiTrace_GetOwnedMonitorInfo(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(10);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(10);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1696,24 +1855,25 @@ jvmtiTrace_GetOwnedMonitorInfo(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetOwnedMonitorInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1721,63 +1881,42 @@ jvmtiTrace_GetOwnedMonitorInfo(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_owned_monitor_info == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
+  if (owned_monitor_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
-  if (owned_monitor_count_ptr == NULL) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is owned_monitor_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is owned_monitor_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (owned_monitors_ptr == NULL) {
+  if (owned_monitors_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is owned_monitors_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is owned_monitors_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->GetOwnedMonitorInfo(java_thread, owned_monitor_count_ptr, owned_monitors_ptr);
+  err = jvmti_env->GetOwnedMonitorInfo(thread, owned_monitor_count_ptr, owned_monitors_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1797,8 +1936,8 @@ jvmtiTrace_GetOwnedMonitorStackDepthInfo(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(153);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(153);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1809,24 +1948,25 @@ jvmtiTrace_GetOwnedMonitorStackDepthInfo(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetOwnedMonitorStackDepthInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1834,63 +1974,42 @@ jvmtiTrace_GetOwnedMonitorStackDepthInfo(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_owned_monitor_stack_depth_info == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
+  if (monitor_info_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
-  if (monitor_info_count_ptr == NULL) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_info_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_info_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (monitor_info_ptr == NULL) {
+  if (monitor_info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->GetOwnedMonitorStackDepthInfo(java_thread, monitor_info_count_ptr, monitor_info_ptr);
+  err = jvmti_env->GetOwnedMonitorStackDepthInfo(thread, monitor_info_count_ptr, monitor_info_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -1909,8 +2028,8 @@ jvmtiTrace_GetCurrentContendedMonitor(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(11);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(11);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -1921,24 +2040,25 @@ jvmtiTrace_GetCurrentContendedMonitor(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetCurrentContendedMonitor , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1946,52 +2066,32 @@ jvmtiTrace_GetCurrentContendedMonitor(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_current_contended_monitor == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
+  if (monitor_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
-  if (monitor_ptr == NULL) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->GetCurrentContendedMonitor(java_thread, monitor_ptr);
+  err = jvmti_env->GetCurrentContendedMonitor(thread, monitor_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2012,8 +2112,8 @@ jvmtiTrace_RunAgentThread(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(12);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(12);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2024,35 +2124,36 @@ jvmtiTrace_RunAgentThread(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_RunAgentThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (proc == NULL) {
+  if (proc == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is proc",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is proc",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2070,7 +2171,7 @@ jvmtiTrace_RunAgentThread(jvmtiEnv* env,
       p2i(arg)
     , priority);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2085,74 +2186,56 @@ jvmtiTrace_SetThreadLocalStorage(jvmtiEnv* env,
             const void* data) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(103);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(103);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetThreadLocalStorage , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s data=" PTR_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), 
+              log_trace(jvmti)("[%s] %s {  data=" PTR_FORMAT "", curr_thread_name, func_name, 
       p2i(data)
     );
   }
-  err = jvmti_env->SetThreadLocalStorage(java_thread, data);
+  err = jvmti_env->SetThreadLocalStorage(thread, data);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s data=" PTR_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), 
+          log_trace(jvmti)("[%s] %s {  data=" PTR_FORMAT "", curr_thread_name, func_name, 
       p2i(data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2166,21 +2249,21 @@ jvmtiTrace_GetThreadLocalStorage(jvmtiEnv* env,
             void** data_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(102);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(102);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
@@ -2191,18 +2274,18 @@ jvmtiTrace_GetThreadLocalStorage(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (data_ptr == NULL) {
+  if (data_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is data_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is data_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2216,7 +2299,7 @@ jvmtiTrace_GetThreadLocalStorage(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2226,7 +2309,7 @@ jvmtiTrace_GetThreadLocalStorage(jvmtiEnv* env,
 
   //
   // Thread Group functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetTopThreadGroups(jvmtiEnv* env,
@@ -2238,8 +2321,8 @@ jvmtiTrace_GetTopThreadGroups(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(13);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(13);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2250,45 +2333,46 @@ jvmtiTrace_GetTopThreadGroups(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetTopThreadGroups , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (group_count_ptr == NULL) {
+  if (group_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is group_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is group_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (groups_ptr == NULL) {
+  if (groups_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is groups_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is groups_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2302,7 +2386,7 @@ jvmtiTrace_GetTopThreadGroups(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2321,8 +2405,8 @@ jvmtiTrace_GetThreadGroupInfo(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(14);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(14);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2333,35 +2417,36 @@ jvmtiTrace_GetThreadGroupInfo(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetThreadGroupInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (info_ptr == NULL) {
+  if (info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2375,7 +2460,7 @@ jvmtiTrace_GetThreadGroupInfo(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2397,8 +2482,8 @@ jvmtiTrace_GetThreadGroupChildren(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(15);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(15);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2409,65 +2494,66 @@ jvmtiTrace_GetThreadGroupChildren(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetThreadGroupChildren , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (thread_count_ptr == NULL) {
+  if (thread_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (threads_ptr == NULL) {
+  if (threads_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is threads_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is threads_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (group_count_ptr == NULL) {
+  if (group_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is group_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is group_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (groups_ptr == NULL) {
+  if (groups_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is groups_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is groups_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2481,7 +2567,7 @@ jvmtiTrace_GetThreadGroupChildren(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2492,7 +2578,7 @@ jvmtiTrace_GetThreadGroupChildren(jvmtiEnv* env,
 
   //
   // Stack Frame functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetStackTrace(jvmtiEnv* env,
@@ -2507,8 +2593,8 @@ jvmtiTrace_GetStackTrace(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(104);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(104);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2519,91 +2605,70 @@ jvmtiTrace_GetStackTrace(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetStackTrace , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
   if (max_frame_count < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s start_depth=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), start_depth);
+          log_trace(jvmti)("[%s] %s {  start_depth=" INT32_FORMAT "", curr_thread_name, func_name, start_depth);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_frame_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_frame_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (frame_buffer == NULL) {
+  if (frame_buffer == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), start_depth, max_frame_count);
+          log_trace(jvmti)("[%s] %s {  start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, start_depth, max_frame_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is frame_buffer",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is frame_buffer",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (count_ptr == NULL) {
+  if (count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), start_depth, max_frame_count);
+          log_trace(jvmti)("[%s] %s {  start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, start_depth, max_frame_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), start_depth, max_frame_count);
+              log_trace(jvmti)("[%s] %s {  start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, start_depth, max_frame_count);
   }
-  err = jvmti_env->GetStackTrace(java_thread, start_depth, max_frame_count, frame_buffer, count_ptr);
+  err = jvmti_env->GetStackTrace(thread, start_depth, max_frame_count, frame_buffer, count_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), start_depth, max_frame_count);
+          log_trace(jvmti)("[%s] %s {  start_depth=" INT32_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, start_depth, max_frame_count);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2623,8 +2688,8 @@ jvmtiTrace_GetAllStackTraces(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(100);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(100);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2635,24 +2700,25 @@ jvmtiTrace_GetAllStackTraces(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetAllStackTraces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2663,27 +2729,27 @@ jvmtiTrace_GetAllStackTraces(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_frame_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_frame_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (stack_info_ptr == NULL) {
+  if (stack_info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, max_frame_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is stack_info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is stack_info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (thread_count_ptr == NULL) {
+  if (thread_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, max_frame_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2697,7 +2763,7 @@ jvmtiTrace_GetAllStackTraces(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, max_frame_count);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2718,8 +2784,8 @@ jvmtiTrace_GetThreadListStackTraces(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(101);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(101);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2730,24 +2796,25 @@ jvmtiTrace_GetThreadListStackTraces(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetThreadListStackTraces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2758,17 +2825,17 @@ jvmtiTrace_GetThreadListStackTraces(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (thread_list == NULL) {
+  if (thread_list == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  thread_count=" INT32_FORMAT "", curr_thread_name, func_name, thread_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_list",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread_list",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2780,19 +2847,19 @@ jvmtiTrace_GetThreadListStackTraces(jvmtiEnv* env,
       p2i(thread_list)
     );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_frame_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_frame_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (stack_info_ptr == NULL) {
+  if (stack_info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  thread_count=" INT32_FORMAT " thread_list=" PTR_FORMAT " max_frame_count=" INT32_FORMAT "", curr_thread_name, func_name, thread_count, 
       p2i(thread_list)
     , max_frame_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is stack_info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is stack_info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -2810,7 +2877,7 @@ jvmtiTrace_GetThreadListStackTraces(jvmtiEnv* env,
       p2i(thread_list)
     , max_frame_count);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2829,8 +2896,8 @@ jvmtiTrace_GetFrameCount(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(16);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(16);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2841,69 +2908,50 @@ jvmtiTrace_GetFrameCount(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetFrameCount , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
+  if (count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
-  if (count_ptr == NULL) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->GetFrameCount(java_thread, count_ptr);
+  err = jvmti_env->GetFrameCount(thread, count_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -2921,8 +2969,8 @@ jvmtiTrace_PopFrame(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(80);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(80);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -2933,24 +2981,25 @@ jvmtiTrace_PopFrame(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_PopFrame , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2958,37 +3007,22 @@ jvmtiTrace_PopFrame(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_pop_frame == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->PopFrame(java_thread);
+  err = jvmti_env->PopFrame(thread);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3009,8 +3043,8 @@ jvmtiTrace_GetFrameLocation(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(19);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(19);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3021,92 +3055,71 @@ jvmtiTrace_GetFrameLocation(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetFrameLocation , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (method_ptr == NULL) {
+  if (method_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+          log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (location_ptr == NULL) {
+  if (location_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+          log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is location_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is location_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+              log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
   }
-  err = jvmti_env->GetFrameLocation(java_thread, depth, method_ptr, location_ptr);
+  err = jvmti_env->GetFrameLocation(thread, depth, method_ptr, location_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+          log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3125,8 +3138,8 @@ jvmtiTrace_NotifyFramePop(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(20);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(20);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3137,24 +3150,25 @@ jvmtiTrace_NotifyFramePop(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_NotifyFramePop , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3162,53 +3176,33 @@ jvmtiTrace_NotifyFramePop(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_frame_pop_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+              log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
   }
-  err = jvmti_env->NotifyFramePop(java_thread, depth);
+  err = jvmti_env->NotifyFramePop(thread, depth);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+          log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3219,7 +3213,7 @@ jvmtiTrace_NotifyFramePop(jvmtiEnv* env,
 
   //
   // Force Early Return functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_ForceEarlyReturnObject(jvmtiEnv* env,
@@ -3231,8 +3225,8 @@ jvmtiTrace_ForceEarlyReturnObject(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(81);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(81);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3243,24 +3237,25 @@ jvmtiTrace_ForceEarlyReturnObject(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ForceEarlyReturnObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3268,41 +3263,22 @@ jvmtiTrace_ForceEarlyReturnObject(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_force_early_return == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->ForceEarlyReturnObject(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnObject(thread, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3321,8 +3297,8 @@ jvmtiTrace_ForceEarlyReturnInt(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(82);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(82);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3333,24 +3309,25 @@ jvmtiTrace_ForceEarlyReturnInt(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ForceEarlyReturnInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3358,41 +3335,22 @@ jvmtiTrace_ForceEarlyReturnInt(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_force_early_return == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s value=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+              log_trace(jvmti)("[%s] %s {  value=" INT32_FORMAT "", curr_thread_name, func_name, value);
   }
-  err = jvmti_env->ForceEarlyReturnInt(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnInt(thread, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s value=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+          log_trace(jvmti)("[%s] %s {  value=" INT32_FORMAT "", curr_thread_name, func_name, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3411,8 +3369,8 @@ jvmtiTrace_ForceEarlyReturnLong(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(83);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(83);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3423,24 +3381,25 @@ jvmtiTrace_ForceEarlyReturnLong(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ForceEarlyReturnLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3448,41 +3407,22 @@ jvmtiTrace_ForceEarlyReturnLong(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_force_early_return == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s value=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+              log_trace(jvmti)("[%s] %s {  value=" JLONG_FORMAT "", curr_thread_name, func_name, value);
   }
-  err = jvmti_env->ForceEarlyReturnLong(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnLong(thread, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s value=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+          log_trace(jvmti)("[%s] %s {  value=" JLONG_FORMAT "", curr_thread_name, func_name, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3501,8 +3441,8 @@ jvmtiTrace_ForceEarlyReturnFloat(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(84);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(84);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3513,24 +3453,25 @@ jvmtiTrace_ForceEarlyReturnFloat(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ForceEarlyReturnFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3538,41 +3479,22 @@ jvmtiTrace_ForceEarlyReturnFloat(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_force_early_return == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+              log_trace(jvmti)("[%s] %s {  value=%f", curr_thread_name, func_name, value);
   }
-  err = jvmti_env->ForceEarlyReturnFloat(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnFloat(thread, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+          log_trace(jvmti)("[%s] %s {  value=%f", curr_thread_name, func_name, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3591,8 +3513,8 @@ jvmtiTrace_ForceEarlyReturnDouble(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(85);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(85);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3603,24 +3525,25 @@ jvmtiTrace_ForceEarlyReturnDouble(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ForceEarlyReturnDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3628,41 +3551,22 @@ jvmtiTrace_ForceEarlyReturnDouble(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_force_early_return == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+              log_trace(jvmti)("[%s] %s {  value=%f", curr_thread_name, func_name, value);
   }
-  err = jvmti_env->ForceEarlyReturnDouble(java_thread, value);
+  err = jvmti_env->ForceEarlyReturnDouble(thread, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), value);
+          log_trace(jvmti)("[%s] %s {  value=%f", curr_thread_name, func_name, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3680,8 +3584,8 @@ jvmtiTrace_ForceEarlyReturnVoid(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(86);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(86);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3692,24 +3596,25 @@ jvmtiTrace_ForceEarlyReturnVoid(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ForceEarlyReturnVoid , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3717,41 +3622,22 @@ jvmtiTrace_ForceEarlyReturnVoid(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_force_early_return == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->ForceEarlyReturnVoid(java_thread);
+  err = jvmti_env->ForceEarlyReturnVoid(thread);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3762,7 +3648,7 @@ jvmtiTrace_ForceEarlyReturnVoid(jvmtiEnv* env,
 
   //
   // Heap functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_FollowReferences(jvmtiEnv* env,
@@ -3777,8 +3663,8 @@ jvmtiTrace_FollowReferences(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(115);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(115);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3789,24 +3675,25 @@ jvmtiTrace_FollowReferences(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_FollowReferences , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3814,20 +3701,20 @@ jvmtiTrace_FollowReferences(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (callbacks == NULL) {
+  if (callbacks == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  heap_filter=" INT32_FORMAT " klass=" PTR_FORMAT "", curr_thread_name, func_name, heap_filter, 
       p2i(klass)
     );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is callbacks",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is callbacks",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -3853,7 +3740,7 @@ jvmtiTrace_FollowReferences(jvmtiEnv* env,
       p2i(user_data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3874,8 +3761,8 @@ jvmtiTrace_IterateThroughHeap(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(116);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(116);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -3886,24 +3773,25 @@ jvmtiTrace_IterateThroughHeap(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IterateThroughHeap , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3911,20 +3799,20 @@ jvmtiTrace_IterateThroughHeap(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (callbacks == NULL) {
+  if (callbacks == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  heap_filter=" INT32_FORMAT " klass=" PTR_FORMAT "", curr_thread_name, func_name, heap_filter, 
       p2i(klass)
     );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is callbacks",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is callbacks",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -3950,7 +3838,7 @@ jvmtiTrace_IterateThroughHeap(jvmtiEnv* env,
       p2i(user_data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -3969,36 +3857,37 @@ jvmtiTrace_GetTag(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(106);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(106);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetTag , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4006,18 +3895,18 @@ jvmtiTrace_GetTag(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (tag_ptr == NULL) {
+  if (tag_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is tag_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is tag_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -4031,7 +3920,7 @@ jvmtiTrace_GetTag(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4050,36 +3939,37 @@ jvmtiTrace_SetTag(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(107);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(107);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetTag , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4087,7 +3977,7 @@ jvmtiTrace_SetTag(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -4102,7 +3992,7 @@ jvmtiTrace_SetTag(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  tag=" JLONG_FORMAT "", curr_thread_name, func_name, tag);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4124,8 +4014,8 @@ jvmtiTrace_GetObjectsWithTags(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(114);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(114);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4136,24 +4026,25 @@ jvmtiTrace_GetObjectsWithTags(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetObjectsWithTags , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4161,7 +4052,7 @@ jvmtiTrace_GetObjectsWithTags(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -4172,29 +4063,29 @@ jvmtiTrace_GetObjectsWithTags(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is tag_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is tag_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (tags == NULL) {
+  if (tags == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  tag_count=" INT32_FORMAT "", curr_thread_name, func_name, tag_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is tags",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is tags",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (count_ptr == NULL) {
+  if (count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  tag_count=" INT32_FORMAT " tags=" PTR_FORMAT "", curr_thread_name, func_name, tag_count, 
       p2i(tags)
     );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -4212,7 +4103,7 @@ jvmtiTrace_GetObjectsWithTags(jvmtiEnv* env,
       p2i(tags)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4229,8 +4120,8 @@ jvmtiTrace_ForceGarbageCollection(jvmtiEnv* env) {
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(108);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(108);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4241,24 +4132,25 @@ jvmtiTrace_ForceGarbageCollection(jvmtiEnv* env) {
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ForceGarbageCollection , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4273,7 +4165,7 @@ jvmtiTrace_ForceGarbageCollection(jvmtiEnv* env) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4284,7 +4176,7 @@ jvmtiTrace_ForceGarbageCollection(jvmtiEnv* env) {
 
   //
   // Heap (1.0) functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
@@ -4297,8 +4189,8 @@ jvmtiTrace_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(109);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(109);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4309,24 +4201,25 @@ jvmtiTrace_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IterateOverObjectsReachableFromObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4334,18 +4227,18 @@ jvmtiTrace_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (object_reference_callback == NULL) {
+  if (object_reference_callback == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is object_reference_callback",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is object_reference_callback",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -4363,7 +4256,7 @@ jvmtiTrace_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
       p2i(user_data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4384,8 +4277,8 @@ jvmtiTrace_IterateOverReachableObjects(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(110);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(110);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4396,24 +4289,25 @@ jvmtiTrace_IterateOverReachableObjects(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IterateOverReachableObjects , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4421,7 +4315,7 @@ jvmtiTrace_IterateOverReachableObjects(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -4440,7 +4334,7 @@ jvmtiTrace_IterateOverReachableObjects(jvmtiEnv* env,
       p2i(user_data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4460,8 +4354,8 @@ jvmtiTrace_IterateOverHeap(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(111);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(111);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4472,24 +4366,25 @@ jvmtiTrace_IterateOverHeap(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IterateOverHeap , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4497,26 +4392,26 @@ jvmtiTrace_IterateOverHeap(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (heap_object_callback == NULL) {
+  if (heap_object_callback == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  object_filter=%d:%s", curr_thread_name, func_name, object_filter, 
+          log_trace(jvmti)("[%s] %s {  object_filter=%d:%s", curr_thread_name, func_name, object_filter,
                     JvmtiTrace::enum_name(jvmtiHeapObjectFilterConstantNames, jvmtiHeapObjectFilterConstantValues, object_filter));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is heap_object_callback",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is heap_object_callback",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name, object_filter, 
+              log_trace(jvmti)("[%s] %s {  object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name, object_filter,
                     JvmtiTrace::enum_name(jvmtiHeapObjectFilterConstantNames, jvmtiHeapObjectFilterConstantValues, object_filter), 
       p2i(user_data)
     );
@@ -4524,12 +4419,12 @@ jvmtiTrace_IterateOverHeap(jvmtiEnv* env,
   err = jvmti_env->IterateOverHeap(object_filter, heap_object_callback, user_data);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name, object_filter, 
+          log_trace(jvmti)("[%s] %s {  object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name, object_filter,
                     JvmtiTrace::enum_name(jvmtiHeapObjectFilterConstantNames, jvmtiHeapObjectFilterConstantValues, object_filter), 
       p2i(user_data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4550,8 +4445,8 @@ jvmtiTrace_IterateOverInstancesOfClass(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(112);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(112);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4562,24 +4457,25 @@ jvmtiTrace_IterateOverInstancesOfClass(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IterateOverInstancesOfClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4587,49 +4483,49 @@ jvmtiTrace_IterateOverInstancesOfClass(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_tag_objects == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (heap_object_callback == NULL) {
+  if (heap_object_callback == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s object_filter=%d:%s", curr_thread_name, func_name, 
-                    JvmtiTrace::get_class_name(k_mirror), object_filter, 
+          log_trace(jvmti)("[%s] %s {  klass=%s object_filter=%d:%s", curr_thread_name, func_name,
+                    JvmtiTrace::get_class_name(k_mirror), object_filter,
                     JvmtiTrace::enum_name(jvmtiHeapObjectFilterConstantNames, jvmtiHeapObjectFilterConstantValues, object_filter));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is heap_object_callback",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is heap_object_callback",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::get_class_name(k_mirror), object_filter, 
+              log_trace(jvmti)("[%s] %s {  klass=%s object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name,
+                    JvmtiTrace::get_class_name(k_mirror), object_filter,
                     JvmtiTrace::enum_name(jvmtiHeapObjectFilterConstantNames, jvmtiHeapObjectFilterConstantValues, object_filter), 
       p2i(user_data)
     );
@@ -4637,13 +4533,13 @@ jvmtiTrace_IterateOverInstancesOfClass(jvmtiEnv* env,
   err = jvmti_env->IterateOverInstancesOfClass(k_mirror, object_filter, heap_object_callback, user_data);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::get_class_name(k_mirror), object_filter, 
+          log_trace(jvmti)("[%s] %s {  klass=%s object_filter=%d:%s user_data=" PTR_FORMAT "", curr_thread_name, func_name,
+                    JvmtiTrace::get_class_name(k_mirror), object_filter,
                     JvmtiTrace::enum_name(jvmtiHeapObjectFilterConstantNames, jvmtiHeapObjectFilterConstantValues, object_filter), 
       p2i(user_data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4654,7 +4550,7 @@ jvmtiTrace_IterateOverInstancesOfClass(jvmtiEnv* env,
 
   //
   // Local Variable functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetLocalObject(jvmtiEnv* env,
@@ -4668,8 +4564,8 @@ jvmtiTrace_GetLocalObject(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(21);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(21);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4680,24 +4576,25 @@ jvmtiTrace_GetLocalObject(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLocalObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4705,64 +4602,43 @@ jvmtiTrace_GetLocalObject(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
   }
-  err = jvmti_env->GetLocalObject(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalObject(thread, depth, slot, value_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4782,8 +4658,8 @@ jvmtiTrace_GetLocalInstance(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(155);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(155);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4794,24 +4670,25 @@ jvmtiTrace_GetLocalInstance(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLocalInstance , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4819,64 +4696,43 @@ jvmtiTrace_GetLocalInstance(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+          log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+              log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
   }
-  err = jvmti_env->GetLocalInstance(java_thread, depth, value_ptr);
+  err = jvmti_env->GetLocalInstance(thread, depth, value_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth);
+          log_trace(jvmti)("[%s] %s { depth=%d", curr_thread_name, func_name, depth);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -4897,8 +4753,8 @@ jvmtiTrace_GetLocalInt(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(22);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(22);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -4909,24 +4765,25 @@ jvmtiTrace_GetLocalInt(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLocalInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4934,64 +4791,43 @@ jvmtiTrace_GetLocalInt(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
   }
-  err = jvmti_env->GetLocalInt(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalInt(thread, depth, slot, value_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5012,8 +4848,8 @@ jvmtiTrace_GetLocalLong(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(23);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(23);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5024,24 +4860,25 @@ jvmtiTrace_GetLocalLong(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLocalLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5049,64 +4886,43 @@ jvmtiTrace_GetLocalLong(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
   }
-  err = jvmti_env->GetLocalLong(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalLong(thread, depth, slot, value_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5127,8 +4943,8 @@ jvmtiTrace_GetLocalFloat(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(24);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(24);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5139,24 +4955,25 @@ jvmtiTrace_GetLocalFloat(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLocalFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5164,64 +4981,43 @@ jvmtiTrace_GetLocalFloat(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
   }
-  err = jvmti_env->GetLocalFloat(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalFloat(thread, depth, slot, value_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5242,8 +5038,8 @@ jvmtiTrace_GetLocalDouble(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(25);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(25);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5254,24 +5050,25 @@ jvmtiTrace_GetLocalDouble(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLocalDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5279,64 +5076,43 @@ jvmtiTrace_GetLocalDouble(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
   }
-  err = jvmti_env->GetLocalDouble(java_thread, depth, slot, value_ptr);
+  err = jvmti_env->GetLocalDouble(thread, depth, slot, value_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5357,8 +5133,8 @@ jvmtiTrace_SetLocalObject(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(26);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(26);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5369,24 +5145,25 @@ jvmtiTrace_SetLocalObject(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetLocalObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5394,53 +5171,33 @@ jvmtiTrace_SetLocalObject(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
   }
-  err = jvmti_env->SetLocalObject(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalObject(thread, depth, slot, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5461,8 +5218,8 @@ jvmtiTrace_SetLocalInt(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(27);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(27);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5473,24 +5230,25 @@ jvmtiTrace_SetLocalInt(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetLocalInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5498,53 +5256,33 @@ jvmtiTrace_SetLocalInt(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot, value);
   }
-  err = jvmti_env->SetLocalInt(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalInt(thread, depth, slot, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=" INT32_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=" INT32_FORMAT "", curr_thread_name, func_name, depth, slot, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5565,8 +5303,8 @@ jvmtiTrace_SetLocalLong(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(28);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(28);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5577,24 +5315,25 @@ jvmtiTrace_SetLocalLong(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetLocalLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5602,53 +5341,33 @@ jvmtiTrace_SetLocalLong(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=" JLONG_FORMAT "", curr_thread_name, func_name, depth, slot, value);
   }
-  err = jvmti_env->SetLocalLong(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalLong(thread, depth, slot, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=" JLONG_FORMAT "", curr_thread_name, func_name, depth, slot, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5669,8 +5388,8 @@ jvmtiTrace_SetLocalFloat(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(29);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(29);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5681,24 +5400,25 @@ jvmtiTrace_SetLocalFloat(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetLocalFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5706,53 +5426,33 @@ jvmtiTrace_SetLocalFloat(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, depth, slot, value);
   }
-  err = jvmti_env->SetLocalFloat(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalFloat(thread, depth, slot, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, depth, slot, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5773,8 +5473,8 @@ jvmtiTrace_SetLocalDouble(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(30);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(30);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5785,24 +5485,25 @@ jvmtiTrace_SetLocalDouble(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetLocalDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5810,53 +5511,33 @@ jvmtiTrace_SetLocalDouble(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
 
   if (depth < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is depth - negative depth - jthread = " INT32_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT), depth);
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+              log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, depth, slot, value);
   }
-  err = jvmti_env->SetLocalDouble(java_thread, depth, slot, value);
+  err = jvmti_env->SetLocalDouble(thread, depth, slot, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%sdepth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread), depth, slot, value);
+          log_trace(jvmti)("[%s] %s { depth=%d slot=" INT32_FORMAT " value=%f", curr_thread_name, func_name, depth, slot, value);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5867,7 +5548,7 @@ jvmtiTrace_SetLocalDouble(jvmtiEnv* env,
 
   //
   // Breakpoint functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_SetBreakpoint(jvmtiEnv* env,
@@ -5879,8 +5560,8 @@ jvmtiTrace_SetBreakpoint(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(38);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(38);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5891,24 +5572,25 @@ jvmtiTrace_SetBreakpoint(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetBreakpoint , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5916,39 +5598,39 @@ jvmtiTrace_SetBreakpoint(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_breakpoint_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              , location);
   }
-  err = jvmti_env->SetBreakpoint(method_oop, location);
+  err = jvmti_env->SetBreakpoint(checked_method, location);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              , location);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -5967,8 +5649,8 @@ jvmtiTrace_ClearBreakpoint(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(39);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(39);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -5979,24 +5661,25 @@ jvmtiTrace_ClearBreakpoint(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ClearBreakpoint , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -6004,39 +5687,39 @@ jvmtiTrace_ClearBreakpoint(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_breakpoint_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              , location);
   }
-  err = jvmti_env->ClearBreakpoint(method_oop, location);
+  err = jvmti_env->ClearBreakpoint(checked_method, location);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s location=" JLONG_FORMAT "", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              , location);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6047,7 +5730,7 @@ jvmtiTrace_ClearBreakpoint(jvmtiEnv* env,
 
   //
   // Watched Field functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_SetFieldAccessWatch(jvmtiEnv* env,
@@ -6059,8 +5742,8 @@ jvmtiTrace_SetFieldAccessWatch(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(41);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(41);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6071,24 +5754,25 @@ jvmtiTrace_SetFieldAccessWatch(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetFieldAccessWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -6096,29 +5780,29 @@ jvmtiTrace_SetFieldAccessWatch(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_field_access_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6129,18 +5813,18 @@ jvmtiTrace_SetFieldAccessWatch(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6150,26 +5834,26 @@ jvmtiTrace_SetFieldAccessWatch(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->SetFieldAccessWatch(&fdesc);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6188,8 +5872,8 @@ jvmtiTrace_ClearFieldAccessWatch(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(42);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(42);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6200,24 +5884,25 @@ jvmtiTrace_ClearFieldAccessWatch(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ClearFieldAccessWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -6225,29 +5910,29 @@ jvmtiTrace_ClearFieldAccessWatch(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_field_access_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6258,18 +5943,18 @@ jvmtiTrace_ClearFieldAccessWatch(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6279,26 +5964,26 @@ jvmtiTrace_ClearFieldAccessWatch(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->ClearFieldAccessWatch(&fdesc);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6317,8 +6002,8 @@ jvmtiTrace_SetFieldModificationWatch(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(43);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(43);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6329,24 +6014,25 @@ jvmtiTrace_SetFieldModificationWatch(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetFieldModificationWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -6354,29 +6040,29 @@ jvmtiTrace_SetFieldModificationWatch(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_field_modification_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6387,18 +6073,18 @@ jvmtiTrace_SetFieldModificationWatch(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6408,26 +6094,26 @@ jvmtiTrace_SetFieldModificationWatch(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->SetFieldModificationWatch(&fdesc);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6446,8 +6132,8 @@ jvmtiTrace_ClearFieldModificationWatch(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(44);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(44);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6458,24 +6144,25 @@ jvmtiTrace_ClearFieldModificationWatch(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_ClearFieldModificationWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -6483,29 +6170,29 @@ jvmtiTrace_ClearFieldModificationWatch(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_field_modification_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6516,18 +6203,18 @@ jvmtiTrace_ClearFieldModificationWatch(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -6537,26 +6224,26 @@ jvmtiTrace_ClearFieldModificationWatch(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->ClearFieldModificationWatch(&fdesc);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6567,7 +6254,7 @@ jvmtiTrace_ClearFieldModificationWatch(jvmtiEnv* env,
 
   //
   // Module functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetAllModules(jvmtiEnv* env,
@@ -6579,8 +6266,8 @@ jvmtiTrace_GetAllModules(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(3);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(3);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6591,45 +6278,46 @@ jvmtiTrace_GetAllModules(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetAllModules , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (module_count_ptr == NULL) {
+  if (module_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (modules_ptr == NULL) {
+  if (modules_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is modules_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is modules_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -6643,7 +6331,7 @@ jvmtiTrace_GetAllModules(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6663,8 +6351,8 @@ jvmtiTrace_GetNamedModule(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(40);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(40);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6675,45 +6363,46 @@ jvmtiTrace_GetNamedModule(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetNamedModule , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (package_name == NULL) {
+  if (package_name == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is package_name",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is package_name",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (module_ptr == NULL) {
+  if (module_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  package_name='%s'", curr_thread_name, func_name, package_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -6727,7 +6416,7 @@ jvmtiTrace_GetNamedModule(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  package_name='%s'", curr_thread_name, func_name, package_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6746,8 +6435,8 @@ jvmtiTrace_AddModuleReads(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(94);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(94);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6758,45 +6447,46 @@ jvmtiTrace_AddModuleReads(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddModuleReads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (module == NULL) {
+  if (module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (to_module == NULL) {
+  if (to_module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is to_module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is to_module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -6810,7 +6500,7 @@ jvmtiTrace_AddModuleReads(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6830,8 +6520,8 @@ jvmtiTrace_AddModuleExports(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(95);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(95);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6842,55 +6532,56 @@ jvmtiTrace_AddModuleExports(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddModuleExports , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (module == NULL) {
+  if (module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (pkg_name == NULL) {
+  if (pkg_name == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is pkg_name",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is pkg_name",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (to_module == NULL) {
+  if (to_module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  pkg_name='%s'", curr_thread_name, func_name, pkg_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is to_module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is to_module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -6904,7 +6595,7 @@ jvmtiTrace_AddModuleExports(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  pkg_name='%s'", curr_thread_name, func_name, pkg_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -6924,8 +6615,8 @@ jvmtiTrace_AddModuleOpens(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(96);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(96);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -6936,55 +6627,56 @@ jvmtiTrace_AddModuleOpens(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddModuleOpens , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (module == NULL) {
+  if (module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (pkg_name == NULL) {
+  if (pkg_name == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is pkg_name",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is pkg_name",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (to_module == NULL) {
+  if (to_module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  pkg_name='%s'", curr_thread_name, func_name, pkg_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is to_module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is to_module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -6998,7 +6690,7 @@ jvmtiTrace_AddModuleOpens(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  pkg_name='%s'", curr_thread_name, func_name, pkg_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7017,8 +6709,8 @@ jvmtiTrace_AddModuleUses(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(97);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(97);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -7029,45 +6721,46 @@ jvmtiTrace_AddModuleUses(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddModuleUses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (module == NULL) {
+  if (module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (service == NULL) {
+  if (service == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is service",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is service",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -7085,7 +6778,7 @@ jvmtiTrace_AddModuleUses(jvmtiEnv* env,
       p2i(service)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7105,8 +6798,8 @@ jvmtiTrace_AddModuleProvides(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(98);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(98);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -7117,57 +6810,58 @@ jvmtiTrace_AddModuleProvides(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddModuleProvides , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (module == NULL) {
+  if (module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (service == NULL) {
+  if (service == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is service",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is service",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (impl_class == NULL) {
+  if (impl_class == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  service=" PTR_FORMAT "", curr_thread_name, func_name, 
       p2i(service)
     );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is impl_class",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is impl_class",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -7189,7 +6883,7 @@ jvmtiTrace_AddModuleProvides(jvmtiEnv* env,
       p2i(impl_class)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7208,8 +6902,8 @@ jvmtiTrace_IsModifiableModule(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(99);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(99);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -7220,45 +6914,46 @@ jvmtiTrace_IsModifiableModule(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsModifiableModule , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (module == NULL) {
+  if (module == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is module",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (is_modifiable_module_ptr == NULL) {
+  if (is_modifiable_module_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_modifiable_module_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_modifiable_module_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -7272,7 +6967,7 @@ jvmtiTrace_IsModifiableModule(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7283,7 +6978,7 @@ jvmtiTrace_IsModifiableModule(jvmtiEnv* env,
 
   //
   // Class functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetLoadedClasses(jvmtiEnv* env,
@@ -7291,8 +6986,8 @@ jvmtiTrace_GetLoadedClasses(jvmtiEnv* env,
             jclass** classes_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(78);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(78);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -7303,45 +6998,46 @@ jvmtiTrace_GetLoadedClasses(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLoadedClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (class_count_ptr == NULL) {
+  if (class_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (classes_ptr == NULL) {
+  if (classes_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is classes_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is classes_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -7355,7 +7051,7 @@ jvmtiTrace_GetLoadedClasses(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7370,8 +7066,8 @@ jvmtiTrace_GetClassLoaderClasses(jvmtiEnv* env,
             jclass** classes_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(79);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(79);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -7382,45 +7078,46 @@ jvmtiTrace_GetClassLoaderClasses(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassLoaderClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (class_count_ptr == NULL) {
+  if (class_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (classes_ptr == NULL) {
+  if (classes_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is classes_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is classes_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -7434,7 +7131,7 @@ jvmtiTrace_GetClassLoaderClasses(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7453,74 +7150,75 @@ jvmtiTrace_GetClassSignature(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(48);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(48);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassSignature , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetClassSignature(k_mirror, signature_ptr, generic_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7539,85 +7237,86 @@ jvmtiTrace_GetClassStatus(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(49);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(49);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassStatus , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (status_ptr == NULL) {
+  if (status_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is status_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is status_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetClassStatus(k_mirror, status_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7636,36 +7335,37 @@ jvmtiTrace_GetSourceFileName(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(50);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(50);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetSourceFileName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -7673,56 +7373,56 @@ jvmtiTrace_GetSourceFileName(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_source_file_name == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (source_name_ptr == NULL) {
+  if (source_name_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is source_name_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is source_name_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetSourceFileName(k_mirror, source_name_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7741,85 +7441,86 @@ jvmtiTrace_GetClassModifiers(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(51);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(51);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (modifiers_ptr == NULL) {
+  if (modifiers_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is modifiers_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is modifiers_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetClassModifiers(k_mirror, modifiers_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7839,96 +7540,97 @@ jvmtiTrace_GetClassMethods(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(52);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(52);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassMethods , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (method_count_ptr == NULL) {
+  if (method_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (methods_ptr == NULL) {
+  if (methods_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is methods_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is methods_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetClassMethods(k_mirror, method_count_ptr, methods_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -7948,96 +7650,97 @@ jvmtiTrace_GetClassFields(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(53);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(53);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassFields , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (field_count_ptr == NULL) {
+  if (field_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (fields_ptr == NULL) {
+  if (fields_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is fields_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is fields_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetClassFields(k_mirror, field_count_ptr, fields_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8057,96 +7760,97 @@ jvmtiTrace_GetImplementedInterfaces(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(54);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(54);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetImplementedInterfaces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (interface_count_ptr == NULL) {
+  if (interface_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is interface_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is interface_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (interfaces_ptr == NULL) {
+  if (interfaces_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is interfaces_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is interfaces_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetImplementedInterfaces(k_mirror, interface_count_ptr, interfaces_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8166,96 +7870,97 @@ jvmtiTrace_GetClassVersionNumbers(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(145);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(145);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassVersionNumbers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (minor_version_ptr == NULL) {
+  if (minor_version_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is minor_version_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is minor_version_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (major_version_ptr == NULL) {
+  if (major_version_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is major_version_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is major_version_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetClassVersionNumbers(k_mirror, minor_version_ptr, major_version_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8276,36 +7981,37 @@ jvmtiTrace_GetConstantPool(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(146);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(146);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetConstantPool , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -8313,78 +8019,78 @@ jvmtiTrace_GetConstantPool(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_constant_pool == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (constant_pool_count_ptr == NULL) {
+  if (constant_pool_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is constant_pool_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is constant_pool_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (constant_pool_byte_count_ptr == NULL) {
+  if (constant_pool_byte_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is constant_pool_byte_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is constant_pool_byte_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (constant_pool_bytes_ptr == NULL) {
+  if (constant_pool_bytes_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is constant_pool_bytes_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is constant_pool_bytes_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetConstantPool(k_mirror, constant_pool_count_ptr, constant_pool_byte_count_ptr, constant_pool_bytes_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8403,85 +8109,86 @@ jvmtiTrace_IsInterface(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(55);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(55);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsInterface , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (is_interface_ptr == NULL) {
+  if (is_interface_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_interface_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_interface_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->IsInterface(k_mirror, is_interface_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8500,85 +8207,86 @@ jvmtiTrace_IsArrayClass(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(56);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(56);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsArrayClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (is_array_class_ptr == NULL) {
+  if (is_array_class_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_array_class_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_array_class_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->IsArrayClass(k_mirror, is_array_class_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8593,85 +8301,86 @@ jvmtiTrace_IsModifiableClass(jvmtiEnv* env,
             jboolean* is_modifiable_class_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(45);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(45);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsModifiableClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (is_modifiable_class_ptr == NULL) {
+  if (is_modifiable_class_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_modifiable_class_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_modifiable_class_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->IsModifiableClass(k_mirror, is_modifiable_class_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8689,85 +8398,86 @@ jvmtiTrace_GetClassLoader(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(57);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(57);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetClassLoader , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (classloader_ptr == NULL) {
+  if (classloader_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is classloader_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is classloader_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetClassLoader(k_mirror, classloader_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8786,36 +8496,37 @@ jvmtiTrace_GetSourceDebugExtension(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(90);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(90);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetSourceDebugExtension , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -8823,56 +8534,56 @@ jvmtiTrace_GetSourceDebugExtension(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_source_debug_extension == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (source_debug_extension_ptr == NULL) {
+  if (source_debug_extension_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is source_debug_extension_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is source_debug_extension_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
   }
   err = jvmti_env->GetSourceDebugExtension(k_mirror, source_debug_extension_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8887,8 +8598,8 @@ jvmtiTrace_RetransformClasses(jvmtiEnv* env,
             const jclass* classes) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(152);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(152);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -8899,24 +8610,25 @@ jvmtiTrace_RetransformClasses(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_RetransformClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -8924,7 +8636,7 @@ jvmtiTrace_RetransformClasses(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_retransform_classes == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -8935,17 +8647,17 @@ jvmtiTrace_RetransformClasses(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (classes == NULL) {
+  if (classes == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  class_count=" INT32_FORMAT "", curr_thread_name, func_name, class_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is classes",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is classes",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -8963,7 +8675,7 @@ jvmtiTrace_RetransformClasses(jvmtiEnv* env,
       p2i(classes)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -8977,8 +8689,8 @@ jvmtiTrace_RedefineClasses(jvmtiEnv* env,
             const jvmtiClassDefinition* class_definitions) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(87);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(87);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -8989,24 +8701,25 @@ jvmtiTrace_RedefineClasses(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_RedefineClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -9014,7 +8727,7 @@ jvmtiTrace_RedefineClasses(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_redefine_classes == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -9025,17 +8738,17 @@ jvmtiTrace_RedefineClasses(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (class_definitions == NULL) {
+  if (class_definitions == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  class_count=" INT32_FORMAT "", curr_thread_name, func_name, class_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_definitions",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is class_definitions",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -9053,7 +8766,7 @@ jvmtiTrace_RedefineClasses(jvmtiEnv* env,
       p2i(class_definitions)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9063,7 +8776,7 @@ jvmtiTrace_RedefineClasses(jvmtiEnv* env,
 
   //
   // Object functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetObjectSize(jvmtiEnv* env,
@@ -9071,47 +8784,48 @@ jvmtiTrace_GetObjectSize(jvmtiEnv* env,
             jlong* size_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(154);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(154);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetObjectSize , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (size_ptr == NULL) {
+  if (size_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -9125,7 +8839,7 @@ jvmtiTrace_GetObjectSize(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9143,47 +8857,48 @@ jvmtiTrace_GetObjectHashCode(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(58);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(58);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetObjectHashCode , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (hash_code_ptr == NULL) {
+  if (hash_code_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is hash_code_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is hash_code_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -9197,7 +8912,7 @@ jvmtiTrace_GetObjectHashCode(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9216,8 +8931,8 @@ jvmtiTrace_GetObjectMonitorUsage(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(59);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(59);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -9228,24 +8943,25 @@ jvmtiTrace_GetObjectMonitorUsage(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetObjectMonitorUsage , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -9253,18 +8969,18 @@ jvmtiTrace_GetObjectMonitorUsage(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_monitor_info == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (info_ptr == NULL) {
+  if (info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -9278,7 +8994,7 @@ jvmtiTrace_GetObjectMonitorUsage(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9289,7 +9005,7 @@ jvmtiTrace_GetObjectMonitorUsage(jvmtiEnv* env,
 
   //
   // Field functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetFieldName(jvmtiEnv* env,
@@ -9304,58 +9020,59 @@ jvmtiTrace_GetFieldName(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(60);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(60);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetFieldName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9366,18 +9083,18 @@ jvmtiTrace_GetFieldName(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9387,26 +9104,26 @@ jvmtiTrace_GetFieldName(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->GetFieldName(&fdesc, name_ptr, signature_ptr, generic_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9426,58 +9143,59 @@ jvmtiTrace_GetFieldDeclaringClass(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(61);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(61);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetFieldDeclaringClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9488,18 +9206,18 @@ jvmtiTrace_GetFieldDeclaringClass(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9509,37 +9227,37 @@ jvmtiTrace_GetFieldDeclaringClass(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
-  if (declaring_class_ptr == NULL) {
+  if (declaring_class_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is declaring_class_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is declaring_class_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->GetFieldDeclaringClass(&fdesc, declaring_class_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9559,58 +9277,59 @@ jvmtiTrace_GetFieldModifiers(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(62);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(62);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetFieldModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9621,18 +9340,18 @@ jvmtiTrace_GetFieldModifiers(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9642,37 +9361,37 @@ jvmtiTrace_GetFieldModifiers(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
-  if (modifiers_ptr == NULL) {
+  if (modifiers_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is modifiers_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is modifiers_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->GetFieldModifiers(&fdesc, modifiers_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9692,36 +9411,37 @@ jvmtiTrace_IsFieldSynthetic(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(63);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(63);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsFieldSynthetic , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -9729,29 +9449,29 @@ jvmtiTrace_IsFieldSynthetic(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_synthetic_attribute == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
   oop k_mirror = JNIHandles::resolve_external_guard(klass);
-  if (k_mirror == NULL) {
+  if (k_mirror == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to NULL - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - resolved to nullptr - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
-  if (!k_mirror->is_a(SystemDictionary::Class_klass())) {
+  if (!k_mirror->is_a(vmClasses::Class_klass())) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - not a class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9762,18 +9482,18 @@ jvmtiTrace_IsFieldSynthetic(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - is a primitive class - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
   }
   Klass* k_oop = java_lang_Class::as_Klass(k_mirror);
-  if (k_oop == NULL) {
+  if (k_oop == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is klass - no Klass* - jclass = " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_CLASS), p2i(klass));
       }
       return JVMTI_ERROR_INVALID_CLASS;
@@ -9783,37 +9503,37 @@ jvmtiTrace_IsFieldSynthetic(jvmtiEnv* env,
   if (!JvmtiEnv::get_field_descriptor(k_oop, field, &fdesc)) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror));
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is field",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_FIELDID));
       }
       return JVMTI_ERROR_INVALID_FIELDID;
   }
-  if (is_synthetic_ptr == NULL) {
+  if (is_synthetic_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_synthetic_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_synthetic_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+              log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
   }
   err = jvmti_env->IsFieldSynthetic(&fdesc, is_synthetic_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s {  klass=%s field=%s", curr_thread_name, func_name,
                     JvmtiTrace::get_class_name(k_mirror), fdesc.name()->as_C_string());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9824,7 +9544,7 @@ jvmtiTrace_IsFieldSynthetic(jvmtiEnv* env,
 
   //
   // Method functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetMethodName(jvmtiEnv* env,
@@ -9838,68 +9558,69 @@ jvmtiTrace_GetMethodName(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(64);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(64);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetMethodName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetMethodName(method_oop, name_ptr, signature_ptr, generic_ptr);
+  err = jvmti_env->GetMethodName(checked_method, name_ptr, signature_ptr, generic_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -9918,81 +9639,82 @@ jvmtiTrace_GetMethodDeclaringClass(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(65);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(65);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetMethodDeclaringClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (declaring_class_ptr == NULL) {
+  if (declaring_class_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is declaring_class_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is declaring_class_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetMethodDeclaringClass(method_oop, declaring_class_ptr);
+  err = jvmti_env->GetMethodDeclaringClass(checked_method, declaring_class_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10011,81 +9733,82 @@ jvmtiTrace_GetMethodModifiers(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(66);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(66);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetMethodModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (modifiers_ptr == NULL) {
+  if (modifiers_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is modifiers_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is modifiers_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetMethodModifiers(method_oop, modifiers_ptr);
+  err = jvmti_env->GetMethodModifiers(checked_method, modifiers_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10104,84 +9827,85 @@ jvmtiTrace_GetMaxLocals(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(68);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(68);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetMaxLocals , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
-  if (max_ptr == NULL) {
+  if (max_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is max_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetMaxLocals(method_oop, max_ptr);
+  err = jvmti_env->GetMaxLocals(checked_method, max_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10200,84 +9924,85 @@ jvmtiTrace_GetArgumentsSize(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(69);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(69);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetArgumentsSize , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
-  if (size_ptr == NULL) {
+  if (size_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetArgumentsSize(method_oop, size_ptr);
+  err = jvmti_env->GetArgumentsSize(checked_method, size_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10297,36 +10022,37 @@ jvmtiTrace_GetLineNumberTable(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(70);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(70);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLineNumberTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -10334,68 +10060,68 @@ jvmtiTrace_GetLineNumberTable(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_line_numbers == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
-  if (entry_count_ptr == NULL) {
+  if (entry_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is entry_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is entry_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (table_ptr == NULL) {
+  if (table_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is table_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is table_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetLineNumberTable(method_oop, entry_count_ptr, table_ptr);
+  err = jvmti_env->GetLineNumberTable(checked_method, entry_count_ptr, table_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10415,97 +10141,98 @@ jvmtiTrace_GetMethodLocation(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(71);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(71);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetMethodLocation , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
-  if (start_location_ptr == NULL) {
+  if (start_location_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is start_location_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is start_location_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (end_location_ptr == NULL) {
+  if (end_location_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is end_location_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is end_location_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetMethodLocation(method_oop, start_location_ptr, end_location_ptr);
+  err = jvmti_env->GetMethodLocation(checked_method, start_location_ptr, end_location_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10525,8 +10252,8 @@ jvmtiTrace_GetLocalVariableTable(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(72);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(72);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -10537,24 +10264,25 @@ jvmtiTrace_GetLocalVariableTable(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetLocalVariableTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -10562,68 +10290,68 @@ jvmtiTrace_GetLocalVariableTable(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_access_local_variables == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
-  if (entry_count_ptr == NULL) {
+  if (entry_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is entry_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is entry_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (table_ptr == NULL) {
+  if (table_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is table_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is table_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetLocalVariableTable(method_oop, entry_count_ptr, table_ptr);
+  err = jvmti_env->GetLocalVariableTable(checked_method, entry_count_ptr, table_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10643,36 +10371,37 @@ jvmtiTrace_GetBytecodes(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(75);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(75);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetBytecodes , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -10680,68 +10409,68 @@ jvmtiTrace_GetBytecodes(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_bytecodes == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (method_oop->is_native()) {
+  if (checked_method->is_native()) {
     return JVMTI_ERROR_NATIVE_METHOD;
   }
-  if (bytecode_count_ptr == NULL) {
+  if (bytecode_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is bytecode_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is bytecode_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (bytecodes_ptr == NULL) {
+  if (bytecodes_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is bytecodes_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is bytecodes_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->GetBytecodes(method_oop, bytecode_count_ptr, bytecodes_ptr);
+  err = jvmti_env->GetBytecodes(checked_method, bytecode_count_ptr, bytecodes_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10760,81 +10489,82 @@ jvmtiTrace_IsMethodNative(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(76);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(76);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsMethodNative , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (is_native_ptr == NULL) {
+  if (is_native_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_native_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_native_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->IsMethodNative(method_oop, is_native_ptr);
+  err = jvmti_env->IsMethodNative(checked_method, is_native_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10853,36 +10583,37 @@ jvmtiTrace_IsMethodSynthetic(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(77);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(77);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsMethodSynthetic , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -10890,52 +10621,52 @@ jvmtiTrace_IsMethodSynthetic(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_synthetic_attribute == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (is_synthetic_ptr == NULL) {
+  if (is_synthetic_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_synthetic_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_synthetic_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->IsMethodSynthetic(method_oop, is_synthetic_ptr);
+  err = jvmti_env->IsMethodSynthetic(checked_method, is_synthetic_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -10954,81 +10685,82 @@ jvmtiTrace_IsMethodObsolete(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(91);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(91);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_IsMethodObsolete , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Method* method_oop = Method::checked_resolve_jmethod_id(method);
-  if (method_oop == NULL) {
+  Method* checked_method = Method::checked_resolve_jmethod_id(method);
+  if (checked_method == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is method",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_METHODID));
       }
       return JVMTI_ERROR_INVALID_METHODID;
   }
-  if (is_obsolete_ptr == NULL) {
+  if (is_obsolete_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_obsolete_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is is_obsolete_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+              log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
   }
-  err = jvmti_env->IsMethodObsolete(method_oop, is_obsolete_ptr);
+  err = jvmti_env->IsMethodObsolete(checked_method, is_obsolete_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name, 
-                    method_oop == NULL? "NULL" : method_oop->klass_name()->as_C_string(),
-                    method_oop == NULL? "NULL" : method_oop->name()->as_C_string()
+          log_trace(jvmti)("[%s] %s {  method=%s.%s", curr_thread_name, func_name,
+                    checked_method == nullptr? "nullptr" : checked_method->klass_name()->as_C_string(),
+                    checked_method == nullptr? "nullptr" : checked_method->name()->as_C_string()
              );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11042,8 +10774,8 @@ jvmtiTrace_SetNativeMethodPrefix(jvmtiEnv* env,
             const char* prefix) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(73);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(73);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -11052,7 +10784,7 @@ jvmtiTrace_SetNativeMethodPrefix(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -11060,7 +10792,7 @@ jvmtiTrace_SetNativeMethodPrefix(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_set_native_method_prefix == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -11068,18 +10800,19 @@ jvmtiTrace_SetNativeMethodPrefix(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetNativeMethodPrefix , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
               log_trace(jvmti)("[%s] %s {  prefix='%s'", curr_thread_name, func_name, prefix);
@@ -11089,7 +10822,7 @@ jvmtiTrace_SetNativeMethodPrefix(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  prefix='%s'", curr_thread_name, func_name, prefix);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11104,7 +10837,7 @@ jvmtiTrace_SetNativeMethodPrefix(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  prefix='%s'", curr_thread_name, func_name, prefix);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11119,8 +10852,8 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
             char** prefixes) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(74);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(74);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -11129,7 +10862,7 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -11137,7 +10870,7 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_set_native_method_prefix == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -11145,34 +10878,35 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetNativeMethodPrefixes , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (prefix_count < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefix_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefix_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (prefixes == NULL) {
+  if (prefixes == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  prefix_count=" INT32_FORMAT "", curr_thread_name, func_name, prefix_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefixes",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefixes",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -11186,7 +10920,7 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  prefix_count=" INT32_FORMAT "", curr_thread_name, func_name, prefix_count);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11197,17 +10931,17 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefix_count",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefix_count",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
-  if (prefixes == NULL) {
+  if (prefixes == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  prefix_count=" INT32_FORMAT "", curr_thread_name, func_name, prefix_count);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefixes",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is prefixes",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -11221,7 +10955,7 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  prefix_count=" INT32_FORMAT "", curr_thread_name, func_name, prefix_count);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11232,7 +10966,7 @@ jvmtiTrace_SetNativeMethodPrefixes(jvmtiEnv* env,
 
   //
   // Raw Monitor functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_CreateRawMonitor(jvmtiEnv* env,
@@ -11244,15 +10978,15 @@ jvmtiTrace_CreateRawMonitor(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(31);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(31);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -11260,19 +10994,19 @@ jvmtiTrace_CreateRawMonitor(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -11282,26 +11016,27 @@ jvmtiTrace_CreateRawMonitor(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_CreateRawMonitor , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    if (name == NULL) {
+    if (name == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is name",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is name",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (monitor_ptr == NULL) {
+  if (monitor_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  name='%s'", curr_thread_name, func_name, name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -11315,28 +11050,28 @@ jvmtiTrace_CreateRawMonitor(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  name='%s'", curr_thread_name, func_name, name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (name == NULL) {
+    if (name == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is name",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is name",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (monitor_ptr == NULL) {
+  if (monitor_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  name='%s'", curr_thread_name, func_name, name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -11350,7 +11085,7 @@ jvmtiTrace_CreateRawMonitor(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  name='%s'", curr_thread_name, func_name, name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11369,15 +11104,15 @@ jvmtiTrace_DestroyRawMonitor(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(32);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(32);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -11385,19 +11120,19 @@ jvmtiTrace_DestroyRawMonitor(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -11407,17 +11142,18 @@ jvmtiTrace_DestroyRawMonitor(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_DestroyRawMonitor , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11427,7 +11163,7 @@ jvmtiTrace_DestroyRawMonitor(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11441,19 +11177,19 @@ jvmtiTrace_DestroyRawMonitor(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11463,7 +11199,7 @@ jvmtiTrace_DestroyRawMonitor(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11477,7 +11213,7 @@ jvmtiTrace_DestroyRawMonitor(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11496,8 +11232,8 @@ jvmtiTrace_RawMonitorEnter(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(33);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(33);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -11506,19 +11242,19 @@ jvmtiTrace_RawMonitorEnter(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -11530,12 +11266,12 @@ jvmtiTrace_RawMonitorEnter(jvmtiEnv* env,
     }
     
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11545,7 +11281,7 @@ jvmtiTrace_RawMonitorEnter(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11559,19 +11295,19 @@ jvmtiTrace_RawMonitorEnter(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11581,7 +11317,7 @@ jvmtiTrace_RawMonitorEnter(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11595,7 +11331,7 @@ jvmtiTrace_RawMonitorEnter(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11614,8 +11350,8 @@ jvmtiTrace_RawMonitorExit(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(34);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(34);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -11624,19 +11360,19 @@ jvmtiTrace_RawMonitorExit(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -11648,12 +11384,12 @@ jvmtiTrace_RawMonitorExit(jvmtiEnv* env,
     }
     
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11663,7 +11399,7 @@ jvmtiTrace_RawMonitorExit(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11677,19 +11413,19 @@ jvmtiTrace_RawMonitorExit(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11699,7 +11435,7 @@ jvmtiTrace_RawMonitorExit(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11713,7 +11449,7 @@ jvmtiTrace_RawMonitorExit(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11733,8 +11469,8 @@ jvmtiTrace_RawMonitorWait(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(35);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(35);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -11743,19 +11479,19 @@ jvmtiTrace_RawMonitorWait(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -11767,12 +11503,12 @@ jvmtiTrace_RawMonitorWait(jvmtiEnv* env,
     }
     
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11782,7 +11518,7 @@ jvmtiTrace_RawMonitorWait(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11796,19 +11532,19 @@ jvmtiTrace_RawMonitorWait(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s millis=" JLONG_FORMAT "", curr_thread_name, func_name, rmonitor->get_name(), millis);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11818,7 +11554,7 @@ jvmtiTrace_RawMonitorWait(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11832,7 +11568,7 @@ jvmtiTrace_RawMonitorWait(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s millis=" JLONG_FORMAT "", curr_thread_name, func_name, rmonitor->get_name(), millis);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11851,8 +11587,8 @@ jvmtiTrace_RawMonitorNotify(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(36);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(36);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -11861,19 +11597,19 @@ jvmtiTrace_RawMonitorNotify(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -11883,17 +11619,18 @@ jvmtiTrace_RawMonitorNotify(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_RawMonitorNotify , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11903,7 +11640,7 @@ jvmtiTrace_RawMonitorNotify(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11917,19 +11654,19 @@ jvmtiTrace_RawMonitorNotify(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11939,7 +11676,7 @@ jvmtiTrace_RawMonitorNotify(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -11953,7 +11690,7 @@ jvmtiTrace_RawMonitorNotify(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -11972,8 +11709,8 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(37);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(37);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -11982,19 +11719,19 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -12004,17 +11741,18 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_RawMonitorNotifyAll , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -12024,7 +11762,7 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -12038,19 +11776,19 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
-  if (rmonitor == NULL) {
+  if (rmonitor == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is NULL",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - raw monitor is nullptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -12060,7 +11798,7 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is monitor - not a raw monitor " PTR_FORMAT "",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_INVALID_MONITOR), p2i(rmonitor));
       }
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -12074,7 +11812,7 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  monitor=%s", curr_thread_name, func_name, rmonitor->get_name());
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12086,7 +11824,7 @@ jvmtiTrace_RawMonitorNotifyAll(jvmtiEnv* env,
 
   //
   // JNI Function Interception functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_SetJNIFunctionTable(jvmtiEnv* env,
@@ -12097,47 +11835,48 @@ jvmtiTrace_SetJNIFunctionTable(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(120);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(120);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetJNIFunctionTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (function_table == NULL) {
+  if (function_table == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is function_table",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is function_table",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12155,7 +11894,7 @@ jvmtiTrace_SetJNIFunctionTable(jvmtiEnv* env,
   p2i(function_table)
 );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12173,47 +11912,48 @@ jvmtiTrace_GetJNIFunctionTable(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(121);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(121);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetJNIFunctionTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  if (function_table == NULL) {
+  if (function_table == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is function_table",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is function_table",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12227,7 +11967,7 @@ jvmtiTrace_GetJNIFunctionTable(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12238,7 +11978,7 @@ jvmtiTrace_GetJNIFunctionTable(jvmtiEnv* env,
 
   //
   // Event Management functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
@@ -12246,15 +11986,15 @@ jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
             jint size_of_callbacks) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(122);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(122);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -12262,7 +12002,7 @@ jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12270,18 +12010,19 @@ jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetEventCallbacks , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
     if (size_of_callbacks < 0) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
@@ -12289,7 +12030,7 @@ jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
   p2i(callbacks)
 );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_of_callbacks",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_of_callbacks",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -12307,7 +12048,7 @@ jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
   p2i(callbacks)
 , size_of_callbacks);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12320,7 +12061,7 @@ jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
   p2i(callbacks)
 );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_of_callbacks",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is size_of_callbacks",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_ILLEGAL_ARGUMENT));
       }
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
@@ -12338,7 +12079,7 @@ jvmtiTrace_SetEventCallbacks(jvmtiEnv* env,
   p2i(callbacks)
 , size_of_callbacks);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12355,15 +12096,15 @@ jvmtiTrace_SetEventNotificationMode(jvmtiEnv* env,
              ...) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(2);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(2);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -12371,7 +12112,7 @@ jvmtiTrace_SetEventNotificationMode(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12379,34 +12120,35 @@ jvmtiTrace_SetEventNotificationMode(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetEventNotificationMode , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode, 
-                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type, 
+              log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode,
+                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type,
                     JvmtiTrace::event_name(event_type)
         );
   }
-  err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, NULL);
+  err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, nullptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode, 
-                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type, 
+          log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode,
+                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type,
                     JvmtiTrace::event_name(event_type)
         );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12414,20 +12156,20 @@ jvmtiTrace_SetEventNotificationMode(jvmtiEnv* env,
   } else {
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode, 
-                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type, 
+              log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode,
+                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type,
                     JvmtiTrace::event_name(event_type)
         );
   }
-  err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, NULL);
+  err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, nullptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode, 
-                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type, 
+          log_trace(jvmti)("[%s] %s {  mode=%d:%s event_type=%d:%s", curr_thread_name, func_name, mode,
+                    JvmtiTrace::enum_name(jvmtiEventModeConstantNames, jvmtiEventModeConstantValues, mode), event_type,
                     JvmtiTrace::event_name(event_type)
         );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12445,8 +12187,8 @@ jvmtiTrace_GenerateEvents(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(123);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(123);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -12457,24 +12199,25 @@ jvmtiTrace_GenerateEvents(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GenerateEvents , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12482,18 +12225,18 @@ jvmtiTrace_GenerateEvents(jvmtiEnv* env,
   jvmtiError err;
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  event_type=%d:%s", curr_thread_name, func_name, event_type, 
+              log_trace(jvmti)("[%s] %s {  event_type=%d:%s", curr_thread_name, func_name, event_type,
                     JvmtiTrace::event_name(event_type)
         );
   }
   err = jvmti_env->GenerateEvents(event_type);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  event_type=%d:%s", curr_thread_name, func_name, event_type, 
+          log_trace(jvmti)("[%s] %s {  event_type=%d:%s", curr_thread_name, func_name, event_type,
                     JvmtiTrace::event_name(event_type)
         );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12504,7 +12247,7 @@ jvmtiTrace_GenerateEvents(jvmtiEnv* env,
 
   //
   // Extension Mechanism functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetExtensionFunctions(jvmtiEnv* env,
@@ -12516,15 +12259,15 @@ jvmtiTrace_GetExtensionFunctions(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(124);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(124);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -12532,7 +12275,7 @@ jvmtiTrace_GetExtensionFunctions(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12540,34 +12283,35 @@ jvmtiTrace_GetExtensionFunctions(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetExtensionFunctions , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (extension_count_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (extension_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (extensions == NULL) {
+  if (extensions == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12581,28 +12325,28 @@ jvmtiTrace_GetExtensionFunctions(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (extension_count_ptr == NULL) {
+    if (extension_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (extensions == NULL) {
+  if (extensions == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12616,7 +12360,7 @@ jvmtiTrace_GetExtensionFunctions(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12636,15 +12380,15 @@ jvmtiTrace_GetExtensionEvents(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(125);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(125);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -12652,7 +12396,7 @@ jvmtiTrace_GetExtensionEvents(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12660,34 +12404,35 @@ jvmtiTrace_GetExtensionEvents(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetExtensionEvents , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (extension_count_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (extension_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (extensions == NULL) {
+  if (extensions == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12701,28 +12446,28 @@ jvmtiTrace_GetExtensionEvents(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (extension_count_ptr == NULL) {
+    if (extension_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extension_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (extensions == NULL) {
+  if (extensions == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is extensions",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12736,7 +12481,7 @@ jvmtiTrace_GetExtensionEvents(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12756,15 +12501,15 @@ jvmtiTrace_SetExtensionEventCallback(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(126);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(126);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -12772,7 +12517,7 @@ jvmtiTrace_SetExtensionEventCallback(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12780,18 +12525,19 @@ jvmtiTrace_SetExtensionEventCallback(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetExtensionEventCallback , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
               log_trace(jvmti)("[%s] %s {  extension_event_index=" INT32_FORMAT "", curr_thread_name, func_name, extension_event_index);
@@ -12801,7 +12547,7 @@ jvmtiTrace_SetExtensionEventCallback(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  extension_event_index=" INT32_FORMAT "", curr_thread_name, func_name, extension_event_index);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12816,7 +12562,7 @@ jvmtiTrace_SetExtensionEventCallback(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  extension_event_index=" INT32_FORMAT "", curr_thread_name, func_name, extension_event_index);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12828,22 +12574,22 @@ jvmtiTrace_SetExtensionEventCallback(jvmtiEnv* env,
 
   //
   // Capability functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetPotentialCapabilities(jvmtiEnv* env,
             jvmtiCapabilities* capabilities_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(140);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(140);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -12851,7 +12597,7 @@ jvmtiTrace_GetPotentialCapabilities(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12859,24 +12605,25 @@ jvmtiTrace_GetPotentialCapabilities(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetPotentialCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (capabilities_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12890,18 +12637,18 @@ jvmtiTrace_GetPotentialCapabilities(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (capabilities_ptr == NULL) {
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12915,7 +12662,7 @@ jvmtiTrace_GetPotentialCapabilities(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -12929,15 +12676,15 @@ jvmtiTrace_AddCapabilities(jvmtiEnv* env,
             const jvmtiCapabilities* capabilities_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(142);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(142);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -12945,7 +12692,7 @@ jvmtiTrace_AddCapabilities(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -12953,24 +12700,25 @@ jvmtiTrace_AddCapabilities(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (capabilities_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -12988,18 +12736,18 @@ jvmtiTrace_AddCapabilities(jvmtiEnv* env,
   p2i(capabilities_ptr)
 );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (capabilities_ptr == NULL) {
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13017,7 +12765,7 @@ jvmtiTrace_AddCapabilities(jvmtiEnv* env,
   p2i(capabilities_ptr)
 );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13035,15 +12783,15 @@ jvmtiTrace_RelinquishCapabilities(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(143);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(143);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -13051,7 +12799,7 @@ jvmtiTrace_RelinquishCapabilities(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13059,24 +12807,25 @@ jvmtiTrace_RelinquishCapabilities(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_RelinquishCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (capabilities_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13094,18 +12843,18 @@ jvmtiTrace_RelinquishCapabilities(jvmtiEnv* env,
   p2i(capabilities_ptr)
 );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (capabilities_ptr == NULL) {
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13123,7 +12872,7 @@ jvmtiTrace_RelinquishCapabilities(jvmtiEnv* env,
   p2i(capabilities_ptr)
 );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13138,8 +12887,8 @@ jvmtiTrace_GetCapabilities(jvmtiEnv* env,
             jvmtiCapabilities* capabilities_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(89);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(89);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -13148,7 +12897,7 @@ jvmtiTrace_GetCapabilities(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13156,24 +12905,25 @@ jvmtiTrace_GetCapabilities(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (capabilities_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13187,18 +12937,18 @@ jvmtiTrace_GetCapabilities(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (capabilities_ptr == NULL) {
+    if (capabilities_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is capabilities_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13212,7 +12962,7 @@ jvmtiTrace_GetCapabilities(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13223,7 +12973,7 @@ jvmtiTrace_GetCapabilities(jvmtiEnv* env,
 
   //
   // Timers functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetCurrentThreadCpuTimerInfo(jvmtiEnv* env,
@@ -13234,21 +12984,21 @@ jvmtiTrace_GetCurrentThreadCpuTimerInfo(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(134);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(134);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || (!this_thread->is_Java_thread() && !this_thread->is_VM_thread())) {
+  if (this_thread == nullptr || (!this_thread->is_Java_thread() && !this_thread->is_Named_thread())) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
@@ -13259,7 +13009,7 @@ jvmtiTrace_GetCurrentThreadCpuTimerInfo(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13267,18 +13017,18 @@ jvmtiTrace_GetCurrentThreadCpuTimerInfo(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_current_thread_cpu_time == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (info_ptr == NULL) {
+  if (info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13292,7 +13042,7 @@ jvmtiTrace_GetCurrentThreadCpuTimerInfo(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13310,21 +13060,21 @@ jvmtiTrace_GetCurrentThreadCpuTime(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(135);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(135);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase(env)!=JVMTI_PHASE_START && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
   }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || (!this_thread->is_Java_thread() && !this_thread->is_VM_thread())) {
+  if (this_thread == nullptr || (!this_thread->is_Java_thread() && !this_thread->is_Named_thread())) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
@@ -13335,7 +13085,7 @@ jvmtiTrace_GetCurrentThreadCpuTime(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13343,18 +13093,18 @@ jvmtiTrace_GetCurrentThreadCpuTime(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_current_thread_cpu_time == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (nanos_ptr == NULL) {
+  if (nanos_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is nanos_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is nanos_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13368,7 +13118,7 @@ jvmtiTrace_GetCurrentThreadCpuTime(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13386,8 +13136,8 @@ jvmtiTrace_GetThreadCpuTimerInfo(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(136);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(136);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -13398,24 +13148,25 @@ jvmtiTrace_GetThreadCpuTimerInfo(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetThreadCpuTimerInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13423,18 +13174,18 @@ jvmtiTrace_GetThreadCpuTimerInfo(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_thread_cpu_time == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  if (info_ptr == NULL) {
+  if (info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13448,7 +13199,7 @@ jvmtiTrace_GetThreadCpuTimerInfo(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13467,8 +13218,8 @@ jvmtiTrace_GetThreadCpuTime(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(137);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(137);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -13479,24 +13230,25 @@ jvmtiTrace_GetThreadCpuTime(jvmtiEnv* env,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE), JvmtiEnv::get_phase());
     }
     return JVMTI_ERROR_WRONG_PHASE;
-  }  
+  }
   Thread* this_thread = Thread::current_or_null(); 
-  if (this_thread == NULL || !this_thread->is_Java_thread()) {
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
     if (trace_flags) {
       log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
       JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
     }
     return JVMTI_ERROR_UNATTACHED_THREAD;
   }
-  JavaThread* current_thread = (JavaThread*)this_thread;
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetThreadCpuTime , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
-  CautiouslyPreserveExceptionMark __em(this_thread);
+  PreserveExceptionMark __em(this_thread);
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13504,52 +13256,22 @@ jvmtiTrace_GetThreadCpuTime(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_get_thread_cpu_time == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
   }
   jvmtiError err;
-  JavaThread* java_thread = NULL;
-  ThreadsListHandle tlh(this_thread);
-  if (thread == NULL) {
-    java_thread = current_thread;
-  } else {
-    err = JvmtiExport::cv_external_thread_to_JavaThread(tlh.list(), thread, &java_thread, NULL);
-    if (err != JVMTI_ERROR_NONE) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is thread - jthread did not convert to a JavaThread - jthread = " PTR_FORMAT "",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(err), p2i(thread));
-      }
-      return err;
-    }
-  }
-  if (nanos_ptr == NULL) {
-      if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
-        if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
-      }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is nanos_ptr",  curr_thread_name, func_name, 
-                  JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
-      }
-      return JVMTI_ERROR_NULL_POINTER;
-  }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+              log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
   }
-  err = jvmti_env->GetThreadCpuTime(java_thread, nanos_ptr);
+  err = jvmti_env->GetThreadCpuTime(thread, nanos_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  thread=%s", curr_thread_name, func_name, 
-                    JvmtiTrace::safe_get_thread_name(java_thread));
+          log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13567,8 +13289,8 @@ jvmtiTrace_GetTimerInfo(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(138);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(138);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -13577,19 +13299,19 @@ jvmtiTrace_GetTimerInfo(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -13599,16 +13321,17 @@ jvmtiTrace_GetTimerInfo(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetTimerInfo , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    if (info_ptr == NULL) {
+    if (info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13622,18 +13345,18 @@ jvmtiTrace_GetTimerInfo(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (info_ptr == NULL) {
+    if (info_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is info_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13647,7 +13370,7 @@ jvmtiTrace_GetTimerInfo(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13666,8 +13389,8 @@ jvmtiTrace_GetTime(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(139);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(139);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -13676,19 +13399,19 @@ jvmtiTrace_GetTime(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -13698,16 +13421,17 @@ jvmtiTrace_GetTime(jvmtiEnv* env,
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetTime , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    if (nanos_ptr == NULL) {
+    if (nanos_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is nanos_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is nanos_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13721,18 +13445,18 @@ jvmtiTrace_GetTime(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (nanos_ptr == NULL) {
+    if (nanos_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is nanos_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is nanos_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13746,7 +13470,7 @@ jvmtiTrace_GetTime(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13765,8 +13489,8 @@ jvmtiTrace_GetAvailableProcessors(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(144);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(144);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -13775,7 +13499,7 @@ jvmtiTrace_GetAvailableProcessors(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13783,24 +13507,25 @@ jvmtiTrace_GetAvailableProcessors(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetAvailableProcessors , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (processor_count_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (processor_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is processor_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is processor_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13814,18 +13539,18 @@ jvmtiTrace_GetAvailableProcessors(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (processor_count_ptr == NULL) {
+    if (processor_count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is processor_count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is processor_count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13839,7 +13564,7 @@ jvmtiTrace_GetAvailableProcessors(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13851,22 +13576,22 @@ jvmtiTrace_GetAvailableProcessors(jvmtiEnv* env,
 
   //
   // Class Loader Search functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
             const char* segment) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(149);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(149);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -13874,7 +13599,7 @@ jvmtiTrace_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13882,24 +13607,25 @@ jvmtiTrace_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddToBootstrapClassLoaderSearch , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (segment == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (segment == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13913,18 +13639,18 @@ jvmtiTrace_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  segment='%s'", curr_thread_name, func_name, segment);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (segment == NULL) {
+    if (segment == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -13938,7 +13664,7 @@ jvmtiTrace_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  segment='%s'", curr_thread_name, func_name, segment);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -13952,15 +13678,15 @@ jvmtiTrace_AddToSystemClassLoaderSearch(jvmtiEnv* env,
             const char* segment) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(151);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(151);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -13968,7 +13694,7 @@ jvmtiTrace_AddToSystemClassLoaderSearch(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -13976,24 +13702,25 @@ jvmtiTrace_AddToSystemClassLoaderSearch(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_AddToSystemClassLoaderSearch , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (segment == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (segment == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14007,18 +13734,18 @@ jvmtiTrace_AddToSystemClassLoaderSearch(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  segment='%s'", curr_thread_name, func_name, segment);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (segment == NULL) {
+    if (segment == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is segment",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14032,7 +13759,7 @@ jvmtiTrace_AddToSystemClassLoaderSearch(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  segment='%s'", curr_thread_name, func_name, segment);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14043,7 +13770,7 @@ jvmtiTrace_AddToSystemClassLoaderSearch(jvmtiEnv* env,
 
   //
   // System Properties functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetSystemProperties(jvmtiEnv* env,
@@ -14055,15 +13782,15 @@ jvmtiTrace_GetSystemProperties(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(130);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(130);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -14071,7 +13798,7 @@ jvmtiTrace_GetSystemProperties(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14079,34 +13806,35 @@ jvmtiTrace_GetSystemProperties(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetSystemProperties , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (count_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (property_ptr == NULL) {
+  if (property_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is property_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is property_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14120,28 +13848,28 @@ jvmtiTrace_GetSystemProperties(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (count_ptr == NULL) {
+    if (count_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is count_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (property_ptr == NULL) {
+  if (property_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is property_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is property_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14155,7 +13883,7 @@ jvmtiTrace_GetSystemProperties(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14175,15 +13903,15 @@ jvmtiTrace_GetSystemProperty(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(131);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(131);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -14191,7 +13919,7 @@ jvmtiTrace_GetSystemProperty(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14199,34 +13927,35 @@ jvmtiTrace_GetSystemProperty(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetSystemProperty , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (property == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (property == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  property='%s'", curr_thread_name, func_name, property);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14240,28 +13969,28 @@ jvmtiTrace_GetSystemProperty(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  property='%s'", curr_thread_name, func_name, property);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (property == NULL) {
+    if (property == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
-  if (value_ptr == NULL) {
+  if (value_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  property='%s'", curr_thread_name, func_name, property);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is value_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14275,7 +14004,7 @@ jvmtiTrace_GetSystemProperty(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  property='%s'", curr_thread_name, func_name, property);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14295,15 +14024,15 @@ jvmtiTrace_SetSystemProperty(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(132);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(132);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -14311,7 +14040,7 @@ jvmtiTrace_SetSystemProperty(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14319,24 +14048,25 @@ jvmtiTrace_SetSystemProperty(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetSystemProperty , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (property == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (property == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14350,18 +14080,18 @@ jvmtiTrace_SetSystemProperty(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  property='%s' value_ptr='%s'", curr_thread_name, func_name, property, value_ptr);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (property == NULL) {
+    if (property == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is property",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14375,7 +14105,7 @@ jvmtiTrace_SetSystemProperty(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s {  property='%s' value_ptr='%s'", curr_thread_name, func_name, property, value_ptr);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14387,15 +14117,15 @@ jvmtiTrace_SetSystemProperty(jvmtiEnv* env,
 
   //
   // General functions
-  // 
+  //
 
 static jvmtiError JNICALL
 jvmtiTrace_GetPhase(jvmtiEnv* env,
             jvmtiPhase* phase_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(133);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(133);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -14404,7 +14134,7 @@ jvmtiTrace_GetPhase(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14412,24 +14142,25 @@ jvmtiTrace_GetPhase(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetPhase , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (phase_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (phase_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is phase_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is phase_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14443,18 +14174,18 @@ jvmtiTrace_GetPhase(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (phase_ptr == NULL) {
+    if (phase_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is phase_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is phase_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14468,7 +14199,7 @@ jvmtiTrace_GetPhase(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14481,8 +14212,8 @@ static jvmtiError JNICALL
 jvmtiTrace_DisposeEnvironment(jvmtiEnv* env) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(127);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(127);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -14491,7 +14222,7 @@ jvmtiTrace_DisposeEnvironment(jvmtiEnv* env) {
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14499,18 +14230,19 @@ jvmtiTrace_DisposeEnvironment(jvmtiEnv* env) {
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_DisposeEnvironment , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
               log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
@@ -14520,7 +14252,7 @@ jvmtiTrace_DisposeEnvironment(jvmtiEnv* env) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14535,7 +14267,7 @@ jvmtiTrace_DisposeEnvironment(jvmtiEnv* env) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14549,8 +14281,8 @@ jvmtiTrace_SetEnvironmentLocalStorage(jvmtiEnv* env,
             const void* data) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(148);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(148);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -14559,19 +14291,19 @@ jvmtiTrace_SetEnvironmentLocalStorage(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -14595,7 +14327,7 @@ jvmtiTrace_SetEnvironmentLocalStorage(jvmtiEnv* env,
       p2i(data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14614,7 +14346,7 @@ jvmtiTrace_SetEnvironmentLocalStorage(jvmtiEnv* env,
       p2i(data)
     );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14628,8 +14360,8 @@ jvmtiTrace_GetEnvironmentLocalStorage(jvmtiEnv* env,
             void** data_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(147);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(147);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -14638,19 +14370,19 @@ jvmtiTrace_GetEnvironmentLocalStorage(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
   }
   jvmtiError err;
-  Thread* this_thread = NULL;
+  Thread* this_thread = nullptr;
   bool transition;
   if (Threads::number_of_threads() == 0) {
     transition = false;
   } else {
     this_thread = Thread::current_or_null();
-    transition = ((this_thread != NULL) && !this_thread->is_Named_thread());
+    transition = ((this_thread != nullptr) && !this_thread->is_Named_thread());
   }
   if (transition) {
     if (!this_thread->is_Java_thread()) {
@@ -14661,12 +14393,12 @@ jvmtiTrace_GetEnvironmentLocalStorage(jvmtiEnv* env,
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
     
-    if (data_ptr == NULL) {
+    if (data_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is data_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is data_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14680,18 +14412,18 @@ jvmtiTrace_GetEnvironmentLocalStorage(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (data_ptr == NULL) {
+    if (data_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is data_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is data_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14705,7 +14437,7 @@ jvmtiTrace_GetEnvironmentLocalStorage(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14719,8 +14451,8 @@ jvmtiTrace_GetVersionNumber(jvmtiEnv* env,
             jint* version_ptr) {
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(88);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(88);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -14729,7 +14461,7 @@ jvmtiTrace_GetVersionNumber(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14737,24 +14469,25 @@ jvmtiTrace_GetVersionNumber(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetVersionNumber , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (version_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (version_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is version_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is version_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14768,18 +14501,18 @@ jvmtiTrace_GetVersionNumber(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (version_ptr == NULL) {
+    if (version_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is version_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is version_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -14793,7 +14526,7 @@ jvmtiTrace_GetVersionNumber(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14812,8 +14545,8 @@ jvmtiTrace_GetErrorName(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(128);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(128);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -14822,7 +14555,7 @@ jvmtiTrace_GetErrorName(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14830,75 +14563,76 @@ jvmtiTrace_GetErrorName(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetErrorName , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (name_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (name_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error, 
+          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error,
                     JvmtiUtil::error_name(error)
 );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is name_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is name_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error, 
+              log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error,
                     JvmtiUtil::error_name(error)
 );
   }
   err = jvmti_env->GetErrorName(error, name_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error, 
+          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error,
                     JvmtiUtil::error_name(error)
 );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (name_ptr == NULL) {
+    if (name_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error, 
+          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error,
                     JvmtiUtil::error_name(error)
 );
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is name_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is name_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
   }
 
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error, 
+              log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error,
                     JvmtiUtil::error_name(error)
 );
   }
   err = jvmti_env->GetErrorName(error, name_ptr);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error, 
+          log_trace(jvmti)("[%s] %s {  error=%d:%s", curr_thread_name, func_name, error,
                     JvmtiUtil::error_name(error)
 );
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14918,8 +14652,8 @@ jvmtiTrace_SetVerboseFlag(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(150);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(150);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -14928,7 +14662,7 @@ jvmtiTrace_SetVerboseFlag(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -14936,30 +14670,31 @@ jvmtiTrace_SetVerboseFlag(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetVerboseFlag , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag, 
+              log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag,
                     JvmtiTrace::enum_name(jvmtiVerboseFlagConstantNames, jvmtiVerboseFlagConstantValues, flag), value? "true" : "false");
   }
   err = jvmti_env->SetVerboseFlag(flag, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag, 
+          log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag,
                     JvmtiTrace::enum_name(jvmtiVerboseFlagConstantNames, jvmtiVerboseFlagConstantValues, flag), value? "true" : "false");
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14967,16 +14702,16 @@ jvmtiTrace_SetVerboseFlag(jvmtiEnv* env,
   } else {
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag, 
+              log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag,
                     JvmtiTrace::enum_name(jvmtiVerboseFlagConstantNames, jvmtiVerboseFlagConstantValues, flag), value? "true" : "false");
   }
   err = jvmti_env->SetVerboseFlag(flag, value);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag, 
+          log_trace(jvmti)("[%s] %s {  flag=%d:%s value=%s", curr_thread_name, func_name, flag,
                     JvmtiTrace::enum_name(jvmtiVerboseFlagConstantNames, jvmtiVerboseFlagConstantValues, flag), value? "true" : "false");
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -14995,8 +14730,8 @@ jvmtiTrace_GetJLocationFormat(jvmtiEnv* env,
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(129);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(129);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
@@ -15005,7 +14740,7 @@ jvmtiTrace_GetJLocationFormat(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -15013,24 +14748,25 @@ jvmtiTrace_GetJLocationFormat(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmtiTrace_GetJLocationFormat , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
-    if (format_ptr == NULL) {
+    PreserveExceptionMark __em(this_thread);
+    if (format_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is format_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is format_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -15044,18 +14780,18 @@ jvmtiTrace_GetJLocationFormat(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
   }
   } else {
-    if (format_ptr == NULL) {
+    if (format_ptr == nullptr) {
       if ((trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
         if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
       }
-        log_error(jvmti)("[%s] %s } %s - erroneous arg is format_ptr",  curr_thread_name, func_name, 
+        log_error(jvmti)("[%s] %s } %s - erroneous arg is format_ptr",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(JVMTI_ERROR_NULL_POINTER));
       }
       return JVMTI_ERROR_NULL_POINTER;
@@ -15069,7 +14805,7 @@ jvmtiTrace_GetJLocationFormat(jvmtiEnv* env,
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
           log_trace(jvmti)("[%s] %s { ", curr_thread_name, func_name);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -15081,26 +14817,26 @@ jvmtiTrace_GetJLocationFormat(jvmtiEnv* env,
 
   //
   // Heap Monitoring functions
-  // 
+  //
 
 static jvmtiError JNICALL
-jvmtiTrace_SetHeapSamplingRate(jvmtiEnv* env,
-            jint sampling_rate) {
+jvmtiTrace_SetHeapSamplingInterval(jvmtiEnv* env,
+            jint sampling_interval) {
 
 #if !INCLUDE_JVMTI 
   return JVMTI_ERROR_NOT_AVAILABLE; 
 #else 
   SafeResourceMark rm;
   jint trace_flags = JvmtiTrace::trace_flags(156);
-  const char *func_name = NULL;
-  const char *curr_thread_name = NULL;
+  const char *func_name = nullptr;
+  const char *curr_thread_name = nullptr;
   if (trace_flags) {
     func_name = JvmtiTrace::function_name(156);
     curr_thread_name = JvmtiTrace::safe_get_current_thread_name();
   }
   if(JvmtiEnv::get_phase()!=JVMTI_PHASE_ONLOAD && JvmtiEnv::get_phase()!=JVMTI_PHASE_LIVE) {
     if (trace_flags) {
-          log_trace(jvmti)("[-] %s %s",  func_name, 
+          log_trace(jvmti)("[-] %s %s",  func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_WRONG_PHASE));
     }
     return JVMTI_ERROR_WRONG_PHASE;
@@ -15108,7 +14844,7 @@ jvmtiTrace_SetHeapSamplingRate(jvmtiEnv* env,
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s  env=" PTR_FORMAT,  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_INVALID_ENVIRONMENT), p2i(env));
     }
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -15116,7 +14852,7 @@ jvmtiTrace_SetHeapSamplingRate(jvmtiEnv* env,
 
   if (jvmti_env->get_capabilities()->can_generate_sampled_object_alloc_events == 0) {
     if (trace_flags) {
-          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name, 
+          log_trace(jvmti)("[%s] %s %s",  curr_thread_name, func_name,
                     JvmtiUtil::error_name(JVMTI_ERROR_MUST_POSSESS_CAPABILITY));
     }
     return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
@@ -15124,28 +14860,29 @@ jvmtiTrace_SetHeapSamplingRate(jvmtiEnv* env,
   jvmtiError err;
   if (Threads::number_of_threads() != 0) {
     Thread* this_thread = Thread::current_or_null();
-    if (this_thread == NULL || !this_thread->is_Java_thread()) {
+    if (this_thread == nullptr || !this_thread->is_Java_thread()) {
       if (trace_flags) {
         log_trace(jvmti)("[non-attached thread] %s %s",  func_name,
         JvmtiUtil::error_name(JVMTI_ERROR_UNATTACHED_THREAD));
       }
       return JVMTI_ERROR_UNATTACHED_THREAD;
     }
-    JavaThread* current_thread = (JavaThread*)this_thread;
+    JavaThread* current_thread = JavaThread::cast(this_thread);
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
-    VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetHeapSamplingRate , current_thread)
+    VM_ENTRY_BASE(jvmtiError, jvmtiTrace_SetHeapSamplingInterval , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
-    CautiouslyPreserveExceptionMark __em(this_thread);
+    PreserveExceptionMark __em(this_thread);
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  sampling_rate=" INT32_FORMAT "", curr_thread_name, func_name, sampling_rate);
+              log_trace(jvmti)("[%s] %s {  sampling_interval=" INT32_FORMAT "", curr_thread_name, func_name, sampling_interval);
   }
-  err = jvmti_env->SetHeapSamplingRate(sampling_rate);
+  err = jvmti_env->SetHeapSamplingInterval(sampling_interval);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  sampling_rate=" INT32_FORMAT "", curr_thread_name, func_name, sampling_rate);
+          log_trace(jvmti)("[%s] %s {  sampling_interval=" INT32_FORMAT "", curr_thread_name, func_name, sampling_interval);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -15153,14 +14890,14 @@ jvmtiTrace_SetHeapSamplingRate(jvmtiEnv* env,
   } else {
   
   if ((trace_flags & JvmtiTrace::SHOW_IN) != 0) {
-              log_trace(jvmti)("[%s] %s {  sampling_rate=" INT32_FORMAT "", curr_thread_name, func_name, sampling_rate);
+              log_trace(jvmti)("[%s] %s {  sampling_interval=" INT32_FORMAT "", curr_thread_name, func_name, sampling_interval);
   }
-  err = jvmti_env->SetHeapSamplingRate(sampling_rate);
+  err = jvmti_env->SetHeapSamplingInterval(sampling_interval);
   if ( err != JVMTI_ERROR_NONE && (trace_flags & JvmtiTrace::SHOW_ERROR) != 0) {
       if ((trace_flags & JvmtiTrace::SHOW_IN) == 0) {
-          log_trace(jvmti)("[%s] %s {  sampling_rate=" INT32_FORMAT "", curr_thread_name, func_name, sampling_rate);
+          log_trace(jvmti)("[%s] %s {  sampling_interval=" INT32_FORMAT "", curr_thread_name, func_name, sampling_interval);
     }
-    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name, 
+    log_error(jvmti)("[%s] %s } %s",  curr_thread_name, func_name,
                   JvmtiUtil::error_name(err));
   } else if ((trace_flags & JvmtiTrace::SHOW_OUT) != 0) {
     log_trace(jvmti)("[%s] %s }",  curr_thread_name, func_name);
@@ -15175,7 +14912,7 @@ jvmtiTrace_SetHeapSamplingRate(jvmtiEnv* env,
 // JVMTI API functions
 struct jvmtiInterface_1_ jvmtiTrace_Interface = {
                               /*   1 :  RESERVED */
-      NULL,
+      nullptr,
                               /*   2 : Set Event Notification Mode */
       jvmtiTrace_SetEventNotificationMode,
                               /*   3 : Get All Modules */
@@ -15307,7 +15044,7 @@ struct jvmtiInterface_1_ jvmtiTrace_Interface = {
                               /*   66 : Get Method Modifiers */
       jvmtiTrace_GetMethodModifiers,
                               /*   67 :  RESERVED */
-      NULL,
+      nullptr,
                               /*   68 : Get Max Locals */
       jvmtiTrace_GetMaxLocals,
                               /*   69 : Get Arguments Size */
@@ -15383,7 +15120,7 @@ struct jvmtiInterface_1_ jvmtiTrace_Interface = {
                               /*   104 : Get Stack Trace */
       jvmtiTrace_GetStackTrace,
                               /*   105 :  RESERVED */
-      NULL,
+      nullptr,
                               /*   106 : Get Tag */
       jvmtiTrace_GetTag,
                               /*   107 : Set Tag */
@@ -15399,7 +15136,7 @@ struct jvmtiInterface_1_ jvmtiTrace_Interface = {
                               /*   112 : Iterate Over Instances Of Class */
       jvmtiTrace_IterateOverInstancesOfClass,
                               /*   113 :  RESERVED */
-      NULL,
+      nullptr,
                               /*   114 : Get Objects With Tags */
       jvmtiTrace_GetObjectsWithTags,
                               /*   115 : Follow References */
@@ -15407,11 +15144,11 @@ struct jvmtiInterface_1_ jvmtiTrace_Interface = {
                               /*   116 : Iterate Through Heap */
       jvmtiTrace_IterateThroughHeap,
                               /*   117 :  RESERVED */
-      NULL,
-                              /*   118 :  RESERVED */
-      NULL,
-                              /*   119 :  RESERVED */
-      NULL,
+      nullptr,
+                              /*   118 : Suspend All Virtual Threads */
+      jvmtiTrace_SuspendAllVirtualThreads,
+                              /*   119 : Resume All Virtual Threads */
+      jvmtiTrace_ResumeAllVirtualThreads,
                               /*   120 : Set JNI Function Table */
       jvmtiTrace_SetJNIFunctionTable,
                               /*   121 : Get JNI Function Table */
@@ -15455,7 +15192,7 @@ struct jvmtiInterface_1_ jvmtiTrace_Interface = {
                               /*   140 : Get Potential Capabilities */
       jvmtiTrace_GetPotentialCapabilities,
                               /*   141 :  RESERVED */
-      NULL,
+      nullptr,
                               /*   142 : Add Capabilities */
       jvmtiTrace_AddCapabilities,
                               /*   143 : Relinquish Capabilities */
@@ -15484,8 +15221,8 @@ struct jvmtiInterface_1_ jvmtiTrace_Interface = {
       jvmtiTrace_GetObjectSize,
                               /*   155 : Get Local Instance */
       jvmtiTrace_GetLocalInstance,
-                              /*   156 : Set Heap Sampling Rate */
-      jvmtiTrace_SetHeapSamplingRate
+                              /*   156 : Set Heap Sampling Interval */
+      jvmtiTrace_SetHeapSamplingInterval
 };
 #endif // INCLUDE_JVMTI
 

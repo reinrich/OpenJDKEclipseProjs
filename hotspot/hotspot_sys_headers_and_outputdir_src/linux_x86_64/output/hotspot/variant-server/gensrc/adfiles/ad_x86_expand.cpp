@@ -1,6 +1,6 @@
 #line 1 "ad_x86_expand.cpp"
 //
-// Copyright (c) 2003, 2017, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -27,59 +27,44 @@
 
 #include "precompiled.hpp"
 #include "adfiles/ad_x86.hpp"
+#include "oops/compressedOops.hpp"
 
 // Register masks, one for each register class.
 const RegMask _NO_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ANY_REG_WITH_RBP_mask( 0xffffffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ANY_REG_NO_RBP_mask( 0xff3fffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _PTR_REG_WITH_RBP_mask( 0xffffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_PTR_REG_WITH_RBP_mask( 0xffffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
-const RegMask _PTR_REG_NO_RBP_mask( 0xf3ffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_PTR_REG_NO_RBP_mask( 0xf3ffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
-const RegMask _PTR_NO_RAX_REG_WITH_RBP_mask( 0xfcffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _PTR_NO_RAX_REG_NO_RBP_mask( 0xf0ffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _PTR_NO_RAX_RBX_REG_WITH_RBP_mask( 0xfcfccff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _PTR_NO_RAX_RBX_REG_NO_RBP_mask( 0xf0fccff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _ALL_REG_mask( 0xffffffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _ALL_INT_REG_mask( 0x5555555, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _PTR_RAX_REG_mask( 0x300000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _PTR_RBX_REG_mask( 0x3000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _PTR_RSI_REG_mask( 0xc0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _PTR_RBP_REG_mask( 0xc00000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _PTR_RDI_REG_mask( 0xc000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _PTR_RSP_REG_mask( 0xc0000000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _PTR_R15_REG_mask( 0x30000000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _PTR_REX_REG_mask( 0xc0000ff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _LONG_REG_WITH_RBP_mask( 0xffffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_LONG_REG_WITH_RBP_mask( 0xffffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
-const RegMask _LONG_REG_NO_RBP_mask( 0xf3ffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_LONG_REG_NO_RBP_mask( 0xf3ffcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
-const RegMask _LONG_NO_RAX_RDX_REG_WITH_RBP_mask( 0xfccfcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _LONG_NO_RAX_RDX_REG_NO_RBP_mask( 0xf0cfcff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _LONG_NO_RCX_REG_WITH_RBP_mask( 0xffff0ff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _LONG_NO_RCX_REG_NO_RBP_mask( 0xf3ff0ff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _LONG_RAX_REG_mask( 0x300000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _LONG_RCX_REG_mask( 0xc00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _LONG_RDX_REG_mask( 0x30000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _INT_REG_WITH_RBP_mask( 0x5555455, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_INT_REG_WITH_RBP_mask( 0x5555455, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
-const RegMask _INT_REG_NO_RBP_mask( 0x5155455, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_INT_REG_NO_RBP_mask( 0x5155455, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
-const RegMask _INT_NO_RCX_REG_WITH_RBP_mask( 0x5555055, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _INT_NO_RCX_REG_NO_RBP_mask( 0x5155055, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _INT_NO_RAX_RDX_REG_WITH_RBP_mask( 0x5445455, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _INT_NO_RAX_RDX_REG_NO_RBP_mask( 0x5045455, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _INT_RAX_REG_mask( 0x100000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _INT_RBX_REG_mask( 0x1000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _INT_RCX_REG_mask( 0x400, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _INT_RDX_REG_mask( 0x10000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _INT_RDI_REG_mask( 0x4000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _INT_FLAGS_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x3fff, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_K1_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x3000, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_K2_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc00, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_K3_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x300, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_K4_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc0, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_K5_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x30, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_K6_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTMASK_REG_K7_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x3, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _INT_FLAGS_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4000, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _FLOAT_REG_LEGACY_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_FLOAT_REG_LEGACY_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
+const RegMask _STACK_OR_FLOAT_REG_LEGACY_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
 const RegMask _FLOAT_REG_EVEX_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_FLOAT_REG_EVEX_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
+const RegMask _STACK_OR_FLOAT_REG_EVEX_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0xffff0000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
 const RegMask _DOUBLE_REG_LEGACY_mask( 0x0, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_DOUBLE_REG_LEGACY_mask( 0x0, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
+const RegMask _STACK_OR_DOUBLE_REG_LEGACY_mask( 0x0, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
 const RegMask _DOUBLE_REG_EVEX_mask( 0x0, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_DOUBLE_REG_EVEX_mask( 0x0, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
+const RegMask _STACK_OR_DOUBLE_REG_EVEX_mask( 0x0, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0xffff0000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
 const RegMask _VECTORS_REG_LEGACY_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _VECTORS_REG_EVEX_mask( 0x0, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x10001, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _VECTORD_REG_LEGACY_mask( 0x0, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x30003, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
@@ -88,105 +73,12 @@ const RegMask _VECTORX_REG_LEGACY_mask( 0x0, 0xf000f, 0xf000f, 0xf000f, 0xf000f,
 const RegMask _VECTORX_REG_EVEX_mask( 0x0, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0xf000f, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _VECTORY_REG_LEGACY_mask( 0x0, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _VECTORY_REG_EVEX_mask( 0x0, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0xff00ff, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _VECTORZ_REG_mask( 0x0, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x0, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTORZ_REG_EVEX_mask( 0x0, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x0, 0x0, 0x0, 0x0, 0x0 );
+const RegMask _VECTORZ_REG_LEGACY_mask( 0x0, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _XMM0_REG_mask( 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM0_REG_mask( 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM0_REG_mask( 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM1_REG_mask( 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM1_REG_mask( 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM1_REG_mask( 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM2_REG_mask( 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM2_REG_mask( 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM2_REG_mask( 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM3_REG_mask( 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM3_REG_mask( 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM3_REG_mask( 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM4_REG_mask( 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM4_REG_mask( 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM4_REG_mask( 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM5_REG_mask( 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM5_REG_mask( 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM5_REG_mask( 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM6_REG_mask( 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM6_REG_mask( 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM6_REG_mask( 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM7_REG_mask( 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM7_REG_mask( 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM7_REG_mask( 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM8_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM8_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM8_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM9_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM9_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM9_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM10_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM10_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM10_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM11_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM11_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM11_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM12_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM12_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM12_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM13_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM13_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM13_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM14_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM14_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM14_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM15_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM15_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM15_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM16_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM16_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM16_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM17_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM17_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM17_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM18_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM18_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM18_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM19_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM19_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM19_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM20_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM20_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM20_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM21_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM21_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM21_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM22_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM22_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM22_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM23_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM23_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM23_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM24_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM24_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM24_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM25_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM25_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM25_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM26_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM26_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM26_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM27_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM27_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM27_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM28_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM28_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM28_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM29_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM29_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM29_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM30_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM30_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM30_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _XMM31_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf0000, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _YMM31_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff0000, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _ZMM31_REG_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0x0, 0x0, 0x0, 0x0, 0x0 );
 const RegMask _STACK_SLOTS_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
-const RegMask _STACK_OR_STACK_SLOTS_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffffff00, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
+const RegMask _STACK_OR_STACK_SLOTS_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff0000, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff );
+const RegMask _DYNAMIC_mask( 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 );
 MachNode* loadUB2L_immINode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -316,6 +208,146 @@ MachNode* loadI2L_immU31Node::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
+MachNode* maxF_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* maxF_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xmmt
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* maxD_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* maxD_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xmmt
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* minF_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* minF_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xmmt
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* minD_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* minD_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xmmt
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* loadConI0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -418,6 +450,17 @@ MachNode* countLeadingZerosINode::Expand(State* state, Node_List& proj_list, Nod
   return this;
 }
 
+MachNode* countLeadingZerosI_memNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* countLeadingZerosI_bsrNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -430,6 +473,17 @@ MachNode* countLeadingZerosI_bsrNode::Expand(State* state, Node_List& proj_list,
 }
 
 MachNode* countLeadingZerosLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* countLeadingZerosL_memNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -462,6 +516,17 @@ MachNode* countTrailingZerosINode::Expand(State* state, Node_List& proj_list, No
   return this;
 }
 
+MachNode* countTrailingZerosI_memNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* countTrailingZerosI_bsfNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -484,9 +549,107 @@ MachNode* countTrailingZerosLNode::Expand(State* state, Node_List& proj_list, No
   return this;
 }
 
+MachNode* countTrailingZerosL_memNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* countTrailingZerosL_bsfNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* bytes_reversebit_intNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* bytes_reversebit_int_gfniNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* bytes_reversebit_longNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rtmp1
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rtmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* bytes_reversebit_long_gfniNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
@@ -597,6 +760,10 @@ MachNode* decodeHeapOop_not_nullNode::Expand(State* state, Node_List& proj_list,
 MachNode* encodeKlass_not_nullNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGN));
+  add_req(def);
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
@@ -608,6 +775,10 @@ MachNode* encodeKlass_not_nullNode::Expand(State* state, Node_List& proj_list, N
 MachNode* decodeKlass_not_nullNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
@@ -670,7 +841,7 @@ MachNode* cmovI_regUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovI_regUNode *n0 = new cmovI_regUNode();
   n0->add_req(_in[0]);
@@ -731,7 +902,7 @@ MachNode* cmovI_memUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovI_memUNode *n0 = new cmovI_memUNode();
   n0->add_req(_in[0]);
@@ -792,7 +963,7 @@ MachNode* cmovN_regUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovN_regUNode *n0 = new cmovN_regUNode();
   n0->add_req(_in[0]);
@@ -850,7 +1021,7 @@ MachNode* cmovP_regUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovP_regUNode *n0 = new cmovP_regUNode();
   n0->add_req(_in[0]);
@@ -908,7 +1079,7 @@ MachNode* cmovL_regUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovL_regUNode *n0 = new cmovL_regUNode();
   n0->add_req(_in[0]);
@@ -969,7 +1140,7 @@ MachNode* cmovL_memUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovL_memUNode *n0 = new cmovL_memUNode();
   n0->add_req(_in[0]);
@@ -1030,7 +1201,7 @@ MachNode* cmovF_regUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovF_regUNode *n0 = new cmovF_regUNode();
   n0->add_req(_in[0]);
@@ -1088,7 +1259,7 @@ MachNode* cmovD_regUCFNode::Expand(State* state, Node_List& proj_list, Node* mem
   unsigned idx3 = idx2 + num2;
   unsigned idx4 = idx3 + num3;
   unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   cmovD_regUNode *n0 = new cmovD_regUNode();
   n0->add_req(_in[0]);
@@ -1620,28 +1791,6 @@ MachNode* addP_rReg_immNode::Expand(State* state, Node_List& proj_list, Node* me
   return this;
 }
 
-MachNode* storeIConditionalNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL oldval
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_RAX_REG_mask()), Op_RegI );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* storeLConditionalNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL oldval
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (LONG_RAX_REG_mask()), Op_RegL );
-  proj_list.push(kill);
-
-  return this;
-}
-
 MachNode* compareAndSwapPNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -1876,7 +2025,18 @@ MachNode* compareAndExchangePNode::Expand(State* state, Node_List& proj_list, No
   return this;
 }
 
-MachNode* xaddB_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xaddB_reg_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* xaddB_imm_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -1898,7 +2058,18 @@ MachNode* xaddBNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   return this;
 }
 
-MachNode* xaddS_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xaddS_reg_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* xaddS_imm_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -1920,7 +2091,18 @@ MachNode* xaddSNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   return this;
 }
 
-MachNode* xaddI_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xaddI_reg_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* xaddI_imm_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -1942,7 +2124,18 @@ MachNode* xaddINode::Expand(State* state, Node_List& proj_list, Node* mem) {
   return this;
 }
 
-MachNode* xaddL_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xaddL_reg_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* xaddL_imm_no_resNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -1964,9 +2157,13 @@ MachNode* xaddLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   return this;
 }
 
-MachNode* subI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* absI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
@@ -1975,7 +2172,22 @@ MachNode* subI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   return this;
 }
 
-MachNode* subI_rReg_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* absL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* subI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -2032,53 +2244,7 @@ MachNode* subI_mem_rRegNode::Expand(State* state, Node_List& proj_list, Node* me
   return this;
 }
 
-MachNode* subI_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// src
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // src
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
-
-  return this;
-}
-
 MachNode* subL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* subL_rReg_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -2135,41 +2301,6 @@ MachNode* subL_mem_rRegNode::Expand(State* state, Node_List& proj_list, Node* me
   return this;
 }
 
-MachNode* subL_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// src
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // src
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
-
-  return this;
-}
-
 MachNode* subP_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -2182,6 +2313,17 @@ MachNode* subP_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
 }
 
 MachNode* negI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* negI_rReg_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -2222,6 +2364,17 @@ MachNode* negI_memNode::Expand(State* state, Node_List& proj_list, Node* mem) {
 }
 
 MachNode* negL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* negL_rReg_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -2316,6 +2469,90 @@ MachNode* mulI_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem
   return this;
 }
 
+MachNode* mulAddS2I_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  MachNode *tmp0 = this;
+  MachNode *tmp1 = this;
+  MachNode *tmp2 = this;
+  MachNode *tmp3 = this;
+  MachNode *tmp4 = this;
+  unsigned num0 = 0;
+  unsigned num1 = opnd_array(1)->num_edges();
+  unsigned num2 = opnd_array(2)->num_edges();
+  unsigned num3 = opnd_array(3)->num_edges();
+  unsigned num4 = opnd_array(4)->num_edges();
+  unsigned idx0 = oper_input_base();
+  unsigned idx1 = idx0 + num0;
+  unsigned idx2 = idx1 + num1;
+  unsigned idx3 = idx2 + num2;
+  unsigned idx4 = idx3 + num3;
+  unsigned idx5 = idx4 + num4;
+  MachNode *result = nullptr;
+
+  mulI_rRegNode *n0 = new mulI_rRegNode();
+  n0->add_req(_in[0]);
+  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
+  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
+  if(tmp1 == this) {
+    for(unsigned i = 0; i < num1; i++) {
+      n0->add_req(_in[i + idx1]);
+    }
+  }
+  else n0->add_req(tmp1);
+  tmp1 = n0;
+  n0->set_opnd_array(2, opnd_array(2)->clone()); // src1
+  if(tmp2 == this) {
+    for(unsigned i = 0; i < num2; i++) {
+      n0->add_req(_in[i + idx2]);
+    }
+  }
+  else n0->add_req(tmp2);
+  result = n0->Expand( state, proj_list, mem );
+
+  mulI_rRegNode *n1 = new mulI_rRegNode();
+  n1->add_req(_in[0]);
+  n1->set_opnd_array(0, state->MachOperGenerator(RREGI));
+  n1->set_opnd_array(1, opnd_array(3)->clone()); // src2
+  if(tmp3 == this) {
+    for(unsigned i = 0; i < num3; i++) {
+      n1->add_req(_in[i + idx3]);
+    }
+  }
+  else n1->add_req(tmp3);
+  tmp3 = n1;
+  n1->set_opnd_array(2, opnd_array(4)->clone()); // src3
+  if(tmp4 == this) {
+    for(unsigned i = 0; i < num4; i++) {
+      n1->add_req(_in[i + idx4]);
+    }
+  }
+  else n1->add_req(tmp4);
+  result = n1->Expand( state, proj_list, mem );
+
+  addI_rRegNode *n2 = new addI_rRegNode();
+  n2->add_req(_in[0]);
+  n2->set_opnd_array(0, state->MachOperGenerator(RREGI));
+  n2->set_opnd_array(1, opnd_array(1)->clone()); // dst
+  if(tmp1 == this) {
+    for(unsigned i = 0; i < num1; i++) {
+      n2->add_req(_in[i + idx1]);
+    }
+  }
+  else n2->add_req(tmp1);
+  tmp1 = n2;
+  n2->set_opnd_array(2, opnd_array(3)->clone()); // src2
+  if(tmp3 == this) {
+    for(unsigned i = 0; i < num3; i++) {
+      n2->add_req(_in[i + idx3]);
+    }
+  }
+  else n2->add_req(tmp3);
+  result = n2->Expand( state, proj_list, mem );
+
+
+  return result;
+}
+
 MachNode* mulL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -2385,6 +2622,20 @@ MachNode* mulHiL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem)
   return this;
 }
 
+MachNode* umulHiL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL rax
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (LONG_RAX_REG_mask()), Op_RegL );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* divI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -2400,6 +2651,34 @@ MachNode* divI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
 }
 
 MachNode* divL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL rdx
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (LONG_RDX_REG_mask()), Op_RegL );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* udivI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL rdx
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* udivL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL rdx
@@ -2435,23 +2714,13 @@ MachNode* divModL_rReg_divmodNode::Expand(State* state, Node_List& proj_list, No
   return this;
 }
 
-MachNode* mul_hiNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* udivModI_rReg_divmodNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // DEF/KILL rax
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (LONG_RAX_REG_mask()), Op_RegL );
-  proj_list.push(kill);
-  // DEF/KILL cr
-  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* sarL_rReg_63Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(NO_RAX_RDX_REGI));
+  add_req(def);
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
@@ -2460,105 +2729,19 @@ MachNode* sarL_rReg_63Node::Expand(State* state, Node_List& proj_list, Node* mem
   return this;
 }
 
-MachNode* sarL_rReg_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* udivModL_rReg_divmodNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(NO_RAX_RDX_REGL));
+  add_req(def);
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
   proj_list.push(kill);
 
   return this;
-}
-
-MachNode* divL_10Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachOper *op0 = new rax_RegLOper();
-  MachOper *op1 = new rFlagsRegOper();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = NULL;
-  MachNode *tmp4 = NULL;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  MachNode *result = NULL;
-
-  loadConL_0x6666666666666667Node *n0 = new loadConL_0x6666666666666667Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  tmp3 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-  mul_hiNode *n1 = new mul_hiNode();
-  n1->add_req(_in[0]);
-  n1->set_opnd_array(0, state->MachOperGenerator(RDX_REGL));
-  tmp0 = n1;
-  n1->set_opnd_array(1, opnd_array(1)->clone()); // src
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n1->add_req(_in[i + idx1]);
-    }
-  }
-  else n1->add_req(tmp1);
-  n1->set_opnd_array(2, op0->clone()); // rax
-  if(tmp3 != NULL)
-    n1->add_req(tmp3);
-  result = n1->Expand( state, proj_list, mem );
-
-  sarL_rReg_63Node *n2 = new sarL_rReg_63Node();
-  n2->add_req(_in[0]);
-  n2->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n2->set_opnd_array(1, opnd_array(1)->clone()); // src
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n2->add_req(_in[i + idx1]);
-    }
-  }
-  else n2->add_req(tmp1);
-  tmp1 = n2;
-  result = n2->Expand( state, proj_list, mem );
-
-  sarL_rReg_2Node *n3 = new sarL_rReg_2Node();
-  n3->add_req(_in[0]);
-  n3->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n3->set_opnd_array(1, opnd_array(0)->clone()); // dst
-  if(tmp0 == this) {
-    for(unsigned i = 0; i < num0; i++) {
-      n3->add_req(_in[i + idx0]);
-    }
-  }
-  else n3->add_req(tmp0);
-  tmp0 = n3;
-  result = n3->Expand( state, proj_list, mem );
-
-  subL_rRegNode *n4 = new subL_rRegNode();
-  n4->add_req(_in[0]);
-  n4->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n4->set_opnd_array(1, opnd_array(0)->clone()); // dst
-  if(tmp0 == this) {
-    for(unsigned i = 0; i < num0; i++) {
-      n4->add_req(_in[i + idx0]);
-    }
-  }
-  else n4->add_req(tmp0);
-  tmp0 = n4;
-  n4->set_opnd_array(2, opnd_array(1)->clone()); // src
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n4->add_req(_in[i + idx1]);
-    }
-  }
-  else n4->add_req(tmp1);
-  result = n4->Expand( state, proj_list, mem );
-
-
-  return result;
 }
 
 MachNode* modI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
@@ -2589,48 +2772,41 @@ MachNode* modL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   return this;
 }
 
-MachNode* salI_rReg_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* umodI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // DEF/KILL cr
+  // DEF/KILL rax
   MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  kill = new MachProjNode( this, 1, (INT_RAX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
   proj_list.push(kill);
 
   return this;
 }
 
-MachNode* salI_mem_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* umodL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL rax
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (LONG_RAX_REG_mask()), Op_RegL );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* salI_rReg_immI2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
   proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// shift
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // shift
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
 
   return this;
 }
@@ -2693,52 +2869,6 @@ MachNode* salI_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem
 }
 
 MachNode* salI_mem_CLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// shift
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // shift
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
-
-  return this;
-}
-
-MachNode* sarI_rReg_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* sarI_mem_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -2865,52 +2995,6 @@ MachNode* sarI_mem_CLNode::Expand(State* state, Node_List& proj_list, Node* mem)
   return this;
 }
 
-MachNode* shrI_rReg_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* shrI_mem_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// shift
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // shift
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
-
-  return this;
-}
-
 MachNode* shrI_rReg_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -3003,48 +3087,13 @@ MachNode* shrI_mem_CLNode::Expand(State* state, Node_List& proj_list, Node* mem)
   return this;
 }
 
-MachNode* salL_rReg_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* salL_rReg_immI2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
   proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* salL_mem_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// shift
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // shift
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
 
   return this;
 }
@@ -3141,52 +3190,6 @@ MachNode* salL_mem_CLNode::Expand(State* state, Node_List& proj_list, Node* mem)
   return this;
 }
 
-MachNode* sarL_rReg_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* sarL_mem_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// shift
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // shift
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
-
-  return this;
-}
-
 MachNode* sarL_rReg_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -3245,52 +3248,6 @@ MachNode* sarL_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem
 }
 
 MachNode* sarL_mem_CLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 4) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
-    unsigned num3 = opnd_array(3)->num_edges(); 	// shift
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    set_opnd_array(2, opnd_array(3)->clone()); // shift
-    for (unsigned i = 0; i < num3; i++) {
-      set_req(i + idx2, _in[i + idx3]);
-    }
-    num2 = num3;
-    idx3 = idx2 + num2;
-    for (int i = idx4 - 1; i >= (int)idx3; i--) {
-      del_req(i);
-    }
-    _num_opnds = 3;
-  } else {
-    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
-  }
-
-  return this;
-}
-
-MachNode* shrL_rReg_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* shrL_mem_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -3465,7 +3422,7 @@ MachNode* i2sNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   return this;
 }
 
-MachNode* rolI_rReg_imm1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rolI_immI8_legacyNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -3476,7 +3433,7 @@ MachNode* rolI_rReg_imm1Node::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
-MachNode* rolI_rReg_imm8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rolI_rReg_VarNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -3487,7 +3444,7 @@ MachNode* rolI_rReg_imm8Node::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
-MachNode* rolI_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rorI_immI8_legacyNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -3498,357 +3455,7 @@ MachNode* rolI_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem
   return this;
 }
 
-MachNode* rolI_rReg_i1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolI_rReg_imm1Node *n0 = new rolI_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolI_rReg_i1_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolI_rReg_imm1Node *n0 = new rolI_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolI_rReg_i8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolI_rReg_imm8Node *n0 = new rolI_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // lshift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolI_rReg_i8_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolI_rReg_imm8Node *n0 = new rolI_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(4)->clone()); // lshift
-  if(tmp4 == this) {
-    for(unsigned i = 0; i < num4; i++) {
-      n0->add_req(_in[i + idx4]);
-    }
-  }
-  else n0->add_req(tmp4);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolI_rReg_Var_C0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolI_rReg_CLNode *n0 = new rolI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolI_rReg_Var_C0_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolI_rReg_CLNode *n0 = new rolI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolI_rReg_Var_C32Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolI_rReg_CLNode *n0 = new rolI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolI_rReg_Var_C32_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolI_rReg_CLNode *n0 = new rolI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_imm1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rorI_rReg_VarNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -3859,7 +3466,7 @@ MachNode* rorI_rReg_imm1Node::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
-MachNode* rorI_rReg_imm8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rolL_immI8_legacyNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -3870,7 +3477,7 @@ MachNode* rorI_rReg_imm8Node::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
-MachNode* rorI_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rolL_rReg_VarNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -3881,357 +3488,7 @@ MachNode* rorI_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem
   return this;
 }
 
-MachNode* rorI_rReg_i1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorI_rReg_imm1Node *n0 = new rorI_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_i1_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorI_rReg_imm1Node *n0 = new rorI_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_i8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorI_rReg_imm8Node *n0 = new rorI_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // rshift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_i8_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorI_rReg_imm8Node *n0 = new rorI_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(4)->clone()); // rshift
-  if(tmp4 == this) {
-    for(unsigned i = 0; i < num4; i++) {
-      n0->add_req(_in[i + idx4]);
-    }
-  }
-  else n0->add_req(tmp4);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_Var_C0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorI_rReg_CLNode *n0 = new rorI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_Var_C0_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorI_rReg_CLNode *n0 = new rorI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_Var_C32Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorI_rReg_CLNode *n0 = new rorI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorI_rReg_Var_C32_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorI_rReg_CLNode *n0 = new rorI_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGI));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_imm1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rorL_immI8_legacyNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -4242,7 +3499,7 @@ MachNode* rolL_rReg_imm1Node::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
-MachNode* rolL_rReg_imm8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* rorL_rReg_VarNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL cr
@@ -4251,755 +3508,26 @@ MachNode* rolL_rReg_imm8Node::Expand(State* state, Node_List& proj_list, Node* m
   proj_list.push(kill);
 
   return this;
-}
-
-MachNode* rolL_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* rolL_rReg_i1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolL_rReg_imm1Node *n0 = new rolL_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_i1_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolL_rReg_imm1Node *n0 = new rolL_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_i8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolL_rReg_imm8Node *n0 = new rolL_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // lshift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_i8_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rolL_rReg_imm8Node *n0 = new rolL_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(4)->clone()); // lshift
-  if(tmp4 == this) {
-    for(unsigned i = 0; i < num4; i++) {
-      n0->add_req(_in[i + idx4]);
-    }
-  }
-  else n0->add_req(tmp4);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_Var_C0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolL_rReg_CLNode *n0 = new rolL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_Var_C0_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolL_rReg_CLNode *n0 = new rolL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_Var_C64Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolL_rReg_CLNode *n0 = new rolL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rolL_rReg_Var_C64_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rolL_rReg_CLNode *n0 = new rolL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_imm1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* rorL_rReg_imm8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* rorL_rReg_CLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* rorL_rReg_i1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorL_rReg_imm1Node *n0 = new rorL_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_i1_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorL_rReg_imm1Node *n0 = new rorL_rReg_imm1Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_i8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorL_rReg_imm8Node *n0 = new rorL_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // rshift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_i8_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  MachNode *result = NULL;
-
-  rorL_rReg_imm8Node *n0 = new rorL_rReg_imm8Node();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(RREGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(4)->clone()); // rshift
-  if(tmp4 == this) {
-    for(unsigned i = 0; i < num4; i++) {
-      n0->add_req(_in[i + idx4]);
-    }
-  }
-  else n0->add_req(tmp4);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_Var_C0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorL_rReg_CLNode *n0 = new rorL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_Var_C0_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorL_rReg_CLNode *n0 = new rorL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_Var_C64Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorL_rReg_CLNode *n0 = new rorL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(2)->clone()); // shift
-  if(tmp2 == this) {
-    for(unsigned i = 0; i < num2; i++) {
-      n0->add_req(_in[i + idx2]);
-    }
-  }
-  else n0->add_req(tmp2);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
-}
-
-MachNode* rorL_rReg_Var_C64_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  MachNode *tmp0 = this;
-  MachNode *tmp1 = this;
-  MachNode *tmp2 = this;
-  MachNode *tmp3 = this;
-  MachNode *tmp4 = this;
-  MachNode *tmp5 = this;
-  unsigned num0 = 0;
-  unsigned num1 = opnd_array(1)->num_edges();
-  unsigned num2 = opnd_array(2)->num_edges();
-  unsigned num3 = opnd_array(3)->num_edges();
-  unsigned num4 = opnd_array(4)->num_edges();
-  unsigned num5 = opnd_array(5)->num_edges();
-  unsigned idx0 = oper_input_base();
-  unsigned idx1 = idx0 + num0;
-  unsigned idx2 = idx1 + num1;
-  unsigned idx3 = idx2 + num2;
-  unsigned idx4 = idx3 + num3;
-  unsigned idx5 = idx4 + num4;
-  unsigned idx6 = idx5 + num5;
-  MachNode *result = NULL;
-
-  rorL_rReg_CLNode *n0 = new rorL_rReg_CLNode();
-  n0->add_req(_in[0]);
-  n0->set_opnd_array(0, state->MachOperGenerator(NO_RCX_REGL));
-  n0->set_opnd_array(1, opnd_array(1)->clone()); // dst
-  if(tmp1 == this) {
-    for(unsigned i = 0; i < num1; i++) {
-      n0->add_req(_in[i + idx1]);
-    }
-  }
-  else n0->add_req(tmp1);
-  tmp1 = n0;
-  n0->set_opnd_array(2, opnd_array(3)->clone()); // shift
-  if(tmp3 == this) {
-    for(unsigned i = 0; i < num3; i++) {
-      n0->add_req(_in[i + idx3]);
-    }
-  }
-  else n0->add_req(tmp3);
-  result = n0->Expand( state, proj_list, mem );
-
-
-  return result;
 }
 
 MachNode* andI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* convI2LAndI_reg_immIbitmaskNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
   // DEF/KILL cr
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
@@ -5037,6 +3565,70 @@ MachNode* andI_rReg_mem_0Node::Expand(State* state, Node_List& proj_list, Node* 
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
   proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* andB_mem_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
+    unsigned num3 = opnd_array(3)->num_edges(); 	// src
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    set_opnd_array(2, opnd_array(3)->clone()); // src
+    for (unsigned i = 0; i < num3; i++) {
+      set_req(i + idx2, _in[i + idx3]);
+    }
+    num2 = num3;
+    idx3 = idx2 + num2;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
+
+  return this;
+}
+
+MachNode* andB_mem_rReg_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
 
   return this;
 }
@@ -5600,6 +4192,70 @@ MachNode* orI_rReg_mem_0Node::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
+MachNode* orB_mem_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
+    unsigned num3 = opnd_array(3)->num_edges(); 	// src
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    set_opnd_array(2, opnd_array(3)->clone()); // src
+    for (unsigned i = 0; i < num3; i++) {
+      set_req(i + idx2, _in[i + idx3]);
+    }
+    num2 = num3;
+    idx3 = idx2 + num2;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
+
+  return this;
+}
+
+MachNode* orB_mem_rReg_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
+
+  return this;
+}
+
 MachNode* orI_mem_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -5739,6 +4395,70 @@ MachNode* xorI_rReg_mem_0Node::Expand(State* state, Node_List& proj_list, Node* 
   MachProjNode *kill;
   kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
   proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* xorB_mem_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
+    unsigned num3 = opnd_array(3)->num_edges(); 	// src
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    set_opnd_array(2, opnd_array(3)->clone()); // src
+    for (unsigned i = 0; i < num3; i++) {
+      set_req(i + idx2, _in[i + idx3]);
+    }
+    num2 = num3;
+    idx3 = idx2 + num2;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
+
+  return this;
+}
+
+MachNode* xorB_mem_rReg_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
 
   return this;
 }
@@ -5969,6 +4689,41 @@ MachNode* andL_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem
     unsigned idx3 = idx2 + num2;
     unsigned idx4 = idx3 + num3;
     set_opnd_array(2, opnd_array(3)->clone()); // src
+    for (unsigned i = 0; i < num3; i++) {
+      set_req(i + idx2, _in[i + idx3]);
+    }
+    num2 = num3;
+    idx3 = idx2 + num2;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
+
+  return this;
+}
+
+MachNode* btrL_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
+    unsigned num3 = opnd_array(3)->num_edges(); 	// con
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    set_opnd_array(2, opnd_array(3)->clone()); // con
     for (unsigned i = 0; i < num3; i++) {
       set_req(i + idx2, _in[i + idx3]);
     }
@@ -6566,6 +5321,41 @@ MachNode* orL_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem)
   return this;
 }
 
+MachNode* btsL_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 4) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
+    unsigned num3 = opnd_array(3)->num_edges(); 	// con
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    set_opnd_array(2, opnd_array(3)->clone()); // con
+    for (unsigned i = 0; i < num3; i++) {
+      set_req(i + idx2, _in[i + idx3]);
+    }
+    num2 = num3;
+    idx3 = idx2 + num2;
+    for (int i = idx4 - 1; i >= (int)idx3; i--) {
+      del_req(i);
+    }
+    _num_opnds = 3;
+  } else {
+    assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
+  }
+
+  return this;
+}
+
 MachNode* xorL_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -6705,28 +5495,6 @@ MachNode* xorL_mem_immNode::Expand(State* state, Node_List& proj_list, Node* mem
   } else {
     assert(_num_opnds == 3, "There should be either 3 or 4 operands.");
   }
-
-  return this;
-}
-
-MachNode* convI2BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* convP2BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
 
   return this;
 }
@@ -6913,21 +5681,7 @@ MachNode* and_cmpLTMask_0Node::Expand(State* state, Node_List& proj_list, Node* 
   return this;
 }
 
-MachNode* cmpF_cc_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
 MachNode* cmpF_cc_immCFNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* cmpD_cc_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   add_req(C->mach_constant_base_node());
 
@@ -7053,6 +5807,48 @@ MachNode* convD2L_reg_regNode::Expand(State* state, Node_List& proj_list, Node* 
   return this;
 }
 
+MachNode* round_double_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rcx
+  def = new MachTempNode(state->MachOperGenerator(RCX_REGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* round_float_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rcx
+  def = new MachTempNode(state->MachOperGenerator(RCX_REGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* rep_stosNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -7066,6 +5862,33 @@ MachNode* rep_stosNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   // TEMP tmp
   MachTempNode *def;
   def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // DEF/KILL zero
+  kill = new MachProjNode( this, 3, (INT_RAX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 4, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* rep_stos_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cnt
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (LONG_RCX_REG_mask()), Op_RegL );
+  proj_list.push(kill);
+  // DEF/KILL base
+  kill = new MachProjNode( this, 2, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL zero
   kill = new MachProjNode( this, 3, (INT_RAX_REG_mask()), Op_RegI );
@@ -7101,6 +5924,54 @@ MachNode* rep_stos_largeNode::Expand(State* state, Node_List& proj_list, Node* m
   return this;
 }
 
+MachNode* rep_stos_large_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cnt
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (LONG_RCX_REG_mask()), Op_RegL );
+  proj_list.push(kill);
+  // DEF/KILL base
+  kill = new MachProjNode( this, 2, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL zero
+  kill = new MachProjNode( this, 3, (INT_RAX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 4, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* rep_stos_imNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // TEMP zero
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* string_compareLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
@@ -7119,7 +5990,37 @@ MachNode* string_compareLNode::Expand(State* state, Node_List& proj_list, Node* 
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* string_compareL_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL str1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt1
+  kill = new MachProjNode( this, 2, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL str2
+  kill = new MachProjNode( this, 3, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt2
+  kill = new MachProjNode( this, 4, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL cr
   kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
@@ -7146,7 +6047,37 @@ MachNode* string_compareUNode::Expand(State* state, Node_List& proj_list, Node* 
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* string_compareU_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL str1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt1
+  kill = new MachProjNode( this, 2, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL str2
+  kill = new MachProjNode( this, 3, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt2
+  kill = new MachProjNode( this, 4, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL cr
   kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
@@ -7173,7 +6104,37 @@ MachNode* string_compareLUNode::Expand(State* state, Node_List& proj_list, Node*
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* string_compareLU_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL str1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt1
+  kill = new MachProjNode( this, 2, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL str2
+  kill = new MachProjNode( this, 3, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt2
+  kill = new MachProjNode( this, 4, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL cr
   kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
@@ -7200,7 +6161,37 @@ MachNode* string_compareULNode::Expand(State* state, Node_List& proj_list, Node*
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* string_compareUL_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL str1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt1
+  kill = new MachProjNode( this, 2, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL str2
+  kill = new MachProjNode( this, 3, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt2
+  kill = new MachProjNode( this, 4, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL cr
   kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
@@ -7222,9 +6213,9 @@ MachNode* string_indexof_conLNode::Expand(State* state, Node_List& proj_list, No
   // DEF/KILL str2
   kill = new MachProjNode( this, 3, (PTR_RSI_REG_mask()), Op_RegP );
   proj_list.push(kill);
-  // TEMP vec
+  // TEMP tmp_vec
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL cnt2
   kill = new MachProjNode( this, 4, (INT_RAX_REG_mask()), Op_RegI );
@@ -7252,9 +6243,9 @@ MachNode* string_indexof_conUNode::Expand(State* state, Node_List& proj_list, No
   // DEF/KILL str2
   kill = new MachProjNode( this, 3, (PTR_RSI_REG_mask()), Op_RegP );
   proj_list.push(kill);
-  // TEMP vec
+  // TEMP tmp_vec
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL cnt2
   kill = new MachProjNode( this, 4, (INT_RAX_REG_mask()), Op_RegI );
@@ -7282,9 +6273,9 @@ MachNode* string_indexof_conULNode::Expand(State* state, Node_List& proj_list, N
   // DEF/KILL str2
   kill = new MachProjNode( this, 3, (PTR_RSI_REG_mask()), Op_RegP );
   proj_list.push(kill);
-  // TEMP vec
+  // TEMP tmp_vec
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL cnt2
   kill = new MachProjNode( this, 4, (INT_RAX_REG_mask()), Op_RegI );
@@ -7315,9 +6306,9 @@ MachNode* string_indexofLNode::Expand(State* state, Node_List& proj_list, Node* 
   // DEF/KILL cnt2
   kill = new MachProjNode( this, 4, (INT_RAX_REG_mask()), Op_RegI );
   proj_list.push(kill);
-  // TEMP vec
+  // TEMP tmp_vec
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL tmp
   kill = new MachProjNode( this, 5, (INT_RCX_REG_mask()), Op_RegI );
@@ -7345,9 +6336,9 @@ MachNode* string_indexofUNode::Expand(State* state, Node_List& proj_list, Node* 
   // DEF/KILL cnt2
   kill = new MachProjNode( this, 4, (INT_RAX_REG_mask()), Op_RegI );
   proj_list.push(kill);
-  // TEMP vec
+  // TEMP tmp_vec
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL tmp
   kill = new MachProjNode( this, 5, (INT_RCX_REG_mask()), Op_RegI );
@@ -7375,9 +6366,9 @@ MachNode* string_indexofULNode::Expand(State* state, Node_List& proj_list, Node*
   // DEF/KILL cnt2
   kill = new MachProjNode( this, 4, (INT_RAX_REG_mask()), Op_RegI );
   proj_list.push(kill);
-  // TEMP vec
+  // TEMP tmp_vec
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL tmp
   kill = new MachProjNode( this, 5, (INT_RCX_REG_mask()), Op_RegI );
@@ -7389,7 +6380,7 @@ MachNode* string_indexofULNode::Expand(State* state, Node_List& proj_list, Node*
   return this;
 }
 
-MachNode* string_indexofU_charNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* string_indexof_charNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL str1
@@ -7402,15 +6393,48 @@ MachNode* string_indexofU_charNode::Expand(State* state, Node_List& proj_list, N
   // DEF/KILL ch
   kill = new MachProjNode( this, 3, (INT_RAX_REG_mask()), Op_RegI );
   proj_list.push(kill);
-  // TEMP vec1
+  // TEMP tmp_vec1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
-  // TEMP vec2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  // TEMP tmp_vec2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
-  // TEMP vec3
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  // TEMP tmp_vec3
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RCX_REGI));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 4, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* stringL_indexof_charNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL str1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt1
+  kill = new MachProjNode( this, 2, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL ch
+  kill = new MachProjNode( this, 3, (INT_RAX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp_vec1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec3
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp
   def = new MachTempNode(state->MachOperGenerator(RCX_REGI));
@@ -7437,10 +6461,43 @@ MachNode* string_equalsNode::Expand(State* state, Node_List& proj_list, Node* me
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL tmp3
+  kill = new MachProjNode( this, 4, (INT_RBX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* string_equals_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL str1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL str2
+  kill = new MachProjNode( this, 2, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt
+  kill = new MachProjNode( this, 3, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL tmp3
   kill = new MachProjNode( this, 4, (INT_RBX_REG_mask()), Op_RegI );
@@ -7464,10 +6521,43 @@ MachNode* array_equalsBNode::Expand(State* state, Node_List& proj_list, Node* me
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL tmp3
+  kill = new MachProjNode( this, 3, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL tmp4
+  kill = new MachProjNode( this, 4, (INT_RBX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* array_equalsB_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL ary1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL ary2
+  kill = new MachProjNode( this, 2, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL tmp3
   kill = new MachProjNode( this, 3, (INT_RCX_REG_mask()), Op_RegI );
@@ -7494,10 +6584,10 @@ MachNode* array_equalsCNode::Expand(State* state, Node_List& proj_list, Node* me
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL tmp3
   kill = new MachProjNode( this, 3, (INT_RCX_REG_mask()), Op_RegI );
@@ -7512,7 +6602,106 @@ MachNode* array_equalsCNode::Expand(State* state, Node_List& proj_list, Node* me
   return this;
 }
 
-MachNode* has_negativesNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* array_equalsC_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL ary1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL ary2
+  kill = new MachProjNode( this, 2, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL tmp3
+  kill = new MachProjNode( this, 3, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL tmp4
+  kill = new MachProjNode( this, 4, (INT_RBX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* arrays_hashcodeNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL ary1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL cnt1
+  kill = new MachProjNode( this, 2, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp_vec1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec3
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec4
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec5
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec6
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec7
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec8
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec9
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec10
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec11
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec12
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp_vec13
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 3, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* count_positivesNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL ary1
@@ -7524,10 +6713,43 @@ MachNode* has_negativesNode::Expand(State* state, Node_List& proj_list, Node* me
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL tmp3
+  kill = new MachProjNode( this, 3, (INT_RBX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 4, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* count_positives_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL ary1
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL len
+  kill = new MachProjNode( this, 2, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP ktmp2
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL tmp3
   kill = new MachProjNode( this, 3, (INT_RBX_REG_mask()), Op_RegI );
@@ -7554,16 +6776,58 @@ MachNode* string_compressNode::Expand(State* state, Node_List& proj_list, Node* 
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp3
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp4
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL tmp5
+  kill = new MachProjNode( this, 4, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* string_compress_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL src
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL dst
+  kill = new MachProjNode( this, 2, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL len
+  kill = new MachProjNode( this, 3, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP ktmp2
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // DEF/KILL tmp5
   kill = new MachProjNode( this, 4, (INT_RCX_REG_mask()), Op_RegI );
@@ -7590,7 +6854,37 @@ MachNode* string_inflateNode::Expand(State* state, Node_List& proj_list, Node* m
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RCX_REGI));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 4, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* string_inflate_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL src
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL dst
+  kill = new MachProjNode( this, 2, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL len
+  kill = new MachProjNode( this, 3, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
   // TEMP tmp2
   def = new MachTempNode(state->MachOperGenerator(RCX_REGI));
@@ -7617,16 +6911,52 @@ MachNode* encode_iso_arrayNode::Expand(State* state, Node_List& proj_list, Node*
   proj_list.push(kill);
   // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp3
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // TEMP tmp4
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // DEF/KILL tmp5
+  kill = new MachProjNode( this, 4, (INT_RCX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 5, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* encode_ascii_arrayNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL src
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RSI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL dst
+  kill = new MachProjNode( this, 2, (PTR_RDI_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // DEF/KILL len
+  kill = new MachProjNode( this, 3, (INT_RDX_REG_mask()), Op_RegI );
+  proj_list.push(kill);
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
   // DEF/KILL tmp5
   kill = new MachProjNode( this, 4, (INT_RCX_REG_mask()), Op_RegI );
@@ -7748,7 +7078,29 @@ MachNode* overflowMulL_rReg_immNode::Expand(State* state, Node_List& proj_list, 
   return this;
 }
 
+MachNode* cmpU3_reg_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL flags
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
 MachNode* cmpL3_reg_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL flags
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* cmpUL3_reg_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // DEF/KILL flags
@@ -7765,7 +7117,7 @@ MachNode* minI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   MachNode *tmp0 = this;
   MachNode *tmp1 = this;
   MachNode *tmp2 = this;
-  MachNode *tmp3 = NULL;
+  MachNode *tmp3 = nullptr;
   unsigned num0 = 0;
   unsigned num1 = opnd_array(1)->num_edges();
   unsigned num2 = opnd_array(2)->num_edges();
@@ -7773,7 +7125,7 @@ MachNode* minI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   unsigned idx1 = idx0 + num0;
   unsigned idx2 = idx1 + num1;
   unsigned idx3 = idx2 + num2;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   compI_rRegNode *n0 = new compI_rRegNode();
   n0->add_req(_in[0]);
@@ -7814,7 +7166,7 @@ MachNode* minI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   }
   else n1->add_req(tmp2);
   n1->set_opnd_array(3, op0->clone()); // cr
-  if(tmp3 != NULL)
+  if(tmp3 != nullptr)
     n1->add_req(tmp3);
   result = n1->Expand( state, proj_list, mem );
 
@@ -7828,7 +7180,7 @@ MachNode* maxI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   MachNode *tmp0 = this;
   MachNode *tmp1 = this;
   MachNode *tmp2 = this;
-  MachNode *tmp3 = NULL;
+  MachNode *tmp3 = nullptr;
   unsigned num0 = 0;
   unsigned num1 = opnd_array(1)->num_edges();
   unsigned num2 = opnd_array(2)->num_edges();
@@ -7836,7 +7188,7 @@ MachNode* maxI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   unsigned idx1 = idx0 + num0;
   unsigned idx2 = idx1 + num1;
   unsigned idx3 = idx2 + num2;
-  MachNode *result = NULL;
+  MachNode *result = nullptr;
 
   compI_rRegNode *n0 = new compI_rRegNode();
   n0->add_req(_in[0]);
@@ -7877,7 +7229,7 @@ MachNode* maxI_rRegNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   }
   else n1->add_req(tmp2);
   n1->set_opnd_array(3, op0->clone()); // cr
-  if(tmp3 != NULL)
+  if(tmp3 != nullptr)
     n1->add_req(tmp3);
   result = n1->Expand( state, proj_list, mem );
 
@@ -7970,24 +7322,35 @@ MachNode* cmpFastUnlockNode::Expand(State* state, Node_List& proj_list, Node* me
   return this;
 }
 
-MachNode* safePoint_pollNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* cmpFastLockLightweightNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // DEF/KILL cr
+  // DEF/KILL box
   MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  kill = new MachProjNode( this, 1, (PTR_RBX_REG_mask()), Op_RegP );
   proj_list.push(kill);
+  // TEMP rax_reg
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RAX_REGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
 
   return this;
 }
 
-MachNode* safePoint_poll_farNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* cmpFastUnlockLightweightNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // DEF/KILL cr
+  // DEF/KILL rax_reg
   MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  kill = new MachProjNode( this, 1, (PTR_RAX_REG_mask()), Op_RegP );
   proj_list.push(kill);
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
 
   return this;
 }
@@ -8003,366 +7366,12 @@ MachNode* safePoint_poll_tlsNode::Expand(State* state, Node_List& proj_list, Nod
   return this;
 }
 
-MachNode* loadBarrierSlowRegNoVecNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* mask_all_evexI_GT32Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* loadBarrierSlowRegXmmAndYmmNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // DEF/KILL x0
-  kill = new MachProjNode( this, 2, (XMM0_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x1
-  kill = new MachProjNode( this, 3, (XMM1_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x2
-  kill = new MachProjNode( this, 4, (XMM2_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x3
-  kill = new MachProjNode( this, 5, (XMM3_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x4
-  kill = new MachProjNode( this, 6, (XMM4_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x5
-  kill = new MachProjNode( this, 7, (XMM5_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x6
-  kill = new MachProjNode( this, 8, (XMM6_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x7
-  kill = new MachProjNode( this, 9, (XMM7_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x8
-  kill = new MachProjNode( this, 10, (XMM8_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x9
-  kill = new MachProjNode( this, 11, (XMM9_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x10
-  kill = new MachProjNode( this, 12, (XMM10_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x11
-  kill = new MachProjNode( this, 13, (XMM11_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x12
-  kill = new MachProjNode( this, 14, (XMM12_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x13
-  kill = new MachProjNode( this, 15, (XMM13_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x14
-  kill = new MachProjNode( this, 16, (XMM14_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x15
-  kill = new MachProjNode( this, 17, (XMM15_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* loadBarrierSlowRegZmmNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // DEF/KILL x0
-  kill = new MachProjNode( this, 2, (XMM0_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x1
-  kill = new MachProjNode( this, 3, (XMM1_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x2
-  kill = new MachProjNode( this, 4, (XMM2_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x3
-  kill = new MachProjNode( this, 5, (XMM3_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x4
-  kill = new MachProjNode( this, 6, (XMM4_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x5
-  kill = new MachProjNode( this, 7, (XMM5_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x6
-  kill = new MachProjNode( this, 8, (XMM6_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x7
-  kill = new MachProjNode( this, 9, (XMM7_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x8
-  kill = new MachProjNode( this, 10, (XMM8_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x9
-  kill = new MachProjNode( this, 11, (XMM9_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x10
-  kill = new MachProjNode( this, 12, (XMM10_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x11
-  kill = new MachProjNode( this, 13, (XMM11_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x12
-  kill = new MachProjNode( this, 14, (XMM12_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x13
-  kill = new MachProjNode( this, 15, (XMM13_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x14
-  kill = new MachProjNode( this, 16, (XMM14_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x15
-  kill = new MachProjNode( this, 17, (XMM15_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x16
-  kill = new MachProjNode( this, 18, (XMM16_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x17
-  kill = new MachProjNode( this, 19, (XMM17_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x18
-  kill = new MachProjNode( this, 20, (XMM18_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x19
-  kill = new MachProjNode( this, 21, (XMM19_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x20
-  kill = new MachProjNode( this, 22, (XMM20_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x21
-  kill = new MachProjNode( this, 23, (XMM21_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x22
-  kill = new MachProjNode( this, 24, (XMM22_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x23
-  kill = new MachProjNode( this, 25, (XMM23_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x24
-  kill = new MachProjNode( this, 26, (XMM24_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x25
-  kill = new MachProjNode( this, 27, (XMM25_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x26
-  kill = new MachProjNode( this, 28, (XMM26_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x27
-  kill = new MachProjNode( this, 29, (XMM27_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x28
-  kill = new MachProjNode( this, 30, (XMM28_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x29
-  kill = new MachProjNode( this, 31, (XMM29_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x30
-  kill = new MachProjNode( this, 32, (XMM30_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x31
-  kill = new MachProjNode( this, 33, (XMM31_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* loadBarrierWeakSlowRegNoVecNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* loadBarrierWeakSlowRegXmmAndYmmNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // DEF/KILL x0
-  kill = new MachProjNode( this, 2, (XMM0_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x1
-  kill = new MachProjNode( this, 3, (XMM1_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x2
-  kill = new MachProjNode( this, 4, (XMM2_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x3
-  kill = new MachProjNode( this, 5, (XMM3_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x4
-  kill = new MachProjNode( this, 6, (XMM4_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x5
-  kill = new MachProjNode( this, 7, (XMM5_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x6
-  kill = new MachProjNode( this, 8, (XMM6_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x7
-  kill = new MachProjNode( this, 9, (XMM7_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x8
-  kill = new MachProjNode( this, 10, (XMM8_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x9
-  kill = new MachProjNode( this, 11, (XMM9_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x10
-  kill = new MachProjNode( this, 12, (XMM10_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x11
-  kill = new MachProjNode( this, 13, (XMM11_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x12
-  kill = new MachProjNode( this, 14, (XMM12_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x13
-  kill = new MachProjNode( this, 15, (XMM13_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x14
-  kill = new MachProjNode( this, 16, (XMM14_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x15
-  kill = new MachProjNode( this, 17, (XMM15_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* loadBarrierWeakSlowRegZmmNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // DEF/KILL cr
-  MachProjNode *kill;
-  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
-  proj_list.push(kill);
-  // DEF/KILL x0
-  kill = new MachProjNode( this, 2, (XMM0_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x1
-  kill = new MachProjNode( this, 3, (XMM1_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x2
-  kill = new MachProjNode( this, 4, (XMM2_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x3
-  kill = new MachProjNode( this, 5, (XMM3_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x4
-  kill = new MachProjNode( this, 6, (XMM4_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x5
-  kill = new MachProjNode( this, 7, (XMM5_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x6
-  kill = new MachProjNode( this, 8, (XMM6_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x7
-  kill = new MachProjNode( this, 9, (XMM7_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x8
-  kill = new MachProjNode( this, 10, (XMM8_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x9
-  kill = new MachProjNode( this, 11, (XMM9_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x10
-  kill = new MachProjNode( this, 12, (XMM10_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x11
-  kill = new MachProjNode( this, 13, (XMM11_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x12
-  kill = new MachProjNode( this, 14, (XMM12_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x13
-  kill = new MachProjNode( this, 15, (XMM13_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x14
-  kill = new MachProjNode( this, 16, (XMM14_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x15
-  kill = new MachProjNode( this, 17, (XMM15_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x16
-  kill = new MachProjNode( this, 18, (XMM16_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x17
-  kill = new MachProjNode( this, 19, (XMM17_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x18
-  kill = new MachProjNode( this, 20, (XMM18_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x19
-  kill = new MachProjNode( this, 21, (XMM19_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x20
-  kill = new MachProjNode( this, 22, (XMM20_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x21
-  kill = new MachProjNode( this, 23, (XMM21_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x22
-  kill = new MachProjNode( this, 24, (XMM22_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x23
-  kill = new MachProjNode( this, 25, (XMM23_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x24
-  kill = new MachProjNode( this, 26, (XMM24_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x25
-  kill = new MachProjNode( this, 27, (XMM25_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x26
-  kill = new MachProjNode( this, 28, (XMM26_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x27
-  kill = new MachProjNode( this, 29, (XMM27_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x28
-  kill = new MachProjNode( this, 30, (XMM28_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x29
-  kill = new MachProjNode( this, 31, (XMM29_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x30
-  kill = new MachProjNode( this, 32, (XMM30_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-  // DEF/KILL x31
-  kill = new MachProjNode( this, 33, (XMM31_REG_mask()), Op_VecX );
-  proj_list.push(kill);
-
-  return this;
-}
-
-MachNode* setMaskNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
+  // TEMP tmp
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
   add_req(def);
 
   return this;
@@ -8480,1135 +7489,2036 @@ MachNode* divD_reg_immNode::Expand(State* state, Node_List& proj_list, Node* mem
   return this;
 }
 
-MachNode* absF_reg_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* convF2HF_reg_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src2
+  // TEMP tmp
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(VLREGF));
   add_req(def);
 
   return this;
 }
 
-MachNode* absD_reg_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* convF2HF_mem_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src2
+  // TEMP ktmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reinterpret_mask_W2BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reinterpret_mask_D2BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reinterpret_mask_Q2BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reinterpret_expandNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* roundD_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* gatherNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // TEMP mask
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* evgatherNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* evgather_maskedNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* scatterNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* scatter_maskedNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP ktmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* ReplI_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* ReplL_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* ReplF_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* ReplD_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* insert32Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* insert64Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* insert4LNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* insert8LNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vinsertFNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* insert2DNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* insert4DNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* insert8DNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionINode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionI_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionI_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionI_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionI_3Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionI_4Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionI_5Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_3Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_4Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_5Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_avx512dqNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_avx512dq_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_avx512dq_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_avx512dq_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_avx512dq_3Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_avx512dq_4Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionL_avx512dq_5Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionF128Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 5) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    for (int i = idx5 - 1; i >= (int)idx4; i--) {
+      del_req(i);
+    }
+    _num_opnds = 4;
+  } else {
+    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reductionF128_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 5) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    for (int i = idx5 - 1; i >= (int)idx4; i--) {
+      del_req(i);
+    }
+    _num_opnds = 4;
+  } else {
+    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction8FNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction8F_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction16FNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction16F_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction2DNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
   MachTempNode *def;
   def = new MachTempNode(state->MachOperGenerator(REGD));
   add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 5) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    for (int i = idx5 - 1; i >= (int)idx4; i--) {
+      del_req(i);
+    }
+    _num_opnds = 4;
+  } else {
+    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
+  }
 
   return this;
 }
 
-MachNode* sqrtF_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* sqrtD_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl16B_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl32B_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl8S_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl16S_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl4I_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl8I_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl4L_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl4B_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl8B_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl2S_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl4S_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl2I_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl2L_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl16B_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl32B_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl64B_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl8S_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl16S_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl32S_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl4I_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl8I_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl16I_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl4L_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* Repl8L_imm_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  add_req(C->mach_constant_base_node());
-
-  return this;
-}
-
-MachNode* rsadd2I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reduction2D_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(REGD));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 5) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    for (int i = idx5 - 1; i >= (int)idx4; i--) {
+      del_req(i);
+    }
+    _num_opnds = 4;
+  } else {
+    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction4DNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction4D_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction8DNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reduction8D_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGD));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 6) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// vtmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// vtmp2
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    set_opnd_array(3, opnd_array(4)->clone()); // vtmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // vtmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+      del_req(i);
+    }
+    _num_opnds = 5;
+  } else {
+    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+  }
+
+  return this;
+}
+
+MachNode* reductionBNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rvadd2I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rvadd2I_reduction_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rsadd4I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rvadd4I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_3Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rvadd4I_reduction_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_4Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rvadd8I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_avx512bwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rvadd8I_reduction_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_avx512bw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* rvadd16I_reduction_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* reductionB_avx512bw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP vtmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionB_avx512bw_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionB_avx512bw_3Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionB_avx512bw_4Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionSNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionS_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionS_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionS_2Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionS_3Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionS_4Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* reductionS_5Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* mul_reductionBNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* mul_reduction64BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* minmax_reduction2FNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* minmax_reduction2F_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* minmax_reductionFNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_0
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* minmax_reductionF_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_0
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* minmax_reduction2F_avNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 8) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
+    unsigned num5 = opnd_array(5)->num_edges(); 	// atmp
+    unsigned num6 = opnd_array(6)->num_edges(); 	// btmp
+    unsigned num7 = opnd_array(7)->num_edges(); 	// xmm_1
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // atmp
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    set_opnd_array(5, opnd_array(6)->clone()); // btmp
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // xmm_1
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    for (int i = idx8 - 1; i >= (int)idx7; i--) {
+      del_req(i);
+    }
+    _num_opnds = 7;
+  } else {
+    assert(_num_opnds == 7, "There should be either 7 or 8 operands.");
+  }
+
+  return this;
+}
+
+MachNode* minmax_reduction2F_av_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 8) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
+    unsigned num5 = opnd_array(5)->num_edges(); 	// atmp
+    unsigned num6 = opnd_array(6)->num_edges(); 	// btmp
+    unsigned num7 = opnd_array(7)->num_edges(); 	// xmm_1
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // atmp
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    set_opnd_array(5, opnd_array(6)->clone()); // btmp
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // xmm_1
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    for (int i = idx8 - 1; i >= (int)idx7; i--) {
+      del_req(i);
+    }
+    _num_opnds = 7;
+  } else {
+    assert(_num_opnds == 7, "There should be either 7 or 8 operands.");
+  }
+
+  return this;
+}
+
+MachNode* minmax_reductionF_avNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_0
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 9) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
+    unsigned num5 = opnd_array(5)->num_edges(); 	// atmp
+    unsigned num6 = opnd_array(6)->num_edges(); 	// btmp
+    unsigned num7 = opnd_array(7)->num_edges(); 	// xmm_0
+    unsigned num8 = opnd_array(8)->num_edges(); 	// xmm_1
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    unsigned idx9 = idx8 + num8;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // atmp
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    set_opnd_array(5, opnd_array(6)->clone()); // btmp
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // xmm_0
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    set_opnd_array(7, opnd_array(8)->clone()); // xmm_1
+    for (unsigned i = 0; i < num8; i++) {
+      set_req(i + idx7, _in[i + idx8]);
+    }
+    num7 = num8;
+    idx8 = idx7 + num7;
+    for (int i = idx9 - 1; i >= (int)idx8; i--) {
+      del_req(i);
+    }
+    _num_opnds = 8;
+  } else {
+    assert(_num_opnds == 8, "There should be either 8 or 9 operands.");
+  }
+
+  return this;
+}
+
+MachNode* minmax_reductionF_av_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_0
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xmm_1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 9) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
+    unsigned num5 = opnd_array(5)->num_edges(); 	// atmp
+    unsigned num6 = opnd_array(6)->num_edges(); 	// btmp
+    unsigned num7 = opnd_array(7)->num_edges(); 	// xmm_0
+    unsigned num8 = opnd_array(8)->num_edges(); 	// xmm_1
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    unsigned idx9 = idx8 + num8;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // atmp
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    set_opnd_array(5, opnd_array(6)->clone()); // btmp
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // xmm_0
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    set_opnd_array(7, opnd_array(8)->clone()); // xmm_1
+    for (unsigned i = 0; i < num8; i++) {
+      set_req(i + idx7, _in[i + idx8]);
+    }
+    num7 = num8;
+    idx8 = idx7 + num7;
+    for (int i = idx9 - 1; i >= (int)idx8; i--) {
+      del_req(i);
+    }
+    _num_opnds = 8;
+  } else {
+    assert(_num_opnds == 8, "There should be either 8 or 9 operands.");
+  }
+
+  return this;
+}
+
+MachNode* minmax_reduction2DNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp3
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* rvadd2L_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rvadd4L_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rvadd8L_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rsadd2F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* minmax_reduction2D_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvadd2F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rsadd4F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvadd4F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* radd8F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 6) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
-    for (unsigned i = 0; i < num5; i++) {
-      set_req(i + idx4, _in[i + idx5]);
-    }
-    num4 = num5;
-    idx5 = idx4 + num4;
-    for (int i = idx6 - 1; i >= (int)idx5; i--) {
-      del_req(i);
-    }
-    _num_opnds = 5;
-  } else {
-    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
-  }
-
-  return this;
-}
-
-MachNode* radd16F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 6) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
-    for (unsigned i = 0; i < num5; i++) {
-      set_req(i + idx4, _in[i + idx5]);
-    }
-    num4 = num5;
-    idx5 = idx4 + num4;
-    for (int i = idx6 - 1; i >= (int)idx5; i--) {
-      del_req(i);
-    }
-    _num_opnds = 5;
-  } else {
-    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rsadd2D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvadd2D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvadd4D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 6) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
-    for (unsigned i = 0; i < num5; i++) {
-      set_req(i + idx4, _in[i + idx5]);
-    }
-    num4 = num5;
-    idx5 = idx4 + num4;
-    for (int i = idx6 - 1; i >= (int)idx5; i--) {
-      del_req(i);
-    }
-    _num_opnds = 5;
-  } else {
-    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvadd8D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 6) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
-    for (unsigned i = 0; i < num5; i++) {
-      set_req(i + idx4, _in[i + idx5]);
-    }
-    num4 = num5;
-    idx5 = idx4 + num4;
-    for (int i = idx6 - 1; i >= (int)idx5; i--) {
-      del_req(i);
-    }
-    _num_opnds = 5;
-  } else {
-    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rsmul2I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rvmul2I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rsmul4I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rvmul4I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rvmul8I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* rvmul16I_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP tmp
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp3
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* rvmul2L_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* minmax_reductionDNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp5
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* rvmul4L_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* minmax_reductionD_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp5
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* rvmul8L_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* minmax_reduction2D_avNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP tmp
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
-
-  return this;
-}
-
-MachNode* rsmul2F_reductionNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
   // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
+  if (num_opnds() == 8) {
     unsigned num0 = 0;
     unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
     unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvmul2F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rsmul4F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvmul4F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 5) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned idx0 = oper_input_base();
-    unsigned idx1 = idx0 + num0;
-    unsigned idx2 = idx1 + num1;
-    unsigned idx3 = idx2 + num2;
-    unsigned idx4 = idx3 + num3;
-    unsigned idx5 = idx4 + num4;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    for (int i = idx5 - 1; i >= (int)idx4; i--) {
-      del_req(i);
-    }
-    _num_opnds = 4;
-  } else {
-    assert(_num_opnds == 4, "There should be either 4 or 5 operands.");
-  }
-
-  return this;
-}
-
-MachNode* rvmul8F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP dst
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
-  add_req(def);
-  // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 6) {
-    unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp1
     unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
+    unsigned num6 = opnd_array(6)->num_edges(); 	// tmp3
+    unsigned num7 = opnd_array(7)->num_edges(); 	// tmp4
     unsigned idx0 = oper_input_base();
     unsigned idx1 = idx0 + num0;
     unsigned idx2 = idx1 + num1;
@@ -9616,7 +9526,9 @@ MachNode* rvmul8F_reduction_regNode::Expand(State* state, Node_List& proj_list, 
     unsigned idx4 = idx3 + num3;
     unsigned idx5 = idx4 + num4;
     unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp1
     for (unsigned i = 0; i < num4; i++) {
       set_req(i + idx3, _in[i + idx4]);
     }
@@ -9628,38 +9540,62 @@ MachNode* rvmul8F_reduction_regNode::Expand(State* state, Node_List& proj_list, 
     }
     num4 = num5;
     idx5 = idx4 + num4;
-    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+    set_opnd_array(5, opnd_array(6)->clone()); // tmp3
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // tmp4
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    for (int i = idx8 - 1; i >= (int)idx7; i--) {
       del_req(i);
     }
-    _num_opnds = 5;
+    _num_opnds = 7;
   } else {
-    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+    assert(_num_opnds == 7, "There should be either 7 or 8 operands.");
   }
 
   return this;
 }
 
-MachNode* rvmul16F_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* minmax_reduction2D_av_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
   add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGF));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
   // Remove duplicated operands and inputs which use the same name.
-  if (num_opnds() == 6) {
+  if (num_opnds() == 8) {
     unsigned num0 = 0;
     unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
     unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp1
     unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
+    unsigned num6 = opnd_array(6)->num_edges(); 	// tmp3
+    unsigned num7 = opnd_array(7)->num_edges(); 	// tmp4
     unsigned idx0 = oper_input_base();
     unsigned idx1 = idx0 + num0;
     unsigned idx2 = idx1 + num1;
@@ -9667,7 +9603,9 @@ MachNode* rvmul16F_reduction_regNode::Expand(State* state, Node_List& proj_list,
     unsigned idx4 = idx3 + num3;
     unsigned idx5 = idx4 + num4;
     unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp1
     for (unsigned i = 0; i < num4; i++) {
       set_req(i + idx3, _in[i + idx4]);
     }
@@ -9679,32 +9617,290 @@ MachNode* rvmul16F_reduction_regNode::Expand(State* state, Node_List& proj_list,
     }
     num4 = num5;
     idx5 = idx4 + num4;
-    for (int i = idx6 - 1; i >= (int)idx5; i--) {
+    set_opnd_array(5, opnd_array(6)->clone()); // tmp3
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // tmp4
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    for (int i = idx8 - 1; i >= (int)idx7; i--) {
       del_req(i);
     }
-    _num_opnds = 5;
+    _num_opnds = 7;
   } else {
-    assert(_num_opnds == 5, "There should be either 5 or 6 operands.");
+    assert(_num_opnds == 7, "There should be either 7 or 8 operands.");
   }
 
   return this;
 }
 
-MachNode* rsmul2D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* minmax_reductionD_avNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp5
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 9) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
+    unsigned num6 = opnd_array(6)->num_edges(); 	// tmp3
+    unsigned num7 = opnd_array(7)->num_edges(); 	// tmp4
+    unsigned num8 = opnd_array(8)->num_edges(); 	// tmp5
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    unsigned idx9 = idx8 + num8;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    set_opnd_array(5, opnd_array(6)->clone()); // tmp3
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // tmp4
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    set_opnd_array(7, opnd_array(8)->clone()); // tmp5
+    for (unsigned i = 0; i < num8; i++) {
+      set_req(i + idx7, _in[i + idx8]);
+    }
+    num7 = num8;
+    idx8 = idx7 + num7;
+    for (int i = idx9 - 1; i >= (int)idx8; i--) {
+      del_req(i);
+    }
+    _num_opnds = 8;
+  } else {
+    assert(_num_opnds == 8, "There should be either 8 or 9 operands.");
+  }
+
+  return this;
+}
+
+MachNode* minmax_reductionD_av_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGD));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp3
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp4
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP tmp5
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  // Remove duplicated operands and inputs which use the same name.
+  if (num_opnds() == 9) {
+    unsigned num0 = 0;
+    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
+    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
+    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp1
+    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
+    unsigned num6 = opnd_array(6)->num_edges(); 	// tmp3
+    unsigned num7 = opnd_array(7)->num_edges(); 	// tmp4
+    unsigned num8 = opnd_array(8)->num_edges(); 	// tmp5
+    unsigned idx0 = oper_input_base();
+    unsigned idx1 = idx0 + num0;
+    unsigned idx2 = idx1 + num1;
+    unsigned idx3 = idx2 + num2;
+    unsigned idx4 = idx3 + num3;
+    unsigned idx5 = idx4 + num4;
+    unsigned idx6 = idx5 + num5;
+    unsigned idx7 = idx6 + num6;
+    unsigned idx8 = idx7 + num7;
+    unsigned idx9 = idx8 + num8;
+    set_opnd_array(3, opnd_array(4)->clone()); // tmp1
+    for (unsigned i = 0; i < num4; i++) {
+      set_req(i + idx3, _in[i + idx4]);
+    }
+    num3 = num4;
+    idx4 = idx3 + num3;
+    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
+    for (unsigned i = 0; i < num5; i++) {
+      set_req(i + idx4, _in[i + idx5]);
+    }
+    num4 = num5;
+    idx5 = idx4 + num4;
+    set_opnd_array(5, opnd_array(6)->clone()); // tmp3
+    for (unsigned i = 0; i < num6; i++) {
+      set_req(i + idx5, _in[i + idx6]);
+    }
+    num5 = num6;
+    idx6 = idx5 + num5;
+    set_opnd_array(6, opnd_array(7)->clone()); // tmp4
+    for (unsigned i = 0; i < num7; i++) {
+      set_req(i + idx6, _in[i + idx7]);
+    }
+    num6 = num7;
+    idx7 = idx6 + num6;
+    set_opnd_array(7, opnd_array(8)->clone()); // tmp5
+    for (unsigned i = 0; i < num8; i++) {
+      set_req(i + idx7, _in[i + idx8]);
+    }
+    num7 = num8;
+    idx8 = idx7 + num7;
+    for (int i = idx9 - 1; i >= (int)idx8; i--) {
+      del_req(i);
+    }
+    _num_opnds = 8;
+  } else {
+    assert(_num_opnds == 8, "There should be either 8 or 9 operands.");
+  }
+
+  return this;
+}
+
+MachNode* vmul8BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vmulBNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vmulB_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vmulLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vmulL_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* minmaxL_reg_sseNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
   // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(RXMM0));
   add_req(def);
   // Remove duplicated operands and inputs which use the same name.
   if (num_opnds() == 5) {
     unsigned num0 = 0;
     unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
+    unsigned num2 = opnd_array(2)->num_edges(); 	// src
     unsigned num3 = opnd_array(3)->num_edges(); 	// dst
     unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
     unsigned idx0 = oper_input_base();
@@ -9730,21 +9926,21 @@ MachNode* rsmul2D_reduction_regNode::Expand(State* state, Node_List& proj_list, 
   return this;
 }
 
-MachNode* rvmul2D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* minmaxL_reg_sse_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
   // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(RXMM0));
   add_req(def);
   // Remove duplicated operands and inputs which use the same name.
   if (num_opnds() == 5) {
     unsigned num0 = 0;
-    unsigned num1 = opnd_array(1)->num_edges(); 	// dst
-    unsigned num2 = opnd_array(2)->num_edges(); 	// src2
+    unsigned num1 = opnd_array(1)->num_edges(); 	// src
+    unsigned num2 = opnd_array(2)->num_edges(); 	// dst
     unsigned num3 = opnd_array(3)->num_edges(); 	// dst
     unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
     unsigned idx0 = oper_input_base();
@@ -9770,27 +9966,1720 @@ MachNode* rvmul2D_reduction_regNode::Expand(State* state, Node_List& proj_list, 
   return this;
 }
 
-MachNode* rvmul4D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vminmaxL_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
   add_req(def);
+
+  return this;
+}
+
+MachNode* vminmaxL_reg_avx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* minmaxFP_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
   // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* minmaxFP_reg_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* evminmaxFP_reg_eavxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* evminmaxFP_reg_eavx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP atmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP btmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* signumF_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* signumD_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* signumV_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* signumV_reg_avx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* signumV_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* signumV_reg_evex_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* copySignF_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(REGF));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* copySignD_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp1
+  MachTempNode *def;
   def = new MachTempNode(state->MachOperGenerator(REGD));
   add_req(def);
   // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftBNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftB_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftB_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_avx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_avx_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift32B_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift32B_avx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift32B_avx_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift64B_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift64B_avx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift64B_avx_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftSNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftS_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftS_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftINode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftI_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftI_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftL_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftL_arith_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift8B_var_nobwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift8B_var_nobw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift8B_var_nobw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_var_nobwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_var_nobw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16B_var_nobw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift32B_var_nobwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp4
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift32B_var_nobw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp4
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift32B_var_nobw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp4
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftB_var_evex_bwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftB_var_evex_bw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftB_var_evex_bw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift64B_var_evex_bwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift64B_var_evex_bw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift64B_var_evex_bw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift8S_var_nobwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift8S_var_nobw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift8S_var_nobw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16S_var_nobwNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16S_var_nobw_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshift16S_var_nobw_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vshiftL_arith_varNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcastStoXNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcastItoXNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* castFtoX_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp4
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* castFtoX_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP ktmp2
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* castDtoX_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp4
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp5
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* castDtoX_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP ktmp2
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vround_float_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp4
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* vround_float_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP ktmp2
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* vround_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP ktmp2
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* evcmpFD64Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP ktmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcmp_negateNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcmpuNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* vcmp64Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP ktmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vextractINode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vextractI_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vextractI_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vextractLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* extractFNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGREGF));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vextractFNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vextractDNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* blendvpNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RXMM0));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vblendvpNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* evblendvp64Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP ktmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vptest_lt16Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP vtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* ktest_alltrue_le8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* ktest_anytrue_le8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* loadMaskNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* loadMask64Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* loadMask_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP xtmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vstoreMask2BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vstoreMask4BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* storeMask8BNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* storeMask8B_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vstoreMask_evex_vectmaskNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vstoreMask_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* VectorPopulateIndexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* VectorPopulateLIndexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* rearrangeB_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* rearrangeB_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* loadShuffleSNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* rearrangeS_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp1
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+  // TEMP vtmp2
+  def = new MachTempNode(state->MachOperGenerator(LEGVEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* loadShuffleINode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* loadShuffleLNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP vtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vpopcount_avx_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vpopcount_avx_reg_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcount_trailing_zeros_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcount_trailing_zeros_short_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcount_trailing_zeros_byte_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp4
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vcount_trailing_zeros_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+
+  return this;
+}
+
+MachNode* vpternlogNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
   // Remove duplicated operands and inputs which use the same name.
   if (num_opnds() == 6) {
     unsigned num0 = 0;
     unsigned num1 = opnd_array(1)->num_edges(); 	// dst
     unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
+    unsigned num3 = opnd_array(3)->num_edges(); 	// src3
+    unsigned num4 = opnd_array(4)->num_edges(); 	// func
+    unsigned num5 = opnd_array(5)->num_edges(); 	// dst
     unsigned idx0 = oper_input_base();
     unsigned idx1 = idx0 + num0;
     unsigned idx2 = idx1 + num1;
@@ -9798,18 +11687,6 @@ MachNode* rvmul4D_reduction_regNode::Expand(State* state, Node_List& proj_list, 
     unsigned idx4 = idx3 + num3;
     unsigned idx5 = idx4 + num4;
     unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
-    for (unsigned i = 0; i < num5; i++) {
-      set_req(i + idx4, _in[i + idx5]);
-    }
-    num4 = num5;
-    idx5 = idx4 + num4;
     for (int i = idx6 - 1; i >= (int)idx5; i--) {
       del_req(i);
     }
@@ -9821,27 +11698,21 @@ MachNode* rvmul4D_reduction_regNode::Expand(State* state, Node_List& proj_list, 
   return this;
 }
 
-MachNode* rvmul8D_reduction_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vpternlog_memNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp
-  def = new MachTempNode(state->MachOperGenerator(REGD));
-  add_req(def);
-  // TEMP tmp2
-  def = new MachTempNode(state->MachOperGenerator(REGD));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
   // Remove duplicated operands and inputs which use the same name.
   if (num_opnds() == 6) {
     unsigned num0 = 0;
     unsigned num1 = opnd_array(1)->num_edges(); 	// dst
     unsigned num2 = opnd_array(2)->num_edges(); 	// src2
-    unsigned num3 = opnd_array(3)->num_edges(); 	// dst
-    unsigned num4 = opnd_array(4)->num_edges(); 	// tmp
-    unsigned num5 = opnd_array(5)->num_edges(); 	// tmp2
+    unsigned num3 = opnd_array(3)->num_edges(); 	// src3
+    unsigned num4 = opnd_array(4)->num_edges(); 	// func
+    unsigned num5 = opnd_array(5)->num_edges(); 	// dst
     unsigned idx0 = oper_input_base();
     unsigned idx1 = idx0 + num0;
     unsigned idx2 = idx1 + num1;
@@ -9849,18 +11720,6 @@ MachNode* rvmul8D_reduction_regNode::Expand(State* state, Node_List& proj_list, 
     unsigned idx4 = idx3 + num3;
     unsigned idx5 = idx4 + num4;
     unsigned idx6 = idx5 + num5;
-    set_opnd_array(3, opnd_array(4)->clone()); // tmp
-    for (unsigned i = 0; i < num4; i++) {
-      set_req(i + idx3, _in[i + idx4]);
-    }
-    num3 = num4;
-    idx4 = idx3 + num3;
-    set_opnd_array(4, opnd_array(5)->clone()); // tmp2
-    for (unsigned i = 0; i < num5; i++) {
-      set_req(i + idx4, _in[i + idx5]);
-    }
-    num4 = num5;
-    idx5 = idx4 + num4;
     for (int i = idx6 - 1; i >= (int)idx5; i--) {
       del_req(i);
     }
@@ -9872,860 +11731,947 @@ MachNode* rvmul8D_reduction_regNode::Expand(State* state, Node_List& proj_list, 
   return this;
 }
 
-MachNode* vadd4B_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* verify_vector_alignmentNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vadd4B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd4B_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd8B_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd8B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd8B_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd16B_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd16B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd16B_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd32B_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd32B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd32B_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd2S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd2S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd2S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd4S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd4S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd4S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd8S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd8S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd8S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd16S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd16S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vadd16S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub4B_reg_exex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub4B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub8B_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub8B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub16B_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub16B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub32B_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub32B_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub2S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub2S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub4S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub4S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub8S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub8S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub16S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vsub16S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul2S_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul2S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul2S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul4S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul4S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul4S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul8S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul8S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul8S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul16S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src1
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul16S_mem_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vmul16S_mem_evex_special_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
-  Compile* C = Compile::current();
-  // Add projection edges for additional defs or kills
-  // TEMP src
-  MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
-  add_req(def);
-
-  return this;
-}
-
-MachNode* vcmov8F_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vmask_cmp_nodeNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP ktmp1
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP ktmp2
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_genNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP temp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_gen_immNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP temp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
   add_req(def);
 
   return this;
 }
 
-MachNode* vcmov4D_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vmask_tolong_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
   // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_tolong_boolNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_tolong_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_truecount_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_truecount_boolNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_truecount_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_first_or_last_true_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_first_or_last_true_evex_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_first_or_last_true_boolNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_first_or_last_true_bool_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_first_or_last_true_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vmask_first_or_last_true_avx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP tmp
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vcompress_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP rscratch
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP perm
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vcompress_reg_avx_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP rscratch
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP perm
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vcompress_mask_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP rtmp1
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rtmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* vreverse_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll2S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vreverse_reg_gfniNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  add_req(C->mach_constant_base_node());
+
+  return this;
+}
+
+MachNode* vreverse_byte_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll2S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vreverse_byte64_regNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll4S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vcount_leading_zeros_short_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll4S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vcount_leading_zeros_byte_reg_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll8S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vcount_leading_zeros_int_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll8S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* vcount_leading_zeros_reg_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp2
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP xtmp3
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll16S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* mask_not_immLT8Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(KREG));
+  add_req(def);
+  // TEMP rtmp
+  def = new MachTempNode(state->MachOperGenerator(RREGI));
+  add_req(def);
+  // TEMP ktmp
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsll16S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* long_to_maskLE8_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp1
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rtmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp
+  def = new MachTempNode(state->MachOperGenerator(VEC));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsrl2S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* long_to_maskGT8_avxNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // TEMP rtmp1
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP rtmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGL));
+  add_req(def);
+  // TEMP xtmp1
+  def = new MachTempNode(state->MachOperGenerator(VEC));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* mask_opers_evexNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP kscratch
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsrl2S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* mask_opers_evex_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP kscratch
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsrl4S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* mask_opers_evex_1Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP kscratch
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
 
   return this;
 }
 
-MachNode* vsrl4S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* FloatClassCheck_reg_reg_vfpclassNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP ktmp
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsrl8S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* DoubleClassCheck_reg_reg_vfpclassNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP ktmp
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
+  def = new MachTempNode(state->MachOperGenerator(KREG));
   add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsrl8S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* compareAndSwapP_shenandoahNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RAX_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsrl16S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* compareAndSwapP_shenandoah_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RAX_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsrl16S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* compareAndSwapN_shenandoahNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_RAX_REG_mask()), Op_RegN );
+  proj_list.push(kill);
+  // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra2S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* compareAndSwapN_shenandoah_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_RAX_REG_mask()), Op_RegN );
+  proj_list.push(kill);
+  // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra2S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* compareAndExchangeN_shenandoahNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECS));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra4S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* compareAndExchangeP_shenandoahNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP tmp1
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // TEMP tmp2
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra4S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xLoadPNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECD));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra8S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xCompareAndExchangePNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // TEMP tmp
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra8S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xCompareAndSwapPNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RAX_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECX));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra16S_reg_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xCompareAndSwapP_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RAX_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
 
-MachNode* vsra16S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+MachNode* xXChgPNode::Expand(State* state, Node_List& proj_list, Node* mem) {
   Compile* C = Compile::current();
   // Add projection edges for additional defs or kills
-  // TEMP src
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* zLoadPNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP dst
   MachTempNode *def;
-  def = new MachTempNode(state->MachOperGenerator(VECY));
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
   add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* zStorePNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* zStorePNullNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* zCompareAndExchangePNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* zCompareAndSwapPNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RAX_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* zCompareAndSwapP_0Node::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // DEF/KILL oldval
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (PTR_RAX_REG_mask()), Op_RegP );
+  proj_list.push(kill);
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  kill = new MachProjNode( this, 2, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
+
+  return this;
+}
+
+MachNode* zXChgPNode::Expand(State* state, Node_List& proj_list, Node* mem) {
+  Compile* C = Compile::current();
+  // Add projection edges for additional defs or kills
+  // TEMP tmp
+  MachTempNode *def;
+  def = new MachTempNode(state->MachOperGenerator(RREGP));
+  add_req(def);
+  // DEF/KILL cr
+  MachProjNode *kill;
+  kill = new MachProjNode( this, 1, (INT_FLAGS_mask()), Op_RegFlags );
+  proj_list.push(kill);
 
   return this;
 }
@@ -10747,3 +12693,7 @@ MachNode* vsra16S_reg_imm_evex_specialNode::Expand(State* state, Node_List& proj
 #ifndef _LP64
 #  error "_LP64 must be defined"
 #endif // _LP64
+// Check adlc -DASSERT=1
+#ifndef ASSERT
+#  error "ASSERT must be defined"
+#endif // ASSERT
