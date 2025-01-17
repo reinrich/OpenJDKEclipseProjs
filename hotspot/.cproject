@@ -38,8 +38,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include-fixed}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/sysroot/usr/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
@@ -479,8 +479,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include-fixed}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/sysroot/usr/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
@@ -931,7 +931,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_x86"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -980,8 +980,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/precompiled}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/java_base_include/share/native/libjimage}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base/win32}&quot;"/>
 								</option>
@@ -1059,8 +1059,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/share/precompiled}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/java_base_include/share/native/libjimage}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/windows_x86_64/output/support/modules_include/java.base/win32}&quot;"/>
 								</option>
@@ -1181,8 +1181,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/sys_headers/System/Library/Frameworks/JavaVM.framework/Versions/A/Frameworks}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/sys_headers/net/sapmnt.home/d038402/(framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/sys_headers/net/sapmnt.home/d038402/directory)}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/support/modules_include/java.base/darwin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
@@ -1574,8 +1574,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/sys_headers/System/Library/Frameworks/JavaVM.framework/Versions/A/Frameworks}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/sys_headers/net/sapmnt.home/d038402/(framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/sys_headers/net/sapmnt.home/d038402/directory)}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_x86_64/output/support/modules_include/java.base/darwin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
@@ -2086,8 +2086,8 @@
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.582196435" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.804433150" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.580908740" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/ppc}&quot;"/>
@@ -2433,8 +2433,8 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.1711309350" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="gnu.c.compiler.so.debug.option.debugging.level.1220076877" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.193999527" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/ppc}&quot;"/>
@@ -2801,7 +2801,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_ppc"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_ppc_64/output/hotspot/variant-server/gensrc_lnk"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -2842,8 +2842,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/sys_headers/net/sapmnt.appl_sw/gcc48-4.8.5-24.1.sap20161020/include/c++/4.8/s390x-suse-linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/sys_headers/net/sapmnt.appl_sw/gcc48-4.8.5-24.1.sap20161020/lib64/gcc/s390x-suse-linux/4.8/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/sys_headers/net/sapmnt.appl_sw/gcc48-4.8.5-24.1.sap20161020/lib64/gcc/s390x-suse-linux/4.8/include-fixed}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/s390}&quot;"/>
@@ -3122,8 +3122,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/sys_headers/net/sapmnt.appl_sw/gcc48-4.8.5-24.1.sap20161020/include/c++/4.8/s390x-suse-linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/sys_headers/net/sapmnt.appl_sw/gcc48-4.8.5-24.1.sap20161020/lib64/gcc/s390x-suse-linux/4.8/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/sys_headers/net/sapmnt.appl_sw/gcc48-4.8.5-24.1.sap20161020/lib64/gcc/s390x-suse-linux/4.8/include-fixed}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/s390}&quot;"/>
@@ -3417,7 +3417,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_s390"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_s390_64/output/hotspot/variant-server/gensrc_lnk"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -3456,8 +3456,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/sys_headers/net/sapmnt.global/tools/compiler/SS12u6-Dec2018/developerstudio12.6/lib/compilers/include/CC}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/sys_headers/net/sapmnt.global/tools/compiler/SS12u6-Dec2018/developerstudio12.6/lib/compilers/include/CC/stlport4}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/sys_headers/net/sapmnt.global/tools/compiler/SS12u6-Dec2018/developerstudio12.6/lib/compilers/include/cc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/support/modules_include/java.base/solaris}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/sparc}&quot;"/>
@@ -3579,8 +3579,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/sys_headers/net/sapmnt.global/tools/compiler/SS12u6-Dec2018/developerstudio12.6/lib/compilers/include/CC}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/sys_headers/net/sapmnt.global/tools/compiler/SS12u6-Dec2018/developerstudio12.6/lib/compilers/include/CC/stlport4}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/sys_headers/net/sapmnt.global/tools/compiler/SS12u6-Dec2018/developerstudio12.6/lib/compilers/include/cc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/solaris_sparc_64/output/support/modules_include/java.base/solaris}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/sparc}&quot;"/>
@@ -3826,8 +3826,8 @@
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.244221682" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.758712793" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1219610251" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
@@ -4125,8 +4125,8 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.1191239036" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="gnu.c.compiler.so.debug.option.debugging.level.1801162203" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.668421489" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/x86}&quot;"/>
@@ -4482,8 +4482,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/sysroot/usr/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include-fixed}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/aarch64}&quot;"/>
@@ -4539,8 +4539,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/aarch64-linux-gnu/sysroot/usr/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/sys_headers/opt/devkits/x86_64-linux-gnu-to-aarch64-linux-gnu/lib/gcc/aarch64-linux-gnu/10.3.0/include-fixed}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/support/modules_include/java.base/linux}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/aarch64}&quot;"/>
@@ -4607,7 +4607,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/linux_aarch64"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/linux_aarch64_64/output/hotspot/variant-server/gensrc_lnk"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -4642,8 +4642,8 @@
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.1021091208" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.531103868" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.346414880" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/support/modules_include/java.base/darwin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/aarch64}&quot;"/>
@@ -5125,8 +5125,8 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.518515533" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="gnu.c.compiler.so.debug.option.debugging.level.623340651" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.731772280" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/support/modules_include/java.base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/support/modules_include/java.base/darwin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_src/cpu/aarch64}&quot;"/>
@@ -5626,7 +5626,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os/posix"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/os_cpu/bsd_aarch64"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_src/share"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/output/hotspot/variant-server/gensrc_lnk"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
