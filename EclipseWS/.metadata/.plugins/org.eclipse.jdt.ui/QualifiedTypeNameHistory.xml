@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="java.lang.management.ManagementFactory"/>
+    <fullyQualifiedTypeName name="java.lang.management.MemoryUsage"/>
+    <fullyQualifiedTypeName name="java.lang.management.GarbageCollectorMXBean"/>
+    <fullyQualifiedTypeName name="java.util.Random"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="java.util.stream.IntStream"/>
+    <fullyQualifiedTypeName name="java.time.Instant"/>
+    <fullyQualifiedTypeName name="java.util.Collections"/>
+    <fullyQualifiedTypeName name="java.time.Duration"/>
+    <fullyQualifiedTypeName name="EARelockingSimpleWithAccessInOtherThreadTarget.SyncCounter"/>
+    <fullyQualifiedTypeName name="XYVal"/>
+    <fullyQualifiedTypeName name="java.lang.Object"/>
+    <fullyQualifiedTypeName name="java.nio.ByteOrder"/>
+    <fullyQualifiedTypeName name="java.lang.constant.ConstantDescs"/>
+    <fullyQualifiedTypeName name="java.lang.constant.MethodTypeDesc"/>
+    <fullyQualifiedTypeName name="java.lang.constant.DynamicCallSiteDesc"/>
+    <fullyQualifiedTypeName name="java.lang.constant.DirectMethodHandleDesc"/>
+    <fullyQualifiedTypeName name="java.lang.constant.MethodHandleDesc"/>
+    <fullyQualifiedTypeName name="java.lang.invoke.MethodType"/>
+    <fullyQualifiedTypeName name="java.lang.invoke.CallSite"/>
+    <fullyQualifiedTypeName name="java.lang.invoke.MethodHandles"/>
+    <fullyQualifiedTypeName name="java.lang.invoke.MethodHandle"/>
+    <fullyQualifiedTypeName name="java.lang.invoke.ConstantCallSite"/>
+    <fullyQualifiedTypeName name="java.io.File"/>
+    <fullyQualifiedTypeName name="java.io.FileOutputStream"/>
+    <fullyQualifiedTypeName name="java.lang.constant.DynamicConstantDesc"/>
+    <fullyQualifiedTypeName name="java.lang.reflect.Method"/>
+    <fullyQualifiedTypeName name="SignaturePolymorphismExample"/>
+</qualifiedTypeNameHistroy>

@@ -1,0 +1,4 @@
+description.autobuilding=false
+eclipse.preferences.version=1
+pathvariable.XCODE_LOC=/opt/xcode/Xcode_13.4.1.app
+version=1

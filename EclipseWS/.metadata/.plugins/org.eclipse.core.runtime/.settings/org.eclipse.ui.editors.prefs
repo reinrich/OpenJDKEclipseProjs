@@ -1,0 +1,10 @@
+comment_stylePreferences=NONE
+comment_text=false
+eclipse.preferences.version=1
+occurrenceIndicationColor=104,255,80
+org.eclipse.cdt.codan.ui.annotation.error.color=255,244,0
+org.eclipse.cdt.ui.occurrenceIndicationColor=11,242,6
+org.eclipse.cdt.ui.writeOccurrenceIndicationColor=240,140,206
+quickdiff.quickDiff=false
+showWhitespaceCharacters=true
+writeOccurrenceIndicationColor=255,145,253

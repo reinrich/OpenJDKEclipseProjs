@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="ExternalProjectImportWizard">
+		<item key="WizardProjectsImportPage.STORE_NESTED_PROJECTS" value="false"/>
+		<item key="WizardProjectsImportPage.STORE_COPY_PROJECT_ID" value="false"/>
+		<item key="WizardProjectsImportPage.STORE_ARCHIVE_SELECTED" value="false"/>
+		<item key="WizardProjectsImportPage.STORE_CLOSE_CREATED_PROJECTS_ID" value="false"/>
+		<item key="WizardProjectsImportPage.STORE_HIDE_CONFLICTING_PROJECTS_ID" value="false"/>
+		<list key="WizardProjectsImportPage.STORE_DIRECTORIES">
+			<item value="/opt/priv/d038402/git/reinrich/jdk/OpenJDKEclipseProjs"/>
+			<item value="/opt/priv/d038402/git/reinrich/jdk/OpenJDKHeadTests"/>
+			<item value="/opt/priv/d038402/p4/bas2/sapjvm_tools/dev/benchmarks/jbb2005/."/>
+			<item value="/Users/d038402/git/reinrich/jdk/OpenJDKEclipseProjs"/>
+		</list>
+		<list key="WizardProjectsImportPage.STORE_ARCHIVES">
+			<item value=""/>
+		</list>
+	</section>
+	<section name="org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog">
+		<item key="ShowStatusLine" value="true"/>
+		<item key="History" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#x0A;&lt;History&gt;&#x0A;&lt;historyRootNode&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/ci/ciReplay.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/runtime/smallRegisterMap.inline.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/runtime/objectMonitor.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/cpu/x86/c2_MacroAssembler_x86.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/utilities/singleWriterSynchronizer.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/runtime/synchronizer.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/runtime/thread.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/runtime/thread.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/memory/resourceArea.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/compiler/oopMap.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/asm/codeBuffer.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/code/oopRecorder.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/opto/parse1.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/nmt/nmtCommon.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/cpu/x86/vm_version_x86.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/opto/postaloc.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/logging/logTag.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/prims/jvm.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/runtime/continuationFreezeThaw.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/utilities/globalDefinitions.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/utilities/vmError.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/nmt/nativeCallStackPrinter.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/utilities/nativeStackPrinter.hpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/prims/whitebox.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/opto/memnode.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/runtime/deoptimization.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/HotSpot/hotspot_src/share/code/nmethod.cpp&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;/historyRootNode&gt;&#x0A;&lt;/History&gt;"/>
+		<item key="ShowDerived" value="false"/>
+		<item key="FilterByLocation" value="false"/>
+		<item key="WorkingSet" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#x0A;&lt;workingSet workingSetName=&quot;&quot;/&gt;"/>
+		<section name="DialogBoundsSettings">
+			<item key="DIALOG_HEIGHT" value="500"/>
+			<item key="DIALOG_WIDTH" value="600"/>
+			<item key="DIALOG_X_ORIGIN" value="980"/>
+			<item key="DIALOG_Y_ORIGIN" value="374"/>
+			<item key="DIALOG_FONT_NAME" value="1|.AppleSystemUIFont|11.0|0|COCOA|1|.AppleSystemUIFont"/>
+		</section>
+	</section>
+	<section name="SmartImportWizard">
+		<item key="SmartImportRootWizardPage.STORE_HIDE_ALREADY_OPEN" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_CLOSE_IMPORTED" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
+		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
+	</section>
+	<section name="ChooseWorkspaceDialogSettings">
+		<item key="DIALOG_X_ORIGIN" value="978"/>
+		<item key="DIALOG_Y_ORIGIN" value="536"/>
+	</section>
+	<section name="WORKBENCH_SETTINGS">
+		<list key="ENABLED_TRANSFERS">
+			<item value="org.eclipse.ui.preferences"/>
+			<item value=""/>
+		</list>
+	</section>
+	<section name="NewWizardAction">
+		<item key="NewWizardSelectionPage.STORE_SELECTED_ID" value="org.eclipse.jdt.ui.wizards.JavaProjectWizard"/>
+		<list key="NewWizardSelectionPage.STORE_EXPANDED_CATEGORIES_ID">
+		</list>
+	</section>
+</section>
