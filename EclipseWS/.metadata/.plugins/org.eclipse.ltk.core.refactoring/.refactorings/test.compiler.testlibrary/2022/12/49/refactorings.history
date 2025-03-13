@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move element &apos;&apos; to &apos;gc.weakrefs.TestNmethodOopConst.DirectClassLoader&apos;&#x0A;- Original project: &apos;test.compiler.testlibrary&apos;&#x0A;- Destination element: &apos;gc.weakrefs.TestNmethodOopConst.DirectClassLoader&apos;&#x0A;- Original element: &apos;gc.weakrefs.TestNmethodOopConst.StoreClassInStaticField&apos;&#x0A;- Textual move only&#x0A;- Update references to refactored element" description="Move type" destination="/test.compiler.testlibrary&lt;gc.weakrefs{TestNmethodOopConst.java[TestNmethodOopConst[DirectClassLoader" element1="/test.compiler.testlibrary&lt;gc.weakrefs{TestNmethodOopConst.java[TestNmethodOopConst[StoreClassInStaticField" flags="589830" id="org.eclipse.jdt.ui.move" members="1" policy="org.eclipse.jdt.ui.moveMembers" stamp="1670342963672" version="1.0"/>
+</session>

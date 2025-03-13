@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<libraryInfos>
+    <libraryInfo home="/Library/Java/JavaVirtualMachines/sapmachine-jdk.jdk/Contents/Home" version="23.0.1"/>
+    <libraryInfo home="/Library/Java/JavaVirtualMachines/sapmachine-jdk-17.0.2.jdk/Contents/Home" version="17.0.2"/>
+    <libraryInfo home="/opt/jdks/sapmachine-jdk-17.0.2.jdk/Contents/Home" version="17.0.2"/>
+    <libraryInfo home="/Library/Java/JavaVirtualMachines/sapmachine-21.jdk/Contents/Home" version="21.0.5"/>
+    <libraryInfo home="/Library/Java/JavaVirtualMachines/sapmachine-jdk-21.0.1.jdk/Contents/Home" version="21.0.1"/>
+    <libraryInfo home="/Library/Java/JavaVirtualMachines/sapmachine-jdk-18.0.1.jdk/Contents/Home" version="18.0.1"/>
+</libraryInfos>

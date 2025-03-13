@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;GenerateDynamicClass&apos; to &apos;IndyEx&apos;&#x0A;- Original project: &apos;RRTests&apos;&#x0A;- Original element: &apos;GenerateDynamicClass&apos;&#x0A;- Renamed element: &apos;IndyEx&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;GenerateDynamicClass&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;{GenerateDynamicClass.java[GenerateDynamicClass" matchStrategy="1" name="IndyEx" qualified="false" references="true" similarDeclarations="false" stamp="1740493559638" textual="false" version="1.0"/>
+</session>

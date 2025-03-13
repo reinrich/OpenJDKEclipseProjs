@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename method &apos;EARelockingNestedInflated_03Target.dontinline_setDoLockNow()&apos; to &apos;dontinline_notifyOtherThread&apos;&#x0A;- Original project: &apos;test.jdk&apos;&#x0A;- Original element: &apos;EARelockingNestedInflated_03Target.dontinline_setDoLockNow()&apos;&#x0A;- Renamed element: &apos;EARelockingNestedInflated_03Target.dontinline_notifyOtherThread()&apos;&#x0A;- Update references to refactored element" delegate="false" deprecate="false" description="Rename method &apos;dontinline_setDoLockNow&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.method" input="/test.jdk.com.sun.jdi&lt;{EATests.java[EARelockingNestedInflated_03Target~dontinline_setDoLockNow" name="dontinline_notifyOtherThread" references="true" stamp="1706883507445" version="1.0"/>
+</session>

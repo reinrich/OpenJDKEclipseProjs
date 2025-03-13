@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item key="org.eclipse.cdt.ui.codeformatter.savepath.loadpath" value="/opt/priv/d038402/git/archive/config_files/eclipse"/>
+	<item key="org.eclipse.cdt.uiformatter_page.white_space.c_view.inner" value="0"/>
+	<item key="org.eclipse.cdt.uiformatter_page.white_space_tab_page.node" value="0"/>
+	<item key="org.eclipse.cdt.uiformatter_page.line_wrapping_tab_page.last_category_index" value="1"/>
+	<item key="org.eclipse.cdt.uiformatter_pagemodify_dialog.preferred_width" value="1187"/>
+	<item key="org.eclipse.cdt.uiformatter_pagemodify_dialog.preferred_height" value="807"/>
+	<item key="org.eclipse.cdt.uiformatter_pagemodify_dialog.preferred_x" value="687"/>
+	<item key="org.eclipse.cdt.uiformatter_pagemodify_dialog.preferred_y" value="104"/>
+	<section name="completion_proposal_size">
+	</section>
+	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
+		<item key="size.width" value="1493"/>
+		<item key="size.height" value="804"/>
+		<item key="location.x" value="979"/>
+		<item key="location.y" value="601"/>
+	</section>
+	<section name="org.eclipse.cdt.internal.ui.browser.opentype.OpenTypeActionSettings">
+		<item key="show_namespaces" value="true"/>
+		<item key="show_classes" value="true"/>
+		<item key="show_structs" value="true"/>
+		<item key="show_typedefs" value="true"/>
+		<item key="show_enums" value="true"/>
+		<item key="show_unions" value="true"/>
+		<item key="show_functions" value="true"/>
+		<item key="show_variables" value="true"/>
+		<item key="show_enumerators" value="true"/>
+		<item key="show_macros" value="true"/>
+		<item key="show_lowlevel" value="true"/>
+		<item key="x" value="1021"/>
+		<item key="y" value="108"/>
+		<item key="width" value="696"/>
+		<item key="height" value="947"/>
+	</section>
+	<section name="org.eclipse.cdt.internal.ui.typehierarchy.OpenTypeInHierarchyActionSettings">
+		<item key="show_namespaces" value="false"/>
+		<item key="show_classes" value="true"/>
+		<item key="show_structs" value="true"/>
+		<item key="show_typedefs" value="true"/>
+		<item key="show_enums" value="true"/>
+		<item key="show_unions" value="true"/>
+		<item key="show_functions" value="false"/>
+		<item key="show_variables" value="false"/>
+		<item key="show_enumerators" value="false"/>
+		<item key="show_macros" value="false"/>
+		<item key="show_lowlevel" value="true"/>
+		<item key="x" value="1083"/>
+		<item key="y" value="342"/>
+		<item key="width" value="394"/>
+		<item key="height" value="585"/>
+	</section>
+	<section name="org.eclipse.cdt.internal.ui.text.QuickOutline">
+		<item key="org.eclipse.cdt.internal.ui.text.COutlineInformationControlDIALOG_WIDTH" value="361"/>
+		<item key="org.eclipse.cdt.internal.ui.text.COutlineInformationControlDIALOG_HEIGHT" value="280"/>
+		<item key="org.eclipse.cdt.internal.ui.text.COutlineInformationControlDIALOG_X_ORIGIN" value="1237"/>
+		<item key="org.eclipse.cdt.internal.ui.text.COutlineInformationControlDIALOG_Y_ORIGIN" value="627"/>
+		<item key="org.eclipse.cdt.internal.ui.text.COutlineInformationControlDIALOG_USE_PERSISTED_SIZE" value="true"/>
+		<item key="org.eclipse.cdt.internal.ui.text.COutlineInformationControlDIALOG_USE_PERSISTED_LOCATION" value="true"/>
+	</section>
+	<section name="org.eclipse.cdt.internal.ui.typehierarchy.QuickHierarchy">
+		<item key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_WIDTH" value="482"/>
+		<item key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_HEIGHT" value="380"/>
+		<item key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_X_ORIGIN" value="1246"/>
+		<item key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_Y_ORIGIN" value="616"/>
+		<item key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_USE_PERSISTED_SIZE" value="true"/>
+		<item key="org.eclipse.cdt.internal.ui.typehierarchy.THInformationControlDIALOG_USE_PERSISTED_LOCATION" value="true"/>
+	</section>
+	<section name="PDOMSearchPage">
+		<item key="caseSensitive" value="true"/>
+		<item key="searchFlags" value="227191"/>
+		<list key="previousPatterns">
+			<item value="ZapResourceArea"/>
+			<item value="mmap"/>
+			<item value="REGISTER_DECLARATION"/>
+			<item value="UseCompressedOops"/>
+			<item value="DisplayVMOutputToStderr"/>
+			<item value="PrintFlagsFinal"/>
+			<item value="StressReflectiveCode"/>
+			<item value="ContinuationEntry"/>
+		</list>
+	</section>
+	<section name="org.eclipse.cdt.ui.OPEN_ACTION_SELECTION_DIALOG_SECTION">
+		<item key="DIALOG_X_ORIGIN" value="1068"/>
+		<item key="DIALOG_Y_ORIGIN" value="454"/>
+		<item key="DIALOG_WIDTH" value="1219"/>
+		<item key="DIALOG_HEIGHT" value="380"/>
+		<item key="DIALOG_FONT_NAME" value="1|.AppleSystemUIFont|11.0|0|COCOA|1|.AppleSystemUIFont"/>
+	</section>
+	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
+		<item key="size.width" value="700"/>
+		<item key="size.height" value="180"/>
+	</section>
+	<section name="RenameInformationPopup">
+	</section>
+	<section name="CRenameRefactoringInputPage">
+		<item key="scope" value="3"/>
+		<item key="workingset" value=""/>
+		<item key="references_inv" value="false"/>
+		<item key="comment" value="false"/>
+		<item key="macroDefinition" value="false"/>
+		<item key="exhausiveFileSearch" value="false"/>
+	</section>
+	<section name="OptionalMessageDialog.hide.">
+		<item key="askReindex.detail" value="1"/>
+	</section>
+</section>
