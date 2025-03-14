@@ -1,7 +1,7 @@
 #line 1 "ad_aarch64_peephole.cpp"
 //
 // Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2014, 2021, Red Hat, Inc. All rights reserved.
+// Copyright (c) 2014, 2024, Red Hat, Inc. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_aarch64.hpp"
 // Check consistency of C++ compilation with ADLC options:
 // Check adlc -D_ALLBSD_SOURCE=1

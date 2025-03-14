@@ -1,7 +1,7 @@
 #line 1 "ad_aarch64_clone.cpp"
 //
 // Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2014, 2021, Red Hat, Inc. All rights reserved.
+// Copyright (c) 2014, 2024, Red Hat, Inc. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_aarch64.hpp"
 MachOper *UniverseOper::clone() const {
   return new UniverseOper();
@@ -142,8 +141,8 @@ MachOper *immIOffset8Oper::clone() const {
 MachOper *immIOffset16Oper::clone() const {
   return new immIOffset16Oper(_c0);
 }
-MachOper *immLoffsetOper::clone() const {
-  return new immLoffsetOper(_c0);
+MachOper *immLOffsetOper::clone() const {
+  return new immLOffsetOper(_c0);
 }
 MachOper *immLoffset1Oper::clone() const {
   return new immLoffset1Oper(_c0);
@@ -271,6 +270,9 @@ MachOper *iRegPOper::clone() const {
 MachOper *iRegPNoSpOper::clone() const {
   return new iRegPNoSpOper();
 }
+MachOper *iRegPNoSpNoRfpOper::clone() const {
+  return new iRegPNoSpNoRfpOper();
+}
 MachOper *iRegP_R0Oper::clone() const {
   return new iRegP_R0Oper();
 }
@@ -358,6 +360,12 @@ MachOper *vRegD_V6Oper::clone() const {
 MachOper *vRegD_V7Oper::clone() const {
   return new vRegD_V7Oper();
 }
+MachOper *vRegD_V12Oper::clone() const {
+  return new vRegD_V12Oper();
+}
+MachOper *vRegD_V13Oper::clone() const {
+  return new vRegD_V13Oper();
+}
 MachOper *pRegOper::clone() const {
   return new pRegOper();
 }
@@ -427,6 +435,12 @@ MachOper *indOffL8Oper::clone() const {
 MachOper *indOffL16Oper::clone() const {
   return new indOffL16Oper(_c0);
 }
+MachOper *indirectX2POper::clone() const {
+  return new indirectX2POper();
+}
+MachOper *indOffX2POper::clone() const {
+  return new indOffX2POper(_c0);
+}
 MachOper *indirectNOper::clone() const {
   return new indirectNOper();
 }
@@ -475,11 +489,14 @@ MachOper *cmpOpEqNeOper::clone() const {
 MachOper *cmpOpLtGeOper::clone() const {
   return new cmpOpLtGeOper(_c0);
 }
-MachOper *cmpOpUEqNeLtGeOper::clone() const {
-  return new cmpOpUEqNeLtGeOper(_c0);
+MachOper *cmpOpUEqNeLeGtOper::clone() const {
+  return new cmpOpUEqNeLeGtOper(_c0);
 }
 MachOper *iRegL2IOper::clone() const {
   return new iRegL2IOper();
+}
+MachOper *iRegL2POper::clone() const {
+  return new iRegL2POper();
 }
 MachOper *vmemA_immIOffset4Oper::clone() const {
   return new vmemA_immIOffset4Oper(_c0);
