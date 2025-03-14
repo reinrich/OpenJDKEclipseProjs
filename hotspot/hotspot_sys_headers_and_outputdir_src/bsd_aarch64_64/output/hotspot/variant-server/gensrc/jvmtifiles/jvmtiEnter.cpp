@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2002, 2024, Oracle and/or its affiliates. All rights reserved.
+ Copyright (c) 2002, 2025, Oracle and/or its affiliates. All rights reserved.
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 
  This code is free software; you can redistribute it and/or modify it
@@ -23,7 +23,6 @@
 
  // AUTOMATICALLY GENERATED FILE - DO NOT EDIT
 
-# include "precompiled.hpp"
 # include "classfile/javaClasses.inline.hpp"
 # include "classfile/vmClasses.hpp"
 # include "memory/resourceArea.hpp"
@@ -348,6 +347,7 @@ jvmti_Allocate(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_Allocate , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     if (mem_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -387,6 +387,7 @@ jvmti_Deallocate(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_Deallocate , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     err = jvmti_env->Deallocate(mem);
   } else {
     err = jvmti_env->Deallocate(mem);
@@ -419,6 +420,7 @@ jvmti_GetThreadState(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadState , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -452,6 +454,7 @@ jvmti_GetCurrentThread(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetCurrentThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -486,6 +489,7 @@ jvmti_GetAllThreads(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllThreads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -522,6 +526,7 @@ jvmti_SuspendThread(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -558,6 +563,7 @@ jvmti_SuspendThreadList(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendThreadList , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -602,6 +608,7 @@ jvmti_SuspendAllVirtualThreads(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendAllVirtualThreads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -643,6 +650,7 @@ jvmti_ResumeThread(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -679,6 +687,7 @@ jvmti_ResumeThreadList(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeThreadList , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -723,6 +732,7 @@ jvmti_ResumeAllVirtualThreads(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeAllVirtualThreads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -765,6 +775,7 @@ jvmti_StopThread(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_StopThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -799,6 +810,7 @@ jvmti_InterruptThread(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_InterruptThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -834,6 +846,7 @@ jvmti_GetThreadInfo(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -869,6 +882,7 @@ jvmti_GetOwnedMonitorInfo(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetOwnedMonitorInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -911,6 +925,7 @@ jvmti_GetOwnedMonitorStackDepthInfo(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetOwnedMonitorStackDepthInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -952,6 +967,7 @@ jvmti_GetCurrentContendedMonitor(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetCurrentContendedMonitor , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -992,6 +1008,7 @@ jvmti_RunAgentThread(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_RunAgentThread , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1022,6 +1039,7 @@ jvmti_SetThreadLocalStorage(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetThreadLocalStorage , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1080,6 +1098,7 @@ jvmti_GetTopThreadGroups(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetTopThreadGroups , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1117,6 +1136,7 @@ jvmti_GetThreadGroupInfo(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadGroupInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1154,6 +1174,7 @@ jvmti_GetThreadGroupChildren(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadGroupChildren , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1204,6 +1225,7 @@ jvmti_GetStackTrace(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetStackTrace , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1245,6 +1267,7 @@ jvmti_GetAllStackTraces(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllStackTraces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1287,6 +1310,7 @@ jvmti_GetThreadListStackTraces(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadListStackTraces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1330,6 +1354,7 @@ jvmti_GetFrameCount(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFrameCount , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1363,6 +1388,7 @@ jvmti_PopFrame(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_PopFrame , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1400,6 +1426,7 @@ jvmti_GetFrameLocation(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFrameLocation , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1441,6 +1468,7 @@ jvmti_NotifyFramePop(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_NotifyFramePop , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1455,6 +1483,41 @@ jvmti_NotifyFramePop(jvmtiEnv* env,
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
   err = jvmti_env->NotifyFramePop(thread, depth);
+  return err;
+#endif // INCLUDE_JVMTI
+}
+
+static jvmtiError JNICALL
+jvmti_ClearAllFramePops(jvmtiEnv* env,
+            jthread thread) {
+
+#if !INCLUDE_JVMTI 
+  return JVMTI_ERROR_NOT_AVAILABLE; 
+#else 
+  if(!JvmtiEnv::is_vm_live()) {
+    return JVMTI_ERROR_WRONG_PHASE;
+  }
+  Thread* this_thread = Thread::current_or_null(); 
+  if (this_thread == nullptr || !this_thread->is_Java_thread()) {
+    return JVMTI_ERROR_UNATTACHED_THREAD;
+  }
+  JavaThread* current_thread = JavaThread::cast(this_thread);
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
+  ThreadInVMfromNative __tiv(current_thread);
+  VM_ENTRY_BASE(jvmtiError, jvmti_ClearAllFramePops , current_thread)
+  debug_only(VMNativeEntryWrapper __vew;)
+  PreserveExceptionMark __em(this_thread);
+  
+  JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
+  if (!jvmti_env->is_valid()) {
+    return JVMTI_ERROR_INVALID_ENVIRONMENT;
+  }
+
+  if (jvmti_env->get_capabilities()->can_generate_frame_pop_events == 0) {
+    return JVMTI_ERROR_MUST_POSSESS_CAPABILITY;
+  }
+  jvmtiError err;
+  err = jvmti_env->ClearAllFramePops(thread);
   return err;
 #endif // INCLUDE_JVMTI
 }
@@ -1484,6 +1547,7 @@ jvmti_ForceEarlyReturnObject(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1519,6 +1583,7 @@ jvmti_ForceEarlyReturnInt(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1554,6 +1619,7 @@ jvmti_ForceEarlyReturnLong(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1589,6 +1655,7 @@ jvmti_ForceEarlyReturnFloat(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1624,6 +1691,7 @@ jvmti_ForceEarlyReturnDouble(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1658,6 +1726,7 @@ jvmti_ForceEarlyReturnVoid(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnVoid , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1700,6 +1769,7 @@ jvmti_FollowReferences(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_FollowReferences , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1740,6 +1810,7 @@ jvmti_IterateThroughHeap(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateThroughHeap , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1778,6 +1849,7 @@ jvmti_GetTag(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetTag , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1816,6 +1888,7 @@ jvmti_SetTag(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetTag , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1854,6 +1927,7 @@ jvmti_GetObjectsWithTags(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectsWithTags , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1896,6 +1970,7 @@ jvmti_ForceGarbageCollection(jvmtiEnv* env) {
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceGarbageCollection , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1932,6 +2007,7 @@ jvmti_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverObjectsReachableFromObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -1972,6 +2048,7 @@ jvmti_IterateOverReachableObjects(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverReachableObjects , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2008,6 +2085,7 @@ jvmti_IterateOverHeap(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverHeap , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2048,6 +2126,7 @@ jvmti_IterateOverInstancesOfClass(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverInstancesOfClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2099,6 +2178,7 @@ jvmti_GetLocalObject(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2142,6 +2222,7 @@ jvmti_GetLocalInstance(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalInstance , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2186,6 +2267,7 @@ jvmti_GetLocalInt(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2230,6 +2312,7 @@ jvmti_GetLocalLong(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2274,6 +2357,7 @@ jvmti_GetLocalFloat(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2318,6 +2402,7 @@ jvmti_GetLocalDouble(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2362,6 +2447,7 @@ jvmti_SetLocalObject(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalObject , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2403,6 +2489,7 @@ jvmti_SetLocalInt(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalInt , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2444,6 +2531,7 @@ jvmti_SetLocalLong(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalLong , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2485,6 +2573,7 @@ jvmti_SetLocalFloat(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalFloat , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2526,6 +2615,7 @@ jvmti_SetLocalDouble(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalDouble , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2569,6 +2659,7 @@ jvmti_SetBreakpoint(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetBreakpoint , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2608,6 +2699,7 @@ jvmti_ClearBreakpoint(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearBreakpoint , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2651,6 +2743,7 @@ jvmti_SetFieldAccessWatch(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetFieldAccessWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2706,6 +2799,7 @@ jvmti_ClearFieldAccessWatch(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearFieldAccessWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2761,6 +2855,7 @@ jvmti_SetFieldModificationWatch(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetFieldModificationWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2816,6 +2911,7 @@ jvmti_ClearFieldModificationWatch(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearFieldModificationWatch , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2875,6 +2971,7 @@ jvmti_GetAllModules(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllModules , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2913,6 +3010,7 @@ jvmti_GetNamedModule(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetNamedModule , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2950,6 +3048,7 @@ jvmti_AddModuleReads(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleReads , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -2988,6 +3087,7 @@ jvmti_AddModuleExports(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleExports , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3029,6 +3129,7 @@ jvmti_AddModuleOpens(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleOpens , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3069,6 +3170,7 @@ jvmti_AddModuleUses(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleUses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3107,6 +3209,7 @@ jvmti_AddModuleProvides(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleProvides , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3147,6 +3250,7 @@ jvmti_IsModifiableModule(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsModifiableModule , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3184,6 +3288,7 @@ jvmti_GetLoadedClasses(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLoadedClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3217,6 +3322,7 @@ jvmti_GetClassLoaderClasses(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassLoaderClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3254,6 +3360,7 @@ jvmti_GetClassSignature(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassSignature , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3292,6 +3399,7 @@ jvmti_GetClassStatus(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassStatus , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3333,6 +3441,7 @@ jvmti_GetSourceFileName(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetSourceFileName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3378,6 +3487,7 @@ jvmti_GetClassModifiers(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3420,6 +3530,7 @@ jvmti_GetClassMethods(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassMethods , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3465,6 +3576,7 @@ jvmti_GetClassFields(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassFields , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3510,6 +3622,7 @@ jvmti_GetImplementedInterfaces(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetImplementedInterfaces , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3555,6 +3668,7 @@ jvmti_GetClassVersionNumbers(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassVersionNumbers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3601,6 +3715,7 @@ jvmti_GetConstantPool(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetConstantPool , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3652,6 +3767,7 @@ jvmti_IsInterface(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsInterface , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3693,6 +3809,7 @@ jvmti_IsArrayClass(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsArrayClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3730,6 +3847,7 @@ jvmti_IsModifiableClass(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsModifiableClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3770,6 +3888,7 @@ jvmti_GetClassLoader(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassLoader , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3811,6 +3930,7 @@ jvmti_GetSourceDebugExtension(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetSourceDebugExtension , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3852,6 +3972,7 @@ jvmti_RetransformClasses(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_RetransformClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3888,6 +4009,7 @@ jvmti_RedefineClasses(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_RedefineClasses , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3928,6 +4050,7 @@ jvmti_GetObjectSize(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectSize , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3961,6 +4084,7 @@ jvmti_GetObjectHashCode(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectHashCode , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -3995,6 +4119,7 @@ jvmti_GetObjectMonitorUsage(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectMonitorUsage , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4040,6 +4165,7 @@ jvmti_GetFieldName(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4092,6 +4218,7 @@ jvmti_GetFieldDeclaringClass(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldDeclaringClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4147,6 +4274,7 @@ jvmti_GetFieldModifiers(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4202,6 +4330,7 @@ jvmti_IsFieldSynthetic(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsFieldSynthetic , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4266,6 +4395,7 @@ jvmti_GetMethodName(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodName , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4301,6 +4431,7 @@ jvmti_GetMethodDeclaringClass(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodDeclaringClass , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4339,6 +4470,7 @@ jvmti_GetMethodModifiers(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodModifiers , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4377,6 +4509,7 @@ jvmti_GetMaxLocals(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMaxLocals , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4418,6 +4551,7 @@ jvmti_GetArgumentsSize(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetArgumentsSize , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4460,6 +4594,7 @@ jvmti_GetLineNumberTable(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLineNumberTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4509,6 +4644,7 @@ jvmti_GetMethodLocation(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodLocation , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4554,6 +4690,7 @@ jvmti_GetLocalVariableTable(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalVariableTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4603,6 +4740,7 @@ jvmti_GetBytecodes(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetBytecodes , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4651,6 +4789,7 @@ jvmti_IsMethodNative(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodNative , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4689,6 +4828,7 @@ jvmti_IsMethodSynthetic(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodSynthetic , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4731,6 +4871,7 @@ jvmti_IsMethodObsolete(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodObsolete , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -4772,6 +4913,7 @@ jvmti_SetNativeMethodPrefix(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetNativeMethodPrefix , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     err = jvmti_env->SetNativeMethodPrefix(prefix);
   } else {
     err = jvmti_env->SetNativeMethodPrefix(prefix);
@@ -4804,6 +4946,7 @@ jvmti_SetNativeMethodPrefixes(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetNativeMethodPrefixes , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (prefix_count < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
@@ -4860,6 +5003,7 @@ jvmti_CreateRawMonitor(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_CreateRawMonitor , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     if (name == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -4912,6 +5056,7 @@ jvmti_DestroyRawMonitor(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_DestroyRawMonitor , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
   if (rmonitor == nullptr) {
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -5109,6 +5254,7 @@ jvmti_RawMonitorNotify(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RawMonitorNotify , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
   if (rmonitor == nullptr) {
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -5161,6 +5307,7 @@ jvmti_RawMonitorNotifyAll(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RawMonitorNotifyAll , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
   if (rmonitor == nullptr) {
       return JVMTI_ERROR_INVALID_MONITOR;
@@ -5207,6 +5354,7 @@ jvmti_SetJNIFunctionTable(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_SetJNIFunctionTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5240,6 +5388,7 @@ jvmti_GetJNIFunctionTable(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetJNIFunctionTable , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5280,6 +5429,7 @@ jvmti_SetEventCallbacks(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetEventCallbacks , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (size_of_callbacks < 0) {
       return JVMTI_ERROR_ILLEGAL_ARGUMENT;
   }
@@ -5318,6 +5468,7 @@ jvmti_SetEventNotificationMode(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetEventNotificationMode , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, nullptr);
   } else {
     err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, nullptr);
@@ -5345,6 +5496,7 @@ jvmti_GenerateEvents(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GenerateEvents , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5386,6 +5538,7 @@ jvmti_GetExtensionFunctions(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetExtensionFunctions , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (extension_count_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5433,6 +5586,7 @@ jvmti_GetExtensionEvents(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetExtensionEvents , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (extension_count_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5480,6 +5634,7 @@ jvmti_SetExtensionEventCallback(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetExtensionEventCallback , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     err = jvmti_env->SetExtensionEventCallback(extension_event_index, callback);
   } else {
     err = jvmti_env->SetExtensionEventCallback(extension_event_index, callback);
@@ -5514,6 +5669,7 @@ jvmti_GetPotentialCapabilities(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetPotentialCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (capabilities_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5549,6 +5705,7 @@ jvmti_AddCapabilities(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_AddCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (capabilities_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5588,6 +5745,7 @@ jvmti_RelinquishCapabilities(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_RelinquishCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (capabilities_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5622,6 +5780,7 @@ jvmti_GetCapabilities(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetCapabilities , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (capabilities_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5723,6 +5882,7 @@ jvmti_GetThreadCpuTimerInfo(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadCpuTimerInfo , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5761,6 +5921,7 @@ jvmti_GetThreadCpuTime(jvmtiEnv* env,
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadCpuTime , current_thread)
   debug_only(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
+  
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
   if (!jvmti_env->is_valid()) {
     return JVMTI_ERROR_INVALID_ENVIRONMENT;
@@ -5805,6 +5966,7 @@ jvmti_GetTimerInfo(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetTimerInfo , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     if (info_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5849,6 +6011,7 @@ jvmti_GetTime(jvmtiEnv* env,
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetTime , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
+    
     if (nanos_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5887,6 +6050,7 @@ jvmti_GetAvailableProcessors(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetAvailableProcessors , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (processor_count_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5927,6 +6091,7 @@ jvmti_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_AddToBootstrapClassLoaderSearch , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (segment == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -5962,6 +6127,7 @@ jvmti_AddToSystemClassLoaderSearch(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_AddToSystemClassLoaderSearch , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (segment == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6006,6 +6172,7 @@ jvmti_GetSystemProperties(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetSystemProperties , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (count_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6053,6 +6220,7 @@ jvmti_GetSystemProperty(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetSystemProperty , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (property == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6100,6 +6268,7 @@ jvmti_SetSystemProperty(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetSystemProperty , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (property == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6138,6 +6307,7 @@ jvmti_GetPhase(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetPhase , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (phase_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6170,6 +6340,7 @@ jvmti_DisposeEnvironment(jvmtiEnv* env) {
     VM_ENTRY_BASE(jvmtiError, jvmti_DisposeEnvironment , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     err = jvmti_env->DisposeEnvironment();
   } else {
     err = jvmti_env->DisposeEnvironment();
@@ -6261,6 +6432,7 @@ jvmti_GetVersionNumber(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetVersionNumber , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (version_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6299,6 +6471,7 @@ jvmti_GetErrorName(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetErrorName , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (name_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6338,6 +6511,7 @@ jvmti_SetVerboseFlag(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetVerboseFlag , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     err = jvmti_env->SetVerboseFlag(flag, value);
   } else {
     err = jvmti_env->SetVerboseFlag(flag, value);
@@ -6370,6 +6544,7 @@ jvmti_GetJLocationFormat(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_GetJLocationFormat , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     if (format_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
   }
@@ -6418,6 +6593,7 @@ jvmti_SetHeapSamplingInterval(jvmtiEnv* env,
     VM_ENTRY_BASE(jvmtiError, jvmti_SetHeapSamplingInterval , current_thread)
     debug_only(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
+    
     err = jvmti_env->SetHeapSamplingInterval(sampling_interval);
   } else {
     err = jvmti_env->SetHeapSamplingInterval(sampling_interval);
@@ -6562,8 +6738,8 @@ struct jvmtiInterface_1_ jvmti_Interface = {
       jvmti_GetMethodDeclaringClass,
                               /*   66 : Get Method Modifiers */
       jvmti_GetMethodModifiers,
-                              /*   67 :  RESERVED */
-      nullptr,
+                              /*   67 : Clear Frame Pop */
+      jvmti_ClearAllFramePops,
                               /*   68 : Get Max Locals */
       jvmti_GetMaxLocals,
                               /*   69 : Get Arguments Size */

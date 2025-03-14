@@ -23,7 +23,7 @@ struct jfrNativeEventSetting {
 
 union JfrNativeSettings {
   // Array version.
-  jfrNativeEventSetting bits[NUMBER_OF_EVENTS];
+  jfrNativeEventSetting bits[NUMBER_OF_EVENTS + NUMBER_OF_RESERVED_EVENTS];
   // Then, to make it easy to debug,
   // add named struct members also.
   struct {
@@ -40,6 +40,8 @@ union JfrNativeSettings {
     jfrNativeEventSetting JavaMonitorEnter;
     jfrNativeEventSetting JavaMonitorWait;
     jfrNativeEventSetting JavaMonitorInflate;
+    jfrNativeEventSetting JavaMonitorDeflate;
+    jfrNativeEventSetting JavaMonitorStatistics;
     jfrNativeEventSetting SyncOnValueBasedClass;
     jfrNativeEventSetting ContinuationFreeze;
     jfrNativeEventSetting ContinuationThaw;
@@ -47,6 +49,7 @@ union JfrNativeSettings {
     jfrNativeEventSetting ContinuationFreezeSlow;
     jfrNativeEventSetting ContinuationThawFast;
     jfrNativeEventSetting ContinuationThawSlow;
+    jfrNativeEventSetting VirtualThreadPinned;
     jfrNativeEventSetting ReservedStackActivation;
     jfrNativeEventSetting ClassLoad;
     jfrNativeEventSetting ClassDefine;
@@ -61,12 +64,9 @@ union JfrNativeSettings {
     jfrNativeEventSetting DoubleFlagChanged;
     jfrNativeEventSetting BooleanFlagChanged;
     jfrNativeEventSetting StringFlagChanged;
-    jfrNativeEventSetting VirtualSpace;
-    jfrNativeEventSetting ObjectSpace;
     jfrNativeEventSetting GCHeapSummary;
     jfrNativeEventSetting GCHeapMemoryUsage;
     jfrNativeEventSetting GCHeapMemoryPoolUsage;
-    jfrNativeEventSetting MetaspaceSizes;
     jfrNativeEventSetting MetaspaceSummary;
     jfrNativeEventSetting MetaspaceGCThreshold;
     jfrNativeEventSetting MetaspaceAllocationFailure;
@@ -83,9 +83,7 @@ union JfrNativeSettings {
     jfrNativeEventSetting G1MMU;
     jfrNativeEventSetting EvacuationInformation;
     jfrNativeEventSetting GCReferenceStatistics;
-    jfrNativeEventSetting CopyFailed;
     jfrNativeEventSetting ObjectCountAfterGC;
-    jfrNativeEventSetting G1EvacuationStatistics;
     jfrNativeEventSetting G1EvacuationYoungStatistics;
     jfrNativeEventSetting G1EvacuationOldStatistics;
     jfrNativeEventSetting G1BasicIHOP;
@@ -112,14 +110,11 @@ union JfrNativeSettings {
     jfrNativeEventSetting Compilation;
     jfrNativeEventSetting CompilerPhase;
     jfrNativeEventSetting CompilationFailure;
-    jfrNativeEventSetting CalleeMethod;
     jfrNativeEventSetting CompilerInlining;
     jfrNativeEventSetting CodeCacheFull;
     jfrNativeEventSetting Deoptimization;
     jfrNativeEventSetting SafepointBegin;
     jfrNativeEventSetting SafepointStateSynchronization;
-    jfrNativeEventSetting SafepointCleanup;
-    jfrNativeEventSetting SafepointCleanupTask;
     jfrNativeEventSetting SafepointEnd;
     jfrNativeEventSetting ExecuteVMOperation;
     jfrNativeEventSetting Shutdown;
@@ -191,14 +186,13 @@ union JfrNativeSettings {
     jfrNativeEventSetting ZUnmap;
     jfrNativeEventSetting ShenandoahHeapRegionStateChange;
     jfrNativeEventSetting ShenandoahHeapRegionInformation;
+    jfrNativeEventSetting ShenandoahEvacuationInformation;
     jfrNativeEventSetting Flush;
     jfrNativeEventSetting HeapDump;
-    jfrNativeEventSetting GCLocker;
     jfrNativeEventSetting FinalizerStatistics;
     jfrNativeEventSetting JavaAgent;
     jfrNativeEventSetting NativeAgent;
     jfrNativeEventSetting DeprecatedInvocation;
-    jfrNativeEventSetting StackFrame;
   } ev;
 };
 

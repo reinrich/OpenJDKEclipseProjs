@@ -1,7 +1,7 @@
 #line 1 "ad_aarch64_misc.cpp"
 //
 // Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2014, 2021, Red Hat, Inc. All rights reserved.
+// Copyright (c) 2014, 2024, Red Hat, Inc. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_aarch64.hpp"
 const RegMask &loadBNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &loadB2LNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
@@ -45,6 +44,7 @@ const RegMask &loadPNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask(
 const RegMask &loadNNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &loadKlassNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
 const RegMask &loadNKlassNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &loadNKlassCompactHeadersNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &loadFNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &loadDNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &loadConINode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
@@ -60,8 +60,6 @@ const RegMask &loadConF_packedNode::out_RegMask() const { return (FLOAT_REG_mask
 const RegMask &loadConFNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &loadConD_packedNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &loadConDNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
-const RegMask &storeimmCM0Node::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &storeimmCM0_orderedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeBNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeimmB0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeCNode::out_RegMask() const { return (RegMask::Empty); }
@@ -331,7 +329,6 @@ const RegMask &OrL_reg_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_R
 const RegMask &XorI_reg_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &AndI_reg_URShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &AndI_reg_URShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &AndL_reg_URShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
@@ -353,33 +350,21 @@ const RegMask &XorI_reg_URShift_not_reg_1Node::out_RegMask() const { return (NO_
 const RegMask &XorI_reg_URShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_URShift_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_URShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_URShift_not_reg_1Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_URShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_URShift_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &XorI_reg_RShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RShift_not_reg_1Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RShift_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_RShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RShift_not_reg_1Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RShift_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &XorI_reg_RotateRight_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RotateRight_not_reg_1Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RotateRight_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RotateRight_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_RotateRight_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RotateRight_not_reg_1Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RotateRight_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RotateRight_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &XorI_reg_LShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_LShift_not_reg_1Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_LShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_LShift_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_LShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_LShift_not_reg_1Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_LShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_LShift_not_reg_2Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &OrI_reg_URShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &OrI_reg_URShift_not_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &OrL_reg_URShift_not_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
@@ -415,19 +400,15 @@ const RegMask &AndL_reg_RotateRight_reg_0Node::out_RegMask() const { return (NO_
 const RegMask &XorI_reg_URShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_URShift_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_URShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_URShift_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &XorI_reg_RShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RShift_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_RShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RShift_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &XorI_reg_LShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_LShift_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_LShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_LShift_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &XorI_reg_RotateRight_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorI_reg_RotateRight_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &XorL_reg_RotateRight_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &XorL_reg_RotateRight_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &OrI_reg_URShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &OrI_reg_URShift_reg_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &OrL_reg_URShift_regNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
@@ -735,15 +716,18 @@ const RegMask &CallStaticJavaDirectNode::out_RegMask() const { return (RegMask::
 const RegMask &CallDynamicJavaDirectNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &CallRuntimeDirectNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &CallLeafDirectNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &CallLeafDirectVectorNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &CallLeafNoFPDirectNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &TailCalljmpIndNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &TailjmpIndNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &ForwardExceptionjmpNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &CreateExceptionNode::out_RegMask() const { return (R0_REG_mask()); }
 const RegMask &RethrowExceptionNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &RetNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &ShouldNotReachHereNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &partialSubtypeCheckNode::out_RegMask() const { return (R5_REG_mask()); }
-const RegMask &partialSubtypeCheckVsZeroNode::out_RegMask() const { return (INT_FLAGS_mask()); }
+const RegMask &partialSubtypeCheckVarSuperNode::out_RegMask() const { return (R5_REG_mask()); }
+const RegMask &partialSubtypeCheckConstSuperNode::out_RegMask() const { return (R5_REG_mask()); }
 const RegMask &string_compareUNode::out_RegMask() const { return (INT_R0_REG_mask()); }
 const RegMask &string_compareLNode::out_RegMask() const { return (INT_R0_REG_mask()); }
 const RegMask &string_compareULNode::out_RegMask() const { return (INT_R0_REG_mask()); }
@@ -765,6 +749,7 @@ const RegMask &stringU_indexof_char_sveNode::out_RegMask() const { return (INT_R
 const RegMask &string_equalsLNode::out_RegMask() const { return (INT_R0_REG_mask()); }
 const RegMask &array_equalsBNode::out_RegMask() const { return (INT_R0_REG_mask()); }
 const RegMask &array_equalsCNode::out_RegMask() const { return (INT_R0_REG_mask()); }
+const RegMask &arrays_hashcodeNode::out_RegMask() const { return (INT_R0_REG_mask()); }
 const RegMask &count_positivesNode::out_RegMask() const { return (INT_R0_REG_mask()); }
 const RegMask &string_compressNode::out_RegMask() const { return (INT_R0_REG_mask()); }
 const RegMask &string_inflateNode::out_RegMask() const { return (RegMask::Empty); }
@@ -1065,10 +1050,10 @@ const RegMask &reduce_addI_neonNode::out_RegMask() const { return (NO_SPECIAL_RE
 const RegMask &reduce_addI_sveNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &reduce_addL_neonNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
 const RegMask &reduce_addL_sveNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
-const RegMask &reduce_add2F_neonNode::out_RegMask() const { return (FLOAT_REG_mask()); }
-const RegMask &reduce_add4F_neonNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &reduce_non_strict_order_add2F_neonNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &reduce_non_strict_order_add4F_neonNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &reduce_addF_sveNode::out_RegMask() const { return (FLOAT_REG_mask()); }
-const RegMask &reduce_addD_neonNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &reduce_non_strict_order_add2D_neonNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reduce_addD_sveNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reduce_addI_maskedNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &reduce_addL_maskedNode::out_RegMask() const { return (NO_SPECIAL_REG_mask()); }
@@ -1254,7 +1239,6 @@ const RegMask &vtest_anytrue_neonNode::out_RegMask() const { return (INT_FLAGS_m
 const RegMask &vtest_anytrue_sveNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &vtest_alltrue_neonNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &vtest_alltrue_sveNode::out_RegMask() const { return (INT_FLAGS_mask()); }
-const RegMask &loadshuffleNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrange_HS_neonNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &gather_loadSNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
@@ -1297,16 +1281,6 @@ const RegMask &weakCompareAndSwapN_shenandoahNode::out_RegMask() const { return 
 const RegMask &weakCompareAndSwapP_shenandoahNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &weakCompareAndSwapNAcq_shenandoahNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 const RegMask &weakCompareAndSwapPAcq_shenandoahNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
-const RegMask &xLoadPNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
-const RegMask &xLoadPVolatileNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
-const RegMask &xCompareAndSwapPNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
-const RegMask &xCompareAndSwapP_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
-const RegMask &xCompareAndSwapPAcqNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
-const RegMask &xCompareAndSwapPAcq_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
-const RegMask &xCompareAndExchangePNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
-const RegMask &xCompareAndExchangePAcqNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
-const RegMask &xGetAndSetPNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
-const RegMask &xGetAndSetPAcqNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
 const RegMask &zLoadPNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
 const RegMask &zLoadPVolatileNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
 const RegMask &zStorePNode::out_RegMask() const { return (RegMask::Empty); }
@@ -1319,6 +1293,30 @@ const RegMask &zCompareAndExchangePNode::out_RegMask() const { return (NO_SPECIA
 const RegMask &zCompareAndExchangePAcqNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
 const RegMask &zGetAndSetPNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
 const RegMask &zGetAndSetPAcqNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
+const RegMask &g1StorePNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1StorePVolatileNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1StoreNNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1StoreNVolatileNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1EncodePAndStoreNNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1EncodePAndStoreNVolatileNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1CompareAndExchangePNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
+const RegMask &g1CompareAndExchangePAcqNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
+const RegMask &g1CompareAndExchangeNNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndExchangeNAcqNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapPNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapP_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapPAcqNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapPAcq_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapNNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapN_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapNAcqNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1CompareAndSwapNAcq_0Node::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1GetAndSetPNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
+const RegMask &g1GetAndSetPAcqNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
+const RegMask &g1GetAndSetNNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1GetAndSetNAcqNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
+const RegMask &g1LoadPNode::out_RegMask() const { return (NO_SPECIAL_PTR_REG_mask()); }
+const RegMask &g1LoadNNode::out_RegMask() const { return (NO_SPECIAL_REG32_mask()); }
 // Check consistency of C++ compilation with ADLC options:
 // Check adlc -D_ALLBSD_SOURCE=1
 #ifndef _ALLBSD_SOURCE

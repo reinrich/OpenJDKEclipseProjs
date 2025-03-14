@@ -1,7 +1,7 @@
 #line 1 "adGlobals_aarch64.hpp"
 //
 // Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2014, 2021, Red Hat, Inc. All rights reserved.
+// Copyright (c) 2014, 2024, Red Hat, Inc. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -255,9 +255,9 @@ enum MachRegisterNumbers {
 };
 
 // Size of register-mask in ints
-#define RM_SIZE 10
+#define RM_SIZE 12
 // Unroll factor for loops over the data in a RegMask
-#define FORALL_BODY BODY(0) BODY(1) BODY(2) BODY(3) BODY(4) BODY(5) BODY(6) BODY(7) BODY(8) BODY(9) 
+#define FORALL_BODY BODY(0) BODY(1) BODY(2) BODY(3) BODY(4) BODY(5) BODY(6) BODY(7) BODY(8) BODY(9) BODY(10) BODY(11) 
 
 class RegMask;
 
