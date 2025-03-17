@@ -1021,6 +1021,143 @@ class EventJavaMonitorInflate : public JfrEvent<EventJavaMonitorInflate>
 #endif
 };
 
+class EventJavaMonitorDeflate : public JfrEvent<EventJavaMonitorDeflate>
+{
+ private:
+  const Klass* _monitorClass;
+  u8 _address;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrJavaMonitorDeflateEvent;
+
+  EventJavaMonitorDeflate(EventStartTime timing=TIMED) : JfrEvent<EventJavaMonitorDeflate>(timing) {}
+
+  void set_monitorClass(const Klass* new_value) {
+    this->_monitorClass = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_address(u8 new_value) {
+    this->_address = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_monitorClass);
+    w.write(_address);
+  }
+
+  using JfrEvent<EventJavaMonitorDeflate>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventJavaMonitorDeflate(
+    const Klass* monitorClass,
+    u8 address) : JfrEvent<EventJavaMonitorDeflate>(TIMED) {
+    if (should_commit()) {
+      set_monitorClass(monitorClass);
+      set_address(address);
+    }
+  }
+
+  void commit(const Klass* monitorClass,
+              u8 address) {
+    if (should_commit()) {
+      set_monitorClass(monitorClass);
+      set_address(address);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const Klass* monitorClass,
+                     u8 address) {
+    EventJavaMonitorDeflate me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_monitorClass(monitorClass);
+      me.set_address(address);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_monitorClass");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_address");
+  }
+#endif
+};
+
+class EventJavaMonitorStatistics : public JfrEvent<EventJavaMonitorStatistics>
+{
+ private:
+  u8 _count;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = true;
+  static const JfrEventId eventId = JfrJavaMonitorStatisticsEvent;
+
+  EventJavaMonitorStatistics(EventStartTime timing=TIMED) : JfrEvent<EventJavaMonitorStatistics>(timing) {}
+
+  void set_count(u8 new_value) {
+    this->_count = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_count);
+  }
+
+  using JfrEvent<EventJavaMonitorStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventJavaMonitorStatistics(
+    u8 count) : JfrEvent<EventJavaMonitorStatistics>(TIMED) {
+    if (should_commit()) {
+      set_count(count);
+    }
+  }
+
+  void commit(u8 count) {
+    if (should_commit()) {
+      set_count(count);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 count) {
+    EventJavaMonitorStatistics me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_count(count);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_count");
+  }
+#endif
+};
+
 class EventSyncOnValueBasedClass : public JfrEvent<EventSyncOnValueBasedClass>
 {
  private:
@@ -1485,6 +1622,94 @@ class EventContinuationThawSlow : public JfrEvent<EventContinuationThawSlow>
 #ifdef ASSERT
   void verify() const {
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_id");
+  }
+#endif
+};
+
+class EventVirtualThreadPinned : public JfrEvent<EventVirtualThreadPinned>
+{
+ private:
+  const char* _blockingOperation;
+  const char* _pinnedReason;
+  u8 _carrierThread;
+
+ public:
+  static const bool hasThread = true;
+  static const bool hasStackTrace = true;
+  static const bool isInstant = false;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrVirtualThreadPinnedEvent;
+
+  EventVirtualThreadPinned(EventStartTime timing=TIMED) : JfrEvent<EventVirtualThreadPinned>(timing) {}
+
+  void set_blockingOperation(const char* new_value) {
+    this->_blockingOperation = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_pinnedReason(const char* new_value) {
+    this->_pinnedReason = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_carrierThread(u8 new_value) {
+    this->_carrierThread = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_blockingOperation);
+    w.write(_pinnedReason);
+    w.write(_carrierThread);
+  }
+
+  using JfrEvent<EventVirtualThreadPinned>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventVirtualThreadPinned(
+    const char* blockingOperation,
+    const char* pinnedReason,
+    u8 carrierThread) : JfrEvent<EventVirtualThreadPinned>(TIMED) {
+    if (should_commit()) {
+      set_blockingOperation(blockingOperation);
+      set_pinnedReason(pinnedReason);
+      set_carrierThread(carrierThread);
+    }
+  }
+
+  void commit(const char* blockingOperation,
+              const char* pinnedReason,
+              u8 carrierThread) {
+    if (should_commit()) {
+      set_blockingOperation(blockingOperation);
+      set_pinnedReason(pinnedReason);
+      set_carrierThread(carrierThread);
+      commit();
+    }
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* blockingOperation,
+                     const char* pinnedReason,
+                     u8 carrierThread) {
+    EventVirtualThreadPinned me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_starttime(startTicks);
+      me.set_endtime(endTicks);
+      me.set_blockingOperation(blockingOperation);
+      me.set_pinnedReason(pinnedReason);
+      me.set_carrierThread(carrierThread);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_blockingOperation");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_pinnedReason");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_carrierThread");
   }
 #endif
 };
@@ -5869,6 +6094,7 @@ class EventCompilation : public JfrEvent<EventCompilation>
   bool _isOsr;
   u8 _codeSize;
   u8 _inlinedBytes;
+  u8 _arenaBytes;
 
  public:
   static const bool hasThread = true;
@@ -5913,6 +6139,10 @@ class EventCompilation : public JfrEvent<EventCompilation>
     this->_inlinedBytes = new_value;
     DEBUG_ONLY(set_field_bit(7));
   }
+  void set_arenaBytes(u8 new_value) {
+    this->_arenaBytes = new_value;
+    DEBUG_ONLY(set_field_bit(8));
+  }
 
   template <typename Writer>
   void writeData(Writer& w) {
@@ -5924,6 +6154,7 @@ class EventCompilation : public JfrEvent<EventCompilation>
     w.write(_isOsr);
     w.write(_codeSize);
     w.write(_inlinedBytes);
+    w.write(_arenaBytes);
   }
 
   using JfrEvent<EventCompilation>::commit; // else commit() is hidden by overloaded versions in this class
@@ -5936,7 +6167,8 @@ class EventCompilation : public JfrEvent<EventCompilation>
     bool succeded,
     bool isOsr,
     u8 codeSize,
-    u8 inlinedBytes) : JfrEvent<EventCompilation>(TIMED) {
+    u8 inlinedBytes,
+    u8 arenaBytes) : JfrEvent<EventCompilation>(TIMED) {
     if (should_commit()) {
       set_compileId(compileId);
       set_compiler(compiler);
@@ -5946,6 +6178,7 @@ class EventCompilation : public JfrEvent<EventCompilation>
       set_isOsr(isOsr);
       set_codeSize(codeSize);
       set_inlinedBytes(inlinedBytes);
+      set_arenaBytes(arenaBytes);
     }
   }
 
@@ -5956,7 +6189,8 @@ class EventCompilation : public JfrEvent<EventCompilation>
               bool succeded,
               bool isOsr,
               u8 codeSize,
-              u8 inlinedBytes) {
+              u8 inlinedBytes,
+              u8 arenaBytes) {
     if (should_commit()) {
       set_compileId(compileId);
       set_compiler(compiler);
@@ -5966,6 +6200,7 @@ class EventCompilation : public JfrEvent<EventCompilation>
       set_isOsr(isOsr);
       set_codeSize(codeSize);
       set_inlinedBytes(inlinedBytes);
+      set_arenaBytes(arenaBytes);
       commit();
     }
   }
@@ -5979,7 +6214,8 @@ class EventCompilation : public JfrEvent<EventCompilation>
                      bool succeded,
                      bool isOsr,
                      u8 codeSize,
-                     u8 inlinedBytes) {
+                     u8 inlinedBytes,
+                     u8 arenaBytes) {
     EventCompilation me(UNTIMED);
 
     if (me.should_commit()) {
@@ -5993,6 +6229,7 @@ class EventCompilation : public JfrEvent<EventCompilation>
       me.set_isOsr(isOsr);
       me.set_codeSize(codeSize);
       me.set_inlinedBytes(inlinedBytes);
+      me.set_arenaBytes(arenaBytes);
       me.commit();
     }
   }
@@ -6007,6 +6244,7 @@ class EventCompilation : public JfrEvent<EventCompilation>
     assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_isOsr");
     assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_codeSize");
     assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_inlinedBytes");
+    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_arenaBytes");
   }
 #endif
 };
@@ -6666,143 +6904,6 @@ class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSy
     assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_initialThreadCount");
     assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_runningThreadCount");
     assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_iterations");
-  }
-#endif
-};
-
-class EventSafepointCleanup : public JfrEvent<EventSafepointCleanup>
-{
- private:
-  u8 _safepointId;
-
- public:
-  static const bool hasThread = true;
-  static const bool hasStackTrace = false;
-  static const bool isInstant = false;
-  static const bool hasCutoff = false;
-  static const bool hasThrottle = false;
-  static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrSafepointCleanupEvent;
-
-  EventSafepointCleanup(EventStartTime timing=TIMED) : JfrEvent<EventSafepointCleanup>(timing) {}
-
-  void set_safepointId(u8 new_value) {
-    this->_safepointId = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_safepointId);
-  }
-
-  using JfrEvent<EventSafepointCleanup>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventSafepointCleanup(
-    u8 safepointId) : JfrEvent<EventSafepointCleanup>(TIMED) {
-    if (should_commit()) {
-      set_safepointId(safepointId);
-    }
-  }
-
-  void commit(u8 safepointId) {
-    if (should_commit()) {
-      set_safepointId(safepointId);
-      commit();
-    }
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     u8 safepointId) {
-    EventSafepointCleanup me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_safepointId(safepointId);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_safepointId");
-  }
-#endif
-};
-
-class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
-{
- private:
-  u8 _safepointId;
-  const char* _name;
-
- public:
-  static const bool hasThread = true;
-  static const bool hasStackTrace = false;
-  static const bool isInstant = false;
-  static const bool hasCutoff = false;
-  static const bool hasThrottle = false;
-  static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrSafepointCleanupTaskEvent;
-
-  EventSafepointCleanupTask(EventStartTime timing=TIMED) : JfrEvent<EventSafepointCleanupTask>(timing) {}
-
-  void set_safepointId(u8 new_value) {
-    this->_safepointId = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-  void set_name(const char* new_value) {
-    this->_name = new_value;
-    DEBUG_ONLY(set_field_bit(1));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_safepointId);
-    w.write(_name);
-  }
-
-  using JfrEvent<EventSafepointCleanupTask>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventSafepointCleanupTask(
-    u8 safepointId,
-    const char* name) : JfrEvent<EventSafepointCleanupTask>(TIMED) {
-    if (should_commit()) {
-      set_safepointId(safepointId);
-      set_name(name);
-    }
-  }
-
-  void commit(u8 safepointId,
-              const char* name) {
-    if (should_commit()) {
-      set_safepointId(safepointId);
-      set_name(name);
-      commit();
-    }
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     u8 safepointId,
-                     const char* name) {
-    EventSafepointCleanupTask me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_safepointId(safepointId);
-      me.set_name(name);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_safepointId");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_name");
   }
 #endif
 };
@@ -10003,8 +10104,8 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
   const char* _name;
   bool _success;
   const char* _errorMessage;
-  bool _fpEnvCorrectionAttempt;
-  bool _fpEnvCorrectionSuccess;
+  bool _fpuCorrectionAttempt;
+  bool _fpuCorrectionSuccess;
 
  public:
   static const bool hasThread = true;
@@ -10029,12 +10130,12 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
     this->_errorMessage = new_value;
     DEBUG_ONLY(set_field_bit(2));
   }
-  void set_fpEnvCorrectionAttempt(bool new_value) {
-    this->_fpEnvCorrectionAttempt = new_value;
+  void set_fpuCorrectionAttempt(bool new_value) {
+    this->_fpuCorrectionAttempt = new_value;
     DEBUG_ONLY(set_field_bit(3));
   }
-  void set_fpEnvCorrectionSuccess(bool new_value) {
-    this->_fpEnvCorrectionSuccess = new_value;
+  void set_fpuCorrectionSuccess(bool new_value) {
+    this->_fpuCorrectionSuccess = new_value;
     DEBUG_ONLY(set_field_bit(4));
   }
 
@@ -10043,8 +10144,8 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
     w.write(_name);
     w.write(_success);
     w.write(_errorMessage);
-    w.write(_fpEnvCorrectionAttempt);
-    w.write(_fpEnvCorrectionSuccess);
+    w.write(_fpuCorrectionAttempt);
+    w.write(_fpuCorrectionSuccess);
   }
 
   using JfrEvent<EventNativeLibraryLoad>::commit; // else commit() is hidden by overloaded versions in this class
@@ -10053,28 +10154,28 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
     const char* name,
     bool success,
     const char* errorMessage,
-    bool fpEnvCorrectionAttempt,
-    bool fpEnvCorrectionSuccess) : JfrEvent<EventNativeLibraryLoad>(TIMED) {
+    bool fpuCorrectionAttempt,
+    bool fpuCorrectionSuccess) : JfrEvent<EventNativeLibraryLoad>(TIMED) {
     if (should_commit()) {
       set_name(name);
       set_success(success);
       set_errorMessage(errorMessage);
-      set_fpEnvCorrectionAttempt(fpEnvCorrectionAttempt);
-      set_fpEnvCorrectionSuccess(fpEnvCorrectionSuccess);
+      set_fpuCorrectionAttempt(fpuCorrectionAttempt);
+      set_fpuCorrectionSuccess(fpuCorrectionSuccess);
     }
   }
 
   void commit(const char* name,
               bool success,
               const char* errorMessage,
-              bool fpEnvCorrectionAttempt,
-              bool fpEnvCorrectionSuccess) {
+              bool fpuCorrectionAttempt,
+              bool fpuCorrectionSuccess) {
     if (should_commit()) {
       set_name(name);
       set_success(success);
       set_errorMessage(errorMessage);
-      set_fpEnvCorrectionAttempt(fpEnvCorrectionAttempt);
-      set_fpEnvCorrectionSuccess(fpEnvCorrectionSuccess);
+      set_fpuCorrectionAttempt(fpuCorrectionAttempt);
+      set_fpuCorrectionSuccess(fpuCorrectionSuccess);
       commit();
     }
   }
@@ -10084,8 +10185,8 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
                      const char* name,
                      bool success,
                      const char* errorMessage,
-                     bool fpEnvCorrectionAttempt,
-                     bool fpEnvCorrectionSuccess) {
+                     bool fpuCorrectionAttempt,
+                     bool fpuCorrectionSuccess) {
     EventNativeLibraryLoad me(UNTIMED);
 
     if (me.should_commit()) {
@@ -10094,8 +10195,8 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
       me.set_name(name);
       me.set_success(success);
       me.set_errorMessage(errorMessage);
-      me.set_fpEnvCorrectionAttempt(fpEnvCorrectionAttempt);
-      me.set_fpEnvCorrectionSuccess(fpEnvCorrectionSuccess);
+      me.set_fpuCorrectionAttempt(fpuCorrectionAttempt);
+      me.set_fpuCorrectionSuccess(fpuCorrectionSuccess);
       me.commit();
     }
   }
@@ -10105,8 +10206,8 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
     assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_name");
     assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_success");
     assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_errorMessage");
-    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_fpEnvCorrectionAttempt");
-    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_fpEnvCorrectionSuccess");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_fpuCorrectionAttempt");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_fpuCorrectionSuccess");
   }
 #endif
 };
@@ -13222,6 +13323,169 @@ class EventShenandoahHeapRegionInformation : public JfrEvent<EventShenandoahHeap
 #endif
 };
 
+class EventShenandoahEvacuationInformation : public JfrEvent<EventShenandoahEvacuationInformation>
+{
+ private:
+  unsigned _gcId;
+  u8 _cSetRegions;
+  u8 _cSetUsedBefore;
+  u8 _cSetUsedAfter;
+  u8 _collectedOld;
+  u8 _collectedPromoted;
+  u8 _collectedYoung;
+  u8 _regionsPromotedHumongous;
+  u8 _regionsPromotedRegular;
+  u8 _regularPromotedGarbage;
+  u8 _regularPromotedFree;
+  u8 _freeRegions;
+  u8 _regionsImmediate;
+  u8 _immediateBytes;
+
+ public:
+  static const bool hasThread = false;
+  static const bool hasStackTrace = false;
+  static const bool isInstant = true;
+  static const bool hasCutoff = false;
+  static const bool hasThrottle = false;
+  static const bool isRequestable = false;
+  static const JfrEventId eventId = JfrShenandoahEvacuationInformationEvent;
+
+  EventShenandoahEvacuationInformation(EventStartTime timing=TIMED) : JfrEvent<EventShenandoahEvacuationInformation>(timing) {}
+
+  void set_gcId(unsigned new_value) {
+    this->_gcId = new_value;
+    DEBUG_ONLY(set_field_bit(0));
+  }
+  void set_cSetRegions(u8 new_value) {
+    this->_cSetRegions = new_value;
+    DEBUG_ONLY(set_field_bit(1));
+  }
+  void set_cSetUsedBefore(u8 new_value) {
+    this->_cSetUsedBefore = new_value;
+    DEBUG_ONLY(set_field_bit(2));
+  }
+  void set_cSetUsedAfter(u8 new_value) {
+    this->_cSetUsedAfter = new_value;
+    DEBUG_ONLY(set_field_bit(3));
+  }
+  void set_collectedOld(u8 new_value) {
+    this->_collectedOld = new_value;
+    DEBUG_ONLY(set_field_bit(4));
+  }
+  void set_collectedPromoted(u8 new_value) {
+    this->_collectedPromoted = new_value;
+    DEBUG_ONLY(set_field_bit(5));
+  }
+  void set_collectedYoung(u8 new_value) {
+    this->_collectedYoung = new_value;
+    DEBUG_ONLY(set_field_bit(6));
+  }
+  void set_regionsPromotedHumongous(u8 new_value) {
+    this->_regionsPromotedHumongous = new_value;
+    DEBUG_ONLY(set_field_bit(7));
+  }
+  void set_regionsPromotedRegular(u8 new_value) {
+    this->_regionsPromotedRegular = new_value;
+    DEBUG_ONLY(set_field_bit(8));
+  }
+  void set_regularPromotedGarbage(u8 new_value) {
+    this->_regularPromotedGarbage = new_value;
+    DEBUG_ONLY(set_field_bit(9));
+  }
+  void set_regularPromotedFree(u8 new_value) {
+    this->_regularPromotedFree = new_value;
+    DEBUG_ONLY(set_field_bit(10));
+  }
+  void set_freeRegions(u8 new_value) {
+    this->_freeRegions = new_value;
+    DEBUG_ONLY(set_field_bit(11));
+  }
+  void set_regionsImmediate(u8 new_value) {
+    this->_regionsImmediate = new_value;
+    DEBUG_ONLY(set_field_bit(12));
+  }
+  void set_immediateBytes(u8 new_value) {
+    this->_immediateBytes = new_value;
+    DEBUG_ONLY(set_field_bit(13));
+  }
+
+  template <typename Writer>
+  void writeData(Writer& w) {
+    w.write(_gcId);
+    w.write(_cSetRegions);
+    w.write(_cSetUsedBefore);
+    w.write(_cSetUsedAfter);
+    w.write(_collectedOld);
+    w.write(_collectedPromoted);
+    w.write(_collectedYoung);
+    w.write(_regionsPromotedHumongous);
+    w.write(_regionsPromotedRegular);
+    w.write(_regularPromotedGarbage);
+    w.write(_regularPromotedFree);
+    w.write(_freeRegions);
+    w.write(_regionsImmediate);
+    w.write(_immediateBytes);
+  }
+
+  using JfrEvent<EventShenandoahEvacuationInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 cSetRegions,
+                     u8 cSetUsedBefore,
+                     u8 cSetUsedAfter,
+                     u8 collectedOld,
+                     u8 collectedPromoted,
+                     u8 collectedYoung,
+                     u8 regionsPromotedHumongous,
+                     u8 regionsPromotedRegular,
+                     u8 regularPromotedGarbage,
+                     u8 regularPromotedFree,
+                     u8 freeRegions,
+                     u8 regionsImmediate,
+                     u8 immediateBytes) {
+    EventShenandoahEvacuationInformation me(UNTIMED);
+
+    if (me.should_commit()) {
+      me.set_gcId(gcId);
+      me.set_cSetRegions(cSetRegions);
+      me.set_cSetUsedBefore(cSetUsedBefore);
+      me.set_cSetUsedAfter(cSetUsedAfter);
+      me.set_collectedOld(collectedOld);
+      me.set_collectedPromoted(collectedPromoted);
+      me.set_collectedYoung(collectedYoung);
+      me.set_regionsPromotedHumongous(regionsPromotedHumongous);
+      me.set_regionsPromotedRegular(regionsPromotedRegular);
+      me.set_regularPromotedGarbage(regularPromotedGarbage);
+      me.set_regularPromotedFree(regularPromotedFree);
+      me.set_freeRegions(freeRegions);
+      me.set_regionsImmediate(regionsImmediate);
+      me.set_immediateBytes(immediateBytes);
+      me.commit();
+    }
+  }
+
+#ifdef ASSERT
+  void verify() const {
+    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_gcId");
+    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_cSetRegions");
+    assert(verify_field_bit(2), "Attempting to write an uninitialized event field: %s", "_cSetUsedBefore");
+    assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_cSetUsedAfter");
+    assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_collectedOld");
+    assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_collectedPromoted");
+    assert(verify_field_bit(6), "Attempting to write an uninitialized event field: %s", "_collectedYoung");
+    assert(verify_field_bit(7), "Attempting to write an uninitialized event field: %s", "_regionsPromotedHumongous");
+    assert(verify_field_bit(8), "Attempting to write an uninitialized event field: %s", "_regionsPromotedRegular");
+    assert(verify_field_bit(9), "Attempting to write an uninitialized event field: %s", "_regularPromotedGarbage");
+    assert(verify_field_bit(10), "Attempting to write an uninitialized event field: %s", "_regularPromotedFree");
+    assert(verify_field_bit(11), "Attempting to write an uninitialized event field: %s", "_freeRegions");
+    assert(verify_field_bit(12), "Attempting to write an uninitialized event field: %s", "_regionsImmediate");
+    assert(verify_field_bit(13), "Attempting to write an uninitialized event field: %s", "_immediateBytes");
+  }
+#endif
+};
+
 class EventFlush : public JfrEvent<EventFlush>
 {
  private:
@@ -13433,81 +13697,6 @@ class EventHeapDump : public JfrEvent<EventHeapDump>
     assert(verify_field_bit(3), "Attempting to write an uninitialized event field: %s", "_onOutOfMemoryError");
     assert(verify_field_bit(4), "Attempting to write an uninitialized event field: %s", "_overwrite");
     assert(verify_field_bit(5), "Attempting to write an uninitialized event field: %s", "_compression");
-  }
-#endif
-};
-
-class EventGCLocker : public JfrEvent<EventGCLocker>
-{
- private:
-  unsigned _lockCount;
-  unsigned _stallCount;
-
- public:
-  static const bool hasThread = true;
-  static const bool hasStackTrace = true;
-  static const bool isInstant = false;
-  static const bool hasCutoff = false;
-  static const bool hasThrottle = false;
-  static const bool isRequestable = false;
-  static const JfrEventId eventId = JfrGCLockerEvent;
-
-  EventGCLocker(EventStartTime timing=TIMED) : JfrEvent<EventGCLocker>(timing) {}
-
-  void set_lockCount(unsigned new_value) {
-    this->_lockCount = new_value;
-    DEBUG_ONLY(set_field_bit(0));
-  }
-  void set_stallCount(unsigned new_value) {
-    this->_stallCount = new_value;
-    DEBUG_ONLY(set_field_bit(1));
-  }
-
-  template <typename Writer>
-  void writeData(Writer& w) {
-    w.write(_lockCount);
-    w.write(_stallCount);
-  }
-
-  using JfrEvent<EventGCLocker>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventGCLocker(
-    unsigned lockCount,
-    unsigned stallCount) : JfrEvent<EventGCLocker>(TIMED) {
-    if (should_commit()) {
-      set_lockCount(lockCount);
-      set_stallCount(stallCount);
-    }
-  }
-
-  void commit(unsigned lockCount,
-              unsigned stallCount) {
-    if (should_commit()) {
-      set_lockCount(lockCount);
-      set_stallCount(stallCount);
-      commit();
-    }
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     unsigned lockCount,
-                     unsigned stallCount) {
-    EventGCLocker me(UNTIMED);
-
-    if (me.should_commit()) {
-      me.set_starttime(startTicks);
-      me.set_endtime(endTicks);
-      me.set_lockCount(lockCount);
-      me.set_stallCount(stallCount);
-      me.commit();
-    }
-  }
-
-#ifdef ASSERT
-  void verify() const {
-    assert(verify_field_bit(0), "Attempting to write an uninitialized event field: %s", "_lockCount");
-    assert(verify_field_bit(1), "Attempting to write an uninitialized event field: %s", "_stallCount");
   }
 #endif
 };
@@ -14219,6 +14408,57 @@ class EventJavaMonitorInflate : public JfrEvent<EventJavaMonitorInflate>
   }
 };
 
+class EventJavaMonitorDeflate : public JfrEvent<EventJavaMonitorDeflate>
+{
+ public:
+  EventJavaMonitorDeflate(EventStartTime timing=TIMED) {}
+
+  void set_monitorClass(const Klass* new_value) {
+  }
+  void set_address(u8 new_value) {
+  }
+
+  using JfrEvent<EventJavaMonitorDeflate>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventJavaMonitorDeflate(
+    const Klass* monitorClass,
+    u8 address) {
+  }
+
+  void commit(const Klass* monitorClass,
+              u8 address) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const Klass* monitorClass,
+                     u8 address) {
+  }
+};
+
+class EventJavaMonitorStatistics : public JfrEvent<EventJavaMonitorStatistics>
+{
+ public:
+  EventJavaMonitorStatistics(EventStartTime timing=TIMED) {}
+
+  void set_count(u8 new_value) {
+  }
+
+  using JfrEvent<EventJavaMonitorStatistics>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventJavaMonitorStatistics(
+    u8 count) {
+  }
+
+  void commit(u8 count) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     u8 count) {
+  }
+};
+
 class EventSyncOnValueBasedClass : public JfrEvent<EventSyncOnValueBasedClass>
 {
  public:
@@ -14384,6 +14624,39 @@ class EventContinuationThawSlow : public JfrEvent<EventContinuationThawSlow>
 
 
   static void commit(u8 id) {
+  }
+};
+
+class EventVirtualThreadPinned : public JfrEvent<EventVirtualThreadPinned>
+{
+ public:
+  EventVirtualThreadPinned(EventStartTime timing=TIMED) {}
+
+  void set_blockingOperation(const char* new_value) {
+  }
+  void set_pinnedReason(const char* new_value) {
+  }
+  void set_carrierThread(u8 new_value) {
+  }
+
+  using JfrEvent<EventVirtualThreadPinned>::commit; // else commit() is hidden by overloaded versions in this class
+
+  EventVirtualThreadPinned(
+    const char* blockingOperation,
+    const char* pinnedReason,
+    u8 carrierThread) {
+  }
+
+  void commit(const char* blockingOperation,
+              const char* pinnedReason,
+              u8 carrierThread) {
+  }
+
+  static void commit(const Ticks& startTicks,
+                     const Ticks& endTicks,
+                     const char* blockingOperation,
+                     const char* pinnedReason,
+                     u8 carrierThread) {
   }
 };
 
@@ -15953,6 +16226,8 @@ class EventCompilation : public JfrEvent<EventCompilation>
   }
   void set_inlinedBytes(u8 new_value) {
   }
+  void set_arenaBytes(u8 new_value) {
+  }
 
   using JfrEvent<EventCompilation>::commit; // else commit() is hidden by overloaded versions in this class
 
@@ -15964,7 +16239,8 @@ class EventCompilation : public JfrEvent<EventCompilation>
     bool succeded,
     bool isOsr,
     u8 codeSize,
-    u8 inlinedBytes) {
+    u8 inlinedBytes,
+    u8 arenaBytes) {
   }
 
   void commit(s4 compileId,
@@ -15974,7 +16250,8 @@ class EventCompilation : public JfrEvent<EventCompilation>
               bool succeded,
               bool isOsr,
               u8 codeSize,
-              u8 inlinedBytes) {
+              u8 inlinedBytes,
+              u8 arenaBytes) {
   }
 
   static void commit(const Ticks& startTicks,
@@ -15986,7 +16263,8 @@ class EventCompilation : public JfrEvent<EventCompilation>
                      bool succeded,
                      bool isOsr,
                      u8 codeSize,
-                     u8 inlinedBytes) {
+                     u8 inlinedBytes,
+                     u8 arenaBytes) {
   }
 };
 
@@ -16221,57 +16499,6 @@ class EventSafepointStateSynchronization : public JfrEvent<EventSafepointStateSy
                      s4 initialThreadCount,
                      s4 runningThreadCount,
                      s4 iterations) {
-  }
-};
-
-class EventSafepointCleanup : public JfrEvent<EventSafepointCleanup>
-{
- public:
-  EventSafepointCleanup(EventStartTime timing=TIMED) {}
-
-  void set_safepointId(u8 new_value) {
-  }
-
-  using JfrEvent<EventSafepointCleanup>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventSafepointCleanup(
-    u8 safepointId) {
-  }
-
-  void commit(u8 safepointId) {
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     u8 safepointId) {
-  }
-};
-
-class EventSafepointCleanupTask : public JfrEvent<EventSafepointCleanupTask>
-{
- public:
-  EventSafepointCleanupTask(EventStartTime timing=TIMED) {}
-
-  void set_safepointId(u8 new_value) {
-  }
-  void set_name(const char* new_value) {
-  }
-
-  using JfrEvent<EventSafepointCleanupTask>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventSafepointCleanupTask(
-    u8 safepointId,
-    const char* name) {
-  }
-
-  void commit(u8 safepointId,
-              const char* name) {
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     u8 safepointId,
-                     const char* name) {
   }
 };
 
@@ -17471,9 +17698,9 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
   }
   void set_errorMessage(const char* new_value) {
   }
-  void set_fpEnvCorrectionAttempt(bool new_value) {
+  void set_fpuCorrectionAttempt(bool new_value) {
   }
-  void set_fpEnvCorrectionSuccess(bool new_value) {
+  void set_fpuCorrectionSuccess(bool new_value) {
   }
 
   using JfrEvent<EventNativeLibraryLoad>::commit; // else commit() is hidden by overloaded versions in this class
@@ -17482,15 +17709,15 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
     const char* name,
     bool success,
     const char* errorMessage,
-    bool fpEnvCorrectionAttempt,
-    bool fpEnvCorrectionSuccess) {
+    bool fpuCorrectionAttempt,
+    bool fpuCorrectionSuccess) {
   }
 
   void commit(const char* name,
               bool success,
               const char* errorMessage,
-              bool fpEnvCorrectionAttempt,
-              bool fpEnvCorrectionSuccess) {
+              bool fpuCorrectionAttempt,
+              bool fpuCorrectionSuccess) {
   }
 
   static void commit(const Ticks& startTicks,
@@ -17498,8 +17725,8 @@ class EventNativeLibraryLoad : public JfrEvent<EventNativeLibraryLoad>
                      const char* name,
                      bool success,
                      const char* errorMessage,
-                     bool fpEnvCorrectionAttempt,
-                     bool fpEnvCorrectionSuccess) {
+                     bool fpuCorrectionAttempt,
+                     bool fpuCorrectionSuccess) {
   }
 };
 
@@ -18650,6 +18877,61 @@ class EventShenandoahHeapRegionInformation : public JfrEvent<EventShenandoahHeap
   }
 };
 
+class EventShenandoahEvacuationInformation : public JfrEvent<EventShenandoahEvacuationInformation>
+{
+ public:
+  EventShenandoahEvacuationInformation(EventStartTime timing=TIMED) {}
+
+  void set_gcId(unsigned new_value) {
+  }
+  void set_cSetRegions(u8 new_value) {
+  }
+  void set_cSetUsedBefore(u8 new_value) {
+  }
+  void set_cSetUsedAfter(u8 new_value) {
+  }
+  void set_collectedOld(u8 new_value) {
+  }
+  void set_collectedPromoted(u8 new_value) {
+  }
+  void set_collectedYoung(u8 new_value) {
+  }
+  void set_regionsPromotedHumongous(u8 new_value) {
+  }
+  void set_regionsPromotedRegular(u8 new_value) {
+  }
+  void set_regularPromotedGarbage(u8 new_value) {
+  }
+  void set_regularPromotedFree(u8 new_value) {
+  }
+  void set_freeRegions(u8 new_value) {
+  }
+  void set_regionsImmediate(u8 new_value) {
+  }
+  void set_immediateBytes(u8 new_value) {
+  }
+
+  using JfrEvent<EventShenandoahEvacuationInformation>::commit; // else commit() is hidden by overloaded versions in this class
+
+
+
+  static void commit(unsigned gcId,
+                     u8 cSetRegions,
+                     u8 cSetUsedBefore,
+                     u8 cSetUsedAfter,
+                     u8 collectedOld,
+                     u8 collectedPromoted,
+                     u8 collectedYoung,
+                     u8 regionsPromotedHumongous,
+                     u8 regionsPromotedRegular,
+                     u8 regularPromotedGarbage,
+                     u8 regularPromotedFree,
+                     u8 freeRegions,
+                     u8 regionsImmediate,
+                     u8 immediateBytes) {
+  }
+};
+
 class EventFlush : public JfrEvent<EventFlush>
 {
  public:
@@ -18728,34 +19010,6 @@ class EventHeapDump : public JfrEvent<EventHeapDump>
                      bool onOutOfMemoryError,
                      bool overwrite,
                      s4 compression) {
-  }
-};
-
-class EventGCLocker : public JfrEvent<EventGCLocker>
-{
- public:
-  EventGCLocker(EventStartTime timing=TIMED) {}
-
-  void set_lockCount(unsigned new_value) {
-  }
-  void set_stallCount(unsigned new_value) {
-  }
-
-  using JfrEvent<EventGCLocker>::commit; // else commit() is hidden by overloaded versions in this class
-
-  EventGCLocker(
-    unsigned lockCount,
-    unsigned stallCount) {
-  }
-
-  void commit(unsigned lockCount,
-              unsigned stallCount) {
-  }
-
-  static void commit(const Ticks& startTicks,
-                     const Ticks& endTicks,
-                     unsigned lockCount,
-                     unsigned stallCount) {
   }
 };
 

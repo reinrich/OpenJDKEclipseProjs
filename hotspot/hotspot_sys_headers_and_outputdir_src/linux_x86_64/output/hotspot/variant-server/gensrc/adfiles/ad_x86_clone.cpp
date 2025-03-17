@@ -1,6 +1,6 @@
 #line 1 "ad_x86_clone.cpp"
 //
-// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -25,7 +25,6 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_x86.hpp"
 MachOper *UniverseOper::clone() const {
   return new UniverseOper();
@@ -141,6 +140,9 @@ MachOper *immF0Oper::clone() const {
 MachOper *immFOper::clone() const {
   return new immFOper(_c0);
 }
+MachOper *immHOper::clone() const {
+  return new immHOper(_c0);
+}
 MachOper *immD0Oper::clone() const {
   return new immD0Oper(_c0);
 }
@@ -239,6 +241,9 @@ MachOper *rcx_RegLOper::clone() const {
 }
 MachOper *rdx_RegLOper::clone() const {
   return new rdx_RegLOper();
+}
+MachOper *r11_RegLOper::clone() const {
+  return new r11_RegLOper();
 }
 MachOper *no_rbp_r13_RegLOper::clone() const {
   return new no_rbp_r13_RegLOper();

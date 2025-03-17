@@ -21,6 +21,10 @@ class JfrPeriodicEventSet : public AllStatic {
         requestResidentSetSize();
         break;
   
+      case JfrJavaMonitorStatisticsEvent:
+        requestJavaMonitorStatistics();
+        break;
+  
       case JfrGCHeapMemoryUsageEvent:
         requestGCHeapMemoryUsage();
         break;
@@ -241,6 +245,8 @@ class JfrPeriodicEventSet : public AllStatic {
  private:
 
   static void requestResidentSetSize(void);
+
+  static void requestJavaMonitorStatistics(void);
 
   static void requestGCHeapMemoryUsage(void);
 
