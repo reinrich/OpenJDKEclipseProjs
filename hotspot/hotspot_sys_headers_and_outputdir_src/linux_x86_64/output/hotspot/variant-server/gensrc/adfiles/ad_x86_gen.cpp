@@ -1,6 +1,6 @@
 #line 1 "ad_x86_gen.cpp"
 //
-// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -25,7 +25,6 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_x86.hpp"
 #include "opto/cfgnode.hpp"
 #include "opto/locknode.hpp"
@@ -119,6 +118,8 @@ MachOper *State::MachOperGenerator(int opcode){
     return new immF0Oper(_leaf->getf() );
   case IMMF:
     return new immFOper(_leaf->getf() );
+  case IMMH:
+    return new immHOper(_leaf->geth() );
   case IMMD0:
     return new immD0Oper(_leaf->getd() );
   case IMMD:
@@ -185,6 +186,8 @@ MachOper *State::MachOperGenerator(int opcode){
     return new rcx_RegLOper( );
   case RDX_REGL:
     return new rdx_RegLOper( );
+  case R11_REGL:
+    return new r11_RegLOper( );
   case NO_RBP_R13_REGL:
     return new no_rbp_r13_RegLOper( );
   case RFLAGSREG:
@@ -332,7 +335,7 @@ MachOper *State::MachOperGenerator(int opcode){
   case _BINARY_RREGI__LOADI_MEMORY_:    return nullptr;
   case _BINARY_RREGN_RREGN:    return nullptr;
   case _BINARY_RREGP_RREGP:    return nullptr;
-  case _BINARY_IMMI_1_RREGL:    return nullptr;
+  case _BINARY_IMML1_RREGL:    return nullptr;
   case _BINARY_RREGL_RREGL:    return nullptr;
   case _BINARY_RREGL__LOADL_MEMORY_:    return nullptr;
   case _BINARY_REGF_REGF:    return nullptr;
@@ -410,7 +413,6 @@ MachOper *State::MachOperGenerator(int opcode){
   case _ORL__LOADL_MEMORY__IMML32:    return nullptr;
   case _ORL__LOADL_MEMORY__IMML_POW2:    return nullptr;
   case _XORL__LOADL_MEMORY__RREGL:    return nullptr;
-  case _XORL_RREGL__LOADL_MEMORY_:    return nullptr;
   case _XORL__LOADL_MEMORY__IMML32:    return nullptr;
   case _CMPLTMASK_RREGI_RREGI:    return nullptr;
   case _ANDI__CMPLTMASK_RREGI_RREGI_RREGI:    return nullptr;
@@ -436,22 +438,31 @@ MachOper *State::MachOperGenerator(int opcode){
   case _ANDL__LOADL_MEMORY___CASTP2X_RREGP_:    return nullptr;
   case _ANDI__LOADUB_MEMORY__IMMU7:    return nullptr;
   case _ANDI__LOADB_MEMORY__IMMI8:    return nullptr;
-  case _PARTIALSUBTYPECHECK_RSI_REGP_RAX_REGP:    return nullptr;
+  case _BINARY_RAX_REGP_IMMP:    return nullptr;
   case _CONVF2HF_REGF_:    return nullptr;
   case _VECTORCASTF2HF_VEC_:    return nullptr;
   case _LOADVECTOR_MEMORY_:    return nullptr;
   case _BINARY_VEC_KREG:    return nullptr;
+  case _BINARY_RREGP_IMMI_0:    return nullptr;
+  case _BINARY_RREGP_RREGI:    return nullptr;
+  case _BINARY_KREG_IMMI_0:    return nullptr;
+  case _BINARY_RREGP__BINARY_KREG_IMMI_0:    return nullptr;
+  case _BINARY_KREG_RREGI:    return nullptr;
+  case _BINARY_RREGP__BINARY_KREG_RREGI:    return nullptr;
+  case _BINARY_VEC_IMMI_0:    return nullptr;
+  case _BINARY_RREGP__BINARY_VEC_IMMI_0:    return nullptr;
+  case _BINARY_VEC_RREGI:    return nullptr;
+  case _BINARY_RREGP__BINARY_VEC_RREGI:    return nullptr;
   case _BINARY_VEC_VEC:    return nullptr;
   case _BINARY_VEC__BINARY_VEC_KREG:    return nullptr;
-  case _BINARY_VEC_RREGI:    return nullptr;
   case _BINARY_VEC_RREGL:    return nullptr;
   case _BINARY_VEC_REGF:    return nullptr;
   case _BINARY_VEC_REGD:    return nullptr;
+  case _BINARY_VEC__LOADVECTOR_MEMORY_:    return nullptr;
   case _BINARY_REGD_IMMD:    return nullptr;
   case _LSHIFTCNTV_IMMI8_:    return nullptr;
   case _RSHIFTCNTV_IMMI8_:    return nullptr;
   case _BINARY_LEGVEC_LEGVEC:    return nullptr;
-  case _BINARY_VEC__LOADVECTOR_MEMORY_:    return nullptr;
   case _MULADDVS2VI_VEC_VEC:    return nullptr;
   case _BINARY_VEC_IMMU8:    return nullptr;
   case _BINARY__LOADVECTOR_MEMORY__IMMU8:    return nullptr;
@@ -467,7 +478,9 @@ MachOper *State::MachOperGenerator(int opcode){
   case _BINARY_VEC__BINARY_VEC__BINARY_IMMU8_KREG:    return nullptr;
   case _BINARY_MEMORY__BINARY_IMMU8_KREG:    return nullptr;
   case _BINARY_VEC__BINARY_MEMORY__BINARY_IMMU8_KREG:    return nullptr;
+  case _REINTERPRETHF2S_REGF_:    return nullptr;
   case _BINARY_RAX_REGP_NO_RAX_REGP:    return nullptr;
+  case _ENCODEP_ANY_REGP_:    return nullptr;
   
   default:
     fprintf(stderr, "Default MachOper Generator invoked for: \n");
@@ -633,6 +646,11 @@ MachNode *State::MachNodeGenerator(int opcode){
     }
   case loadNKlass_rule: {
       loadNKlassNode *node = new loadNKlassNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case loadNKlassCompactHeaders_rule: {
+      loadNKlassCompactHeadersNode *node = new loadNKlassCompactHeadersNode();
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
@@ -827,6 +845,12 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
+  case loadConH_rule: {
+      loadConHNode *node = new loadConHNode();
+      node->_opnd_array[1] = new immHOper(_leaf->geth() );
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
   case loadConN0_rule: {
       loadConN0Node *node = new loadConN0Node();
       return node;
@@ -993,16 +1017,6 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
-  case storeImmCM0_reg_rule: {
-      storeImmCM0_regNode *node = new storeImmCM0_regNode();
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
-  case storeImmCM0_rule: {
-      storeImmCM0Node *node = new storeImmCM0Node();
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
   case storeF_rule: {
       storeFNode *node = new storeFNode();
       node->_bottom_type = _leaf->bottom_type();
@@ -1138,8 +1152,8 @@ MachNode *State::MachNodeGenerator(int opcode){
   case bytes_reversebit_int_gfni_rule: {
       bytes_reversebit_int_gfniNode *node = new bytes_reversebit_int_gfniNode();
       node->set_opnd_array(2, MachOperGenerator(RREGI));
-      node->set_opnd_array(3, MachOperGenerator(REGF));
-      node->set_opnd_array(4, MachOperGenerator(REGF));
+      node->set_opnd_array(3, MachOperGenerator(VLREGF));
+      node->set_opnd_array(4, MachOperGenerator(VLREGF));
       node->set_opnd_array(5, MachOperGenerator(RREGL));
       return node;
     }
@@ -1153,8 +1167,8 @@ MachNode *State::MachNodeGenerator(int opcode){
   case bytes_reversebit_long_gfni_rule: {
       bytes_reversebit_long_gfniNode *node = new bytes_reversebit_long_gfniNode();
       node->set_opnd_array(2, MachOperGenerator(RREGL));
-      node->set_opnd_array(3, MachOperGenerator(REGD));
-      node->set_opnd_array(4, MachOperGenerator(REGD));
+      node->set_opnd_array(3, MachOperGenerator(VLREGD));
+      node->set_opnd_array(4, MachOperGenerator(VLREGD));
       node->set_opnd_array(5, MachOperGenerator(RREGL));
       return node;
     }
@@ -1632,6 +1646,10 @@ MachNode *State::MachNodeGenerator(int opcode){
   case castFF_rule: {
       castFFNode *node = new castFFNode();
       node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case castHH_rule: {
+      castHHNode *node = new castHHNode();
       return node;
     }
   case castDD_rule: {
@@ -2587,18 +2605,8 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_clears_zero_flag | Node::PD::Flag_clears_overflow_flag);
       return node;
     }
-  case blsmskL_rReg_mem_0_rule: {
-      blsmskL_rReg_mem_0Node *node = new blsmskL_rReg_mem_0Node();
-      node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_clears_zero_flag | Node::PD::Flag_clears_overflow_flag);
-      return node;
-    }
   case blsmskL_rReg_rReg_rule: {
       blsmskL_rReg_rRegNode *node = new blsmskL_rReg_rRegNode();
-      node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_clears_zero_flag | Node::PD::Flag_clears_overflow_flag);
-      return node;
-    }
-  case blsmskL_rReg_rReg_0_rule: {
-      blsmskL_rReg_rReg_0Node *node = new blsmskL_rReg_rReg_0Node();
       node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_clears_zero_flag | Node::PD::Flag_clears_overflow_flag);
       return node;
     }
@@ -2694,19 +2702,8 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_sets_zero_flag | Node::PD::Flag_sets_parity_flag | Node::PD::Flag_clears_overflow_flag | Node::PD::Flag_clears_carry_flag);
       return node;
     }
-  case xorL_rReg_mem_0_rule: {
-      xorL_rReg_mem_0Node *node = new xorL_rReg_mem_0Node();
-      node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_sets_zero_flag | Node::PD::Flag_sets_parity_flag | Node::PD::Flag_clears_overflow_flag | Node::PD::Flag_clears_carry_flag);
-      return node;
-    }
   case xorL_mem_rReg_rule: {
       xorL_mem_rRegNode *node = new xorL_mem_rRegNode();
-      node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_sets_zero_flag | Node::PD::Flag_sets_parity_flag | Node::PD::Flag_clears_overflow_flag | Node::PD::Flag_clears_carry_flag);
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
-  case xorL_mem_rReg_0_rule: {
-      xorL_mem_rReg_0Node *node = new xorL_mem_rReg_0Node();
       node->add_flag(Node::PD::Flag_sets_sign_flag | Node::PD::Flag_sets_zero_flag | Node::PD::Flag_sets_parity_flag | Node::PD::Flag_clears_overflow_flag | Node::PD::Flag_clears_carry_flag);
       node->_bottom_type = _leaf->bottom_type();
       return node;
@@ -3506,8 +3503,20 @@ MachNode *State::MachNodeGenerator(int opcode){
       partialSubtypeCheckNode *node = new partialSubtypeCheckNode();
       return node;
     }
-  case partialSubtypeCheck_vs_Zero_rule: {
-      partialSubtypeCheck_vs_ZeroNode *node = new partialSubtypeCheck_vs_ZeroNode();
+  case partialSubtypeCheckVarSuper_rule: {
+      partialSubtypeCheckVarSuperNode *node = new partialSubtypeCheckVarSuperNode();
+      node->set_opnd_array(3, MachOperGenerator(RDX_REGL));
+      node->set_opnd_array(4, MachOperGenerator(RCX_REGL));
+      node->set_opnd_array(5, MachOperGenerator(RBX_REGP));
+      node->set_opnd_array(6, MachOperGenerator(R11_REGL));
+      return node;
+    }
+  case partialSubtypeCheckConstSuper_rule: {
+      partialSubtypeCheckConstSuperNode *node = new partialSubtypeCheckConstSuperNode();
+      node->set_opnd_array(4, MachOperGenerator(RDX_REGL));
+      node->set_opnd_array(5, MachOperGenerator(RCX_REGL));
+      node->set_opnd_array(6, MachOperGenerator(RBX_REGP));
+      node->set_opnd_array(7, MachOperGenerator(R11_REGL));
       return node;
     }
   case jmpDir_short_rule: {
@@ -3550,22 +3559,10 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_fcnt = _leaf->as_If()->_fcnt;
       return node;
     }
-  case cmpFastLockRTM_rule: {
-      cmpFastLockRTMNode *node = new cmpFastLockRTMNode();
-      node->set_opnd_array(3, MachOperGenerator(RAX_REGI));
-      node->set_opnd_array(4, MachOperGenerator(RDX_REGI));
-      node->set_opnd_array(5, MachOperGenerator(RREGI));
-      node->set_opnd_array(6, MachOperGenerator(RREGI));
-      node->_rtm_counters = _leaf->as_FastLock()->rtm_counters();
-      node->_stack_rtm_counters = _leaf->as_FastLock()->stack_rtm_counters();
-      return node;
-    }
   case cmpFastLock_rule: {
       cmpFastLockNode *node = new cmpFastLockNode();
       node->set_opnd_array(3, MachOperGenerator(RAX_REGI));
       node->set_opnd_array(4, MachOperGenerator(RREGP));
-      node->_rtm_counters = _leaf->as_FastLock()->rtm_counters();
-      node->_stack_rtm_counters = _leaf->as_FastLock()->stack_rtm_counters();
       return node;
     }
   case cmpFastUnlock_rule: {
@@ -3577,8 +3574,6 @@ MachNode *State::MachNodeGenerator(int opcode){
       cmpFastLockLightweightNode *node = new cmpFastLockLightweightNode();
       node->set_opnd_array(3, MachOperGenerator(RAX_REGI));
       node->set_opnd_array(4, MachOperGenerator(RREGP));
-      node->_rtm_counters = _leaf->as_FastLock()->rtm_counters();
-      node->_stack_rtm_counters = _leaf->as_FastLock()->stack_rtm_counters();
       return node;
     }
   case cmpFastUnlockLightweight_rule: {
@@ -3641,6 +3636,10 @@ MachNode *State::MachNodeGenerator(int opcode){
     }
   case tailjmpInd_rule: {
       tailjmpIndNode *node = new tailjmpIndNode();
+      return node;
+    }
+  case ForwardExceptionjmp_rule: {
+      ForwardExceptionjmpNode *node = new ForwardExceptionjmpNode();
       return node;
     }
   case CreateException_rule: {
@@ -4134,6 +4133,142 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
+  case vgather_subwordLE8B_rule: {
+      vgather_subwordLE8BNode *node = new vgather_subwordLE8BNode();
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_subwordGT8B_rule: {
+      vgather_subwordGT8BNode *node = new vgather_subwordGT8BNode();
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(VEC));
+      node->set_opnd_array(8, MachOperGenerator(VEC));
+      node->set_opnd_array(9, MachOperGenerator(VEC));
+      node->set_opnd_array(10, MachOperGenerator(RREGI));
+      node->set_opnd_array(11, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_subwordLE8B_off_rule: {
+      vgather_subwordLE8B_offNode *node = new vgather_subwordLE8B_offNode();
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_subwordGT8B_off_rule: {
+      vgather_subwordGT8B_offNode *node = new vgather_subwordGT8B_offNode();
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(VEC));
+      node->set_opnd_array(8, MachOperGenerator(VEC));
+      node->set_opnd_array(9, MachOperGenerator(VEC));
+      node->set_opnd_array(10, MachOperGenerator(RREGI));
+      node->set_opnd_array(11, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordLE8B_avx3_rule: {
+      vgather_masked_subwordLE8B_avx3Node *node = new vgather_masked_subwordLE8B_avx3Node();
+      node->set_opnd_array(5, MachOperGenerator(RREGL));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGI));
+      node->set_opnd_array(8, MachOperGenerator(RREGL));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordGT8B_avx3_rule: {
+      vgather_masked_subwordGT8B_avx3Node *node = new vgather_masked_subwordGT8B_avx3Node();
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      node->set_opnd_array(8, MachOperGenerator(VEC));
+      node->set_opnd_array(9, MachOperGenerator(VEC));
+      node->set_opnd_array(10, MachOperGenerator(VEC));
+      node->set_opnd_array(11, MachOperGenerator(RREGI));
+      node->set_opnd_array(12, MachOperGenerator(RREGL));
+      node->set_opnd_array(13, MachOperGenerator(RREGL));
+      node->set_opnd_array(14, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordLE8B_off_avx3_rule: {
+      vgather_masked_subwordLE8B_off_avx3Node *node = new vgather_masked_subwordLE8B_off_avx3Node();
+      node->set_opnd_array(5, MachOperGenerator(RREGL));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGI));
+      node->set_opnd_array(8, MachOperGenerator(RREGL));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordGT8B_off_avx3_rule: {
+      vgather_masked_subwordGT8B_off_avx3Node *node = new vgather_masked_subwordGT8B_off_avx3Node();
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      node->set_opnd_array(8, MachOperGenerator(VEC));
+      node->set_opnd_array(9, MachOperGenerator(VEC));
+      node->set_opnd_array(10, MachOperGenerator(VEC));
+      node->set_opnd_array(11, MachOperGenerator(RREGI));
+      node->set_opnd_array(12, MachOperGenerator(RREGL));
+      node->set_opnd_array(13, MachOperGenerator(RREGL));
+      node->set_opnd_array(14, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordLE8B_avx2_rule: {
+      vgather_masked_subwordLE8B_avx2Node *node = new vgather_masked_subwordLE8B_avx2Node();
+      node->set_opnd_array(5, MachOperGenerator(RREGI));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGI));
+      node->set_opnd_array(8, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordGT8B_avx2_rule: {
+      vgather_masked_subwordGT8B_avx2Node *node = new vgather_masked_subwordGT8B_avx2Node();
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      node->set_opnd_array(8, MachOperGenerator(VEC));
+      node->set_opnd_array(9, MachOperGenerator(VEC));
+      node->set_opnd_array(10, MachOperGenerator(VEC));
+      node->set_opnd_array(11, MachOperGenerator(RREGI));
+      node->set_opnd_array(12, MachOperGenerator(RREGI));
+      node->set_opnd_array(13, MachOperGenerator(RREGI));
+      node->set_opnd_array(14, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordLE8B_off_avx2_rule: {
+      vgather_masked_subwordLE8B_off_avx2Node *node = new vgather_masked_subwordLE8B_off_avx2Node();
+      node->set_opnd_array(5, MachOperGenerator(RREGI));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGI));
+      node->set_opnd_array(8, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vgather_masked_subwordGT8B_off_avx2_rule: {
+      vgather_masked_subwordGT8B_off_avx2Node *node = new vgather_masked_subwordGT8B_off_avx2Node();
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      node->set_opnd_array(8, MachOperGenerator(VEC));
+      node->set_opnd_array(9, MachOperGenerator(VEC));
+      node->set_opnd_array(10, MachOperGenerator(VEC));
+      node->set_opnd_array(11, MachOperGenerator(RREGI));
+      node->set_opnd_array(12, MachOperGenerator(RREGI));
+      node->set_opnd_array(13, MachOperGenerator(RREGI));
+      node->set_opnd_array(14, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
   case scatter_rule: {
       scatterNode *node = new scatterNode();
       node->set_opnd_array(4, MachOperGenerator(RREGP));
@@ -4160,6 +4295,18 @@ MachNode *State::MachNodeGenerator(int opcode){
     }
   case vReplS_reg_rule: {
       vReplS_regNode *node = new vReplS_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case ReplHF_imm_rule: {
+      ReplHF_immNode *node = new ReplHF_immNode();
+      node->set_opnd_array(2, MachOperGenerator(RREGI));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case ReplHF_reg_rule: {
+      ReplHF_regNode *node = new ReplHF_regNode();
+      node->set_opnd_array(2, MachOperGenerator(RREGI));
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
@@ -4526,6 +4673,64 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
+  case unordered_reduction2F_rule: {
+      unordered_reduction2FNode *node = new unordered_reduction2FNode();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction2F_0_rule: {
+      unordered_reduction2F_0Node *node = new unordered_reduction2F_0Node();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction4F_rule: {
+      unordered_reduction4FNode *node = new unordered_reduction4FNode();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction4F_0_rule: {
+      unordered_reduction4F_0Node *node = new unordered_reduction4F_0Node();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction8F_rule: {
+      unordered_reduction8FNode *node = new unordered_reduction8FNode();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction8F_0_rule: {
+      unordered_reduction8F_0Node *node = new unordered_reduction8F_0Node();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction16F_rule: {
+      unordered_reduction16FNode *node = new unordered_reduction16FNode();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->set_opnd_array(4, MachOperGenerator(LEGVEC));
+      node->set_opnd_array(5, MachOperGenerator(LEGVEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction16F_0_rule: {
+      unordered_reduction16F_0Node *node = new unordered_reduction16F_0Node();
+      node->set_opnd_array(3, MachOperGenerator(REGF));
+      node->set_opnd_array(4, MachOperGenerator(LEGVEC));
+      node->set_opnd_array(5, MachOperGenerator(LEGVEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
   case reduction2D_rule: {
       reduction2DNode *node = new reduction2DNode();
       node->set_opnd_array(3, MachOperGenerator(REGD));
@@ -4566,6 +4771,48 @@ MachNode *State::MachNodeGenerator(int opcode){
     }
   case reduction8D_0_rule: {
       reduction8D_0Node *node = new reduction8D_0Node();
+      node->set_opnd_array(3, MachOperGenerator(REGD));
+      node->set_opnd_array(4, MachOperGenerator(LEGVEC));
+      node->set_opnd_array(5, MachOperGenerator(LEGVEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction2D_rule: {
+      unordered_reduction2DNode *node = new unordered_reduction2DNode();
+      node->set_opnd_array(3, MachOperGenerator(REGD));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction2D_0_rule: {
+      unordered_reduction2D_0Node *node = new unordered_reduction2D_0Node();
+      node->set_opnd_array(3, MachOperGenerator(REGD));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction4D_rule: {
+      unordered_reduction4DNode *node = new unordered_reduction4DNode();
+      node->set_opnd_array(3, MachOperGenerator(REGD));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction4D_0_rule: {
+      unordered_reduction4D_0Node *node = new unordered_reduction4D_0Node();
+      node->set_opnd_array(3, MachOperGenerator(REGD));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction8D_rule: {
+      unordered_reduction8DNode *node = new unordered_reduction8DNode();
+      node->set_opnd_array(3, MachOperGenerator(REGD));
+      node->set_opnd_array(4, MachOperGenerator(LEGVEC));
+      node->set_opnd_array(5, MachOperGenerator(LEGVEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case unordered_reduction8D_0_rule: {
+      unordered_reduction8D_0Node *node = new unordered_reduction8D_0Node();
       node->set_opnd_array(3, MachOperGenerator(REGD));
       node->set_opnd_array(4, MachOperGenerator(LEGVEC));
       node->set_opnd_array(5, MachOperGenerator(LEGVEC));
@@ -5189,6 +5436,16 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
+  case vmuludq_reg_rule: {
+      vmuludq_regNode *node = new vmuludq_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vmuldq_reg_rule: {
+      vmuldq_regNode *node = new vmuldq_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
   case vmulF_rule: {
       vmulFNode *node = new vmulFNode();
       node->_bottom_type = _leaf->bottom_type();
@@ -5346,6 +5603,60 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->set_opnd_array(4, MachOperGenerator(VEC));
       node->set_opnd_array(5, MachOperGenerator(VEC));
       node->set_opnd_array(6, MachOperGenerator(KREG));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_reg_rule: {
+      vector_uminmax_regNode *node = new vector_uminmax_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_reg_0_rule: {
+      vector_uminmax_reg_0Node *node = new vector_uminmax_reg_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_mem_rule: {
+      vector_uminmax_memNode *node = new vector_uminmax_memNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_mem_0_rule: {
+      vector_uminmax_mem_0Node *node = new vector_uminmax_mem_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmaxq_reg_rule: {
+      vector_uminmaxq_regNode *node = new vector_uminmaxq_regNode();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmaxq_reg_0_rule: {
+      vector_uminmaxq_reg_0Node *node = new vector_uminmaxq_reg_0Node();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_reg_masked_rule: {
+      vector_uminmax_reg_maskedNode *node = new vector_uminmax_reg_maskedNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_reg_masked_0_rule: {
+      vector_uminmax_reg_masked_0Node *node = new vector_uminmax_reg_masked_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_mem_masked_rule: {
+      vector_uminmax_mem_maskedNode *node = new vector_uminmax_mem_maskedNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_uminmax_mem_masked_0_rule: {
+      vector_uminmax_mem_masked_0Node *node = new vector_uminmax_mem_masked_0Node();
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
@@ -5921,6 +6232,11 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
+  case vcastBtoD_rule: {
+      vcastBtoDNode *node = new vcastBtoDNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
   case castStoX_rule: {
       castStoXNode *node = new castStoXNode();
       node->_bottom_type = _leaf->bottom_type();
@@ -6397,11 +6713,6 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
-  case loadShuffleB_rule: {
-      loadShuffleBNode *node = new loadShuffleBNode();
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
   case rearrangeB_rule: {
       rearrangeBNode *node = new rearrangeBNode();
       node->_bottom_type = _leaf->bottom_type();
@@ -6451,11 +6762,6 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
-  case loadShuffleS_evex_rule: {
-      loadShuffleS_evexNode *node = new loadShuffleS_evexNode();
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
   case rearrangeS_evex_rule: {
       rearrangeS_evexNode *node = new rearrangeS_evexNode();
       node->_bottom_type = _leaf->bottom_type();
@@ -6473,11 +6779,6 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
-  case loadShuffleI_avx_rule: {
-      loadShuffleI_avxNode *node = new loadShuffleI_avxNode();
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
   case rearrangeI_avx_rule: {
       rearrangeI_avxNode *node = new rearrangeI_avxNode();
       node->_bottom_type = _leaf->bottom_type();
@@ -6492,11 +6793,6 @@ MachNode *State::MachNodeGenerator(int opcode){
     }
   case rearrangeL_rule: {
       rearrangeLNode *node = new rearrangeLNode();
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
-  case loadShuffleL_evex_rule: {
-      loadShuffleL_evexNode *node = new loadShuffleL_evexNode();
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
@@ -7442,6 +7738,211 @@ MachNode *State::MachNodeGenerator(int opcode){
       node->set_opnd_array(2, MachOperGenerator(KREG));
       return node;
     }
+  case vector_addsub_saturating_subword_reg_rule: {
+      vector_addsub_saturating_subword_regNode *node = new vector_addsub_saturating_subword_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_subword_reg_0_rule: {
+      vector_addsub_saturating_subword_reg_0Node *node = new vector_addsub_saturating_subword_reg_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_reg_rule: {
+      vector_addsub_saturating_unsigned_subword_regNode *node = new vector_addsub_saturating_unsigned_subword_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_reg_0_rule: {
+      vector_addsub_saturating_unsigned_subword_reg_0Node *node = new vector_addsub_saturating_unsigned_subword_reg_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_reg_evex_rule: {
+      vector_addsub_saturating_reg_evexNode *node = new vector_addsub_saturating_reg_evexNode();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(KREG));
+      node->set_opnd_array(7, MachOperGenerator(KREG));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_reg_evex_0_rule: {
+      vector_addsub_saturating_reg_evex_0Node *node = new vector_addsub_saturating_reg_evex_0Node();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(KREG));
+      node->set_opnd_array(7, MachOperGenerator(KREG));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_reg_avx_rule: {
+      vector_addsub_saturating_reg_avxNode *node = new vector_addsub_saturating_reg_avxNode();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(VEC));
+      node->set_opnd_array(7, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_reg_avx_0_rule: {
+      vector_addsub_saturating_reg_avx_0Node *node = new vector_addsub_saturating_reg_avx_0Node();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(VEC));
+      node->set_opnd_array(7, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_add_saturating_unsigned_reg_evex_rule: {
+      vector_add_saturating_unsigned_reg_evexNode *node = new vector_add_saturating_unsigned_reg_evexNode();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(KREG));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_add_saturating_unsigned_reg_avx_rule: {
+      vector_add_saturating_unsigned_reg_avxNode *node = new vector_add_saturating_unsigned_reg_avxNode();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->set_opnd_array(6, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_sub_saturating_unsigned_reg_evex_rule: {
+      vector_sub_saturating_unsigned_reg_evexNode *node = new vector_sub_saturating_unsigned_reg_evexNode();
+      node->set_opnd_array(3, MachOperGenerator(KREG));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_sub_saturating_unsigned_reg_avx_rule: {
+      vector_sub_saturating_unsigned_reg_avxNode *node = new vector_sub_saturating_unsigned_reg_avxNode();
+      node->set_opnd_array(3, MachOperGenerator(VEC));
+      node->set_opnd_array(4, MachOperGenerator(VEC));
+      node->set_opnd_array(5, MachOperGenerator(VEC));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_subword_mem_rule: {
+      vector_addsub_saturating_subword_memNode *node = new vector_addsub_saturating_subword_memNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_subword_mem_0_rule: {
+      vector_addsub_saturating_subword_mem_0Node *node = new vector_addsub_saturating_subword_mem_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_mem_rule: {
+      vector_addsub_saturating_unsigned_subword_memNode *node = new vector_addsub_saturating_unsigned_subword_memNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_mem_0_rule: {
+      vector_addsub_saturating_unsigned_subword_mem_0Node *node = new vector_addsub_saturating_unsigned_subword_mem_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_subword_masked_reg_rule: {
+      vector_addsub_saturating_subword_masked_regNode *node = new vector_addsub_saturating_subword_masked_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_subword_masked_reg_0_rule: {
+      vector_addsub_saturating_subword_masked_reg_0Node *node = new vector_addsub_saturating_subword_masked_reg_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_masked_reg_rule: {
+      vector_addsub_saturating_unsigned_subword_masked_regNode *node = new vector_addsub_saturating_unsigned_subword_masked_regNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_masked_reg_0_rule: {
+      vector_addsub_saturating_unsigned_subword_masked_reg_0Node *node = new vector_addsub_saturating_unsigned_subword_masked_reg_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_subword_masked_mem_rule: {
+      vector_addsub_saturating_subword_masked_memNode *node = new vector_addsub_saturating_subword_masked_memNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_subword_masked_mem_0_rule: {
+      vector_addsub_saturating_subword_masked_mem_0Node *node = new vector_addsub_saturating_subword_masked_mem_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_masked_mem_rule: {
+      vector_addsub_saturating_unsigned_subword_masked_memNode *node = new vector_addsub_saturating_unsigned_subword_masked_memNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_addsub_saturating_unsigned_subword_masked_mem_0_rule: {
+      vector_addsub_saturating_unsigned_subword_masked_mem_0Node *node = new vector_addsub_saturating_unsigned_subword_masked_mem_0Node();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case vector_selectfrom_twovectors_reg_evex_rule: {
+      vector_selectfrom_twovectors_reg_evexNode *node = new vector_selectfrom_twovectors_reg_evexNode();
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case reinterpretS2HF_rule: {
+      reinterpretS2HFNode *node = new reinterpretS2HFNode();
+      return node;
+    }
+  case convF2HFAndS2HF_rule: {
+      convF2HFAndS2HFNode *node = new convF2HFAndS2HFNode();
+      return node;
+    }
+  case convHF2SAndHF2F_rule: {
+      convHF2SAndHF2FNode *node = new convHF2SAndHF2FNode();
+      return node;
+    }
+  case reinterpretHF2S_rule: {
+      reinterpretHF2SNode *node = new reinterpretHF2SNode();
+      return node;
+    }
+  case scalar_sqrt_HF_reg_rule: {
+      scalar_sqrt_HF_regNode *node = new scalar_sqrt_HF_regNode();
+      return node;
+    }
+  case scalar_binOps_HF_reg_rule: {
+      scalar_binOps_HF_regNode *node = new scalar_binOps_HF_regNode();
+      return node;
+    }
+  case scalar_binOps_HF_reg_0_rule: {
+      scalar_binOps_HF_reg_0Node *node = new scalar_binOps_HF_reg_0Node();
+      return node;
+    }
+  case scalar_binOps_HF_reg_1_rule: {
+      scalar_binOps_HF_reg_1Node *node = new scalar_binOps_HF_reg_1Node();
+      return node;
+    }
+  case scalar_binOps_HF_reg_2_rule: {
+      scalar_binOps_HF_reg_2Node *node = new scalar_binOps_HF_reg_2Node();
+      return node;
+    }
+  case scalar_binOps_HF_reg_3_rule: {
+      scalar_binOps_HF_reg_3Node *node = new scalar_binOps_HF_reg_3Node();
+      return node;
+    }
+  case scalar_binOps_HF_reg_4_rule: {
+      scalar_binOps_HF_reg_4Node *node = new scalar_binOps_HF_reg_4Node();
+      return node;
+    }
+  case scalar_fma_HF_reg_rule: {
+      scalar_fma_HF_regNode *node = new scalar_fma_HF_regNode();
+      return node;
+    }
   case compareAndSwapP_shenandoah_rule: {
       compareAndSwapP_shenandoahNode *node = new compareAndSwapP_shenandoahNode();
       node->set_opnd_array(4, MachOperGenerator(RREGP));
@@ -7477,33 +7978,6 @@ MachNode *State::MachNodeGenerator(int opcode){
       compareAndExchangeP_shenandoahNode *node = new compareAndExchangeP_shenandoahNode();
       node->set_opnd_array(4, MachOperGenerator(RREGP));
       node->set_opnd_array(5, MachOperGenerator(RREGP));
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
-  case xLoadP_rule: {
-      xLoadPNode *node = new xLoadPNode();
-      node->set_opnd_array(2, MachOperGenerator(RREGP));
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
-  case xCompareAndExchangeP_rule: {
-      xCompareAndExchangePNode *node = new xCompareAndExchangePNode();
-      node->set_opnd_array(4, MachOperGenerator(RREGP));
-      node->_bottom_type = _leaf->bottom_type();
-      return node;
-    }
-  case xCompareAndSwapP_rule: {
-      xCompareAndSwapPNode *node = new xCompareAndSwapPNode();
-      node->set_opnd_array(4, MachOperGenerator(RREGP));
-      return node;
-    }
-  case xCompareAndSwapP_0_rule: {
-      xCompareAndSwapP_0Node *node = new xCompareAndSwapP_0Node();
-      node->set_opnd_array(4, MachOperGenerator(RREGP));
-      return node;
-    }
-  case xXChgP_rule: {
-      xXChgPNode *node = new xXChgPNode();
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }
@@ -7548,6 +8022,109 @@ MachNode *State::MachNodeGenerator(int opcode){
   case zXChgP_rule: {
       zXChgPNode *node = new zXChgPNode();
       node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1StoreP_rule: {
+      g1StorePNode *node = new g1StorePNode();
+      node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1StoreN_rule: {
+      g1StoreNNode *node = new g1StoreNNode();
+      node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1EncodePAndStoreN_rule: {
+      g1EncodePAndStoreNNode *node = new g1EncodePAndStoreNNode();
+      node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1CompareAndExchangeP_rule: {
+      g1CompareAndExchangePNode *node = new g1CompareAndExchangePNode();
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1CompareAndExchangeN_rule: {
+      g1CompareAndExchangeNNode *node = new g1CompareAndExchangeNNode();
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1CompareAndSwapP_rule: {
+      g1CompareAndSwapPNode *node = new g1CompareAndSwapPNode();
+      node->set_opnd_array(4, MachOperGenerator(RREGI));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      return node;
+    }
+  case g1CompareAndSwapP_0_rule: {
+      g1CompareAndSwapP_0Node *node = new g1CompareAndSwapP_0Node();
+      node->set_opnd_array(4, MachOperGenerator(RREGI));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      return node;
+    }
+  case g1CompareAndSwapN_rule: {
+      g1CompareAndSwapNNode *node = new g1CompareAndSwapNNode();
+      node->set_opnd_array(4, MachOperGenerator(RREGI));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      return node;
+    }
+  case g1CompareAndSwapN_0_rule: {
+      g1CompareAndSwapN_0Node *node = new g1CompareAndSwapN_0Node();
+      node->set_opnd_array(4, MachOperGenerator(RREGI));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->set_opnd_array(6, MachOperGenerator(RREGP));
+      node->set_opnd_array(7, MachOperGenerator(RREGP));
+      return node;
+    }
+  case g1GetAndSetP_rule: {
+      g1GetAndSetPNode *node = new g1GetAndSetPNode();
+      node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1GetAndSetN_rule: {
+      g1GetAndSetNNode *node = new g1GetAndSetNNode();
+      node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
+      node->set_opnd_array(5, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1LoadP_rule: {
+      g1LoadPNode *node = new g1LoadPNode();
+      node->set_opnd_array(2, MachOperGenerator(RREGP));
+      node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->_bottom_type = _leaf->bottom_type();
+      return node;
+    }
+  case g1LoadN_rule: {
+      g1LoadNNode *node = new g1LoadNNode();
+      node->set_opnd_array(2, MachOperGenerator(RREGN));
+      node->set_opnd_array(3, MachOperGenerator(RREGP));
+      node->set_opnd_array(4, MachOperGenerator(RREGP));
       node->_bottom_type = _leaf->bottom_type();
       return node;
     }

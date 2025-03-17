@@ -1,6 +1,6 @@
 #line 1 "ad_x86_peephole.cpp"
 //
-// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -25,15 +25,14 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_x86.hpp"
 int addI_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==0)) && ( 
-#line 12729 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12867 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_2op_lea()
-#line 36 "ad_x86_peephole.cpp"
+#line 35 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_rReg_peepNode()); };
     bool replacement = Peephole::lea_coalesce_reg(block, block_index, cfg_, ra_, replacing, addI_rReg_rule);
@@ -49,9 +48,9 @@ int addI_rReg_immNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, P
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==1)) && ( 
-#line 12737 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12875 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_2op_lea()
-#line 54 "ad_x86_peephole.cpp"
+#line 53 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, addI_rReg_imm_rule);
@@ -67,10 +66,10 @@ int incI_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, Phase
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==2)) && ( 
-#line 12745 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12883 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_3op_lea() ||
                 VM_Version::is_intel_cascade_lake()
-#line 73 "ad_x86_peephole.cpp"
+#line 72 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, incI_rReg_rule);
@@ -86,10 +85,10 @@ int decI_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, Phase
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==3)) && ( 
-#line 12754 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12892 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_3op_lea() ||
                 VM_Version::is_intel_cascade_lake()
-#line 92 "ad_x86_peephole.cpp"
+#line 91 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, decI_rReg_rule);
@@ -105,9 +104,9 @@ int addL_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, Phase
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==5)) && ( 
-#line 12771 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12909 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_2op_lea()
-#line 110 "ad_x86_peephole.cpp"
+#line 109 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_rReg_peepNode()); };
     bool replacement = Peephole::lea_coalesce_reg(block, block_index, cfg_, ra_, replacing, addL_rReg_rule);
@@ -123,9 +122,9 @@ int addL_rReg_immNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, P
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==6)) && ( 
-#line 12779 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12917 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_2op_lea()
-#line 128 "ad_x86_peephole.cpp"
+#line 127 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immL32_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, addL_rReg_imm_rule);
@@ -141,10 +140,10 @@ int incL_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, Phase
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==7)) && ( 
-#line 12787 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12925 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_3op_lea() ||
                 VM_Version::is_intel_cascade_lake()
-#line 147 "ad_x86_peephole.cpp"
+#line 146 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immL32_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, incL_rReg_rule);
@@ -160,10 +159,10 @@ int decL_rRegNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, Phase
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==8)) && ( 
-#line 12796 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12934 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_3op_lea() ||
                 VM_Version::is_intel_cascade_lake()
-#line 166 "ad_x86_peephole.cpp"
+#line 165 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immL32_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, decL_rReg_rule);
@@ -179,9 +178,9 @@ int salI_rReg_immI2Node::peephole(Block* block, int block_index, PhaseCFG* cfg_,
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==4)) && ( 
-#line 12763 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12901 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_2op_lea()
-#line 184 "ad_x86_peephole.cpp"
+#line 183 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaI_rReg_immI2_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, salI_rReg_immI2_rule);
@@ -197,9 +196,9 @@ int salL_rReg_immI2Node::peephole(Block* block, int block_index, PhaseCFG* cfg_,
   bool  matches = true;
   MachNode *inst0 = this;
   if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==9)) && ( 
-#line 12805 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12943 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 VM_Version::supports_fast_2op_lea()
-#line 202 "ad_x86_peephole.cpp"
+#line 201 "ad_x86_peephole.cpp"
  ) ) {
     auto replacing = [](){ return static_cast<MachNode*>(new leaL_rReg_immI2_peepNode()); };
     bool replacement = Peephole::lea_coalesce_imm(block, block_index, cfg_, ra_, replacing, salL_rReg_immI2_rule);

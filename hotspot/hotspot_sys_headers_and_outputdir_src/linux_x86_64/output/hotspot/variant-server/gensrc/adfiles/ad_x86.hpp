@@ -1,6 +1,6 @@
 #line 1 "ad_x86.hpp"
 //
-// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -81,272 +81,284 @@ enum MachOperands {
   /*   37 */  IMMI_POW2M1,
   /*   38 */  IMMF0,
   /*   39 */  IMMF,
-  /*   40 */  IMMD0,
-  /*   41 */  IMMD,
-  /*   42 */  IMMI_16,
-  /*   43 */  IMMI_24,
-  /*   44 */  IMMI_255,
-  /*   45 */  IMMI_65535,
-  /*   46 */  IMML_255,
-  /*   47 */  IMML_65535,
-  /*   48 */  KREG,
-  /*   49 */  RREGI,
-  /*   50 */  RAX_REGI,
-  /*   51 */  RBX_REGI,
-  /*   52 */  RCX_REGI,
-  /*   53 */  RDX_REGI,
-  /*   54 */  RDI_REGI,
-  /*   55 */  NO_RAX_RDX_REGI,
-  /*   56 */  NO_RBP_R13_REGI,
-  /*   57 */  ANY_REGP,
-  /*   58 */  RREGP,
-  /*   59 */  RREGN,
-  /*   60 */  NO_RBP_REGP,
-  /*   61 */  RAX_REGP,
-  /*   62 */  RAX_REGN,
-  /*   63 */  RBX_REGP,
-  /*   64 */  RSI_REGP,
-  /*   65 */  RBP_REGP,
-  /*   66 */  RDI_REGP,
-  /*   67 */  R15_REGP,
-  /*   68 */  RREGL,
-  /*   69 */  NO_RAX_RDX_REGL,
-  /*   70 */  RAX_REGL,
-  /*   71 */  RCX_REGL,
-  /*   72 */  RDX_REGL,
-  /*   73 */  NO_RBP_R13_REGL,
-  /*   74 */  RFLAGSREG,
-  /*   75 */  RFLAGSREGU,
-  /*   76 */  RFLAGSREGUCF,
-  /*   77 */  REGF,
-  /*   78 */  LEGREGF,
-  /*   79 */  VLREGF,
-  /*   80 */  REGD,
-  /*   81 */  LEGREGD,
-  /*   82 */  VLREGD,
-  /*   83 */  INDIRECT,
-  /*   84 */  INDOFFSET8,
-  /*   85 */  INDOFFSET32,
-  /*   86 */  INDINDEXOFFSET,
-  /*   87 */  INDINDEX,
-  /*   88 */  INDINDEXSCALE,
-  /*   89 */  INDPOSINDEXSCALE,
-  /*   90 */  INDINDEXSCALEOFFSET,
-  /*   91 */  INDPOSINDEXOFFSET,
-  /*   92 */  INDPOSINDEXSCALEOFFSET,
-  /*   93 */  INDCOMPRESSEDOOPOFFSET,
-  /*   94 */  INDIRECTNARROW,
-  /*   95 */  INDOFFSET8NARROW,
-  /*   96 */  INDOFFSET32NARROW,
-  /*   97 */  INDINDEXOFFSETNARROW,
-  /*   98 */  INDINDEXNARROW,
-  /*   99 */  INDINDEXSCALENARROW,
-  /*  100 */  INDINDEXSCALEOFFSETNARROW,
-  /*  101 */  INDPOSINDEXOFFSETNARROW,
-  /*  102 */  INDPOSINDEXSCALEOFFSETNARROW,
-  /*  103 */  STACKSLOTP,
-  /*  104 */  STACKSLOTI,
-  /*  105 */  STACKSLOTF,
-  /*  106 */  STACKSLOTD,
-  /*  107 */  STACKSLOTL,
-  /*  108 */  CMPOP,
-  /*  109 */  CMPOPU,
-  /*  110 */  CMPOPUCF,
-  /*  111 */  CMPOPUCF2,
-  /*  112 */  RXMM0,
-  /*  113 */  VEC,
-  /*  114 */  LEGVEC,
-  /*  115 */  VECS,
-  /*  116 */  LEGVECS,
-  /*  117 */  VECD,
-  /*  118 */  LEGVECD,
-  /*  119 */  VECX,
-  /*  120 */  LEGVECX,
-  /*  121 */  VECY,
-  /*  122 */  LEGVECY,
-  /*  123 */  VECZ,
-  /*  124 */  LEGVECZ,
-  /*  125 */  NO_RAX_REGP,
+  /*   40 */  IMMH,
+  /*   41 */  IMMD0,
+  /*   42 */  IMMD,
+  /*   43 */  IMMI_16,
+  /*   44 */  IMMI_24,
+  /*   45 */  IMMI_255,
+  /*   46 */  IMMI_65535,
+  /*   47 */  IMML_255,
+  /*   48 */  IMML_65535,
+  /*   49 */  KREG,
+  /*   50 */  RREGI,
+  /*   51 */  RAX_REGI,
+  /*   52 */  RBX_REGI,
+  /*   53 */  RCX_REGI,
+  /*   54 */  RDX_REGI,
+  /*   55 */  RDI_REGI,
+  /*   56 */  NO_RAX_RDX_REGI,
+  /*   57 */  NO_RBP_R13_REGI,
+  /*   58 */  ANY_REGP,
+  /*   59 */  RREGP,
+  /*   60 */  RREGN,
+  /*   61 */  NO_RBP_REGP,
+  /*   62 */  RAX_REGP,
+  /*   63 */  RAX_REGN,
+  /*   64 */  RBX_REGP,
+  /*   65 */  RSI_REGP,
+  /*   66 */  RBP_REGP,
+  /*   67 */  RDI_REGP,
+  /*   68 */  R15_REGP,
+  /*   69 */  RREGL,
+  /*   70 */  NO_RAX_RDX_REGL,
+  /*   71 */  RAX_REGL,
+  /*   72 */  RCX_REGL,
+  /*   73 */  RDX_REGL,
+  /*   74 */  R11_REGL,
+  /*   75 */  NO_RBP_R13_REGL,
+  /*   76 */  RFLAGSREG,
+  /*   77 */  RFLAGSREGU,
+  /*   78 */  RFLAGSREGUCF,
+  /*   79 */  REGF,
+  /*   80 */  LEGREGF,
+  /*   81 */  VLREGF,
+  /*   82 */  REGD,
+  /*   83 */  LEGREGD,
+  /*   84 */  VLREGD,
+  /*   85 */  INDIRECT,
+  /*   86 */  INDOFFSET8,
+  /*   87 */  INDOFFSET32,
+  /*   88 */  INDINDEXOFFSET,
+  /*   89 */  INDINDEX,
+  /*   90 */  INDINDEXSCALE,
+  /*   91 */  INDPOSINDEXSCALE,
+  /*   92 */  INDINDEXSCALEOFFSET,
+  /*   93 */  INDPOSINDEXOFFSET,
+  /*   94 */  INDPOSINDEXSCALEOFFSET,
+  /*   95 */  INDCOMPRESSEDOOPOFFSET,
+  /*   96 */  INDIRECTNARROW,
+  /*   97 */  INDOFFSET8NARROW,
+  /*   98 */  INDOFFSET32NARROW,
+  /*   99 */  INDINDEXOFFSETNARROW,
+  /*  100 */  INDINDEXNARROW,
+  /*  101 */  INDINDEXSCALENARROW,
+  /*  102 */  INDINDEXSCALEOFFSETNARROW,
+  /*  103 */  INDPOSINDEXOFFSETNARROW,
+  /*  104 */  INDPOSINDEXSCALEOFFSETNARROW,
+  /*  105 */  STACKSLOTP,
+  /*  106 */  STACKSLOTI,
+  /*  107 */  STACKSLOTF,
+  /*  108 */  STACKSLOTD,
+  /*  109 */  STACKSLOTL,
+  /*  110 */  CMPOP,
+  /*  111 */  CMPOPU,
+  /*  112 */  CMPOPUCF,
+  /*  113 */  CMPOPUCF2,
+  /*  114 */  RXMM0,
+  /*  115 */  VEC,
+  /*  116 */  LEGVEC,
+  /*  117 */  VECS,
+  /*  118 */  LEGVECS,
+  /*  119 */  VECD,
+  /*  120 */  LEGVECD,
+  /*  121 */  VECX,
+  /*  122 */  LEGVECX,
+  /*  123 */  VECY,
+  /*  124 */  LEGVECY,
+  /*  125 */  VECZ,
+  /*  126 */  LEGVECZ,
+  /*  127 */  NO_RAX_REGP,
   // last operand
-  /*  126 */  MEMORY,
+  /*  128 */  MEMORY,
   // last operand class
-  /*  127 */  _ADDP_ANY_REGP_RREGL,
-  /*  128 */  _LSHIFTL_RREGL_IMMI2,
-  /*  129 */  _CONVI2L_RREGI_,
-  /*  130 */  _LSHIFTL__CONVI2L_RREGI__IMMI2,
-  /*  131 */  _ADDP_ANY_REGP__LSHIFTL_RREGL_IMMI2,
-  /*  132 */  _ADDP_ANY_REGP__CONVI2L_RREGI_,
-  /*  133 */  _ADDP_ANY_REGP__LSHIFTL__CONVI2L_RREGI__IMMI2,
-  /*  134 */  _DECODEN_RREGN_,
-  /*  135 */  _ADDP__DECODEN_RREGN__RREGL,
-  /*  136 */  _ADDP__DECODEN_RREGN___LSHIFTL_RREGL_IMMI2,
-  /*  137 */  _ADDP__DECODEN_RREGN___CONVI2L_RREGI_,
-  /*  138 */  _ADDP__DECODEN_RREGN___LSHIFTL__CONVI2L_RREGI__IMMI2,
-  /*  139 */  _LOADB_MEMORY_,
-  /*  140 */  _LOADUB_MEMORY_,
-  /*  141 */  _ANDI__LOADUB_MEMORY__IMMI,
-  /*  142 */  _LOADS_MEMORY_,
-  /*  143 */  _LSHIFTI__LOADS_MEMORY__IMMI_24,
-  /*  144 */  _LOADUS_MEMORY_,
-  /*  145 */  _LSHIFTI__LOADUS_MEMORY__IMMI_24,
-  /*  146 */  _ANDI__LOADUS_MEMORY__IMMI_255,
-  /*  147 */  _ANDI__LOADUS_MEMORY__IMMI,
-  /*  148 */  _LOADI_MEMORY_,
-  /*  149 */  _LSHIFTI__LOADI_MEMORY__IMMI_24,
-  /*  150 */  _LSHIFTI__LOADI_MEMORY__IMMI_16,
-  /*  151 */  _ANDI__LOADI_MEMORY__IMMI_255,
-  /*  152 */  _ANDI__LOADI_MEMORY__IMMI_65535,
-  /*  153 */  _ANDI__LOADI_MEMORY__IMMU31,
-  /*  154 */  _CONVI2L__LOADI_MEMORY__,
-  /*  155 */  _LOADL_MEMORY_,
-  /*  156 */  _CASTP2X_RREGP_,
-  /*  157 */  _CASTP2X__DECODEN_RREGN__,
-  /*  158 */  _ADDL__LSHIFTL_RREGL_IMMI2_IMML32,
-  /*  159 */  _BINARY_CMPOP_RFLAGSREG,
-  /*  160 */  _BINARY_IMMI_1_RREGI,
-  /*  161 */  _BINARY_RREGI_RREGI,
-  /*  162 */  _BINARY_CMPOPU_RFLAGSREGU,
-  /*  163 */  _BINARY_CMPOPUCF_RFLAGSREGUCF,
-  /*  164 */  _BINARY_CMPOPUCF2_RFLAGSREGUCF,
-  /*  165 */  _BINARY_RREGI__LOADI_MEMORY_,
-  /*  166 */  _BINARY_RREGN_RREGN,
-  /*  167 */  _BINARY_RREGP_RREGP,
-  /*  168 */  _BINARY_IMMI_1_RREGL,
-  /*  169 */  _BINARY_RREGL_RREGL,
-  /*  170 */  _BINARY_RREGL__LOADL_MEMORY_,
-  /*  171 */  _BINARY_REGF_REGF,
-  /*  172 */  _BINARY_REGD_REGD,
-  /*  173 */  _ADDI__LOADI_MEMORY__RREGI,
-  /*  174 */  _ADDI_RREGI__LOADI_MEMORY_,
-  /*  175 */  _ADDI__LOADI_MEMORY__IMMI,
-  /*  176 */  _ADDI__LOADI_MEMORY__IMMI_1,
-  /*  177 */  _ADDI__LOADI_MEMORY__IMMI_M1,
-  /*  178 */  _LSHIFTI_RREGI_IMMI2,
-  /*  179 */  _ADDI_RREGI_RREGI,
-  /*  180 */  _ADDI_RREGI__LSHIFTI_RREGI_IMMI2,
-  /*  181 */  _ADDI__LSHIFTI_RREGI_IMMI2_RREGI,
-  /*  182 */  _ADDL__LOADL_MEMORY__RREGL,
-  /*  183 */  _ADDL_RREGL__LOADL_MEMORY_,
-  /*  184 */  _ADDL__LOADL_MEMORY__IMML32,
-  /*  185 */  _ADDL__LOADL_MEMORY__IMML1,
-  /*  186 */  _ADDL__LOADL_MEMORY__IMML_M1,
-  /*  187 */  _ADDL_RREGL_RREGL,
-  /*  188 */  _ADDL_RREGL__LSHIFTL_RREGL_IMMI2,
-  /*  189 */  _ADDL__LSHIFTL_RREGL_IMMI2_RREGL,
-  /*  190 */  _BINARY_RAX_REGP_RREGP,
-  /*  191 */  _BINARY_RAX_REGL_RREGL,
-  /*  192 */  _BINARY_RAX_REGI_RREGI,
-  /*  193 */  _BINARY_RAX_REGN_RREGN,
-  /*  194 */  _SUBI__LOADI_MEMORY__RREGI,
-  /*  195 */  _SUBL__LOADL_MEMORY__RREGL,
-  /*  196 */  _SUBI_IMMI_0_RREGI,
-  /*  197 */  _SUBI_IMMI_0__LOADI_MEMORY_,
-  /*  198 */  _SUBL_IMML0__LOADL_MEMORY_,
-  /*  199 */  _LSHIFTI__LOADI_MEMORY__IMMI8,
-  /*  200 */  _LSHIFTI__LOADI_MEMORY__RCX_REGI,
-  /*  201 */  _RSHIFTI__LOADI_MEMORY__IMMI8,
-  /*  202 */  _RSHIFTI__LOADI_MEMORY__RCX_REGI,
-  /*  203 */  _URSHIFTI__LOADI_MEMORY__IMMI8,
-  /*  204 */  _URSHIFTI__LOADI_MEMORY__RCX_REGI,
-  /*  205 */  _LSHIFTL__LOADL_MEMORY__IMMI8,
-  /*  206 */  _LSHIFTL__LOADL_MEMORY__RCX_REGI,
-  /*  207 */  _RSHIFTL__LOADL_MEMORY__IMMI,
-  /*  208 */  _RSHIFTL__LOADL_MEMORY__RCX_REGI,
-  /*  209 */  _URSHIFTL__LOADL_MEMORY__IMMI8,
-  /*  210 */  _URSHIFTL__LOADL_MEMORY__RCX_REGI,
-  /*  211 */  _LSHIFTI_RREGI_IMMI_24,
-  /*  212 */  _LSHIFTI_RREGI_IMMI_16,
-  /*  213 */  _ANDI_RREGI_IMMI_255,
-  /*  214 */  _ANDI_RREGI_IMMI_65535,
-  /*  215 */  _ANDI_RREGI_IMMI_POW2M1,
-  /*  216 */  _ANDI__LOADB_MEMORY__RREGI,
-  /*  217 */  _ANDI_RREGI__LOADB_MEMORY_,
-  /*  218 */  _ANDI__LOADI_MEMORY__RREGI,
-  /*  219 */  _ANDI_RREGI__LOADI_MEMORY_,
-  /*  220 */  _ANDI__LOADI_MEMORY__IMMI,
-  /*  221 */  _XORI_RREGI_IMMI_M1,
-  /*  222 */  _ADDI_RREGI_IMMI_M1,
-  /*  223 */  _ORI__LOADB_MEMORY__RREGI,
-  /*  224 */  _ORI_RREGI__LOADB_MEMORY_,
-  /*  225 */  _ORI__LOADI_MEMORY__RREGI,
-  /*  226 */  _ORI_RREGI__LOADI_MEMORY_,
-  /*  227 */  _ORI__LOADI_MEMORY__IMMI,
-  /*  228 */  _XORI__LOADB_MEMORY__RREGI,
-  /*  229 */  _XORI_RREGI__LOADB_MEMORY_,
-  /*  230 */  _XORI__LOADI_MEMORY__RREGI,
-  /*  231 */  _XORI_RREGI__LOADI_MEMORY_,
-  /*  232 */  _XORI__LOADI_MEMORY__IMMI,
-  /*  233 */  _ANDL__LOADL_MEMORY__RREGL,
-  /*  234 */  _ANDL_RREGL__LOADL_MEMORY_,
-  /*  235 */  _ANDL__LOADL_MEMORY__IMML32,
-  /*  236 */  _ANDL__LOADL_MEMORY__IMML_NOTPOW2,
-  /*  237 */  _XORL_RREGL_IMML_M1,
-  /*  238 */  _SUBL_IMML0_RREGL,
-  /*  239 */  _ADDL_RREGL_IMML_M1,
-  /*  240 */  _CASTP2X_ANY_REGP_,
-  /*  241 */  _ORL__LOADL_MEMORY__RREGL,
-  /*  242 */  _ORL_RREGL__LOADL_MEMORY_,
-  /*  243 */  _ORL__LOADL_MEMORY__IMML32,
-  /*  244 */  _ORL__LOADL_MEMORY__IMML_POW2,
-  /*  245 */  _XORL__LOADL_MEMORY__RREGL,
-  /*  246 */  _XORL_RREGL__LOADL_MEMORY_,
-  /*  247 */  _XORL__LOADL_MEMORY__IMML32,
-  /*  248 */  _CMPLTMASK_RREGI_RREGI,
-  /*  249 */  _ANDI__CMPLTMASK_RREGI_RREGI_RREGI,
-  /*  250 */  _SUBI_RREGI_RREGI,
-  /*  251 */  _ANDI_RREGI__CMPLTMASK_RREGI_RREGI,
-  /*  252 */  _LOADF_MEMORY_,
-  /*  253 */  _LOADD_MEMORY_,
-  /*  254 */  _BINARY_RDI_REGP_RCX_REGI,
-  /*  255 */  _BINARY_RSI_REGP_RDX_REGI,
-  /*  256 */  _BINARY_RDI_REGP_RDX_REGI,
-  /*  257 */  _BINARY_RSI_REGP_IMMI,
-  /*  258 */  _BINARY_RSI_REGP_RAX_REGI,
-  /*  259 */  _BINARY_RDI_REGP_RSI_REGP,
-  /*  260 */  _BINARY_RBX_REGI_IMMU8,
-  /*  261 */  _ANDI_RREGI_IMMI,
-  /*  262 */  _ANDI_RREGI_RREGI,
-  /*  263 */  _LOADP_MEMORY_,
-  /*  264 */  _LOADN_MEMORY_,
-  /*  265 */  _LOADNKLASS_MEMORY_,
-  /*  266 */  _ANDL_RREGL_IMML32,
-  /*  267 */  _ANDL_RREGL_RREGL,
-  /*  268 */  _ANDL__CASTP2X_RREGP___LOADL_MEMORY_,
-  /*  269 */  _ANDL__LOADL_MEMORY___CASTP2X_RREGP_,
-  /*  270 */  _ANDI__LOADUB_MEMORY__IMMU7,
-  /*  271 */  _ANDI__LOADB_MEMORY__IMMI8,
-  /*  272 */  _PARTIALSUBTYPECHECK_RSI_REGP_RAX_REGP,
-  /*  273 */  _CONVF2HF_REGF_,
-  /*  274 */  _VECTORCASTF2HF_VEC_,
-  /*  275 */  _LOADVECTOR_MEMORY_,
-  /*  276 */  _BINARY_VEC_KREG,
-  /*  277 */  _BINARY_VEC_VEC,
-  /*  278 */  _BINARY_VEC__BINARY_VEC_KREG,
-  /*  279 */  _BINARY_VEC_RREGI,
-  /*  280 */  _BINARY_VEC_RREGL,
-  /*  281 */  _BINARY_VEC_REGF,
-  /*  282 */  _BINARY_VEC_REGD,
-  /*  283 */  _BINARY_REGD_IMMD,
-  /*  284 */  _LSHIFTCNTV_IMMI8_,
-  /*  285 */  _RSHIFTCNTV_IMMI8_,
-  /*  286 */  _BINARY_LEGVEC_LEGVEC,
-  /*  287 */  _BINARY_VEC__LOADVECTOR_MEMORY_,
-  /*  288 */  _MULADDVS2VI_VEC_VEC,
-  /*  289 */  _BINARY_VEC_IMMU8,
-  /*  290 */  _BINARY__LOADVECTOR_MEMORY__IMMU8,
-  /*  291 */  _VECTORSTOREMASK_VEC_IMMI,
-  /*  292 */  _BINARY_VEC_IMMI8,
-  /*  293 */  _BINARY_VEC__LSHIFTCNTV_IMMI8_,
-  /*  294 */  _BINARY_VEC__RSHIFTCNTV_IMMI8_,
-  /*  295 */  _BINARY__LOADVECTOR_MEMORY__KREG,
-  /*  296 */  _BINARY_IMMI8_KREG,
-  /*  297 */  _MASKALL_IMMI_M1_,
-  /*  298 */  _BINARY_IMMU8_KREG,
-  /*  299 */  _BINARY_VEC__BINARY_IMMU8_KREG,
-  /*  300 */  _BINARY_VEC__BINARY_VEC__BINARY_IMMU8_KREG,
-  /*  301 */  _BINARY_MEMORY__BINARY_IMMU8_KREG,
-  /*  302 */  _BINARY_VEC__BINARY_MEMORY__BINARY_IMMU8_KREG,
-  /*  303 */  _BINARY_RAX_REGP_NO_RAX_REGP,
+  /*  129 */  _ADDP_ANY_REGP_RREGL,
+  /*  130 */  _LSHIFTL_RREGL_IMMI2,
+  /*  131 */  _CONVI2L_RREGI_,
+  /*  132 */  _LSHIFTL__CONVI2L_RREGI__IMMI2,
+  /*  133 */  _ADDP_ANY_REGP__LSHIFTL_RREGL_IMMI2,
+  /*  134 */  _ADDP_ANY_REGP__CONVI2L_RREGI_,
+  /*  135 */  _ADDP_ANY_REGP__LSHIFTL__CONVI2L_RREGI__IMMI2,
+  /*  136 */  _DECODEN_RREGN_,
+  /*  137 */  _ADDP__DECODEN_RREGN__RREGL,
+  /*  138 */  _ADDP__DECODEN_RREGN___LSHIFTL_RREGL_IMMI2,
+  /*  139 */  _ADDP__DECODEN_RREGN___CONVI2L_RREGI_,
+  /*  140 */  _ADDP__DECODEN_RREGN___LSHIFTL__CONVI2L_RREGI__IMMI2,
+  /*  141 */  _LOADB_MEMORY_,
+  /*  142 */  _LOADUB_MEMORY_,
+  /*  143 */  _ANDI__LOADUB_MEMORY__IMMI,
+  /*  144 */  _LOADS_MEMORY_,
+  /*  145 */  _LSHIFTI__LOADS_MEMORY__IMMI_24,
+  /*  146 */  _LOADUS_MEMORY_,
+  /*  147 */  _LSHIFTI__LOADUS_MEMORY__IMMI_24,
+  /*  148 */  _ANDI__LOADUS_MEMORY__IMMI_255,
+  /*  149 */  _ANDI__LOADUS_MEMORY__IMMI,
+  /*  150 */  _LOADI_MEMORY_,
+  /*  151 */  _LSHIFTI__LOADI_MEMORY__IMMI_24,
+  /*  152 */  _LSHIFTI__LOADI_MEMORY__IMMI_16,
+  /*  153 */  _ANDI__LOADI_MEMORY__IMMI_255,
+  /*  154 */  _ANDI__LOADI_MEMORY__IMMI_65535,
+  /*  155 */  _ANDI__LOADI_MEMORY__IMMU31,
+  /*  156 */  _CONVI2L__LOADI_MEMORY__,
+  /*  157 */  _LOADL_MEMORY_,
+  /*  158 */  _CASTP2X_RREGP_,
+  /*  159 */  _CASTP2X__DECODEN_RREGN__,
+  /*  160 */  _ADDL__LSHIFTL_RREGL_IMMI2_IMML32,
+  /*  161 */  _BINARY_CMPOP_RFLAGSREG,
+  /*  162 */  _BINARY_IMMI_1_RREGI,
+  /*  163 */  _BINARY_RREGI_RREGI,
+  /*  164 */  _BINARY_CMPOPU_RFLAGSREGU,
+  /*  165 */  _BINARY_CMPOPUCF_RFLAGSREGUCF,
+  /*  166 */  _BINARY_CMPOPUCF2_RFLAGSREGUCF,
+  /*  167 */  _BINARY_RREGI__LOADI_MEMORY_,
+  /*  168 */  _BINARY_RREGN_RREGN,
+  /*  169 */  _BINARY_RREGP_RREGP,
+  /*  170 */  _BINARY_IMML1_RREGL,
+  /*  171 */  _BINARY_RREGL_RREGL,
+  /*  172 */  _BINARY_RREGL__LOADL_MEMORY_,
+  /*  173 */  _BINARY_REGF_REGF,
+  /*  174 */  _BINARY_REGD_REGD,
+  /*  175 */  _ADDI__LOADI_MEMORY__RREGI,
+  /*  176 */  _ADDI_RREGI__LOADI_MEMORY_,
+  /*  177 */  _ADDI__LOADI_MEMORY__IMMI,
+  /*  178 */  _ADDI__LOADI_MEMORY__IMMI_1,
+  /*  179 */  _ADDI__LOADI_MEMORY__IMMI_M1,
+  /*  180 */  _LSHIFTI_RREGI_IMMI2,
+  /*  181 */  _ADDI_RREGI_RREGI,
+  /*  182 */  _ADDI_RREGI__LSHIFTI_RREGI_IMMI2,
+  /*  183 */  _ADDI__LSHIFTI_RREGI_IMMI2_RREGI,
+  /*  184 */  _ADDL__LOADL_MEMORY__RREGL,
+  /*  185 */  _ADDL_RREGL__LOADL_MEMORY_,
+  /*  186 */  _ADDL__LOADL_MEMORY__IMML32,
+  /*  187 */  _ADDL__LOADL_MEMORY__IMML1,
+  /*  188 */  _ADDL__LOADL_MEMORY__IMML_M1,
+  /*  189 */  _ADDL_RREGL_RREGL,
+  /*  190 */  _ADDL_RREGL__LSHIFTL_RREGL_IMMI2,
+  /*  191 */  _ADDL__LSHIFTL_RREGL_IMMI2_RREGL,
+  /*  192 */  _BINARY_RAX_REGP_RREGP,
+  /*  193 */  _BINARY_RAX_REGL_RREGL,
+  /*  194 */  _BINARY_RAX_REGI_RREGI,
+  /*  195 */  _BINARY_RAX_REGN_RREGN,
+  /*  196 */  _SUBI__LOADI_MEMORY__RREGI,
+  /*  197 */  _SUBL__LOADL_MEMORY__RREGL,
+  /*  198 */  _SUBI_IMMI_0_RREGI,
+  /*  199 */  _SUBI_IMMI_0__LOADI_MEMORY_,
+  /*  200 */  _SUBL_IMML0__LOADL_MEMORY_,
+  /*  201 */  _LSHIFTI__LOADI_MEMORY__IMMI8,
+  /*  202 */  _LSHIFTI__LOADI_MEMORY__RCX_REGI,
+  /*  203 */  _RSHIFTI__LOADI_MEMORY__IMMI8,
+  /*  204 */  _RSHIFTI__LOADI_MEMORY__RCX_REGI,
+  /*  205 */  _URSHIFTI__LOADI_MEMORY__IMMI8,
+  /*  206 */  _URSHIFTI__LOADI_MEMORY__RCX_REGI,
+  /*  207 */  _LSHIFTL__LOADL_MEMORY__IMMI8,
+  /*  208 */  _LSHIFTL__LOADL_MEMORY__RCX_REGI,
+  /*  209 */  _RSHIFTL__LOADL_MEMORY__IMMI,
+  /*  210 */  _RSHIFTL__LOADL_MEMORY__RCX_REGI,
+  /*  211 */  _URSHIFTL__LOADL_MEMORY__IMMI8,
+  /*  212 */  _URSHIFTL__LOADL_MEMORY__RCX_REGI,
+  /*  213 */  _LSHIFTI_RREGI_IMMI_24,
+  /*  214 */  _LSHIFTI_RREGI_IMMI_16,
+  /*  215 */  _ANDI_RREGI_IMMI_255,
+  /*  216 */  _ANDI_RREGI_IMMI_65535,
+  /*  217 */  _ANDI_RREGI_IMMI_POW2M1,
+  /*  218 */  _ANDI__LOADB_MEMORY__RREGI,
+  /*  219 */  _ANDI_RREGI__LOADB_MEMORY_,
+  /*  220 */  _ANDI__LOADI_MEMORY__RREGI,
+  /*  221 */  _ANDI_RREGI__LOADI_MEMORY_,
+  /*  222 */  _ANDI__LOADI_MEMORY__IMMI,
+  /*  223 */  _XORI_RREGI_IMMI_M1,
+  /*  224 */  _ADDI_RREGI_IMMI_M1,
+  /*  225 */  _ORI__LOADB_MEMORY__RREGI,
+  /*  226 */  _ORI_RREGI__LOADB_MEMORY_,
+  /*  227 */  _ORI__LOADI_MEMORY__RREGI,
+  /*  228 */  _ORI_RREGI__LOADI_MEMORY_,
+  /*  229 */  _ORI__LOADI_MEMORY__IMMI,
+  /*  230 */  _XORI__LOADB_MEMORY__RREGI,
+  /*  231 */  _XORI_RREGI__LOADB_MEMORY_,
+  /*  232 */  _XORI__LOADI_MEMORY__RREGI,
+  /*  233 */  _XORI_RREGI__LOADI_MEMORY_,
+  /*  234 */  _XORI__LOADI_MEMORY__IMMI,
+  /*  235 */  _ANDL__LOADL_MEMORY__RREGL,
+  /*  236 */  _ANDL_RREGL__LOADL_MEMORY_,
+  /*  237 */  _ANDL__LOADL_MEMORY__IMML32,
+  /*  238 */  _ANDL__LOADL_MEMORY__IMML_NOTPOW2,
+  /*  239 */  _XORL_RREGL_IMML_M1,
+  /*  240 */  _SUBL_IMML0_RREGL,
+  /*  241 */  _ADDL_RREGL_IMML_M1,
+  /*  242 */  _CASTP2X_ANY_REGP_,
+  /*  243 */  _ORL__LOADL_MEMORY__RREGL,
+  /*  244 */  _ORL_RREGL__LOADL_MEMORY_,
+  /*  245 */  _ORL__LOADL_MEMORY__IMML32,
+  /*  246 */  _ORL__LOADL_MEMORY__IMML_POW2,
+  /*  247 */  _XORL__LOADL_MEMORY__RREGL,
+  /*  248 */  _XORL__LOADL_MEMORY__IMML32,
+  /*  249 */  _CMPLTMASK_RREGI_RREGI,
+  /*  250 */  _ANDI__CMPLTMASK_RREGI_RREGI_RREGI,
+  /*  251 */  _SUBI_RREGI_RREGI,
+  /*  252 */  _ANDI_RREGI__CMPLTMASK_RREGI_RREGI,
+  /*  253 */  _LOADF_MEMORY_,
+  /*  254 */  _LOADD_MEMORY_,
+  /*  255 */  _BINARY_RDI_REGP_RCX_REGI,
+  /*  256 */  _BINARY_RSI_REGP_RDX_REGI,
+  /*  257 */  _BINARY_RDI_REGP_RDX_REGI,
+  /*  258 */  _BINARY_RSI_REGP_IMMI,
+  /*  259 */  _BINARY_RSI_REGP_RAX_REGI,
+  /*  260 */  _BINARY_RDI_REGP_RSI_REGP,
+  /*  261 */  _BINARY_RBX_REGI_IMMU8,
+  /*  262 */  _ANDI_RREGI_IMMI,
+  /*  263 */  _ANDI_RREGI_RREGI,
+  /*  264 */  _LOADP_MEMORY_,
+  /*  265 */  _LOADN_MEMORY_,
+  /*  266 */  _LOADNKLASS_MEMORY_,
+  /*  267 */  _ANDL_RREGL_IMML32,
+  /*  268 */  _ANDL_RREGL_RREGL,
+  /*  269 */  _ANDL__CASTP2X_RREGP___LOADL_MEMORY_,
+  /*  270 */  _ANDL__LOADL_MEMORY___CASTP2X_RREGP_,
+  /*  271 */  _ANDI__LOADUB_MEMORY__IMMU7,
+  /*  272 */  _ANDI__LOADB_MEMORY__IMMI8,
+  /*  273 */  _BINARY_RAX_REGP_IMMP,
+  /*  274 */  _CONVF2HF_REGF_,
+  /*  275 */  _VECTORCASTF2HF_VEC_,
+  /*  276 */  _LOADVECTOR_MEMORY_,
+  /*  277 */  _BINARY_VEC_KREG,
+  /*  278 */  _BINARY_RREGP_IMMI_0,
+  /*  279 */  _BINARY_RREGP_RREGI,
+  /*  280 */  _BINARY_KREG_IMMI_0,
+  /*  281 */  _BINARY_RREGP__BINARY_KREG_IMMI_0,
+  /*  282 */  _BINARY_KREG_RREGI,
+  /*  283 */  _BINARY_RREGP__BINARY_KREG_RREGI,
+  /*  284 */  _BINARY_VEC_IMMI_0,
+  /*  285 */  _BINARY_RREGP__BINARY_VEC_IMMI_0,
+  /*  286 */  _BINARY_VEC_RREGI,
+  /*  287 */  _BINARY_RREGP__BINARY_VEC_RREGI,
+  /*  288 */  _BINARY_VEC_VEC,
+  /*  289 */  _BINARY_VEC__BINARY_VEC_KREG,
+  /*  290 */  _BINARY_VEC_RREGL,
+  /*  291 */  _BINARY_VEC_REGF,
+  /*  292 */  _BINARY_VEC_REGD,
+  /*  293 */  _BINARY_VEC__LOADVECTOR_MEMORY_,
+  /*  294 */  _BINARY_REGD_IMMD,
+  /*  295 */  _LSHIFTCNTV_IMMI8_,
+  /*  296 */  _RSHIFTCNTV_IMMI8_,
+  /*  297 */  _BINARY_LEGVEC_LEGVEC,
+  /*  298 */  _MULADDVS2VI_VEC_VEC,
+  /*  299 */  _BINARY_VEC_IMMU8,
+  /*  300 */  _BINARY__LOADVECTOR_MEMORY__IMMU8,
+  /*  301 */  _VECTORSTOREMASK_VEC_IMMI,
+  /*  302 */  _BINARY_VEC_IMMI8,
+  /*  303 */  _BINARY_VEC__LSHIFTCNTV_IMMI8_,
+  /*  304 */  _BINARY_VEC__RSHIFTCNTV_IMMI8_,
+  /*  305 */  _BINARY__LOADVECTOR_MEMORY__KREG,
+  /*  306 */  _BINARY_IMMI8_KREG,
+  /*  307 */  _MASKALL_IMMI_M1_,
+  /*  308 */  _BINARY_IMMU8_KREG,
+  /*  309 */  _BINARY_VEC__BINARY_IMMU8_KREG,
+  /*  310 */  _BINARY_VEC__BINARY_VEC__BINARY_IMMU8_KREG,
+  /*  311 */  _BINARY_MEMORY__BINARY_IMMU8_KREG,
+  /*  312 */  _BINARY_VEC__BINARY_MEMORY__BINARY_IMMU8_KREG,
+  /*  313 */  _REINTERPRETHF2S_REGF_,
+  /*  314 */  _BINARY_RAX_REGP_NO_RAX_REGP,
+  /*  315 */  _ENCODEP_ANY_REGP_,
   // last internally defined operand
   _LAST_MACH_OPER
 };
@@ -392,1627 +404,1719 @@ enum MachOpcodes {
   /*   37 */  immI_Pow2M1_rule,
   /*   38 */  immF0_rule,
   /*   39 */  immF_rule,
-  /*   40 */  immD0_rule,
-  /*   41 */  immD_rule,
-  /*   42 */  immI_16_rule,
-  /*   43 */  immI_24_rule,
-  /*   44 */  immI_255_rule,
-  /*   45 */  immI_65535_rule,
-  /*   46 */  immL_255_rule,
-  /*   47 */  immL_65535_rule,
-  /*   48 */  kReg_rule,
-  /*   49 */  rRegI_rule,
-  /*   50 */  rax_RegI_rule,
-  /*   51 */  rbx_RegI_rule,
-  /*   52 */  rcx_RegI_rule,
-  /*   53 */  rdx_RegI_rule,
-  /*   54 */  rdi_RegI_rule,
-  /*   55 */  no_rax_rdx_RegI_rule,
-  /*   56 */  no_rbp_r13_RegI_rule,
-  /*   57 */  any_RegP_rule,
-  /*   58 */  rRegP_rule,
-  /*   59 */  rRegN_rule,
-  /*   60 */  no_rbp_RegP_rule,
-  /*   61 */  rax_RegP_rule,
-  /*   62 */  rax_RegN_rule,
-  /*   63 */  rbx_RegP_rule,
-  /*   64 */  rsi_RegP_rule,
-  /*   65 */  rbp_RegP_rule,
-  /*   66 */  rdi_RegP_rule,
-  /*   67 */  r15_RegP_rule,
-  /*   68 */  rRegL_rule,
-  /*   69 */  no_rax_rdx_RegL_rule,
-  /*   70 */  rax_RegL_rule,
-  /*   71 */  rcx_RegL_rule,
-  /*   72 */  rdx_RegL_rule,
-  /*   73 */  no_rbp_r13_RegL_rule,
-  /*   74 */  rFlagsReg_rule,
-  /*   75 */  rFlagsRegU_rule,
-  /*   76 */  rFlagsRegUCF_rule,
-  /*   77 */  regF_rule,
-  /*   78 */  legRegF_rule,
-  /*   79 */  vlRegF_rule,
-  /*   80 */  regD_rule,
-  /*   81 */  legRegD_rule,
-  /*   82 */  vlRegD_rule,
-  /*   83 */  indirect_rule,
-  /*   84 */  indOffset8_rule,
-  /*   85 */  indOffset32_rule,
-  /*   86 */  indIndexOffset_rule,
-  /*   87 */  indIndex_rule,
-  /*   88 */  indIndexScale_rule,
-  /*   89 */  indPosIndexScale_rule,
-  /*   90 */  indIndexScaleOffset_rule,
-  /*   91 */  indPosIndexOffset_rule,
-  /*   92 */  indPosIndexScaleOffset_rule,
-  /*   93 */  indCompressedOopOffset_rule,
-  /*   94 */  indirectNarrow_rule,
-  /*   95 */  indOffset8Narrow_rule,
-  /*   96 */  indOffset32Narrow_rule,
-  /*   97 */  indIndexOffsetNarrow_rule,
-  /*   98 */  indIndexNarrow_rule,
-  /*   99 */  indIndexScaleNarrow_rule,
-  /*  100 */  indIndexScaleOffsetNarrow_rule,
-  /*  101 */  indPosIndexOffsetNarrow_rule,
-  /*  102 */  indPosIndexScaleOffsetNarrow_rule,
-  /*  103 */  stackSlotP_rule,
-  /*  104 */  stackSlotI_rule,
-  /*  105 */  stackSlotF_rule,
-  /*  106 */  stackSlotD_rule,
-  /*  107 */  stackSlotL_rule,
-  /*  108 */  cmpOp_rule,
-  /*  109 */  cmpOpU_rule,
-  /*  110 */  cmpOpUCF_rule,
-  /*  111 */  cmpOpUCF2_rule,
-  /*  112 */  rxmm0_rule,
-  /*  113 */  vec_rule,
-  /*  114 */  legVec_rule,
-  /*  115 */  vecS_rule,
-  /*  116 */  legVecS_rule,
-  /*  117 */  vecD_rule,
-  /*  118 */  legVecD_rule,
-  /*  119 */  vecX_rule,
-  /*  120 */  legVecX_rule,
-  /*  121 */  vecY_rule,
-  /*  122 */  legVecY_rule,
-  /*  123 */  vecZ_rule,
-  /*  124 */  legVecZ_rule,
-  /*  125 */  no_rax_RegP_rule,
+  /*   40 */  immH_rule,
+  /*   41 */  immD0_rule,
+  /*   42 */  immD_rule,
+  /*   43 */  immI_16_rule,
+  /*   44 */  immI_24_rule,
+  /*   45 */  immI_255_rule,
+  /*   46 */  immI_65535_rule,
+  /*   47 */  immL_255_rule,
+  /*   48 */  immL_65535_rule,
+  /*   49 */  kReg_rule,
+  /*   50 */  rRegI_rule,
+  /*   51 */  rax_RegI_rule,
+  /*   52 */  rbx_RegI_rule,
+  /*   53 */  rcx_RegI_rule,
+  /*   54 */  rdx_RegI_rule,
+  /*   55 */  rdi_RegI_rule,
+  /*   56 */  no_rax_rdx_RegI_rule,
+  /*   57 */  no_rbp_r13_RegI_rule,
+  /*   58 */  any_RegP_rule,
+  /*   59 */  rRegP_rule,
+  /*   60 */  rRegN_rule,
+  /*   61 */  no_rbp_RegP_rule,
+  /*   62 */  rax_RegP_rule,
+  /*   63 */  rax_RegN_rule,
+  /*   64 */  rbx_RegP_rule,
+  /*   65 */  rsi_RegP_rule,
+  /*   66 */  rbp_RegP_rule,
+  /*   67 */  rdi_RegP_rule,
+  /*   68 */  r15_RegP_rule,
+  /*   69 */  rRegL_rule,
+  /*   70 */  no_rax_rdx_RegL_rule,
+  /*   71 */  rax_RegL_rule,
+  /*   72 */  rcx_RegL_rule,
+  /*   73 */  rdx_RegL_rule,
+  /*   74 */  r11_RegL_rule,
+  /*   75 */  no_rbp_r13_RegL_rule,
+  /*   76 */  rFlagsReg_rule,
+  /*   77 */  rFlagsRegU_rule,
+  /*   78 */  rFlagsRegUCF_rule,
+  /*   79 */  regF_rule,
+  /*   80 */  legRegF_rule,
+  /*   81 */  vlRegF_rule,
+  /*   82 */  regD_rule,
+  /*   83 */  legRegD_rule,
+  /*   84 */  vlRegD_rule,
+  /*   85 */  indirect_rule,
+  /*   86 */  indOffset8_rule,
+  /*   87 */  indOffset32_rule,
+  /*   88 */  indIndexOffset_rule,
+  /*   89 */  indIndex_rule,
+  /*   90 */  indIndexScale_rule,
+  /*   91 */  indPosIndexScale_rule,
+  /*   92 */  indIndexScaleOffset_rule,
+  /*   93 */  indPosIndexOffset_rule,
+  /*   94 */  indPosIndexScaleOffset_rule,
+  /*   95 */  indCompressedOopOffset_rule,
+  /*   96 */  indirectNarrow_rule,
+  /*   97 */  indOffset8Narrow_rule,
+  /*   98 */  indOffset32Narrow_rule,
+  /*   99 */  indIndexOffsetNarrow_rule,
+  /*  100 */  indIndexNarrow_rule,
+  /*  101 */  indIndexScaleNarrow_rule,
+  /*  102 */  indIndexScaleOffsetNarrow_rule,
+  /*  103 */  indPosIndexOffsetNarrow_rule,
+  /*  104 */  indPosIndexScaleOffsetNarrow_rule,
+  /*  105 */  stackSlotP_rule,
+  /*  106 */  stackSlotI_rule,
+  /*  107 */  stackSlotF_rule,
+  /*  108 */  stackSlotD_rule,
+  /*  109 */  stackSlotL_rule,
+  /*  110 */  cmpOp_rule,
+  /*  111 */  cmpOpU_rule,
+  /*  112 */  cmpOpUCF_rule,
+  /*  113 */  cmpOpUCF2_rule,
+  /*  114 */  rxmm0_rule,
+  /*  115 */  vec_rule,
+  /*  116 */  legVec_rule,
+  /*  117 */  vecS_rule,
+  /*  118 */  legVecS_rule,
+  /*  119 */  vecD_rule,
+  /*  120 */  legVecD_rule,
+  /*  121 */  vecX_rule,
+  /*  122 */  legVecX_rule,
+  /*  123 */  vecY_rule,
+  /*  124 */  legVecY_rule,
+  /*  125 */  vecZ_rule,
+  /*  126 */  legVecZ_rule,
+  /*  127 */  no_rax_RegP_rule,
   // last operand
-  /*  126 */  memory_rule,
+  /*  128 */  memory_rule,
   // last operand class
-  /*  127 */  _AddP_any_RegP_rRegL_rule,
-  /*  128 */  _LShiftL_rRegL_immI2_rule,
-  /*  129 */  _ConvI2L_rRegI__rule,
-  /*  130 */  _LShiftL__ConvI2L_rRegI__immI2_rule,
-  /*  131 */  _AddP_any_RegP__LShiftL_rRegL_immI2_rule,
-  /*  132 */  _AddP_any_RegP__ConvI2L_rRegI__rule,
-  /*  133 */  _AddP_any_RegP__LShiftL__ConvI2L_rRegI__immI2_rule,
-  /*  134 */  _DecodeN_rRegN__rule,
-  /*  135 */  _AddP__DecodeN_rRegN__rRegL_rule,
-  /*  136 */  _AddP__DecodeN_rRegN___LShiftL_rRegL_immI2_rule,
-  /*  137 */  _AddP__DecodeN_rRegN___ConvI2L_rRegI__rule,
-  /*  138 */  _AddP__DecodeN_rRegN___LShiftL__ConvI2L_rRegI__immI2_rule,
-  /*  139 */  _LoadB_memory__rule,
-  /*  140 */  _LoadUB_memory__rule,
-  /*  141 */  _AndI__LoadUB_memory__immI_rule,
-  /*  142 */  _LoadS_memory__rule,
-  /*  143 */  _LShiftI__LoadS_memory__immI_24_rule,
-  /*  144 */  _LoadUS_memory__rule,
-  /*  145 */  _LShiftI__LoadUS_memory__immI_24_rule,
-  /*  146 */  _AndI__LoadUS_memory__immI_255_rule,
-  /*  147 */  _AndI__LoadUS_memory__immI_rule,
-  /*  148 */  _LoadI_memory__rule,
-  /*  149 */  _LShiftI__LoadI_memory__immI_24_rule,
-  /*  150 */  _LShiftI__LoadI_memory__immI_16_rule,
-  /*  151 */  _AndI__LoadI_memory__immI_255_rule,
-  /*  152 */  _AndI__LoadI_memory__immI_65535_rule,
-  /*  153 */  _AndI__LoadI_memory__immU31_rule,
-  /*  154 */  _ConvI2L__LoadI_memory___rule,
-  /*  155 */  _LoadL_memory__rule,
-  /*  156 */  _CastP2X_rRegP__rule,
-  /*  157 */  _CastP2X__DecodeN_rRegN___rule,
-  /*  158 */  _AddL__LShiftL_rRegL_immI2_immL32_rule,
-  /*  159 */  _Binary_cmpOp_rFlagsReg_rule,
-  /*  160 */  _Binary_immI_1_rRegI_rule,
-  /*  161 */  _Binary_rRegI_rRegI_rule,
-  /*  162 */  _Binary_cmpOpU_rFlagsRegU_rule,
-  /*  163 */  _Binary_cmpOpUCF_rFlagsRegUCF_rule,
-  /*  164 */  _Binary_cmpOpUCF2_rFlagsRegUCF_rule,
-  /*  165 */  _Binary_rRegI__LoadI_memory__rule,
-  /*  166 */  _Binary_rRegN_rRegN_rule,
-  /*  167 */  _Binary_rRegP_rRegP_rule,
-  /*  168 */  _Binary_immI_1_rRegL_rule,
-  /*  169 */  _Binary_rRegL_rRegL_rule,
-  /*  170 */  _Binary_rRegL__LoadL_memory__rule,
-  /*  171 */  _Binary_regF_regF_rule,
-  /*  172 */  _Binary_regD_regD_rule,
-  /*  173 */  _AddI__LoadI_memory__rRegI_rule,
-  /*  174 */  _AddI_rRegI__LoadI_memory__rule,
-  /*  175 */  _AddI__LoadI_memory__immI_rule,
-  /*  176 */  _AddI__LoadI_memory__immI_1_rule,
-  /*  177 */  _AddI__LoadI_memory__immI_M1_rule,
-  /*  178 */  _LShiftI_rRegI_immI2_rule,
-  /*  179 */  _AddI_rRegI_rRegI_rule,
-  /*  180 */  _AddI_rRegI__LShiftI_rRegI_immI2_rule,
-  /*  181 */  _AddI__LShiftI_rRegI_immI2_rRegI_rule,
-  /*  182 */  _AddL__LoadL_memory__rRegL_rule,
-  /*  183 */  _AddL_rRegL__LoadL_memory__rule,
-  /*  184 */  _AddL__LoadL_memory__immL32_rule,
-  /*  185 */  _AddL__LoadL_memory__immL1_rule,
-  /*  186 */  _AddL__LoadL_memory__immL_M1_rule,
-  /*  187 */  _AddL_rRegL_rRegL_rule,
-  /*  188 */  _AddL_rRegL__LShiftL_rRegL_immI2_rule,
-  /*  189 */  _AddL__LShiftL_rRegL_immI2_rRegL_rule,
-  /*  190 */  _Binary_rax_RegP_rRegP_rule,
-  /*  191 */  _Binary_rax_RegL_rRegL_rule,
-  /*  192 */  _Binary_rax_RegI_rRegI_rule,
-  /*  193 */  _Binary_rax_RegN_rRegN_rule,
-  /*  194 */  _SubI__LoadI_memory__rRegI_rule,
-  /*  195 */  _SubL__LoadL_memory__rRegL_rule,
-  /*  196 */  _SubI_immI_0_rRegI_rule,
-  /*  197 */  _SubI_immI_0__LoadI_memory__rule,
-  /*  198 */  _SubL_immL0__LoadL_memory__rule,
-  /*  199 */  _LShiftI__LoadI_memory__immI8_rule,
-  /*  200 */  _LShiftI__LoadI_memory__rcx_RegI_rule,
-  /*  201 */  _RShiftI__LoadI_memory__immI8_rule,
-  /*  202 */  _RShiftI__LoadI_memory__rcx_RegI_rule,
-  /*  203 */  _URShiftI__LoadI_memory__immI8_rule,
-  /*  204 */  _URShiftI__LoadI_memory__rcx_RegI_rule,
-  /*  205 */  _LShiftL__LoadL_memory__immI8_rule,
-  /*  206 */  _LShiftL__LoadL_memory__rcx_RegI_rule,
-  /*  207 */  _RShiftL__LoadL_memory__immI_rule,
-  /*  208 */  _RShiftL__LoadL_memory__rcx_RegI_rule,
-  /*  209 */  _URShiftL__LoadL_memory__immI8_rule,
-  /*  210 */  _URShiftL__LoadL_memory__rcx_RegI_rule,
-  /*  211 */  _LShiftI_rRegI_immI_24_rule,
-  /*  212 */  _LShiftI_rRegI_immI_16_rule,
-  /*  213 */  _AndI_rRegI_immI_255_rule,
-  /*  214 */  _AndI_rRegI_immI_65535_rule,
-  /*  215 */  _AndI_rRegI_immI_Pow2M1_rule,
-  /*  216 */  _AndI__LoadB_memory__rRegI_rule,
-  /*  217 */  _AndI_rRegI__LoadB_memory__rule,
-  /*  218 */  _AndI__LoadI_memory__rRegI_rule,
-  /*  219 */  _AndI_rRegI__LoadI_memory__rule,
-  /*  220 */  _AndI__LoadI_memory__immI_rule,
-  /*  221 */  _XorI_rRegI_immI_M1_rule,
-  /*  222 */  _AddI_rRegI_immI_M1_rule,
-  /*  223 */  _OrI__LoadB_memory__rRegI_rule,
-  /*  224 */  _OrI_rRegI__LoadB_memory__rule,
-  /*  225 */  _OrI__LoadI_memory__rRegI_rule,
-  /*  226 */  _OrI_rRegI__LoadI_memory__rule,
-  /*  227 */  _OrI__LoadI_memory__immI_rule,
-  /*  228 */  _XorI__LoadB_memory__rRegI_rule,
-  /*  229 */  _XorI_rRegI__LoadB_memory__rule,
-  /*  230 */  _XorI__LoadI_memory__rRegI_rule,
-  /*  231 */  _XorI_rRegI__LoadI_memory__rule,
-  /*  232 */  _XorI__LoadI_memory__immI_rule,
-  /*  233 */  _AndL__LoadL_memory__rRegL_rule,
-  /*  234 */  _AndL_rRegL__LoadL_memory__rule,
-  /*  235 */  _AndL__LoadL_memory__immL32_rule,
-  /*  236 */  _AndL__LoadL_memory__immL_NotPow2_rule,
-  /*  237 */  _XorL_rRegL_immL_M1_rule,
-  /*  238 */  _SubL_immL0_rRegL_rule,
-  /*  239 */  _AddL_rRegL_immL_M1_rule,
-  /*  240 */  _CastP2X_any_RegP__rule,
-  /*  241 */  _OrL__LoadL_memory__rRegL_rule,
-  /*  242 */  _OrL_rRegL__LoadL_memory__rule,
-  /*  243 */  _OrL__LoadL_memory__immL32_rule,
-  /*  244 */  _OrL__LoadL_memory__immL_Pow2_rule,
-  /*  245 */  _XorL__LoadL_memory__rRegL_rule,
-  /*  246 */  _XorL_rRegL__LoadL_memory__rule,
-  /*  247 */  _XorL__LoadL_memory__immL32_rule,
-  /*  248 */  _CmpLTMask_rRegI_rRegI_rule,
-  /*  249 */  _AndI__CmpLTMask_rRegI_rRegI_rRegI_rule,
-  /*  250 */  _SubI_rRegI_rRegI_rule,
-  /*  251 */  _AndI_rRegI__CmpLTMask_rRegI_rRegI_rule,
-  /*  252 */  _LoadF_memory__rule,
-  /*  253 */  _LoadD_memory__rule,
-  /*  254 */  _Binary_rdi_RegP_rcx_RegI_rule,
-  /*  255 */  _Binary_rsi_RegP_rdx_RegI_rule,
-  /*  256 */  _Binary_rdi_RegP_rdx_RegI_rule,
-  /*  257 */  _Binary_rsi_RegP_immI_rule,
-  /*  258 */  _Binary_rsi_RegP_rax_RegI_rule,
-  /*  259 */  _Binary_rdi_RegP_rsi_RegP_rule,
-  /*  260 */  _Binary_rbx_RegI_immU8_rule,
-  /*  261 */  _AndI_rRegI_immI_rule,
-  /*  262 */  _AndI_rRegI_rRegI_rule,
-  /*  263 */  _LoadP_memory__rule,
-  /*  264 */  _LoadN_memory__rule,
-  /*  265 */  _LoadNKlass_memory__rule,
-  /*  266 */  _AndL_rRegL_immL32_rule,
-  /*  267 */  _AndL_rRegL_rRegL_rule,
-  /*  268 */  _AndL__CastP2X_rRegP___LoadL_memory__rule,
-  /*  269 */  _AndL__LoadL_memory___CastP2X_rRegP__rule,
-  /*  270 */  _AndI__LoadUB_memory__immU7_rule,
-  /*  271 */  _AndI__LoadB_memory__immI8_rule,
-  /*  272 */  _PartialSubtypeCheck_rsi_RegP_rax_RegP_rule,
-  /*  273 */  _ConvF2HF_regF__rule,
-  /*  274 */  _VectorCastF2HF_vec__rule,
-  /*  275 */  _LoadVector_memory__rule,
-  /*  276 */  _Binary_vec_kReg_rule,
-  /*  277 */  _Binary_vec_vec_rule,
-  /*  278 */  _Binary_vec__Binary_vec_kReg_rule,
-  /*  279 */  _Binary_vec_rRegI_rule,
-  /*  280 */  _Binary_vec_rRegL_rule,
-  /*  281 */  _Binary_vec_regF_rule,
-  /*  282 */  _Binary_vec_regD_rule,
-  /*  283 */  _Binary_regD_immD_rule,
-  /*  284 */  _LShiftCntV_immI8__rule,
-  /*  285 */  _RShiftCntV_immI8__rule,
-  /*  286 */  _Binary_legVec_legVec_rule,
-  /*  287 */  _Binary_vec__LoadVector_memory__rule,
-  /*  288 */  _MulAddVS2VI_vec_vec_rule,
-  /*  289 */  _Binary_vec_immU8_rule,
-  /*  290 */  _Binary__LoadVector_memory__immU8_rule,
-  /*  291 */  _VectorStoreMask_vec_immI_rule,
-  /*  292 */  _Binary_vec_immI8_rule,
-  /*  293 */  _Binary_vec__LShiftCntV_immI8__rule,
-  /*  294 */  _Binary_vec__RShiftCntV_immI8__rule,
-  /*  295 */  _Binary__LoadVector_memory__kReg_rule,
-  /*  296 */  _Binary_immI8_kReg_rule,
-  /*  297 */  _MaskAll_immI_M1__rule,
-  /*  298 */  _Binary_immU8_kReg_rule,
-  /*  299 */  _Binary_vec__Binary_immU8_kReg_rule,
-  /*  300 */  _Binary_vec__Binary_vec__Binary_immU8_kReg_rule,
-  /*  301 */  _Binary_memory__Binary_immU8_kReg_rule,
-  /*  302 */  _Binary_vec__Binary_memory__Binary_immU8_kReg_rule,
-  /*  303 */  _Binary_rax_RegP_no_rax_RegP_rule,
+  /*  129 */  _AddP_any_RegP_rRegL_rule,
+  /*  130 */  _LShiftL_rRegL_immI2_rule,
+  /*  131 */  _ConvI2L_rRegI__rule,
+  /*  132 */  _LShiftL__ConvI2L_rRegI__immI2_rule,
+  /*  133 */  _AddP_any_RegP__LShiftL_rRegL_immI2_rule,
+  /*  134 */  _AddP_any_RegP__ConvI2L_rRegI__rule,
+  /*  135 */  _AddP_any_RegP__LShiftL__ConvI2L_rRegI__immI2_rule,
+  /*  136 */  _DecodeN_rRegN__rule,
+  /*  137 */  _AddP__DecodeN_rRegN__rRegL_rule,
+  /*  138 */  _AddP__DecodeN_rRegN___LShiftL_rRegL_immI2_rule,
+  /*  139 */  _AddP__DecodeN_rRegN___ConvI2L_rRegI__rule,
+  /*  140 */  _AddP__DecodeN_rRegN___LShiftL__ConvI2L_rRegI__immI2_rule,
+  /*  141 */  _LoadB_memory__rule,
+  /*  142 */  _LoadUB_memory__rule,
+  /*  143 */  _AndI__LoadUB_memory__immI_rule,
+  /*  144 */  _LoadS_memory__rule,
+  /*  145 */  _LShiftI__LoadS_memory__immI_24_rule,
+  /*  146 */  _LoadUS_memory__rule,
+  /*  147 */  _LShiftI__LoadUS_memory__immI_24_rule,
+  /*  148 */  _AndI__LoadUS_memory__immI_255_rule,
+  /*  149 */  _AndI__LoadUS_memory__immI_rule,
+  /*  150 */  _LoadI_memory__rule,
+  /*  151 */  _LShiftI__LoadI_memory__immI_24_rule,
+  /*  152 */  _LShiftI__LoadI_memory__immI_16_rule,
+  /*  153 */  _AndI__LoadI_memory__immI_255_rule,
+  /*  154 */  _AndI__LoadI_memory__immI_65535_rule,
+  /*  155 */  _AndI__LoadI_memory__immU31_rule,
+  /*  156 */  _ConvI2L__LoadI_memory___rule,
+  /*  157 */  _LoadL_memory__rule,
+  /*  158 */  _CastP2X_rRegP__rule,
+  /*  159 */  _CastP2X__DecodeN_rRegN___rule,
+  /*  160 */  _AddL__LShiftL_rRegL_immI2_immL32_rule,
+  /*  161 */  _Binary_cmpOp_rFlagsReg_rule,
+  /*  162 */  _Binary_immI_1_rRegI_rule,
+  /*  163 */  _Binary_rRegI_rRegI_rule,
+  /*  164 */  _Binary_cmpOpU_rFlagsRegU_rule,
+  /*  165 */  _Binary_cmpOpUCF_rFlagsRegUCF_rule,
+  /*  166 */  _Binary_cmpOpUCF2_rFlagsRegUCF_rule,
+  /*  167 */  _Binary_rRegI__LoadI_memory__rule,
+  /*  168 */  _Binary_rRegN_rRegN_rule,
+  /*  169 */  _Binary_rRegP_rRegP_rule,
+  /*  170 */  _Binary_immL1_rRegL_rule,
+  /*  171 */  _Binary_rRegL_rRegL_rule,
+  /*  172 */  _Binary_rRegL__LoadL_memory__rule,
+  /*  173 */  _Binary_regF_regF_rule,
+  /*  174 */  _Binary_regD_regD_rule,
+  /*  175 */  _AddI__LoadI_memory__rRegI_rule,
+  /*  176 */  _AddI_rRegI__LoadI_memory__rule,
+  /*  177 */  _AddI__LoadI_memory__immI_rule,
+  /*  178 */  _AddI__LoadI_memory__immI_1_rule,
+  /*  179 */  _AddI__LoadI_memory__immI_M1_rule,
+  /*  180 */  _LShiftI_rRegI_immI2_rule,
+  /*  181 */  _AddI_rRegI_rRegI_rule,
+  /*  182 */  _AddI_rRegI__LShiftI_rRegI_immI2_rule,
+  /*  183 */  _AddI__LShiftI_rRegI_immI2_rRegI_rule,
+  /*  184 */  _AddL__LoadL_memory__rRegL_rule,
+  /*  185 */  _AddL_rRegL__LoadL_memory__rule,
+  /*  186 */  _AddL__LoadL_memory__immL32_rule,
+  /*  187 */  _AddL__LoadL_memory__immL1_rule,
+  /*  188 */  _AddL__LoadL_memory__immL_M1_rule,
+  /*  189 */  _AddL_rRegL_rRegL_rule,
+  /*  190 */  _AddL_rRegL__LShiftL_rRegL_immI2_rule,
+  /*  191 */  _AddL__LShiftL_rRegL_immI2_rRegL_rule,
+  /*  192 */  _Binary_rax_RegP_rRegP_rule,
+  /*  193 */  _Binary_rax_RegL_rRegL_rule,
+  /*  194 */  _Binary_rax_RegI_rRegI_rule,
+  /*  195 */  _Binary_rax_RegN_rRegN_rule,
+  /*  196 */  _SubI__LoadI_memory__rRegI_rule,
+  /*  197 */  _SubL__LoadL_memory__rRegL_rule,
+  /*  198 */  _SubI_immI_0_rRegI_rule,
+  /*  199 */  _SubI_immI_0__LoadI_memory__rule,
+  /*  200 */  _SubL_immL0__LoadL_memory__rule,
+  /*  201 */  _LShiftI__LoadI_memory__immI8_rule,
+  /*  202 */  _LShiftI__LoadI_memory__rcx_RegI_rule,
+  /*  203 */  _RShiftI__LoadI_memory__immI8_rule,
+  /*  204 */  _RShiftI__LoadI_memory__rcx_RegI_rule,
+  /*  205 */  _URShiftI__LoadI_memory__immI8_rule,
+  /*  206 */  _URShiftI__LoadI_memory__rcx_RegI_rule,
+  /*  207 */  _LShiftL__LoadL_memory__immI8_rule,
+  /*  208 */  _LShiftL__LoadL_memory__rcx_RegI_rule,
+  /*  209 */  _RShiftL__LoadL_memory__immI_rule,
+  /*  210 */  _RShiftL__LoadL_memory__rcx_RegI_rule,
+  /*  211 */  _URShiftL__LoadL_memory__immI8_rule,
+  /*  212 */  _URShiftL__LoadL_memory__rcx_RegI_rule,
+  /*  213 */  _LShiftI_rRegI_immI_24_rule,
+  /*  214 */  _LShiftI_rRegI_immI_16_rule,
+  /*  215 */  _AndI_rRegI_immI_255_rule,
+  /*  216 */  _AndI_rRegI_immI_65535_rule,
+  /*  217 */  _AndI_rRegI_immI_Pow2M1_rule,
+  /*  218 */  _AndI__LoadB_memory__rRegI_rule,
+  /*  219 */  _AndI_rRegI__LoadB_memory__rule,
+  /*  220 */  _AndI__LoadI_memory__rRegI_rule,
+  /*  221 */  _AndI_rRegI__LoadI_memory__rule,
+  /*  222 */  _AndI__LoadI_memory__immI_rule,
+  /*  223 */  _XorI_rRegI_immI_M1_rule,
+  /*  224 */  _AddI_rRegI_immI_M1_rule,
+  /*  225 */  _OrI__LoadB_memory__rRegI_rule,
+  /*  226 */  _OrI_rRegI__LoadB_memory__rule,
+  /*  227 */  _OrI__LoadI_memory__rRegI_rule,
+  /*  228 */  _OrI_rRegI__LoadI_memory__rule,
+  /*  229 */  _OrI__LoadI_memory__immI_rule,
+  /*  230 */  _XorI__LoadB_memory__rRegI_rule,
+  /*  231 */  _XorI_rRegI__LoadB_memory__rule,
+  /*  232 */  _XorI__LoadI_memory__rRegI_rule,
+  /*  233 */  _XorI_rRegI__LoadI_memory__rule,
+  /*  234 */  _XorI__LoadI_memory__immI_rule,
+  /*  235 */  _AndL__LoadL_memory__rRegL_rule,
+  /*  236 */  _AndL_rRegL__LoadL_memory__rule,
+  /*  237 */  _AndL__LoadL_memory__immL32_rule,
+  /*  238 */  _AndL__LoadL_memory__immL_NotPow2_rule,
+  /*  239 */  _XorL_rRegL_immL_M1_rule,
+  /*  240 */  _SubL_immL0_rRegL_rule,
+  /*  241 */  _AddL_rRegL_immL_M1_rule,
+  /*  242 */  _CastP2X_any_RegP__rule,
+  /*  243 */  _OrL__LoadL_memory__rRegL_rule,
+  /*  244 */  _OrL_rRegL__LoadL_memory__rule,
+  /*  245 */  _OrL__LoadL_memory__immL32_rule,
+  /*  246 */  _OrL__LoadL_memory__immL_Pow2_rule,
+  /*  247 */  _XorL__LoadL_memory__rRegL_rule,
+  /*  248 */  _XorL__LoadL_memory__immL32_rule,
+  /*  249 */  _CmpLTMask_rRegI_rRegI_rule,
+  /*  250 */  _AndI__CmpLTMask_rRegI_rRegI_rRegI_rule,
+  /*  251 */  _SubI_rRegI_rRegI_rule,
+  /*  252 */  _AndI_rRegI__CmpLTMask_rRegI_rRegI_rule,
+  /*  253 */  _LoadF_memory__rule,
+  /*  254 */  _LoadD_memory__rule,
+  /*  255 */  _Binary_rdi_RegP_rcx_RegI_rule,
+  /*  256 */  _Binary_rsi_RegP_rdx_RegI_rule,
+  /*  257 */  _Binary_rdi_RegP_rdx_RegI_rule,
+  /*  258 */  _Binary_rsi_RegP_immI_rule,
+  /*  259 */  _Binary_rsi_RegP_rax_RegI_rule,
+  /*  260 */  _Binary_rdi_RegP_rsi_RegP_rule,
+  /*  261 */  _Binary_rbx_RegI_immU8_rule,
+  /*  262 */  _AndI_rRegI_immI_rule,
+  /*  263 */  _AndI_rRegI_rRegI_rule,
+  /*  264 */  _LoadP_memory__rule,
+  /*  265 */  _LoadN_memory__rule,
+  /*  266 */  _LoadNKlass_memory__rule,
+  /*  267 */  _AndL_rRegL_immL32_rule,
+  /*  268 */  _AndL_rRegL_rRegL_rule,
+  /*  269 */  _AndL__CastP2X_rRegP___LoadL_memory__rule,
+  /*  270 */  _AndL__LoadL_memory___CastP2X_rRegP__rule,
+  /*  271 */  _AndI__LoadUB_memory__immU7_rule,
+  /*  272 */  _AndI__LoadB_memory__immI8_rule,
+  /*  273 */  _Binary_rax_RegP_immP_rule,
+  /*  274 */  _ConvF2HF_regF__rule,
+  /*  275 */  _VectorCastF2HF_vec__rule,
+  /*  276 */  _LoadVector_memory__rule,
+  /*  277 */  _Binary_vec_kReg_rule,
+  /*  278 */  _Binary_rRegP_immI_0_rule,
+  /*  279 */  _Binary_rRegP_rRegI_rule,
+  /*  280 */  _Binary_kReg_immI_0_rule,
+  /*  281 */  _Binary_rRegP__Binary_kReg_immI_0_rule,
+  /*  282 */  _Binary_kReg_rRegI_rule,
+  /*  283 */  _Binary_rRegP__Binary_kReg_rRegI_rule,
+  /*  284 */  _Binary_vec_immI_0_rule,
+  /*  285 */  _Binary_rRegP__Binary_vec_immI_0_rule,
+  /*  286 */  _Binary_vec_rRegI_rule,
+  /*  287 */  _Binary_rRegP__Binary_vec_rRegI_rule,
+  /*  288 */  _Binary_vec_vec_rule,
+  /*  289 */  _Binary_vec__Binary_vec_kReg_rule,
+  /*  290 */  _Binary_vec_rRegL_rule,
+  /*  291 */  _Binary_vec_regF_rule,
+  /*  292 */  _Binary_vec_regD_rule,
+  /*  293 */  _Binary_vec__LoadVector_memory__rule,
+  /*  294 */  _Binary_regD_immD_rule,
+  /*  295 */  _LShiftCntV_immI8__rule,
+  /*  296 */  _RShiftCntV_immI8__rule,
+  /*  297 */  _Binary_legVec_legVec_rule,
+  /*  298 */  _MulAddVS2VI_vec_vec_rule,
+  /*  299 */  _Binary_vec_immU8_rule,
+  /*  300 */  _Binary__LoadVector_memory__immU8_rule,
+  /*  301 */  _VectorStoreMask_vec_immI_rule,
+  /*  302 */  _Binary_vec_immI8_rule,
+  /*  303 */  _Binary_vec__LShiftCntV_immI8__rule,
+  /*  304 */  _Binary_vec__RShiftCntV_immI8__rule,
+  /*  305 */  _Binary__LoadVector_memory__kReg_rule,
+  /*  306 */  _Binary_immI8_kReg_rule,
+  /*  307 */  _MaskAll_immI_M1__rule,
+  /*  308 */  _Binary_immU8_kReg_rule,
+  /*  309 */  _Binary_vec__Binary_immU8_kReg_rule,
+  /*  310 */  _Binary_vec__Binary_vec__Binary_immU8_kReg_rule,
+  /*  311 */  _Binary_memory__Binary_immU8_kReg_rule,
+  /*  312 */  _Binary_vec__Binary_memory__Binary_immU8_kReg_rule,
+  /*  313 */  _ReinterpretHF2S_regF__rule,
+  /*  314 */  _Binary_rax_RegP_no_rax_RegP_rule,
+  /*  315 */  _EncodeP_any_RegP__rule,
   // last internally defined operand
-  /*  304 */  storeSSI_rule,
-  /*  305 */  storeSSL_rule,
-  /*  306 */  storeSSP_rule,
-  /*  307 */  storeSSF_rule,
-  /*  308 */  storeSSD_rule,
-  /*  309 */  MoveF2VL_rule,
-  /*  310 */  MoveF2LEG_rule,
-  /*  311 */  MoveVL2F_rule,
-  /*  312 */  MoveLEG2F_rule,
-  /*  313 */  MoveD2VL_rule,
-  /*  314 */  MoveD2LEG_rule,
-  /*  315 */  MoveVL2D_rule,
-  /*  316 */  MoveLEG2D_rule,
-  /*  317 */  leaP8_rule,
-  /*  318 */  leaP32_rule,
-  /*  319 */  leaPIdxOff_rule,
-  /*  320 */  leaPIdxScale_rule,
-  /*  321 */  leaPPosIdxScale_rule,
-  /*  322 */  leaPIdxScaleOff_rule,
-  /*  323 */  leaPPosIdxOff_rule,
-  /*  324 */  leaPPosIdxScaleOff_rule,
-  /*  325 */  leaPCompressedOopOffset_rule,
-  /*  326 */  leaP8Narrow_rule,
-  /*  327 */  leaP32Narrow_rule,
-  /*  328 */  leaPIdxOffNarrow_rule,
-  /*  329 */  leaPIdxScaleNarrow_rule,
-  /*  330 */  leaPIdxScaleOffNarrow_rule,
-  /*  331 */  leaPPosIdxOffNarrow_rule,
-  /*  332 */  leaPPosIdxScaleOffNarrow_rule,
-  /*  333 */  loadConI_rule,
-  /*  334 */  loadConI0_rule,
-  /*  335 */  loadConL_rule,
-  /*  336 */  loadConL0_rule,
-  /*  337 */  loadConUL32_rule,
-  /*  338 */  loadConL32_rule,
-  /*  339 */  loadConP_rule,
-  /*  340 */  loadConP0_rule,
-  /*  341 */  loadConP31_rule,
-  /*  342 */  loadConF_rule,
-  /*  343 */  loadConN0_rule,
-  /*  344 */  loadConN_rule,
-  /*  345 */  loadConNKlass_rule,
-  /*  346 */  loadConF0_rule,
-  /*  347 */  loadConD_rule,
-  /*  348 */  loadConD0_rule,
-  /*  349 */  loadSSI_rule,
-  /*  350 */  loadSSL_rule,
-  /*  351 */  loadSSP_rule,
-  /*  352 */  loadSSF_rule,
-  /*  353 */  loadSSD_rule,
-  /*  354 */  MoveVec2Leg_rule,
-  /*  355 */  MoveLeg2Vec_rule,
-  /*  356 */  membar_volatile_rule,
-  /*  357 */  castX2P_rule,
-  /*  358 */  castP2X_rule,
-  /*  359 */  checkCastPP_rule,
-  /*  360 */  castPP_rule,
-  /*  361 */  castII_rule,
-  /*  362 */  castLL_rule,
-  /*  363 */  castFF_rule,
-  /*  364 */  castDD_rule,
-  /*  365 */  cmpF_cc_reg_rule,
-  /*  366 */  cmpF_cc_reg_CF_rule,
-  /*  367 */  cmpF_cc_memCF_rule,
-  /*  368 */  cmpF_cc_immCF_rule,
-  /*  369 */  cmpD_cc_reg_rule,
-  /*  370 */  cmpD_cc_reg_CF_rule,
-  /*  371 */  cmpD_cc_memCF_rule,
-  /*  372 */  cmpD_cc_immCF_rule,
-  /*  373 */  MoveF2I_stack_reg_rule,
-  /*  374 */  MoveI2F_stack_reg_rule,
-  /*  375 */  MoveD2L_stack_reg_rule,
-  /*  376 */  MoveL2D_stack_reg_partial_rule,
-  /*  377 */  MoveL2D_stack_reg_rule,
-  /*  378 */  MoveF2I_reg_reg_rule,
-  /*  379 */  MoveD2L_reg_reg_rule,
-  /*  380 */  MoveI2F_reg_reg_rule,
-  /*  381 */  MoveL2D_reg_reg_rule,
-  /*  382 */  overflowAddI_rReg_rule,
-  /*  383 */  overflowAddI_rReg_imm_rule,
-  /*  384 */  overflowAddL_rReg_rule,
-  /*  385 */  overflowAddL_rReg_imm_rule,
-  /*  386 */  overflowSubI_rReg_rule,
-  /*  387 */  overflowSubI_rReg_imm_rule,
-  /*  388 */  overflowSubL_rReg_rule,
-  /*  389 */  overflowSubL_rReg_imm_rule,
-  /*  390 */  overflowNegI_rReg_rule,
-  /*  391 */  overflowNegL_rReg_rule,
-  /*  392 */  overflowMulI_rReg_rule,
-  /*  393 */  overflowMulI_rReg_imm_rule,
-  /*  394 */  overflowMulL_rReg_rule,
-  /*  395 */  overflowMulL_rReg_imm_rule,
-  /*  396 */  compI_rReg_rule,
-  /*  397 */  compI_rReg_imm_rule,
-  /*  398 */  compI_rReg_mem_rule,
-  /*  399 */  testI_reg_rule,
-  /*  400 */  testI_reg_imm_rule,
-  /*  401 */  testI_reg_reg_rule,
-  /*  402 */  testI_reg_mem_rule,
-  /*  403 */  testI_reg_mem_0_rule,
-  /*  404 */  compU_rReg_rule,
-  /*  405 */  compU_rReg_imm_rule,
-  /*  406 */  compU_rReg_mem_rule,
-  /*  407 */  testU_reg_rule,
-  /*  408 */  compP_rReg_rule,
-  /*  409 */  compP_rReg_mem_rule,
-  /*  410 */  compP_mem_rReg_rule,
-  /*  411 */  testP_reg_rule,
-  /*  412 */  testP_mem_rule,
-  /*  413 */  testP_mem_reg0_rule,
-  /*  414 */  compN_rReg_rule,
-  /*  415 */  compN_rReg_mem_rule,
-  /*  416 */  compN_rReg_imm_rule,
-  /*  417 */  compN_mem_imm_rule,
-  /*  418 */  compN_rReg_imm_klass_rule,
-  /*  419 */  compN_mem_imm_klass_rule,
-  /*  420 */  testN_reg_rule,
-  /*  421 */  testN_mem_rule,
-  /*  422 */  testN_mem_reg0_rule,
-  /*  423 */  compL_rReg_rule,
-  /*  424 */  compL_rReg_imm_rule,
-  /*  425 */  compL_rReg_mem_rule,
-  /*  426 */  testL_reg_rule,
-  /*  427 */  testL_reg_imm_rule,
-  /*  428 */  testL_reg_reg_rule,
-  /*  429 */  testL_reg_mem_rule,
-  /*  430 */  testL_reg_mem_0_rule,
-  /*  431 */  testL_reg_mem2_rule,
-  /*  432 */  testL_reg_mem2_0_rule,
-  /*  433 */  compUL_rReg_rule,
-  /*  434 */  compUL_rReg_imm_rule,
-  /*  435 */  compUL_rReg_mem_rule,
-  /*  436 */  testUL_reg_rule,
-  /*  437 */  compB_mem_imm_rule,
-  /*  438 */  testUB_mem_imm_rule,
-  /*  439 */  testB_mem_imm_rule,
-  /*  440 */  partialSubtypeCheck_vs_Zero_rule,
-  /*  441 */  cmpFastLockRTM_rule,
-  /*  442 */  cmpFastLock_rule,
-  /*  443 */  cmpFastUnlock_rule,
-  /*  444 */  cmpFastLockLightweight_rule,
-  /*  445 */  cmpFastUnlockLightweight_rule,
-  /*  446 */  tlsLoadP_rule,
-  /*  447 */  absF_reg_rule,
-  /*  448 */  absF_reg_reg_rule,
-  /*  449 */  absD_reg_rule,
-  /*  450 */  absD_reg_reg_rule,
-  /*  451 */  negF_reg_rule,
-  /*  452 */  negF_reg_reg_rule,
-  /*  453 */  negD_reg_rule,
-  /*  454 */  negD_reg_reg_rule,
-  /*  455 */  vconvF2HF_rule,
-  /*  456 */  convHF2F_reg_reg_rule,
-  /*  457 */  vconvHF2F_reg_mem_rule,
-  /*  458 */  vconvHF2F_rule,
-  /*  459 */  reinterpret_mask_rule,
-  /*  460 */  reinterpret_rule,
-  /*  461 */  vreinterpret_expand4_rule,
-  /*  462 */  vreinterpret_expand_rule,
-  /*  463 */  reinterpret_shrink_rule,
-  /*  464 */  vReplB_reg_rule,
-  /*  465 */  ReplB_mem_rule,
-  /*  466 */  vReplS_reg_rule,
-  /*  467 */  ReplS_mem_rule,
-  /*  468 */  ReplI_reg_rule,
-  /*  469 */  ReplI_mem_rule,
-  /*  470 */  ReplI_imm_rule,
-  /*  471 */  ReplI_zero_rule,
-  /*  472 */  ReplI_M1_rule,
-  /*  473 */  ReplL_reg_rule,
-  /*  474 */  ReplL_mem_rule,
-  /*  475 */  ReplL_imm_rule,
-  /*  476 */  ReplL_zero_rule,
-  /*  477 */  ReplL_M1_rule,
-  /*  478 */  vReplF_reg_rule,
-  /*  479 */  ReplF_reg_rule,
-  /*  480 */  ReplF_mem_rule,
-  /*  481 */  ReplF_imm_rule,
-  /*  482 */  ReplF_zero_rule,
-  /*  483 */  vReplD_reg_rule,
-  /*  484 */  ReplD_reg_rule,
-  /*  485 */  ReplD_mem_rule,
-  /*  486 */  ReplD_imm_rule,
-  /*  487 */  ReplD_zero_rule,
-  /*  488 */  vsqrtF_reg_rule,
-  /*  489 */  vsqrtF_mem_rule,
-  /*  490 */  vsqrtD_reg_rule,
-  /*  491 */  vsqrtD_mem_rule,
-  /*  492 */  vshiftcnt_rule,
-  /*  493 */  vshiftcnt_0_rule,
-  /*  494 */  vcastBtoX_rule,
-  /*  495 */  castStoX_rule,
-  /*  496 */  vcastStoX_evex_rule,
-  /*  497 */  castItoX_rule,
-  /*  498 */  vcastItoX_evex_rule,
-  /*  499 */  vcastLtoBS_rule,
-  /*  500 */  vcastLtoX_evex_rule,
-  /*  501 */  vcastFtoD_reg_rule,
-  /*  502 */  vcastDtoF_reg_rule,
-  /*  503 */  vucast_rule,
-  /*  504 */  vucast_0_rule,
-  /*  505 */  vucast_1_rule,
-  /*  506 */  vabsB_reg_rule,
-  /*  507 */  vabsS_reg_rule,
-  /*  508 */  vabsI_reg_rule,
-  /*  509 */  vabsL_reg_rule,
-  /*  510 */  vabsnegF_rule,
-  /*  511 */  vabsnegF_0_rule,
-  /*  512 */  vabsneg4F_rule,
-  /*  513 */  vabsneg4F_0_rule,
-  /*  514 */  vabsnegD_rule,
-  /*  515 */  vabsnegD_0_rule,
-  /*  516 */  vptest_lt16_rule,
-  /*  517 */  vptest_ge16_rule,
-  /*  518 */  ktest_alltrue_le8_rule,
-  /*  519 */  ktest_anytrue_le8_rule,
-  /*  520 */  ktest_ge8_rule,
-  /*  521 */  vmaskcast_evex_rule,
-  /*  522 */  vmaskcast_rule,
-  /*  523 */  vmaskcast_avx_rule,
-  /*  524 */  loadIotaIndices_rule,
-  /*  525 */  loadShuffleB_rule,
-  /*  526 */  loadShuffleS_evex_rule,
-  /*  527 */  loadShuffleI_avx_rule,
-  /*  528 */  loadShuffleL_evex_rule,
-  /*  529 */  vpopcount_integral_reg_evex_rule,
-  /*  530 */  vpopcount_integral_reg_evex_0_rule,
-  /*  531 */  vcount_leading_zeros_IL_reg_evex_rule,
-  /*  532 */  long_to_mask_evex_rule,
-  /*  533 */  castMM_rule,
-  /*  534 */  castVV_rule,
-  /*  535 */  castVVLeg_rule,
-  /*  536 */  zLoadPNullCheck_rule,
-  /*  537 */  loadB_rule,
-  /*  538 */  loadB2L_rule,
-  /*  539 */  loadUB_rule,
-  /*  540 */  loadUB2L_rule,
-  /*  541 */  loadUB2L_immI_rule,
-  /*  542 */  loadS_rule,
-  /*  543 */  loadS2B_rule,
-  /*  544 */  loadS2L_rule,
-  /*  545 */  loadUS_rule,
-  /*  546 */  loadUS2B_rule,
-  /*  547 */  loadUS2L_rule,
-  /*  548 */  loadUS2L_immI_255_rule,
-  /*  549 */  loadUS2L_immI_rule,
-  /*  550 */  loadI_rule,
-  /*  551 */  loadI2B_rule,
-  /*  552 */  loadI2UB_rule,
-  /*  553 */  loadI2S_rule,
-  /*  554 */  loadI2US_rule,
-  /*  555 */  loadI2L_rule,
-  /*  556 */  loadI2L_immI_255_rule,
-  /*  557 */  loadI2L_immI_65535_rule,
-  /*  558 */  loadI2L_immU31_rule,
-  /*  559 */  loadUI2L_rule,
-  /*  560 */  loadL_rule,
-  /*  561 */  loadRange_rule,
-  /*  562 */  loadP_rule,
-  /*  563 */  loadN_rule,
-  /*  564 */  loadKlass_rule,
-  /*  565 */  loadNKlass_rule,
-  /*  566 */  loadF_rule,
-  /*  567 */  loadD_partial_rule,
-  /*  568 */  loadD_rule,
-  /*  569 */  maxF_reg_rule,
-  /*  570 */  maxF_reduction_reg_rule,
-  /*  571 */  maxD_reg_rule,
-  /*  572 */  maxD_reduction_reg_rule,
-  /*  573 */  minF_reg_rule,
-  /*  574 */  minF_reduction_reg_rule,
-  /*  575 */  minD_reg_rule,
-  /*  576 */  minD_reduction_reg_rule,
-  /*  577 */  prefetchAlloc_rule,
-  /*  578 */  prefetchAllocNTA_rule,
-  /*  579 */  prefetchAllocT0_rule,
-  /*  580 */  prefetchAllocT2_rule,
-  /*  581 */  storeB_rule,
-  /*  582 */  storeC_rule,
-  /*  583 */  storeI_rule,
-  /*  584 */  storeL_rule,
-  /*  585 */  storeP_rule,
-  /*  586 */  storeImmP0_rule,
-  /*  587 */  storeImmP_rule,
-  /*  588 */  storeN_rule,
-  /*  589 */  storeNKlass_rule,
-  /*  590 */  storeImmN0_rule,
-  /*  591 */  storeImmN_rule,
-  /*  592 */  storeImmNKlass_rule,
-  /*  593 */  storeImmI0_rule,
-  /*  594 */  storeImmI_rule,
-  /*  595 */  storeImmL0_rule,
-  /*  596 */  storeImmL_rule,
-  /*  597 */  storeImmC0_rule,
-  /*  598 */  storeImmI16_rule,
-  /*  599 */  storeImmB0_rule,
-  /*  600 */  storeImmB_rule,
-  /*  601 */  storeImmCM0_reg_rule,
-  /*  602 */  storeImmCM0_rule,
-  /*  603 */  storeF_rule,
-  /*  604 */  storeF0_rule,
-  /*  605 */  storeF_imm_rule,
-  /*  606 */  storeD_rule,
-  /*  607 */  storeD0_imm_rule,
-  /*  608 */  storeD0_rule,
-  /*  609 */  cacheWB_rule,
-  /*  610 */  cacheWBPreSync_rule,
-  /*  611 */  cacheWBPostSync_rule,
-  /*  612 */  bytes_reverse_int_rule,
-  /*  613 */  bytes_reverse_long_rule,
-  /*  614 */  bytes_reverse_unsigned_short_rule,
-  /*  615 */  bytes_reverse_short_rule,
-  /*  616 */  countLeadingZerosI_rule,
-  /*  617 */  countLeadingZerosI_mem_rule,
-  /*  618 */  countLeadingZerosI_bsr_rule,
-  /*  619 */  countLeadingZerosL_rule,
-  /*  620 */  countLeadingZerosL_mem_rule,
-  /*  621 */  countLeadingZerosL_bsr_rule,
-  /*  622 */  countTrailingZerosI_rule,
-  /*  623 */  countTrailingZerosI_mem_rule,
-  /*  624 */  countTrailingZerosI_bsf_rule,
-  /*  625 */  countTrailingZerosL_rule,
-  /*  626 */  countTrailingZerosL_mem_rule,
-  /*  627 */  countTrailingZerosL_bsf_rule,
-  /*  628 */  bytes_reversebit_int_rule,
-  /*  629 */  bytes_reversebit_int_gfni_rule,
-  /*  630 */  bytes_reversebit_long_rule,
-  /*  631 */  bytes_reversebit_long_gfni_rule,
-  /*  632 */  popCountI_rule,
-  /*  633 */  popCountI_mem_rule,
-  /*  634 */  popCountL_rule,
-  /*  635 */  popCountL_mem_rule,
-  /*  636 */  membar_acquire_rule,
-  /*  637 */  membar_acquire_0_rule,
-  /*  638 */  membar_acquire_lock_rule,
-  /*  639 */  membar_release_rule,
-  /*  640 */  membar_release_0_rule,
-  /*  641 */  membar_release_lock_rule,
-  /*  642 */  unnecessary_membar_volatile_rule,
-  /*  643 */  membar_storestore_rule,
-  /*  644 */  membar_storestore_0_rule,
-  /*  645 */  convP2I_rule,
-  /*  646 */  convN2I_rule,
-  /*  647 */  encodeHeapOop_rule,
-  /*  648 */  encodeHeapOop_not_null_rule,
-  /*  649 */  decodeHeapOop_rule,
-  /*  650 */  decodeHeapOop_not_null_rule,
-  /*  651 */  encodeKlass_not_null_rule,
-  /*  652 */  decodeKlass_not_null_rule,
-  /*  653 */  jumpXtnd_offset_rule,
-  /*  654 */  jumpXtnd_addr_rule,
-  /*  655 */  jumpXtnd_rule,
-  /*  656 */  cmovI_imm_01_rule,
-  /*  657 */  cmovI_reg_rule,
-  /*  658 */  cmovI_imm_01U_rule,
-  /*  659 */  cmovI_regU_rule,
-  /*  660 */  cmovI_imm_01UCF_rule,
-  /*  661 */  cmovI_regUCF_rule,
-  /*  662 */  cmovI_regUCF2_ne_rule,
-  /*  663 */  cmovI_regUCF2_eq_rule,
-  /*  664 */  cmovI_mem_rule,
-  /*  665 */  cmovI_memU_rule,
-  /*  666 */  cmovI_memUCF_rule,
-  /*  667 */  cmovN_reg_rule,
-  /*  668 */  cmovN_regU_rule,
-  /*  669 */  cmovN_regUCF_rule,
-  /*  670 */  cmovN_regUCF2_ne_rule,
-  /*  671 */  cmovN_regUCF2_eq_rule,
-  /*  672 */  cmovP_reg_rule,
-  /*  673 */  cmovP_regU_rule,
-  /*  674 */  cmovP_regUCF_rule,
-  /*  675 */  cmovP_regUCF2_ne_rule,
-  /*  676 */  cmovP_regUCF2_eq_rule,
-  /*  677 */  cmovL_imm_01_rule,
-  /*  678 */  cmovL_reg_rule,
-  /*  679 */  cmovL_mem_rule,
-  /*  680 */  cmovL_imm_01U_rule,
-  /*  681 */  cmovL_regU_rule,
-  /*  682 */  cmovL_imm_01UCF_rule,
-  /*  683 */  cmovL_regUCF_rule,
-  /*  684 */  cmovL_regUCF2_ne_rule,
-  /*  685 */  cmovL_regUCF2_eq_rule,
-  /*  686 */  cmovL_memU_rule,
-  /*  687 */  cmovL_memUCF_rule,
-  /*  688 */  cmovF_reg_rule,
-  /*  689 */  cmovF_regU_rule,
-  /*  690 */  cmovF_regUCF_rule,
-  /*  691 */  cmovD_reg_rule,
-  /*  692 */  cmovD_regU_rule,
-  /*  693 */  cmovD_regUCF_rule,
-  /*  694 */  addI_rReg_rule,
-  /*  695 */  addI_rReg_imm_rule,
-  /*  696 */  addI_rReg_mem_rule,
-  /*  697 */  addI_rReg_mem_0_rule,
-  /*  698 */  addI_mem_rReg_rule,
-  /*  699 */  addI_mem_rReg_0_rule,
-  /*  700 */  addI_mem_imm_rule,
-  /*  701 */  incI_rReg_rule,
-  /*  702 */  incI_mem_rule,
-  /*  703 */  decI_rReg_rule,
-  /*  704 */  decI_mem_rule,
-  /*  705 */  leaI_rReg_immI2_immI_rule,
-  /*  706 */  leaI_rReg_rReg_immI_rule,
-  /*  707 */  leaI_rReg_rReg_immI2_rule,
-  /*  708 */  leaI_rReg_rReg_immI2_0_rule,
-  /*  709 */  leaI_rReg_rReg_immI2_immI_rule,
-  /*  710 */  leaI_rReg_rReg_immI2_immI_0_rule,
-  /*  711 */  addL_rReg_rule,
-  /*  712 */  addL_rReg_imm_rule,
-  /*  713 */  addL_rReg_mem_rule,
-  /*  714 */  addL_rReg_mem_0_rule,
-  /*  715 */  addL_mem_rReg_rule,
-  /*  716 */  addL_mem_rReg_0_rule,
-  /*  717 */  addL_mem_imm_rule,
-  /*  718 */  incL_rReg_rule,
-  /*  719 */  incL_mem_rule,
-  /*  720 */  decL_rReg_rule,
-  /*  721 */  decL_mem_rule,
-  /*  722 */  leaL_rReg_immI2_immL32_rule,
-  /*  723 */  leaL_rReg_rReg_immL32_rule,
-  /*  724 */  leaL_rReg_rReg_immI2_rule,
-  /*  725 */  leaL_rReg_rReg_immI2_0_rule,
-  /*  726 */  leaL_rReg_rReg_immI2_immL32_rule,
-  /*  727 */  leaL_rReg_rReg_immI2_immL32_0_rule,
-  /*  728 */  addP_rReg_rule,
-  /*  729 */  addP_rReg_imm_rule,
-  /*  730 */  compareAndSwapP_rule,
-  /*  731 */  compareAndSwapP_0_rule,
-  /*  732 */  compareAndSwapL_rule,
-  /*  733 */  compareAndSwapL_0_rule,
-  /*  734 */  compareAndSwapI_rule,
-  /*  735 */  compareAndSwapI_0_rule,
-  /*  736 */  compareAndSwapB_rule,
-  /*  737 */  compareAndSwapB_0_rule,
-  /*  738 */  compareAndSwapS_rule,
-  /*  739 */  compareAndSwapS_0_rule,
-  /*  740 */  compareAndSwapN_rule,
-  /*  741 */  compareAndSwapN_0_rule,
-  /*  742 */  compareAndExchangeB_rule,
-  /*  743 */  compareAndExchangeS_rule,
-  /*  744 */  compareAndExchangeI_rule,
-  /*  745 */  compareAndExchangeL_rule,
-  /*  746 */  compareAndExchangeN_rule,
-  /*  747 */  compareAndExchangeP_rule,
-  /*  748 */  xaddB_reg_no_res_rule,
-  /*  749 */  xaddB_imm_no_res_rule,
-  /*  750 */  xaddB_rule,
-  /*  751 */  xaddS_reg_no_res_rule,
-  /*  752 */  xaddS_imm_no_res_rule,
-  /*  753 */  xaddS_rule,
-  /*  754 */  xaddI_reg_no_res_rule,
-  /*  755 */  xaddI_imm_no_res_rule,
-  /*  756 */  xaddI_rule,
-  /*  757 */  xaddL_reg_no_res_rule,
-  /*  758 */  xaddL_imm_no_res_rule,
-  /*  759 */  xaddL_rule,
-  /*  760 */  xchgB_rule,
-  /*  761 */  xchgS_rule,
-  /*  762 */  xchgI_rule,
-  /*  763 */  xchgL_rule,
-  /*  764 */  xchgP_rule,
-  /*  765 */  xchgN_rule,
-  /*  766 */  absI_rReg_rule,
-  /*  767 */  absL_rReg_rule,
-  /*  768 */  subI_rReg_rule,
-  /*  769 */  subI_rReg_mem_rule,
-  /*  770 */  subI_mem_rReg_rule,
-  /*  771 */  subL_rReg_rule,
-  /*  772 */  subL_rReg_mem_rule,
-  /*  773 */  subL_mem_rReg_rule,
-  /*  774 */  subP_rReg_rule,
-  /*  775 */  negI_rReg_rule,
-  /*  776 */  negI_rReg_2_rule,
-  /*  777 */  negI_mem_rule,
-  /*  778 */  negL_rReg_rule,
-  /*  779 */  negL_rReg_2_rule,
-  /*  780 */  negL_mem_rule,
-  /*  781 */  mulI_rReg_rule,
-  /*  782 */  mulI_rReg_imm_rule,
-  /*  783 */  mulI_mem_rule,
-  /*  784 */  mulI_mem_0_rule,
-  /*  785 */  mulI_mem_imm_rule,
-  /*  786 */  mulAddS2I_rReg_rule,
-  /*  787 */  mulL_rReg_rule,
-  /*  788 */  mulL_rReg_imm_rule,
-  /*  789 */  mulL_mem_rule,
-  /*  790 */  mulL_mem_0_rule,
-  /*  791 */  mulL_mem_imm_rule,
-  /*  792 */  mulHiL_rReg_rule,
-  /*  793 */  umulHiL_rReg_rule,
-  /*  794 */  divI_rReg_rule,
-  /*  795 */  divL_rReg_rule,
-  /*  796 */  udivI_rReg_rule,
-  /*  797 */  udivL_rReg_rule,
-  /*  798 */  divModI_rReg_divmod_rule,
-  /*  799 */  divModL_rReg_divmod_rule,
-  /*  800 */  udivModI_rReg_divmod_rule,
-  /*  801 */  udivModL_rReg_divmod_rule,
-  /*  802 */  modI_rReg_rule,
-  /*  803 */  modL_rReg_rule,
-  /*  804 */  umodI_rReg_rule,
-  /*  805 */  umodL_rReg_rule,
-  /*  806 */  salI_rReg_immI2_rule,
-  /*  807 */  salI_rReg_imm_rule,
-  /*  808 */  salI_mem_imm_rule,
-  /*  809 */  salI_rReg_CL_rule,
-  /*  810 */  salI_mem_CL_rule,
-  /*  811 */  salI_rReg_rReg_rule,
-  /*  812 */  salI_mem_rReg_rule,
-  /*  813 */  sarI_rReg_imm_rule,
-  /*  814 */  sarI_mem_imm_rule,
-  /*  815 */  sarI_rReg_CL_rule,
-  /*  816 */  sarI_mem_CL_rule,
-  /*  817 */  sarI_rReg_rReg_rule,
-  /*  818 */  sarI_mem_rReg_rule,
-  /*  819 */  shrI_rReg_imm_rule,
-  /*  820 */  shrI_mem_imm_rule,
-  /*  821 */  shrI_rReg_CL_rule,
-  /*  822 */  shrI_mem_CL_rule,
-  /*  823 */  shrI_rReg_rReg_rule,
-  /*  824 */  shrI_mem_rReg_rule,
-  /*  825 */  salL_rReg_immI2_rule,
-  /*  826 */  salL_rReg_imm_rule,
-  /*  827 */  salL_mem_imm_rule,
-  /*  828 */  salL_rReg_CL_rule,
-  /*  829 */  salL_mem_CL_rule,
-  /*  830 */  salL_rReg_rReg_rule,
-  /*  831 */  salL_mem_rReg_rule,
-  /*  832 */  sarL_rReg_imm_rule,
-  /*  833 */  sarL_mem_imm_rule,
-  /*  834 */  sarL_rReg_CL_rule,
-  /*  835 */  sarL_mem_CL_rule,
-  /*  836 */  sarL_rReg_rReg_rule,
-  /*  837 */  sarL_mem_rReg_rule,
-  /*  838 */  shrL_rReg_imm_rule,
-  /*  839 */  shrL_mem_imm_rule,
-  /*  840 */  shrL_rReg_CL_rule,
-  /*  841 */  shrL_mem_CL_rule,
-  /*  842 */  shrL_rReg_rReg_rule,
-  /*  843 */  shrL_mem_rReg_rule,
-  /*  844 */  i2b_rule,
-  /*  845 */  i2s_rule,
-  /*  846 */  rolI_immI8_legacy_rule,
-  /*  847 */  rolI_immI8_rule,
-  /*  848 */  rolI_mem_immI8_rule,
-  /*  849 */  rolI_rReg_Var_rule,
-  /*  850 */  rorI_immI8_legacy_rule,
-  /*  851 */  rorI_immI8_rule,
-  /*  852 */  rorI_mem_immI8_rule,
-  /*  853 */  rorI_rReg_Var_rule,
-  /*  854 */  rolL_immI8_legacy_rule,
-  /*  855 */  rolL_immI8_rule,
-  /*  856 */  rolL_mem_immI8_rule,
-  /*  857 */  rolL_rReg_Var_rule,
-  /*  858 */  rorL_immI8_legacy_rule,
-  /*  859 */  rorL_immI8_rule,
-  /*  860 */  rorL_mem_immI8_rule,
-  /*  861 */  rorL_rReg_Var_rule,
-  /*  862 */  compressBitsL_reg_rule,
-  /*  863 */  expandBitsL_reg_rule,
-  /*  864 */  compressBitsL_mem_rule,
-  /*  865 */  expandBitsL_mem_rule,
-  /*  866 */  andI_rReg_rule,
-  /*  867 */  andI_rReg_imm255_rule,
-  /*  868 */  andI2L_rReg_imm255_rule,
-  /*  869 */  andI_rReg_imm65535_rule,
-  /*  870 */  andI2L_rReg_imm65535_rule,
-  /*  871 */  convI2LAndI_reg_immIbitmask_rule,
-  /*  872 */  andI_rReg_imm_rule,
-  /*  873 */  andI_rReg_mem_rule,
-  /*  874 */  andI_rReg_mem_0_rule,
-  /*  875 */  andB_mem_rReg_rule,
-  /*  876 */  andB_mem_rReg_0_rule,
-  /*  877 */  andI_mem_rReg_rule,
-  /*  878 */  andI_mem_rReg_0_rule,
-  /*  879 */  andI_mem_imm_rule,
-  /*  880 */  andnI_rReg_rReg_mem_rule,
-  /*  881 */  andnI_rReg_rReg_mem_0_rule,
-  /*  882 */  andnI_rReg_rReg_rReg_rule,
-  /*  883 */  andnI_rReg_rReg_rReg_0_rule,
-  /*  884 */  blsiI_rReg_rReg_rule,
-  /*  885 */  blsiI_rReg_rReg_0_rule,
-  /*  886 */  blsiI_rReg_mem_rule,
-  /*  887 */  blsiI_rReg_mem_0_rule,
-  /*  888 */  blsmskI_rReg_mem_rule,
-  /*  889 */  blsmskI_rReg_mem_0_rule,
-  /*  890 */  blsmskI_rReg_rReg_rule,
-  /*  891 */  blsmskI_rReg_rReg_0_rule,
-  /*  892 */  blsrI_rReg_rReg_rule,
-  /*  893 */  blsrI_rReg_rReg_0_rule,
-  /*  894 */  blsrI_rReg_mem_rule,
-  /*  895 */  blsrI_rReg_mem_0_rule,
-  /*  896 */  orI_rReg_rule,
-  /*  897 */  orI_rReg_imm_rule,
-  /*  898 */  orI_rReg_mem_rule,
-  /*  899 */  orI_rReg_mem_0_rule,
-  /*  900 */  orB_mem_rReg_rule,
-  /*  901 */  orB_mem_rReg_0_rule,
-  /*  902 */  orI_mem_rReg_rule,
-  /*  903 */  orI_mem_rReg_0_rule,
-  /*  904 */  orI_mem_imm_rule,
-  /*  905 */  xorI_rReg_rule,
-  /*  906 */  xorI_rReg_im1_rule,
-  /*  907 */  xorI_rReg_imm_rule,
-  /*  908 */  xorI_rReg_mem_rule,
-  /*  909 */  xorI_rReg_mem_0_rule,
-  /*  910 */  xorB_mem_rReg_rule,
-  /*  911 */  xorB_mem_rReg_0_rule,
-  /*  912 */  xorI_mem_rReg_rule,
-  /*  913 */  xorI_mem_rReg_0_rule,
-  /*  914 */  xorI_mem_imm_rule,
-  /*  915 */  andL_rReg_rule,
-  /*  916 */  andL_rReg_imm255_rule,
-  /*  917 */  andL_rReg_imm65535_rule,
-  /*  918 */  andL_rReg_imm_rule,
-  /*  919 */  andL_rReg_mem_rule,
-  /*  920 */  andL_rReg_mem_0_rule,
-  /*  921 */  andL_mem_rReg_rule,
-  /*  922 */  andL_mem_rReg_0_rule,
-  /*  923 */  andL_mem_imm_rule,
-  /*  924 */  btrL_mem_imm_rule,
-  /*  925 */  andnL_rReg_rReg_mem_rule,
-  /*  926 */  andnL_rReg_rReg_mem_0_rule,
-  /*  927 */  andnL_rReg_rReg_rReg_rule,
-  /*  928 */  andnL_rReg_rReg_rReg_0_rule,
-  /*  929 */  blsiL_rReg_rReg_rule,
-  /*  930 */  blsiL_rReg_rReg_0_rule,
-  /*  931 */  blsiL_rReg_mem_rule,
-  /*  932 */  blsiL_rReg_mem_0_rule,
-  /*  933 */  blsmskL_rReg_mem_rule,
-  /*  934 */  blsmskL_rReg_mem_0_rule,
-  /*  935 */  blsmskL_rReg_rReg_rule,
-  /*  936 */  blsmskL_rReg_rReg_0_rule,
-  /*  937 */  blsrL_rReg_rReg_rule,
-  /*  938 */  blsrL_rReg_rReg_0_rule,
-  /*  939 */  blsrL_rReg_mem_rule,
-  /*  940 */  blsrL_rReg_mem_0_rule,
-  /*  941 */  orL_rReg_rule,
-  /*  942 */  orL_rReg_castP2X_rule,
-  /*  943 */  orL_rReg_castP2X_0_rule,
-  /*  944 */  orL_rReg_imm_rule,
-  /*  945 */  orL_rReg_mem_rule,
-  /*  946 */  orL_rReg_mem_0_rule,
-  /*  947 */  orL_mem_rReg_rule,
-  /*  948 */  orL_mem_rReg_0_rule,
-  /*  949 */  orL_mem_imm_rule,
-  /*  950 */  btsL_mem_imm_rule,
-  /*  951 */  xorL_rReg_rule,
-  /*  952 */  xorL_rReg_im1_rule,
-  /*  953 */  xorL_rReg_imm_rule,
-  /*  954 */  xorL_rReg_mem_rule,
-  /*  955 */  xorL_rReg_mem_0_rule,
-  /*  956 */  xorL_mem_rReg_rule,
-  /*  957 */  xorL_mem_rReg_0_rule,
-  /*  958 */  xorL_mem_imm_rule,
-  /*  959 */  cmpLTMask_rule,
-  /*  960 */  cmpLTMask0_rule,
-  /*  961 */  cadd_cmpLTMask_rule,
-  /*  962 */  cadd_cmpLTMask_1_rule,
-  /*  963 */  cadd_cmpLTMask_0_rule,
-  /*  964 */  cadd_cmpLTMask_2_rule,
-  /*  965 */  and_cmpLTMask_rule,
-  /*  966 */  and_cmpLTMask_0_rule,
-  /*  967 */  cmpF_reg_rule,
-  /*  968 */  cmpF_mem_rule,
-  /*  969 */  cmpF_imm_rule,
-  /*  970 */  cmpD_reg_rule,
-  /*  971 */  cmpD_mem_rule,
-  /*  972 */  cmpD_imm_rule,
-  /*  973 */  convF2D_reg_reg_rule,
-  /*  974 */  convF2D_reg_mem_rule,
-  /*  975 */  convD2F_reg_reg_rule,
-  /*  976 */  convD2F_reg_mem_rule,
-  /*  977 */  convF2I_reg_reg_rule,
-  /*  978 */  convF2L_reg_reg_rule,
-  /*  979 */  convD2I_reg_reg_rule,
-  /*  980 */  convD2L_reg_reg_rule,
-  /*  981 */  round_double_reg_rule,
-  /*  982 */  round_float_reg_rule,
-  /*  983 */  convI2F_reg_reg_rule,
-  /*  984 */  convI2F_reg_mem_rule,
-  /*  985 */  convI2D_reg_reg_rule,
-  /*  986 */  convI2D_reg_mem_rule,
-  /*  987 */  convXI2F_reg_rule,
-  /*  988 */  convXI2D_reg_rule,
-  /*  989 */  convL2F_reg_reg_rule,
-  /*  990 */  convL2F_reg_mem_rule,
-  /*  991 */  convL2D_reg_reg_rule,
-  /*  992 */  convL2D_reg_mem_rule,
-  /*  993 */  convI2L_reg_reg_rule,
-  /*  994 */  convI2L_reg_reg_zex_rule,
-  /*  995 */  convI2L_reg_mem_zex_rule,
-  /*  996 */  zerox_long_reg_reg_rule,
-  /*  997 */  convL2I_reg_reg_rule,
-  /*  998 */  MoveF2I_reg_stack_rule,
-  /*  999 */  MoveI2F_reg_stack_rule,
-  /* 1000 */  MoveD2L_reg_stack_rule,
-  /* 1001 */  MoveL2D_reg_stack_rule,
-  /* 1002 */  rep_stos_rule,
-  /* 1003 */  rep_stos_evex_rule,
-  /* 1004 */  rep_stos_large_rule,
-  /* 1005 */  rep_stos_large_evex_rule,
-  /* 1006 */  rep_stos_im_rule,
-  /* 1007 */  string_compareL_rule,
-  /* 1008 */  string_compareL_evex_rule,
-  /* 1009 */  string_compareU_rule,
-  /* 1010 */  string_compareU_evex_rule,
-  /* 1011 */  string_compareLU_rule,
-  /* 1012 */  string_compareLU_evex_rule,
-  /* 1013 */  string_compareUL_rule,
-  /* 1014 */  string_compareUL_evex_rule,
-  /* 1015 */  string_indexof_conL_rule,
-  /* 1016 */  string_indexof_conU_rule,
-  /* 1017 */  string_indexof_conUL_rule,
-  /* 1018 */  string_indexofL_rule,
-  /* 1019 */  string_indexofU_rule,
-  /* 1020 */  string_indexofUL_rule,
-  /* 1021 */  string_indexof_char_rule,
-  /* 1022 */  stringL_indexof_char_rule,
-  /* 1023 */  string_equals_rule,
-  /* 1024 */  string_equals_evex_rule,
-  /* 1025 */  array_equalsB_rule,
-  /* 1026 */  array_equalsB_evex_rule,
-  /* 1027 */  array_equalsC_rule,
-  /* 1028 */  array_equalsC_evex_rule,
-  /* 1029 */  arrays_hashcode_rule,
-  /* 1030 */  count_positives_rule,
-  /* 1031 */  count_positives_evex_rule,
-  /* 1032 */  string_compress_rule,
-  /* 1033 */  string_compress_evex_rule,
-  /* 1034 */  string_inflate_rule,
-  /* 1035 */  string_inflate_evex_rule,
-  /* 1036 */  encode_iso_array_rule,
-  /* 1037 */  encode_ascii_array_rule,
-  /* 1038 */  cmpU3_reg_reg_rule,
-  /* 1039 */  cmpL3_reg_reg_rule,
-  /* 1040 */  cmpUL3_reg_reg_rule,
-  /* 1041 */  cmovI_reg_g_rule,
-  /* 1042 */  minI_rReg_rule,
-  /* 1043 */  cmovI_reg_l_rule,
-  /* 1044 */  maxI_rReg_rule,
-  /* 1045 */  jmpDir_rule,
-  /* 1046 */  jmpCon_rule,
-  /* 1047 */  jmpLoopEnd_rule,
-  /* 1048 */  jmpConU_rule,
-  /* 1049 */  jmpConUCF_rule,
-  /* 1050 */  jmpConUCF2_rule,
-  /* 1051 */  partialSubtypeCheck_rule,
-  /* 1052 */  jmpDir_short_rule,
-  /* 1053 */  jmpCon_short_rule,
-  /* 1054 */  jmpLoopEnd_short_rule,
-  /* 1055 */  jmpConU_short_rule,
-  /* 1056 */  jmpConUCF_short_rule,
-  /* 1057 */  jmpConUCF2_short_rule,
-  /* 1058 */  safePoint_poll_tls_rule,
-  /* 1059 */  mask_all_evexL_rule,
-  /* 1060 */  mask_all_evexI_GT32_rule,
-  /* 1061 */  CallStaticJavaDirect_rule,
-  /* 1062 */  CallDynamicJavaDirect_rule,
-  /* 1063 */  CallRuntimeDirect_rule,
-  /* 1064 */  CallLeafDirect_rule,
-  /* 1065 */  CallLeafDirectVector_rule,
-  /* 1066 */  CallLeafNoFPDirect_rule,
-  /* 1067 */  Ret_rule,
-  /* 1068 */  TailCalljmpInd_rule,
-  /* 1069 */  tailjmpInd_rule,
-  /* 1070 */  CreateException_rule,
-  /* 1071 */  RethrowException_rule,
-  /* 1072 */  leaI_rReg_rReg_peep_rule,
-  /* 1073 */  leaI_rReg_immI_peep_rule,
-  /* 1074 */  leaI_rReg_immI2_peep_rule,
-  /* 1075 */  leaL_rReg_rReg_peep_rule,
-  /* 1076 */  leaL_rReg_immL32_peep_rule,
-  /* 1077 */  leaL_rReg_immI2_peep_rule,
-  /* 1078 */  ShouldNotReachHere_rule,
-  /* 1079 */  addF_reg_rule,
-  /* 1080 */  addF_mem_rule,
-  /* 1081 */  addF_mem_0_rule,
-  /* 1082 */  addF_imm_rule,
-  /* 1083 */  addF_reg_reg_rule,
-  /* 1084 */  addF_reg_mem_rule,
-  /* 1085 */  addF_reg_mem_0_rule,
-  /* 1086 */  addF_reg_imm_rule,
-  /* 1087 */  addD_reg_rule,
-  /* 1088 */  addD_mem_rule,
-  /* 1089 */  addD_mem_0_rule,
-  /* 1090 */  addD_imm_rule,
-  /* 1091 */  addD_reg_reg_rule,
-  /* 1092 */  addD_reg_mem_rule,
-  /* 1093 */  addD_reg_mem_0_rule,
-  /* 1094 */  addD_reg_imm_rule,
-  /* 1095 */  subF_reg_rule,
-  /* 1096 */  subF_mem_rule,
-  /* 1097 */  subF_imm_rule,
-  /* 1098 */  subF_reg_reg_rule,
-  /* 1099 */  subF_reg_mem_rule,
-  /* 1100 */  subF_reg_imm_rule,
-  /* 1101 */  subD_reg_rule,
-  /* 1102 */  subD_mem_rule,
-  /* 1103 */  subD_imm_rule,
-  /* 1104 */  subD_reg_reg_rule,
-  /* 1105 */  subD_reg_mem_rule,
-  /* 1106 */  subD_reg_imm_rule,
-  /* 1107 */  mulF_reg_rule,
-  /* 1108 */  mulF_mem_rule,
-  /* 1109 */  mulF_mem_0_rule,
-  /* 1110 */  mulF_imm_rule,
-  /* 1111 */  mulF_reg_reg_rule,
-  /* 1112 */  mulF_reg_mem_rule,
-  /* 1113 */  mulF_reg_mem_0_rule,
-  /* 1114 */  mulF_reg_imm_rule,
-  /* 1115 */  mulD_reg_rule,
-  /* 1116 */  mulD_mem_rule,
-  /* 1117 */  mulD_mem_0_rule,
-  /* 1118 */  mulD_imm_rule,
-  /* 1119 */  mulD_reg_reg_rule,
-  /* 1120 */  mulD_reg_mem_rule,
-  /* 1121 */  mulD_reg_mem_0_rule,
-  /* 1122 */  mulD_reg_imm_rule,
-  /* 1123 */  divF_reg_rule,
-  /* 1124 */  divF_mem_rule,
-  /* 1125 */  divF_imm_rule,
-  /* 1126 */  divF_reg_reg_rule,
-  /* 1127 */  divF_reg_mem_rule,
-  /* 1128 */  divF_reg_imm_rule,
-  /* 1129 */  divD_reg_rule,
-  /* 1130 */  divD_mem_rule,
-  /* 1131 */  divD_imm_rule,
-  /* 1132 */  divD_reg_reg_rule,
-  /* 1133 */  divD_reg_mem_rule,
-  /* 1134 */  divD_reg_imm_rule,
-  /* 1135 */  sqrtF_reg_rule,
-  /* 1136 */  sqrtD_reg_rule,
-  /* 1137 */  convF2HF_reg_reg_rule,
-  /* 1138 */  convF2HF_mem_reg_rule,
-  /* 1139 */  vconvF2HF_mem_reg_rule,
-  /* 1140 */  reinterpret_mask_W2B_rule,
-  /* 1141 */  reinterpret_mask_D2B_rule,
-  /* 1142 */  reinterpret_mask_Q2B_rule,
-  /* 1143 */  reinterpret_expand_rule,
-  /* 1144 */  roundD_reg_rule,
-  /* 1145 */  roundD_imm_rule,
-  /* 1146 */  vroundD_reg_rule,
-  /* 1147 */  vround8D_reg_rule,
-  /* 1148 */  vroundD_mem_rule,
-  /* 1149 */  vround8D_mem_rule,
-  /* 1150 */  onspinwait_rule,
-  /* 1151 */  fmaD_reg_rule,
-  /* 1152 */  fmaF_reg_rule,
-  /* 1153 */  loadV_rule,
-  /* 1154 */  storeV_rule,
-  /* 1155 */  gather_rule,
-  /* 1156 */  evgather_rule,
-  /* 1157 */  evgather_masked_rule,
-  /* 1158 */  scatter_rule,
-  /* 1159 */  scatter_masked_rule,
-  /* 1160 */  insert_rule,
-  /* 1161 */  insert32_rule,
-  /* 1162 */  insert64_rule,
-  /* 1163 */  insert2L_rule,
-  /* 1164 */  insert4L_rule,
-  /* 1165 */  insert8L_rule,
-  /* 1166 */  insertF_rule,
-  /* 1167 */  vinsertF_rule,
-  /* 1168 */  insert2D_rule,
-  /* 1169 */  insert4D_rule,
-  /* 1170 */  insert8D_rule,
-  /* 1171 */  reductionI_rule,
-  /* 1172 */  reductionI_0_rule,
-  /* 1173 */  reductionI_1_rule,
-  /* 1174 */  reductionI_2_rule,
-  /* 1175 */  reductionI_3_rule,
-  /* 1176 */  reductionI_4_rule,
-  /* 1177 */  reductionI_5_rule,
-  /* 1178 */  reductionL_rule,
-  /* 1179 */  reductionL_0_rule,
-  /* 1180 */  reductionL_1_rule,
-  /* 1181 */  reductionL_2_rule,
-  /* 1182 */  reductionL_3_rule,
-  /* 1183 */  reductionL_4_rule,
-  /* 1184 */  reductionL_5_rule,
-  /* 1185 */  reductionL_avx512dq_rule,
-  /* 1186 */  reductionL_avx512dq_0_rule,
-  /* 1187 */  reductionL_avx512dq_1_rule,
-  /* 1188 */  reductionL_avx512dq_2_rule,
-  /* 1189 */  reductionL_avx512dq_3_rule,
-  /* 1190 */  reductionL_avx512dq_4_rule,
-  /* 1191 */  reductionL_avx512dq_5_rule,
-  /* 1192 */  reductionF128_rule,
-  /* 1193 */  reductionF128_0_rule,
-  /* 1194 */  reduction8F_rule,
-  /* 1195 */  reduction8F_0_rule,
-  /* 1196 */  reduction16F_rule,
-  /* 1197 */  reduction16F_0_rule,
-  /* 1198 */  reduction2D_rule,
-  /* 1199 */  reduction2D_0_rule,
-  /* 1200 */  reduction4D_rule,
-  /* 1201 */  reduction4D_0_rule,
-  /* 1202 */  reduction8D_rule,
-  /* 1203 */  reduction8D_0_rule,
-  /* 1204 */  reductionB_rule,
-  /* 1205 */  reductionB_0_rule,
-  /* 1206 */  reductionB_1_rule,
-  /* 1207 */  reductionB_2_rule,
-  /* 1208 */  reductionB_3_rule,
-  /* 1209 */  reductionB_4_rule,
-  /* 1210 */  reductionB_avx512bw_rule,
-  /* 1211 */  reductionB_avx512bw_0_rule,
-  /* 1212 */  reductionB_avx512bw_1_rule,
-  /* 1213 */  reductionB_avx512bw_2_rule,
-  /* 1214 */  reductionB_avx512bw_3_rule,
-  /* 1215 */  reductionB_avx512bw_4_rule,
-  /* 1216 */  reductionS_rule,
-  /* 1217 */  reductionS_0_rule,
-  /* 1218 */  reductionS_1_rule,
-  /* 1219 */  reductionS_2_rule,
-  /* 1220 */  reductionS_3_rule,
-  /* 1221 */  reductionS_4_rule,
-  /* 1222 */  reductionS_5_rule,
-  /* 1223 */  mul_reductionB_rule,
-  /* 1224 */  mul_reduction64B_rule,
-  /* 1225 */  minmax_reduction2F_rule,
-  /* 1226 */  minmax_reduction2F_0_rule,
-  /* 1227 */  minmax_reductionF_rule,
-  /* 1228 */  minmax_reductionF_0_rule,
-  /* 1229 */  minmax_reduction2F_av_rule,
-  /* 1230 */  minmax_reduction2F_av_0_rule,
-  /* 1231 */  minmax_reductionF_av_rule,
-  /* 1232 */  minmax_reductionF_av_0_rule,
-  /* 1233 */  minmax_reduction2D_rule,
-  /* 1234 */  minmax_reduction2D_0_rule,
-  /* 1235 */  minmax_reductionD_rule,
-  /* 1236 */  minmax_reductionD_0_rule,
-  /* 1237 */  minmax_reduction2D_av_rule,
-  /* 1238 */  minmax_reduction2D_av_0_rule,
-  /* 1239 */  minmax_reductionD_av_rule,
-  /* 1240 */  minmax_reductionD_av_0_rule,
-  /* 1241 */  vaddB_rule,
-  /* 1242 */  vaddB_reg_rule,
-  /* 1243 */  vaddB_mem_rule,
-  /* 1244 */  vaddB_mem_0_rule,
-  /* 1245 */  vaddS_rule,
-  /* 1246 */  vaddS_reg_rule,
-  /* 1247 */  vaddS_mem_rule,
-  /* 1248 */  vaddS_mem_0_rule,
-  /* 1249 */  vaddI_rule,
-  /* 1250 */  vaddI_reg_rule,
-  /* 1251 */  vaddI_mem_rule,
-  /* 1252 */  vaddI_mem_0_rule,
-  /* 1253 */  vaddL_rule,
-  /* 1254 */  vaddL_reg_rule,
-  /* 1255 */  vaddL_mem_rule,
-  /* 1256 */  vaddL_mem_0_rule,
-  /* 1257 */  vaddF_rule,
-  /* 1258 */  vaddF_reg_rule,
-  /* 1259 */  vaddF_mem_rule,
-  /* 1260 */  vaddF_mem_0_rule,
-  /* 1261 */  vaddD_rule,
-  /* 1262 */  vaddD_reg_rule,
-  /* 1263 */  vaddD_mem_rule,
-  /* 1264 */  vaddD_mem_0_rule,
-  /* 1265 */  vsubB_rule,
-  /* 1266 */  vsubB_reg_rule,
-  /* 1267 */  vsubB_mem_rule,
-  /* 1268 */  vsubS_rule,
-  /* 1269 */  vsubS_reg_rule,
-  /* 1270 */  vsubS_mem_rule,
-  /* 1271 */  vsubI_rule,
-  /* 1272 */  vsubI_reg_rule,
-  /* 1273 */  vsubI_mem_rule,
-  /* 1274 */  vsubL_rule,
-  /* 1275 */  vsubL_reg_rule,
-  /* 1276 */  vsubL_mem_rule,
-  /* 1277 */  vsubF_rule,
-  /* 1278 */  vsubF_reg_rule,
-  /* 1279 */  vsubF_mem_rule,
-  /* 1280 */  vsubD_rule,
-  /* 1281 */  vsubD_reg_rule,
-  /* 1282 */  vsubD_mem_rule,
-  /* 1283 */  vmul8B_rule,
-  /* 1284 */  vmulB_rule,
-  /* 1285 */  vmulB_reg_rule,
-  /* 1286 */  vmulS_rule,
-  /* 1287 */  vmulS_reg_rule,
-  /* 1288 */  vmulS_mem_rule,
-  /* 1289 */  vmulS_mem_0_rule,
-  /* 1290 */  vmulI_rule,
-  /* 1291 */  vmulI_reg_rule,
-  /* 1292 */  vmulI_mem_rule,
-  /* 1293 */  vmulI_mem_0_rule,
-  /* 1294 */  evmulL_reg_rule,
-  /* 1295 */  evmulL_mem_rule,
-  /* 1296 */  evmulL_mem_0_rule,
-  /* 1297 */  vmulL_rule,
-  /* 1298 */  vmulL_reg_rule,
-  /* 1299 */  vmulF_rule,
-  /* 1300 */  vmulF_reg_rule,
-  /* 1301 */  vmulF_mem_rule,
-  /* 1302 */  vmulF_mem_0_rule,
-  /* 1303 */  vmulD_rule,
-  /* 1304 */  vmulD_reg_rule,
-  /* 1305 */  vmulD_mem_rule,
-  /* 1306 */  vmulD_mem_0_rule,
-  /* 1307 */  vdivF_rule,
-  /* 1308 */  vdivF_reg_rule,
-  /* 1309 */  vdivF_mem_rule,
-  /* 1310 */  vdivD_rule,
-  /* 1311 */  vdivD_reg_rule,
-  /* 1312 */  vdivD_mem_rule,
-  /* 1313 */  minmax_reg_sse_rule,
-  /* 1314 */  minmax_reg_sse_0_rule,
-  /* 1315 */  vminmax_reg_rule,
-  /* 1316 */  vminmax_reg_0_rule,
-  /* 1317 */  minmaxL_reg_sse_rule,
-  /* 1318 */  minmaxL_reg_sse_0_rule,
-  /* 1319 */  vminmaxL_reg_avx_rule,
-  /* 1320 */  vminmaxL_reg_avx_0_rule,
-  /* 1321 */  vminmaxL_reg_evex_rule,
-  /* 1322 */  vminmaxL_reg_evex_0_rule,
-  /* 1323 */  minmaxFP_reg_rule,
-  /* 1324 */  minmaxFP_reg_0_rule,
-  /* 1325 */  evminmaxFP_reg_eavx_rule,
-  /* 1326 */  evminmaxFP_reg_eavx_0_rule,
-  /* 1327 */  signumF_reg_rule,
-  /* 1328 */  signumD_reg_rule,
-  /* 1329 */  signumV_reg_avx_rule,
-  /* 1330 */  signumV_reg_avx_0_rule,
-  /* 1331 */  signumV_reg_evex_rule,
-  /* 1332 */  signumV_reg_evex_0_rule,
-  /* 1333 */  copySignF_reg_rule,
-  /* 1334 */  copySignD_imm_rule,
-  /* 1335 */  compressBitsI_reg_rule,
-  /* 1336 */  expandBitsI_reg_rule,
-  /* 1337 */  compressBitsI_mem_rule,
-  /* 1338 */  expandBitsI_mem_rule,
-  /* 1339 */  vshiftB_rule,
-  /* 1340 */  vshiftB_0_rule,
-  /* 1341 */  vshiftB_1_rule,
-  /* 1342 */  vshift16B_rule,
-  /* 1343 */  vshift16B_0_rule,
-  /* 1344 */  vshift16B_1_rule,
-  /* 1345 */  vshift16B_avx_rule,
-  /* 1346 */  vshift16B_avx_0_rule,
-  /* 1347 */  vshift16B_avx_1_rule,
-  /* 1348 */  vshift32B_avx_rule,
-  /* 1349 */  vshift32B_avx_0_rule,
-  /* 1350 */  vshift32B_avx_1_rule,
-  /* 1351 */  vshift64B_avx_rule,
-  /* 1352 */  vshift64B_avx_0_rule,
-  /* 1353 */  vshift64B_avx_1_rule,
-  /* 1354 */  vshiftS_rule,
-  /* 1355 */  vshiftS_0_rule,
-  /* 1356 */  vshiftS_1_rule,
-  /* 1357 */  vshiftI_rule,
-  /* 1358 */  vshiftI_0_rule,
-  /* 1359 */  vshiftI_1_rule,
-  /* 1360 */  vshiftI_imm_rule,
-  /* 1361 */  vshiftI_imm_0_rule,
-  /* 1362 */  vshiftI_imm_1_rule,
-  /* 1363 */  vshiftL_rule,
-  /* 1364 */  vshiftL_0_rule,
-  /* 1365 */  vshiftL_imm_rule,
-  /* 1366 */  vshiftL_imm_0_rule,
-  /* 1367 */  vshiftL_arith_reg_rule,
-  /* 1368 */  vshiftL_arith_reg_evex_rule,
-  /* 1369 */  vshift8B_var_nobw_rule,
-  /* 1370 */  vshift8B_var_nobw_0_rule,
-  /* 1371 */  vshift8B_var_nobw_1_rule,
-  /* 1372 */  vshift16B_var_nobw_rule,
-  /* 1373 */  vshift16B_var_nobw_0_rule,
-  /* 1374 */  vshift16B_var_nobw_1_rule,
-  /* 1375 */  vshift32B_var_nobw_rule,
-  /* 1376 */  vshift32B_var_nobw_0_rule,
-  /* 1377 */  vshift32B_var_nobw_1_rule,
-  /* 1378 */  vshiftB_var_evex_bw_rule,
-  /* 1379 */  vshiftB_var_evex_bw_0_rule,
-  /* 1380 */  vshiftB_var_evex_bw_1_rule,
-  /* 1381 */  vshift64B_var_evex_bw_rule,
-  /* 1382 */  vshift64B_var_evex_bw_0_rule,
-  /* 1383 */  vshift64B_var_evex_bw_1_rule,
-  /* 1384 */  vshift8S_var_nobw_rule,
-  /* 1385 */  vshift8S_var_nobw_0_rule,
-  /* 1386 */  vshift8S_var_nobw_1_rule,
-  /* 1387 */  vshift16S_var_nobw_rule,
-  /* 1388 */  vshift16S_var_nobw_0_rule,
-  /* 1389 */  vshift16S_var_nobw_1_rule,
-  /* 1390 */  vshift16S_var_evex_bw_rule,
-  /* 1391 */  vshift16S_var_evex_bw_0_rule,
-  /* 1392 */  vshift16S_var_evex_bw_1_rule,
-  /* 1393 */  vshiftI_var_rule,
-  /* 1394 */  vshiftI_var_0_rule,
-  /* 1395 */  vshiftI_var_1_rule,
-  /* 1396 */  vshiftL_var_rule,
-  /* 1397 */  vshiftL_var_0_rule,
-  /* 1398 */  vshiftL_arith_var_rule,
-  /* 1399 */  vshiftL_arith_var_evex_rule,
-  /* 1400 */  vand_rule,
-  /* 1401 */  vand_reg_rule,
-  /* 1402 */  vand_mem_rule,
-  /* 1403 */  vand_mem_0_rule,
-  /* 1404 */  vor_rule,
-  /* 1405 */  vor_reg_rule,
-  /* 1406 */  vor_mem_rule,
-  /* 1407 */  vor_mem_0_rule,
-  /* 1408 */  vxor_rule,
-  /* 1409 */  vxor_reg_rule,
-  /* 1410 */  vxor_mem_rule,
-  /* 1411 */  vxor_mem_0_rule,
-  /* 1412 */  vcastStoX_rule,
-  /* 1413 */  vcastItoX_rule,
-  /* 1414 */  castFtoX_reg_avx_rule,
-  /* 1415 */  castFtoX_reg_evex_rule,
-  /* 1416 */  castDtoX_reg_avx_rule,
-  /* 1417 */  castDtoX_reg_evex_rule,
-  /* 1418 */  vround_float_avx_rule,
-  /* 1419 */  vround_float_evex_rule,
-  /* 1420 */  vround_reg_evex_rule,
-  /* 1421 */  vcmpFD_rule,
-  /* 1422 */  evcmpFD64_rule,
-  /* 1423 */  evcmpFD_rule,
-  /* 1424 */  vcmp_direct_rule,
-  /* 1425 */  vcmp_negate_rule,
-  /* 1426 */  vcmpu_rule,
-  /* 1427 */  vcmp64_rule,
-  /* 1428 */  evcmp_rule,
-  /* 1429 */  extractI_rule,
-  /* 1430 */  extractI_0_rule,
-  /* 1431 */  extractI_1_rule,
-  /* 1432 */  vextractI_rule,
-  /* 1433 */  vextractI_0_rule,
-  /* 1434 */  vextractI_1_rule,
-  /* 1435 */  extractL_rule,
-  /* 1436 */  vextractL_rule,
-  /* 1437 */  extractF_rule,
-  /* 1438 */  vextractF_rule,
-  /* 1439 */  extractD_rule,
-  /* 1440 */  vextractD_rule,
-  /* 1441 */  blendvp_rule,
-  /* 1442 */  vblendvpI_rule,
-  /* 1443 */  vblendvpFD_rule,
-  /* 1444 */  vblendvp_rule,
-  /* 1445 */  evblendvp64_rule,
-  /* 1446 */  evblendvp64_masked_rule,
-  /* 1447 */  loadMask_rule,
-  /* 1448 */  loadMask64_rule,
-  /* 1449 */  loadMask_evex_rule,
-  /* 1450 */  vstoreMask1B_rule,
-  /* 1451 */  vstoreMask2B_rule,
-  /* 1452 */  vstoreMask4B_rule,
-  /* 1453 */  storeMask8B_rule,
-  /* 1454 */  storeMask8B_avx_rule,
-  /* 1455 */  vstoreMask4B_evex_novectmask_rule,
-  /* 1456 */  vstoreMask8B_evex_novectmask_rule,
-  /* 1457 */  vstoreMask_evex_vectmask_rule,
-  /* 1458 */  vstoreMask_evex_rule,
-  /* 1459 */  VectorPopulateIndex_rule,
-  /* 1460 */  VectorPopulateLIndex_rule,
-  /* 1461 */  rearrangeB_rule,
-  /* 1462 */  rearrangeB_avx_rule,
-  /* 1463 */  rearrangeB_evex_rule,
-  /* 1464 */  rearrangeB_evex_vbmi_rule,
-  /* 1465 */  loadShuffleS_rule,
-  /* 1466 */  rearrangeS_rule,
-  /* 1467 */  rearrangeS_avx_rule,
-  /* 1468 */  rearrangeS_evex_rule,
-  /* 1469 */  loadShuffleI_rule,
-  /* 1470 */  rearrangeI_rule,
-  /* 1471 */  rearrangeI_avx_rule,
-  /* 1472 */  loadShuffleL_rule,
-  /* 1473 */  rearrangeL_rule,
-  /* 1474 */  rearrangeL_evex_rule,
-  /* 1475 */  vfmaF_reg_rule,
-  /* 1476 */  vfmaF_mem_rule,
-  /* 1477 */  vfmaD_reg_rule,
-  /* 1478 */  vfmaD_mem_rule,
-  /* 1479 */  vmuladdS2I_reg_sse_rule,
-  /* 1480 */  vmuladdS2I_reg_avx_rule,
-  /* 1481 */  vmuladdaddS2I_reg_rule,
-  /* 1482 */  vmuladdaddS2I_reg_0_rule,
-  /* 1483 */  vpopcount_integral_reg_evex_masked_rule,
-  /* 1484 */  vpopcount_integral_reg_evex_masked_0_rule,
-  /* 1485 */  vpopcount_avx_reg_rule,
-  /* 1486 */  vpopcount_avx_reg_0_rule,
-  /* 1487 */  vcount_trailing_zeros_reg_evex_rule,
-  /* 1488 */  vcount_trailing_zeros_short_reg_evex_rule,
-  /* 1489 */  vcount_trailing_zeros_byte_reg_evex_rule,
-  /* 1490 */  vcount_trailing_zeros_reg_avx_rule,
-  /* 1491 */  vpternlog_rule,
-  /* 1492 */  vpternlog_mem_rule,
-  /* 1493 */  vprotate_immI8_rule,
-  /* 1494 */  vprotate_immI8_0_rule,
-  /* 1495 */  vprorate_rule,
-  /* 1496 */  vprorate_0_rule,
-  /* 1497 */  vmasked_load_avx_non_subword_rule,
-  /* 1498 */  vmasked_load_evex_rule,
-  /* 1499 */  vmasked_store_avx_non_subword_rule,
-  /* 1500 */  vmasked_store_evex_rule,
-  /* 1501 */  verify_vector_alignment_rule,
-  /* 1502 */  vmask_cmp_node_rule,
-  /* 1503 */  vmask_gen_rule,
-  /* 1504 */  vmask_gen_imm_rule,
-  /* 1505 */  vmask_tolong_evex_rule,
-  /* 1506 */  vmask_tolong_bool_rule,
-  /* 1507 */  vmask_tolong_avx_rule,
-  /* 1508 */  vmask_truecount_evex_rule,
-  /* 1509 */  vmask_truecount_bool_rule,
-  /* 1510 */  vmask_truecount_avx_rule,
-  /* 1511 */  vmask_first_or_last_true_evex_rule,
-  /* 1512 */  vmask_first_or_last_true_evex_0_rule,
-  /* 1513 */  vmask_first_or_last_true_bool_rule,
-  /* 1514 */  vmask_first_or_last_true_bool_0_rule,
-  /* 1515 */  vmask_first_or_last_true_avx_rule,
-  /* 1516 */  vmask_first_or_last_true_avx_0_rule,
-  /* 1517 */  vcompress_reg_avx_rule,
-  /* 1518 */  vcompress_reg_avx_0_rule,
-  /* 1519 */  vcompress_expand_reg_evex_rule,
-  /* 1520 */  vcompress_expand_reg_evex_0_rule,
-  /* 1521 */  vcompress_mask_reg_evex_rule,
-  /* 1522 */  vreverse_reg_rule,
-  /* 1523 */  vreverse_reg_gfni_rule,
-  /* 1524 */  vreverse_byte_reg_rule,
-  /* 1525 */  vreverse_byte64_reg_rule,
-  /* 1526 */  vcount_leading_zeros_IL_reg_evex_masked_rule,
-  /* 1527 */  vcount_leading_zeros_short_reg_evex_rule,
-  /* 1528 */  vcount_leading_zeros_byte_reg_evex_rule,
-  /* 1529 */  vcount_leading_zeros_int_reg_avx_rule,
-  /* 1530 */  vcount_leading_zeros_reg_avx_rule,
-  /* 1531 */  vadd_reg_masked_rule,
-  /* 1532 */  vadd_reg_masked_0_rule,
-  /* 1533 */  vadd_reg_masked_1_rule,
-  /* 1534 */  vadd_reg_masked_2_rule,
-  /* 1535 */  vadd_reg_masked_3_rule,
-  /* 1536 */  vadd_reg_masked_4_rule,
-  /* 1537 */  vadd_mem_masked_rule,
-  /* 1538 */  vadd_mem_masked_0_rule,
-  /* 1539 */  vadd_mem_masked_1_rule,
-  /* 1540 */  vadd_mem_masked_2_rule,
-  /* 1541 */  vadd_mem_masked_3_rule,
-  /* 1542 */  vadd_mem_masked_4_rule,
-  /* 1543 */  vxor_reg_masked_rule,
-  /* 1544 */  vxor_mem_masked_rule,
-  /* 1545 */  vor_reg_masked_rule,
-  /* 1546 */  vor_mem_masked_rule,
-  /* 1547 */  vand_reg_masked_rule,
-  /* 1548 */  vand_mem_masked_rule,
-  /* 1549 */  vsub_reg_masked_rule,
-  /* 1550 */  vsub_reg_masked_0_rule,
-  /* 1551 */  vsub_reg_masked_1_rule,
-  /* 1552 */  vsub_reg_masked_2_rule,
-  /* 1553 */  vsub_reg_masked_3_rule,
-  /* 1554 */  vsub_reg_masked_4_rule,
-  /* 1555 */  vsub_mem_masked_rule,
-  /* 1556 */  vsub_mem_masked_0_rule,
-  /* 1557 */  vsub_mem_masked_1_rule,
-  /* 1558 */  vsub_mem_masked_2_rule,
-  /* 1559 */  vsub_mem_masked_3_rule,
-  /* 1560 */  vsub_mem_masked_4_rule,
-  /* 1561 */  vmul_reg_masked_rule,
-  /* 1562 */  vmul_reg_masked_0_rule,
-  /* 1563 */  vmul_reg_masked_1_rule,
-  /* 1564 */  vmul_reg_masked_2_rule,
-  /* 1565 */  vmul_reg_masked_3_rule,
-  /* 1566 */  vmul_mem_masked_rule,
-  /* 1567 */  vmul_mem_masked_0_rule,
-  /* 1568 */  vmul_mem_masked_1_rule,
-  /* 1569 */  vmul_mem_masked_2_rule,
-  /* 1570 */  vmul_mem_masked_3_rule,
-  /* 1571 */  vsqrt_reg_masked_rule,
-  /* 1572 */  vsqrt_reg_masked_0_rule,
-  /* 1573 */  vdiv_reg_masked_rule,
-  /* 1574 */  vdiv_reg_masked_0_rule,
-  /* 1575 */  vdiv_mem_masked_rule,
-  /* 1576 */  vdiv_mem_masked_0_rule,
-  /* 1577 */  vrol_imm_masked_rule,
-  /* 1578 */  vrol_imm_masked_0_rule,
-  /* 1579 */  vrol_reg_masked_rule,
-  /* 1580 */  vrol_reg_masked_0_rule,
-  /* 1581 */  vlshift_imm_masked_rule,
-  /* 1582 */  vlshift_imm_masked_0_rule,
-  /* 1583 */  vlshift_imm_masked_1_rule,
-  /* 1584 */  vlshift_reg_masked_rule,
-  /* 1585 */  vlshift_reg_masked_0_rule,
-  /* 1586 */  vlshift_reg_masked_1_rule,
-  /* 1587 */  vlshiftv_reg_masked_rule,
-  /* 1588 */  vlshiftv_reg_masked_0_rule,
-  /* 1589 */  vlshiftv_reg_masked_1_rule,
-  /* 1590 */  vrshift_imm_masked_rule,
-  /* 1591 */  vrshift_imm_masked_0_rule,
-  /* 1592 */  vrshift_imm_masked_1_rule,
-  /* 1593 */  vrshift_reg_masked_rule,
-  /* 1594 */  vrshift_reg_masked_0_rule,
-  /* 1595 */  vrshift_reg_masked_1_rule,
-  /* 1596 */  vrshiftv_reg_masked_rule,
-  /* 1597 */  vrshiftv_reg_masked_0_rule,
-  /* 1598 */  vrshiftv_reg_masked_1_rule,
-  /* 1599 */  vurshift_imm_masked_rule,
-  /* 1600 */  vurshift_imm_masked_0_rule,
-  /* 1601 */  vurshift_imm_masked_1_rule,
-  /* 1602 */  vurshift_reg_masked_rule,
-  /* 1603 */  vurshift_reg_masked_0_rule,
-  /* 1604 */  vurshift_reg_masked_1_rule,
-  /* 1605 */  vurshiftv_reg_masked_rule,
-  /* 1606 */  vurshiftv_reg_masked_0_rule,
-  /* 1607 */  vurshiftv_reg_masked_1_rule,
-  /* 1608 */  vmaxv_reg_masked_rule,
-  /* 1609 */  vmaxv_mem_masked_rule,
-  /* 1610 */  vminv_reg_masked_rule,
-  /* 1611 */  vminv_mem_masked_rule,
-  /* 1612 */  vrearrangev_reg_masked_rule,
-  /* 1613 */  vabs_masked_rule,
-  /* 1614 */  vabs_masked_0_rule,
-  /* 1615 */  vabs_masked_1_rule,
-  /* 1616 */  vabs_masked_2_rule,
-  /* 1617 */  vfma_reg_masked_rule,
-  /* 1618 */  vfma_reg_masked_0_rule,
-  /* 1619 */  vfma_mem_masked_rule,
-  /* 1620 */  vfma_mem_masked_0_rule,
-  /* 1621 */  evcmp_masked_rule,
-  /* 1622 */  mask_all_evexI_LE32_rule,
-  /* 1623 */  mask_not_immLT8_rule,
-  /* 1624 */  mask_not_imm_rule,
-  /* 1625 */  long_to_maskLE8_avx_rule,
-  /* 1626 */  long_to_maskGT8_avx_rule,
-  /* 1627 */  mask_opers_evex_rule,
-  /* 1628 */  mask_opers_evex_0_rule,
-  /* 1629 */  mask_opers_evex_1_rule,
-  /* 1630 */  vternlog_reg_masked_rule,
-  /* 1631 */  vternlogd_mem_masked_rule,
-  /* 1632 */  FloatClassCheck_reg_reg_vfpclass_rule,
-  /* 1633 */  DoubleClassCheck_reg_reg_vfpclass_rule,
-  /* 1634 */  compareAndSwapP_shenandoah_rule,
-  /* 1635 */  compareAndSwapP_shenandoah_0_rule,
-  /* 1636 */  compareAndSwapN_shenandoah_rule,
-  /* 1637 */  compareAndSwapN_shenandoah_0_rule,
-  /* 1638 */  compareAndExchangeN_shenandoah_rule,
-  /* 1639 */  compareAndExchangeP_shenandoah_rule,
-  /* 1640 */  xLoadP_rule,
-  /* 1641 */  xCompareAndExchangeP_rule,
-  /* 1642 */  xCompareAndSwapP_rule,
-  /* 1643 */  xCompareAndSwapP_0_rule,
-  /* 1644 */  xXChgP_rule,
-  /* 1645 */  zLoadP_rule,
-  /* 1646 */  zStoreP_rule,
-  /* 1647 */  zStorePNull_rule,
-  /* 1648 */  zCompareAndExchangeP_rule,
-  /* 1649 */  zCompareAndSwapP_rule,
-  /* 1650 */  zCompareAndSwapP_0_rule,
-  /* 1651 */  zXChgP_rule,
+  /*  316 */  storeSSI_rule,
+  /*  317 */  storeSSL_rule,
+  /*  318 */  storeSSP_rule,
+  /*  319 */  storeSSF_rule,
+  /*  320 */  storeSSD_rule,
+  /*  321 */  MoveF2VL_rule,
+  /*  322 */  MoveF2LEG_rule,
+  /*  323 */  MoveVL2F_rule,
+  /*  324 */  MoveLEG2F_rule,
+  /*  325 */  MoveD2VL_rule,
+  /*  326 */  MoveD2LEG_rule,
+  /*  327 */  MoveVL2D_rule,
+  /*  328 */  MoveLEG2D_rule,
+  /*  329 */  leaP8_rule,
+  /*  330 */  leaP32_rule,
+  /*  331 */  leaPIdxOff_rule,
+  /*  332 */  leaPIdxScale_rule,
+  /*  333 */  leaPPosIdxScale_rule,
+  /*  334 */  leaPIdxScaleOff_rule,
+  /*  335 */  leaPPosIdxOff_rule,
+  /*  336 */  leaPPosIdxScaleOff_rule,
+  /*  337 */  leaPCompressedOopOffset_rule,
+  /*  338 */  leaP8Narrow_rule,
+  /*  339 */  leaP32Narrow_rule,
+  /*  340 */  leaPIdxOffNarrow_rule,
+  /*  341 */  leaPIdxScaleNarrow_rule,
+  /*  342 */  leaPIdxScaleOffNarrow_rule,
+  /*  343 */  leaPPosIdxOffNarrow_rule,
+  /*  344 */  leaPPosIdxScaleOffNarrow_rule,
+  /*  345 */  loadConI_rule,
+  /*  346 */  loadConI0_rule,
+  /*  347 */  loadConL_rule,
+  /*  348 */  loadConL0_rule,
+  /*  349 */  loadConUL32_rule,
+  /*  350 */  loadConL32_rule,
+  /*  351 */  loadConP_rule,
+  /*  352 */  loadConP0_rule,
+  /*  353 */  loadConP31_rule,
+  /*  354 */  loadConF_rule,
+  /*  355 */  loadConH_rule,
+  /*  356 */  loadConN0_rule,
+  /*  357 */  loadConN_rule,
+  /*  358 */  loadConNKlass_rule,
+  /*  359 */  loadConF0_rule,
+  /*  360 */  loadConD_rule,
+  /*  361 */  loadConD0_rule,
+  /*  362 */  loadSSI_rule,
+  /*  363 */  loadSSL_rule,
+  /*  364 */  loadSSP_rule,
+  /*  365 */  loadSSF_rule,
+  /*  366 */  loadSSD_rule,
+  /*  367 */  MoveVec2Leg_rule,
+  /*  368 */  MoveLeg2Vec_rule,
+  /*  369 */  membar_volatile_rule,
+  /*  370 */  castX2P_rule,
+  /*  371 */  castP2X_rule,
+  /*  372 */  checkCastPP_rule,
+  /*  373 */  castPP_rule,
+  /*  374 */  castII_rule,
+  /*  375 */  castLL_rule,
+  /*  376 */  castFF_rule,
+  /*  377 */  castHH_rule,
+  /*  378 */  castDD_rule,
+  /*  379 */  cmpF_cc_reg_rule,
+  /*  380 */  cmpF_cc_reg_CF_rule,
+  /*  381 */  cmpF_cc_memCF_rule,
+  /*  382 */  cmpF_cc_immCF_rule,
+  /*  383 */  cmpD_cc_reg_rule,
+  /*  384 */  cmpD_cc_reg_CF_rule,
+  /*  385 */  cmpD_cc_memCF_rule,
+  /*  386 */  cmpD_cc_immCF_rule,
+  /*  387 */  MoveF2I_stack_reg_rule,
+  /*  388 */  MoveI2F_stack_reg_rule,
+  /*  389 */  MoveD2L_stack_reg_rule,
+  /*  390 */  MoveL2D_stack_reg_partial_rule,
+  /*  391 */  MoveL2D_stack_reg_rule,
+  /*  392 */  MoveF2I_reg_reg_rule,
+  /*  393 */  MoveD2L_reg_reg_rule,
+  /*  394 */  MoveI2F_reg_reg_rule,
+  /*  395 */  MoveL2D_reg_reg_rule,
+  /*  396 */  overflowAddI_rReg_rule,
+  /*  397 */  overflowAddI_rReg_imm_rule,
+  /*  398 */  overflowAddL_rReg_rule,
+  /*  399 */  overflowAddL_rReg_imm_rule,
+  /*  400 */  overflowSubI_rReg_rule,
+  /*  401 */  overflowSubI_rReg_imm_rule,
+  /*  402 */  overflowSubL_rReg_rule,
+  /*  403 */  overflowSubL_rReg_imm_rule,
+  /*  404 */  overflowNegI_rReg_rule,
+  /*  405 */  overflowNegL_rReg_rule,
+  /*  406 */  overflowMulI_rReg_rule,
+  /*  407 */  overflowMulI_rReg_imm_rule,
+  /*  408 */  overflowMulL_rReg_rule,
+  /*  409 */  overflowMulL_rReg_imm_rule,
+  /*  410 */  compI_rReg_rule,
+  /*  411 */  compI_rReg_imm_rule,
+  /*  412 */  compI_rReg_mem_rule,
+  /*  413 */  testI_reg_rule,
+  /*  414 */  testI_reg_imm_rule,
+  /*  415 */  testI_reg_reg_rule,
+  /*  416 */  testI_reg_mem_rule,
+  /*  417 */  testI_reg_mem_0_rule,
+  /*  418 */  compU_rReg_rule,
+  /*  419 */  compU_rReg_imm_rule,
+  /*  420 */  compU_rReg_mem_rule,
+  /*  421 */  testU_reg_rule,
+  /*  422 */  compP_rReg_rule,
+  /*  423 */  compP_rReg_mem_rule,
+  /*  424 */  compP_mem_rReg_rule,
+  /*  425 */  testP_reg_rule,
+  /*  426 */  testP_mem_rule,
+  /*  427 */  testP_mem_reg0_rule,
+  /*  428 */  compN_rReg_rule,
+  /*  429 */  compN_rReg_mem_rule,
+  /*  430 */  compN_rReg_imm_rule,
+  /*  431 */  compN_mem_imm_rule,
+  /*  432 */  compN_rReg_imm_klass_rule,
+  /*  433 */  compN_mem_imm_klass_rule,
+  /*  434 */  testN_reg_rule,
+  /*  435 */  testN_mem_rule,
+  /*  436 */  testN_mem_reg0_rule,
+  /*  437 */  compL_rReg_rule,
+  /*  438 */  compL_rReg_imm_rule,
+  /*  439 */  compL_rReg_mem_rule,
+  /*  440 */  testL_reg_rule,
+  /*  441 */  testL_reg_imm_rule,
+  /*  442 */  testL_reg_reg_rule,
+  /*  443 */  testL_reg_mem_rule,
+  /*  444 */  testL_reg_mem_0_rule,
+  /*  445 */  testL_reg_mem2_rule,
+  /*  446 */  testL_reg_mem2_0_rule,
+  /*  447 */  compUL_rReg_rule,
+  /*  448 */  compUL_rReg_imm_rule,
+  /*  449 */  compUL_rReg_mem_rule,
+  /*  450 */  testUL_reg_rule,
+  /*  451 */  compB_mem_imm_rule,
+  /*  452 */  testUB_mem_imm_rule,
+  /*  453 */  testB_mem_imm_rule,
+  /*  454 */  cmpFastLock_rule,
+  /*  455 */  cmpFastUnlock_rule,
+  /*  456 */  cmpFastLockLightweight_rule,
+  /*  457 */  cmpFastUnlockLightweight_rule,
+  /*  458 */  tlsLoadP_rule,
+  /*  459 */  absF_reg_rule,
+  /*  460 */  absF_reg_reg_rule,
+  /*  461 */  absD_reg_rule,
+  /*  462 */  absD_reg_reg_rule,
+  /*  463 */  negF_reg_rule,
+  /*  464 */  negF_reg_reg_rule,
+  /*  465 */  negD_reg_rule,
+  /*  466 */  negD_reg_reg_rule,
+  /*  467 */  vconvF2HF_rule,
+  /*  468 */  convHF2F_reg_reg_rule,
+  /*  469 */  vconvHF2F_reg_mem_rule,
+  /*  470 */  vconvHF2F_rule,
+  /*  471 */  reinterpret_mask_rule,
+  /*  472 */  reinterpret_rule,
+  /*  473 */  vreinterpret_expand4_rule,
+  /*  474 */  vreinterpret_expand_rule,
+  /*  475 */  reinterpret_shrink_rule,
+  /*  476 */  vReplB_reg_rule,
+  /*  477 */  ReplB_mem_rule,
+  /*  478 */  vReplS_reg_rule,
+  /*  479 */  ReplS_mem_rule,
+  /*  480 */  ReplI_reg_rule,
+  /*  481 */  ReplI_mem_rule,
+  /*  482 */  ReplI_imm_rule,
+  /*  483 */  ReplI_zero_rule,
+  /*  484 */  ReplI_M1_rule,
+  /*  485 */  ReplL_reg_rule,
+  /*  486 */  ReplL_mem_rule,
+  /*  487 */  ReplL_imm_rule,
+  /*  488 */  ReplL_zero_rule,
+  /*  489 */  ReplL_M1_rule,
+  /*  490 */  vReplF_reg_rule,
+  /*  491 */  ReplF_reg_rule,
+  /*  492 */  ReplF_mem_rule,
+  /*  493 */  ReplF_imm_rule,
+  /*  494 */  ReplF_zero_rule,
+  /*  495 */  vReplD_reg_rule,
+  /*  496 */  ReplD_reg_rule,
+  /*  497 */  ReplD_mem_rule,
+  /*  498 */  ReplD_imm_rule,
+  /*  499 */  ReplD_zero_rule,
+  /*  500 */  vsqrtF_reg_rule,
+  /*  501 */  vsqrtF_mem_rule,
+  /*  502 */  vsqrtD_reg_rule,
+  /*  503 */  vsqrtD_mem_rule,
+  /*  504 */  vshiftcnt_rule,
+  /*  505 */  vshiftcnt_0_rule,
+  /*  506 */  vcastBtoX_rule,
+  /*  507 */  vcastBtoD_rule,
+  /*  508 */  castStoX_rule,
+  /*  509 */  vcastStoX_evex_rule,
+  /*  510 */  castItoX_rule,
+  /*  511 */  vcastItoX_evex_rule,
+  /*  512 */  vcastLtoBS_rule,
+  /*  513 */  vcastLtoX_evex_rule,
+  /*  514 */  vcastFtoD_reg_rule,
+  /*  515 */  vcastDtoF_reg_rule,
+  /*  516 */  vucast_rule,
+  /*  517 */  vucast_0_rule,
+  /*  518 */  vucast_1_rule,
+  /*  519 */  vabsB_reg_rule,
+  /*  520 */  vabsS_reg_rule,
+  /*  521 */  vabsI_reg_rule,
+  /*  522 */  vabsL_reg_rule,
+  /*  523 */  vabsnegF_rule,
+  /*  524 */  vabsnegF_0_rule,
+  /*  525 */  vabsneg4F_rule,
+  /*  526 */  vabsneg4F_0_rule,
+  /*  527 */  vabsnegD_rule,
+  /*  528 */  vabsnegD_0_rule,
+  /*  529 */  vptest_lt16_rule,
+  /*  530 */  vptest_ge16_rule,
+  /*  531 */  ktest_alltrue_le8_rule,
+  /*  532 */  ktest_anytrue_le8_rule,
+  /*  533 */  ktest_ge8_rule,
+  /*  534 */  vmaskcast_evex_rule,
+  /*  535 */  vmaskcast_rule,
+  /*  536 */  vmaskcast_avx_rule,
+  /*  537 */  loadIotaIndices_rule,
+  /*  538 */  vpopcount_integral_reg_evex_rule,
+  /*  539 */  vpopcount_integral_reg_evex_0_rule,
+  /*  540 */  vcount_leading_zeros_IL_reg_evex_rule,
+  /*  541 */  long_to_mask_evex_rule,
+  /*  542 */  castMM_rule,
+  /*  543 */  castVV_rule,
+  /*  544 */  castVVLeg_rule,
+  /*  545 */  reinterpretS2HF_rule,
+  /*  546 */  convF2HFAndS2HF_rule,
+  /*  547 */  convHF2SAndHF2F_rule,
+  /*  548 */  reinterpretHF2S_rule,
+  /*  549 */  zLoadPNullCheck_rule,
+  /*  550 */  loadB_rule,
+  /*  551 */  loadB2L_rule,
+  /*  552 */  loadUB_rule,
+  /*  553 */  loadUB2L_rule,
+  /*  554 */  loadUB2L_immI_rule,
+  /*  555 */  loadS_rule,
+  /*  556 */  loadS2B_rule,
+  /*  557 */  loadS2L_rule,
+  /*  558 */  loadUS_rule,
+  /*  559 */  loadUS2B_rule,
+  /*  560 */  loadUS2L_rule,
+  /*  561 */  loadUS2L_immI_255_rule,
+  /*  562 */  loadUS2L_immI_rule,
+  /*  563 */  loadI_rule,
+  /*  564 */  loadI2B_rule,
+  /*  565 */  loadI2UB_rule,
+  /*  566 */  loadI2S_rule,
+  /*  567 */  loadI2US_rule,
+  /*  568 */  loadI2L_rule,
+  /*  569 */  loadI2L_immI_255_rule,
+  /*  570 */  loadI2L_immI_65535_rule,
+  /*  571 */  loadI2L_immU31_rule,
+  /*  572 */  loadUI2L_rule,
+  /*  573 */  loadL_rule,
+  /*  574 */  loadRange_rule,
+  /*  575 */  loadP_rule,
+  /*  576 */  loadN_rule,
+  /*  577 */  loadKlass_rule,
+  /*  578 */  loadNKlass_rule,
+  /*  579 */  loadNKlassCompactHeaders_rule,
+  /*  580 */  loadF_rule,
+  /*  581 */  loadD_partial_rule,
+  /*  582 */  loadD_rule,
+  /*  583 */  maxF_reg_rule,
+  /*  584 */  maxF_reduction_reg_rule,
+  /*  585 */  maxD_reg_rule,
+  /*  586 */  maxD_reduction_reg_rule,
+  /*  587 */  minF_reg_rule,
+  /*  588 */  minF_reduction_reg_rule,
+  /*  589 */  minD_reg_rule,
+  /*  590 */  minD_reduction_reg_rule,
+  /*  591 */  prefetchAlloc_rule,
+  /*  592 */  prefetchAllocNTA_rule,
+  /*  593 */  prefetchAllocT0_rule,
+  /*  594 */  prefetchAllocT2_rule,
+  /*  595 */  storeB_rule,
+  /*  596 */  storeC_rule,
+  /*  597 */  storeI_rule,
+  /*  598 */  storeL_rule,
+  /*  599 */  storeP_rule,
+  /*  600 */  storeImmP0_rule,
+  /*  601 */  storeImmP_rule,
+  /*  602 */  storeN_rule,
+  /*  603 */  storeNKlass_rule,
+  /*  604 */  storeImmN0_rule,
+  /*  605 */  storeImmN_rule,
+  /*  606 */  storeImmNKlass_rule,
+  /*  607 */  storeImmI0_rule,
+  /*  608 */  storeImmI_rule,
+  /*  609 */  storeImmL0_rule,
+  /*  610 */  storeImmL_rule,
+  /*  611 */  storeImmC0_rule,
+  /*  612 */  storeImmI16_rule,
+  /*  613 */  storeImmB0_rule,
+  /*  614 */  storeImmB_rule,
+  /*  615 */  storeF_rule,
+  /*  616 */  storeF0_rule,
+  /*  617 */  storeF_imm_rule,
+  /*  618 */  storeD_rule,
+  /*  619 */  storeD0_imm_rule,
+  /*  620 */  storeD0_rule,
+  /*  621 */  cacheWB_rule,
+  /*  622 */  cacheWBPreSync_rule,
+  /*  623 */  cacheWBPostSync_rule,
+  /*  624 */  bytes_reverse_int_rule,
+  /*  625 */  bytes_reverse_long_rule,
+  /*  626 */  bytes_reverse_unsigned_short_rule,
+  /*  627 */  bytes_reverse_short_rule,
+  /*  628 */  countLeadingZerosI_rule,
+  /*  629 */  countLeadingZerosI_mem_rule,
+  /*  630 */  countLeadingZerosI_bsr_rule,
+  /*  631 */  countLeadingZerosL_rule,
+  /*  632 */  countLeadingZerosL_mem_rule,
+  /*  633 */  countLeadingZerosL_bsr_rule,
+  /*  634 */  countTrailingZerosI_rule,
+  /*  635 */  countTrailingZerosI_mem_rule,
+  /*  636 */  countTrailingZerosI_bsf_rule,
+  /*  637 */  countTrailingZerosL_rule,
+  /*  638 */  countTrailingZerosL_mem_rule,
+  /*  639 */  countTrailingZerosL_bsf_rule,
+  /*  640 */  bytes_reversebit_int_rule,
+  /*  641 */  bytes_reversebit_int_gfni_rule,
+  /*  642 */  bytes_reversebit_long_rule,
+  /*  643 */  bytes_reversebit_long_gfni_rule,
+  /*  644 */  popCountI_rule,
+  /*  645 */  popCountI_mem_rule,
+  /*  646 */  popCountL_rule,
+  /*  647 */  popCountL_mem_rule,
+  /*  648 */  membar_acquire_rule,
+  /*  649 */  membar_acquire_0_rule,
+  /*  650 */  membar_acquire_lock_rule,
+  /*  651 */  membar_release_rule,
+  /*  652 */  membar_release_0_rule,
+  /*  653 */  membar_release_lock_rule,
+  /*  654 */  unnecessary_membar_volatile_rule,
+  /*  655 */  membar_storestore_rule,
+  /*  656 */  membar_storestore_0_rule,
+  /*  657 */  convP2I_rule,
+  /*  658 */  convN2I_rule,
+  /*  659 */  encodeHeapOop_rule,
+  /*  660 */  encodeHeapOop_not_null_rule,
+  /*  661 */  decodeHeapOop_rule,
+  /*  662 */  decodeHeapOop_not_null_rule,
+  /*  663 */  encodeKlass_not_null_rule,
+  /*  664 */  decodeKlass_not_null_rule,
+  /*  665 */  jumpXtnd_offset_rule,
+  /*  666 */  jumpXtnd_addr_rule,
+  /*  667 */  jumpXtnd_rule,
+  /*  668 */  cmovI_imm_01_rule,
+  /*  669 */  cmovI_reg_rule,
+  /*  670 */  cmovI_imm_01U_rule,
+  /*  671 */  cmovI_regU_rule,
+  /*  672 */  cmovI_imm_01UCF_rule,
+  /*  673 */  cmovI_regUCF_rule,
+  /*  674 */  cmovI_regUCF2_ne_rule,
+  /*  675 */  cmovI_regUCF2_eq_rule,
+  /*  676 */  cmovI_mem_rule,
+  /*  677 */  cmovI_memU_rule,
+  /*  678 */  cmovI_memUCF_rule,
+  /*  679 */  cmovN_reg_rule,
+  /*  680 */  cmovN_regU_rule,
+  /*  681 */  cmovN_regUCF_rule,
+  /*  682 */  cmovN_regUCF2_ne_rule,
+  /*  683 */  cmovN_regUCF2_eq_rule,
+  /*  684 */  cmovP_reg_rule,
+  /*  685 */  cmovP_regU_rule,
+  /*  686 */  cmovP_regUCF_rule,
+  /*  687 */  cmovP_regUCF2_ne_rule,
+  /*  688 */  cmovP_regUCF2_eq_rule,
+  /*  689 */  cmovL_imm_01_rule,
+  /*  690 */  cmovL_reg_rule,
+  /*  691 */  cmovL_mem_rule,
+  /*  692 */  cmovL_imm_01U_rule,
+  /*  693 */  cmovL_regU_rule,
+  /*  694 */  cmovL_imm_01UCF_rule,
+  /*  695 */  cmovL_regUCF_rule,
+  /*  696 */  cmovL_regUCF2_ne_rule,
+  /*  697 */  cmovL_regUCF2_eq_rule,
+  /*  698 */  cmovL_memU_rule,
+  /*  699 */  cmovL_memUCF_rule,
+  /*  700 */  cmovF_reg_rule,
+  /*  701 */  cmovF_regU_rule,
+  /*  702 */  cmovF_regUCF_rule,
+  /*  703 */  cmovD_reg_rule,
+  /*  704 */  cmovD_regU_rule,
+  /*  705 */  cmovD_regUCF_rule,
+  /*  706 */  addI_rReg_rule,
+  /*  707 */  addI_rReg_imm_rule,
+  /*  708 */  addI_rReg_mem_rule,
+  /*  709 */  addI_rReg_mem_0_rule,
+  /*  710 */  addI_mem_rReg_rule,
+  /*  711 */  addI_mem_rReg_0_rule,
+  /*  712 */  addI_mem_imm_rule,
+  /*  713 */  incI_rReg_rule,
+  /*  714 */  incI_mem_rule,
+  /*  715 */  decI_rReg_rule,
+  /*  716 */  decI_mem_rule,
+  /*  717 */  leaI_rReg_immI2_immI_rule,
+  /*  718 */  leaI_rReg_rReg_immI_rule,
+  /*  719 */  leaI_rReg_rReg_immI2_rule,
+  /*  720 */  leaI_rReg_rReg_immI2_0_rule,
+  /*  721 */  leaI_rReg_rReg_immI2_immI_rule,
+  /*  722 */  leaI_rReg_rReg_immI2_immI_0_rule,
+  /*  723 */  addL_rReg_rule,
+  /*  724 */  addL_rReg_imm_rule,
+  /*  725 */  addL_rReg_mem_rule,
+  /*  726 */  addL_rReg_mem_0_rule,
+  /*  727 */  addL_mem_rReg_rule,
+  /*  728 */  addL_mem_rReg_0_rule,
+  /*  729 */  addL_mem_imm_rule,
+  /*  730 */  incL_rReg_rule,
+  /*  731 */  incL_mem_rule,
+  /*  732 */  decL_rReg_rule,
+  /*  733 */  decL_mem_rule,
+  /*  734 */  leaL_rReg_immI2_immL32_rule,
+  /*  735 */  leaL_rReg_rReg_immL32_rule,
+  /*  736 */  leaL_rReg_rReg_immI2_rule,
+  /*  737 */  leaL_rReg_rReg_immI2_0_rule,
+  /*  738 */  leaL_rReg_rReg_immI2_immL32_rule,
+  /*  739 */  leaL_rReg_rReg_immI2_immL32_0_rule,
+  /*  740 */  addP_rReg_rule,
+  /*  741 */  addP_rReg_imm_rule,
+  /*  742 */  compareAndSwapP_rule,
+  /*  743 */  compareAndSwapP_0_rule,
+  /*  744 */  compareAndSwapL_rule,
+  /*  745 */  compareAndSwapL_0_rule,
+  /*  746 */  compareAndSwapI_rule,
+  /*  747 */  compareAndSwapI_0_rule,
+  /*  748 */  compareAndSwapB_rule,
+  /*  749 */  compareAndSwapB_0_rule,
+  /*  750 */  compareAndSwapS_rule,
+  /*  751 */  compareAndSwapS_0_rule,
+  /*  752 */  compareAndSwapN_rule,
+  /*  753 */  compareAndSwapN_0_rule,
+  /*  754 */  compareAndExchangeB_rule,
+  /*  755 */  compareAndExchangeS_rule,
+  /*  756 */  compareAndExchangeI_rule,
+  /*  757 */  compareAndExchangeL_rule,
+  /*  758 */  compareAndExchangeN_rule,
+  /*  759 */  compareAndExchangeP_rule,
+  /*  760 */  xaddB_reg_no_res_rule,
+  /*  761 */  xaddB_imm_no_res_rule,
+  /*  762 */  xaddB_rule,
+  /*  763 */  xaddS_reg_no_res_rule,
+  /*  764 */  xaddS_imm_no_res_rule,
+  /*  765 */  xaddS_rule,
+  /*  766 */  xaddI_reg_no_res_rule,
+  /*  767 */  xaddI_imm_no_res_rule,
+  /*  768 */  xaddI_rule,
+  /*  769 */  xaddL_reg_no_res_rule,
+  /*  770 */  xaddL_imm_no_res_rule,
+  /*  771 */  xaddL_rule,
+  /*  772 */  xchgB_rule,
+  /*  773 */  xchgS_rule,
+  /*  774 */  xchgI_rule,
+  /*  775 */  xchgL_rule,
+  /*  776 */  xchgP_rule,
+  /*  777 */  xchgN_rule,
+  /*  778 */  absI_rReg_rule,
+  /*  779 */  absL_rReg_rule,
+  /*  780 */  subI_rReg_rule,
+  /*  781 */  subI_rReg_mem_rule,
+  /*  782 */  subI_mem_rReg_rule,
+  /*  783 */  subL_rReg_rule,
+  /*  784 */  subL_rReg_mem_rule,
+  /*  785 */  subL_mem_rReg_rule,
+  /*  786 */  subP_rReg_rule,
+  /*  787 */  negI_rReg_rule,
+  /*  788 */  negI_rReg_2_rule,
+  /*  789 */  negI_mem_rule,
+  /*  790 */  negL_rReg_rule,
+  /*  791 */  negL_rReg_2_rule,
+  /*  792 */  negL_mem_rule,
+  /*  793 */  mulI_rReg_rule,
+  /*  794 */  mulI_rReg_imm_rule,
+  /*  795 */  mulI_mem_rule,
+  /*  796 */  mulI_mem_0_rule,
+  /*  797 */  mulI_mem_imm_rule,
+  /*  798 */  mulAddS2I_rReg_rule,
+  /*  799 */  mulL_rReg_rule,
+  /*  800 */  mulL_rReg_imm_rule,
+  /*  801 */  mulL_mem_rule,
+  /*  802 */  mulL_mem_0_rule,
+  /*  803 */  mulL_mem_imm_rule,
+  /*  804 */  mulHiL_rReg_rule,
+  /*  805 */  umulHiL_rReg_rule,
+  /*  806 */  divI_rReg_rule,
+  /*  807 */  divL_rReg_rule,
+  /*  808 */  udivI_rReg_rule,
+  /*  809 */  udivL_rReg_rule,
+  /*  810 */  divModI_rReg_divmod_rule,
+  /*  811 */  divModL_rReg_divmod_rule,
+  /*  812 */  udivModI_rReg_divmod_rule,
+  /*  813 */  udivModL_rReg_divmod_rule,
+  /*  814 */  modI_rReg_rule,
+  /*  815 */  modL_rReg_rule,
+  /*  816 */  umodI_rReg_rule,
+  /*  817 */  umodL_rReg_rule,
+  /*  818 */  salI_rReg_immI2_rule,
+  /*  819 */  salI_rReg_imm_rule,
+  /*  820 */  salI_mem_imm_rule,
+  /*  821 */  salI_rReg_CL_rule,
+  /*  822 */  salI_mem_CL_rule,
+  /*  823 */  salI_rReg_rReg_rule,
+  /*  824 */  salI_mem_rReg_rule,
+  /*  825 */  sarI_rReg_imm_rule,
+  /*  826 */  sarI_mem_imm_rule,
+  /*  827 */  sarI_rReg_CL_rule,
+  /*  828 */  sarI_mem_CL_rule,
+  /*  829 */  sarI_rReg_rReg_rule,
+  /*  830 */  sarI_mem_rReg_rule,
+  /*  831 */  shrI_rReg_imm_rule,
+  /*  832 */  shrI_mem_imm_rule,
+  /*  833 */  shrI_rReg_CL_rule,
+  /*  834 */  shrI_mem_CL_rule,
+  /*  835 */  shrI_rReg_rReg_rule,
+  /*  836 */  shrI_mem_rReg_rule,
+  /*  837 */  salL_rReg_immI2_rule,
+  /*  838 */  salL_rReg_imm_rule,
+  /*  839 */  salL_mem_imm_rule,
+  /*  840 */  salL_rReg_CL_rule,
+  /*  841 */  salL_mem_CL_rule,
+  /*  842 */  salL_rReg_rReg_rule,
+  /*  843 */  salL_mem_rReg_rule,
+  /*  844 */  sarL_rReg_imm_rule,
+  /*  845 */  sarL_mem_imm_rule,
+  /*  846 */  sarL_rReg_CL_rule,
+  /*  847 */  sarL_mem_CL_rule,
+  /*  848 */  sarL_rReg_rReg_rule,
+  /*  849 */  sarL_mem_rReg_rule,
+  /*  850 */  shrL_rReg_imm_rule,
+  /*  851 */  shrL_mem_imm_rule,
+  /*  852 */  shrL_rReg_CL_rule,
+  /*  853 */  shrL_mem_CL_rule,
+  /*  854 */  shrL_rReg_rReg_rule,
+  /*  855 */  shrL_mem_rReg_rule,
+  /*  856 */  i2b_rule,
+  /*  857 */  i2s_rule,
+  /*  858 */  rolI_immI8_legacy_rule,
+  /*  859 */  rolI_immI8_rule,
+  /*  860 */  rolI_mem_immI8_rule,
+  /*  861 */  rolI_rReg_Var_rule,
+  /*  862 */  rorI_immI8_legacy_rule,
+  /*  863 */  rorI_immI8_rule,
+  /*  864 */  rorI_mem_immI8_rule,
+  /*  865 */  rorI_rReg_Var_rule,
+  /*  866 */  rolL_immI8_legacy_rule,
+  /*  867 */  rolL_immI8_rule,
+  /*  868 */  rolL_mem_immI8_rule,
+  /*  869 */  rolL_rReg_Var_rule,
+  /*  870 */  rorL_immI8_legacy_rule,
+  /*  871 */  rorL_immI8_rule,
+  /*  872 */  rorL_mem_immI8_rule,
+  /*  873 */  rorL_rReg_Var_rule,
+  /*  874 */  compressBitsL_reg_rule,
+  /*  875 */  expandBitsL_reg_rule,
+  /*  876 */  compressBitsL_mem_rule,
+  /*  877 */  expandBitsL_mem_rule,
+  /*  878 */  andI_rReg_rule,
+  /*  879 */  andI_rReg_imm255_rule,
+  /*  880 */  andI2L_rReg_imm255_rule,
+  /*  881 */  andI_rReg_imm65535_rule,
+  /*  882 */  andI2L_rReg_imm65535_rule,
+  /*  883 */  convI2LAndI_reg_immIbitmask_rule,
+  /*  884 */  andI_rReg_imm_rule,
+  /*  885 */  andI_rReg_mem_rule,
+  /*  886 */  andI_rReg_mem_0_rule,
+  /*  887 */  andB_mem_rReg_rule,
+  /*  888 */  andB_mem_rReg_0_rule,
+  /*  889 */  andI_mem_rReg_rule,
+  /*  890 */  andI_mem_rReg_0_rule,
+  /*  891 */  andI_mem_imm_rule,
+  /*  892 */  andnI_rReg_rReg_mem_rule,
+  /*  893 */  andnI_rReg_rReg_mem_0_rule,
+  /*  894 */  andnI_rReg_rReg_rReg_rule,
+  /*  895 */  andnI_rReg_rReg_rReg_0_rule,
+  /*  896 */  blsiI_rReg_rReg_rule,
+  /*  897 */  blsiI_rReg_rReg_0_rule,
+  /*  898 */  blsiI_rReg_mem_rule,
+  /*  899 */  blsiI_rReg_mem_0_rule,
+  /*  900 */  blsmskI_rReg_mem_rule,
+  /*  901 */  blsmskI_rReg_mem_0_rule,
+  /*  902 */  blsmskI_rReg_rReg_rule,
+  /*  903 */  blsmskI_rReg_rReg_0_rule,
+  /*  904 */  blsrI_rReg_rReg_rule,
+  /*  905 */  blsrI_rReg_rReg_0_rule,
+  /*  906 */  blsrI_rReg_mem_rule,
+  /*  907 */  blsrI_rReg_mem_0_rule,
+  /*  908 */  orI_rReg_rule,
+  /*  909 */  orI_rReg_imm_rule,
+  /*  910 */  orI_rReg_mem_rule,
+  /*  911 */  orI_rReg_mem_0_rule,
+  /*  912 */  orB_mem_rReg_rule,
+  /*  913 */  orB_mem_rReg_0_rule,
+  /*  914 */  orI_mem_rReg_rule,
+  /*  915 */  orI_mem_rReg_0_rule,
+  /*  916 */  orI_mem_imm_rule,
+  /*  917 */  xorI_rReg_rule,
+  /*  918 */  xorI_rReg_im1_rule,
+  /*  919 */  xorI_rReg_imm_rule,
+  /*  920 */  xorI_rReg_mem_rule,
+  /*  921 */  xorI_rReg_mem_0_rule,
+  /*  922 */  xorB_mem_rReg_rule,
+  /*  923 */  xorB_mem_rReg_0_rule,
+  /*  924 */  xorI_mem_rReg_rule,
+  /*  925 */  xorI_mem_rReg_0_rule,
+  /*  926 */  xorI_mem_imm_rule,
+  /*  927 */  andL_rReg_rule,
+  /*  928 */  andL_rReg_imm255_rule,
+  /*  929 */  andL_rReg_imm65535_rule,
+  /*  930 */  andL_rReg_imm_rule,
+  /*  931 */  andL_rReg_mem_rule,
+  /*  932 */  andL_rReg_mem_0_rule,
+  /*  933 */  andL_mem_rReg_rule,
+  /*  934 */  andL_mem_rReg_0_rule,
+  /*  935 */  andL_mem_imm_rule,
+  /*  936 */  btrL_mem_imm_rule,
+  /*  937 */  andnL_rReg_rReg_mem_rule,
+  /*  938 */  andnL_rReg_rReg_mem_0_rule,
+  /*  939 */  andnL_rReg_rReg_rReg_rule,
+  /*  940 */  andnL_rReg_rReg_rReg_0_rule,
+  /*  941 */  blsiL_rReg_rReg_rule,
+  /*  942 */  blsiL_rReg_rReg_0_rule,
+  /*  943 */  blsiL_rReg_mem_rule,
+  /*  944 */  blsiL_rReg_mem_0_rule,
+  /*  945 */  blsmskL_rReg_mem_rule,
+  /*  946 */  blsmskL_rReg_rReg_rule,
+  /*  947 */  blsrL_rReg_rReg_rule,
+  /*  948 */  blsrL_rReg_rReg_0_rule,
+  /*  949 */  blsrL_rReg_mem_rule,
+  /*  950 */  blsrL_rReg_mem_0_rule,
+  /*  951 */  orL_rReg_rule,
+  /*  952 */  orL_rReg_castP2X_rule,
+  /*  953 */  orL_rReg_castP2X_0_rule,
+  /*  954 */  orL_rReg_imm_rule,
+  /*  955 */  orL_rReg_mem_rule,
+  /*  956 */  orL_rReg_mem_0_rule,
+  /*  957 */  orL_mem_rReg_rule,
+  /*  958 */  orL_mem_rReg_0_rule,
+  /*  959 */  orL_mem_imm_rule,
+  /*  960 */  btsL_mem_imm_rule,
+  /*  961 */  xorL_rReg_rule,
+  /*  962 */  xorL_rReg_im1_rule,
+  /*  963 */  xorL_rReg_imm_rule,
+  /*  964 */  xorL_rReg_mem_rule,
+  /*  965 */  xorL_mem_rReg_rule,
+  /*  966 */  xorL_mem_imm_rule,
+  /*  967 */  cmpLTMask_rule,
+  /*  968 */  cmpLTMask0_rule,
+  /*  969 */  cadd_cmpLTMask_rule,
+  /*  970 */  cadd_cmpLTMask_1_rule,
+  /*  971 */  cadd_cmpLTMask_0_rule,
+  /*  972 */  cadd_cmpLTMask_2_rule,
+  /*  973 */  and_cmpLTMask_rule,
+  /*  974 */  and_cmpLTMask_0_rule,
+  /*  975 */  cmpF_reg_rule,
+  /*  976 */  cmpF_mem_rule,
+  /*  977 */  cmpF_imm_rule,
+  /*  978 */  cmpD_reg_rule,
+  /*  979 */  cmpD_mem_rule,
+  /*  980 */  cmpD_imm_rule,
+  /*  981 */  convF2D_reg_reg_rule,
+  /*  982 */  convF2D_reg_mem_rule,
+  /*  983 */  convD2F_reg_reg_rule,
+  /*  984 */  convD2F_reg_mem_rule,
+  /*  985 */  convF2I_reg_reg_rule,
+  /*  986 */  convF2L_reg_reg_rule,
+  /*  987 */  convD2I_reg_reg_rule,
+  /*  988 */  convD2L_reg_reg_rule,
+  /*  989 */  round_double_reg_rule,
+  /*  990 */  round_float_reg_rule,
+  /*  991 */  convI2F_reg_reg_rule,
+  /*  992 */  convI2F_reg_mem_rule,
+  /*  993 */  convI2D_reg_reg_rule,
+  /*  994 */  convI2D_reg_mem_rule,
+  /*  995 */  convXI2F_reg_rule,
+  /*  996 */  convXI2D_reg_rule,
+  /*  997 */  convL2F_reg_reg_rule,
+  /*  998 */  convL2F_reg_mem_rule,
+  /*  999 */  convL2D_reg_reg_rule,
+  /* 1000 */  convL2D_reg_mem_rule,
+  /* 1001 */  convI2L_reg_reg_rule,
+  /* 1002 */  convI2L_reg_reg_zex_rule,
+  /* 1003 */  convI2L_reg_mem_zex_rule,
+  /* 1004 */  zerox_long_reg_reg_rule,
+  /* 1005 */  convL2I_reg_reg_rule,
+  /* 1006 */  MoveF2I_reg_stack_rule,
+  /* 1007 */  MoveI2F_reg_stack_rule,
+  /* 1008 */  MoveD2L_reg_stack_rule,
+  /* 1009 */  MoveL2D_reg_stack_rule,
+  /* 1010 */  rep_stos_rule,
+  /* 1011 */  rep_stos_evex_rule,
+  /* 1012 */  rep_stos_large_rule,
+  /* 1013 */  rep_stos_large_evex_rule,
+  /* 1014 */  rep_stos_im_rule,
+  /* 1015 */  string_compareL_rule,
+  /* 1016 */  string_compareL_evex_rule,
+  /* 1017 */  string_compareU_rule,
+  /* 1018 */  string_compareU_evex_rule,
+  /* 1019 */  string_compareLU_rule,
+  /* 1020 */  string_compareLU_evex_rule,
+  /* 1021 */  string_compareUL_rule,
+  /* 1022 */  string_compareUL_evex_rule,
+  /* 1023 */  string_indexof_conL_rule,
+  /* 1024 */  string_indexof_conU_rule,
+  /* 1025 */  string_indexof_conUL_rule,
+  /* 1026 */  string_indexofL_rule,
+  /* 1027 */  string_indexofU_rule,
+  /* 1028 */  string_indexofUL_rule,
+  /* 1029 */  string_indexof_char_rule,
+  /* 1030 */  stringL_indexof_char_rule,
+  /* 1031 */  string_equals_rule,
+  /* 1032 */  string_equals_evex_rule,
+  /* 1033 */  array_equalsB_rule,
+  /* 1034 */  array_equalsB_evex_rule,
+  /* 1035 */  array_equalsC_rule,
+  /* 1036 */  array_equalsC_evex_rule,
+  /* 1037 */  arrays_hashcode_rule,
+  /* 1038 */  count_positives_rule,
+  /* 1039 */  count_positives_evex_rule,
+  /* 1040 */  string_compress_rule,
+  /* 1041 */  string_compress_evex_rule,
+  /* 1042 */  string_inflate_rule,
+  /* 1043 */  string_inflate_evex_rule,
+  /* 1044 */  encode_iso_array_rule,
+  /* 1045 */  encode_ascii_array_rule,
+  /* 1046 */  cmpU3_reg_reg_rule,
+  /* 1047 */  cmpL3_reg_reg_rule,
+  /* 1048 */  cmpUL3_reg_reg_rule,
+  /* 1049 */  cmovI_reg_g_rule,
+  /* 1050 */  minI_rReg_rule,
+  /* 1051 */  cmovI_reg_l_rule,
+  /* 1052 */  maxI_rReg_rule,
+  /* 1053 */  jmpDir_rule,
+  /* 1054 */  jmpCon_rule,
+  /* 1055 */  jmpLoopEnd_rule,
+  /* 1056 */  jmpConU_rule,
+  /* 1057 */  jmpConUCF_rule,
+  /* 1058 */  jmpConUCF2_rule,
+  /* 1059 */  partialSubtypeCheck_rule,
+  /* 1060 */  partialSubtypeCheckVarSuper_rule,
+  /* 1061 */  partialSubtypeCheckConstSuper_rule,
+  /* 1062 */  jmpDir_short_rule,
+  /* 1063 */  jmpCon_short_rule,
+  /* 1064 */  jmpLoopEnd_short_rule,
+  /* 1065 */  jmpConU_short_rule,
+  /* 1066 */  jmpConUCF_short_rule,
+  /* 1067 */  jmpConUCF2_short_rule,
+  /* 1068 */  safePoint_poll_tls_rule,
+  /* 1069 */  mask_all_evexL_rule,
+  /* 1070 */  mask_all_evexI_GT32_rule,
+  /* 1071 */  CallStaticJavaDirect_rule,
+  /* 1072 */  CallDynamicJavaDirect_rule,
+  /* 1073 */  CallRuntimeDirect_rule,
+  /* 1074 */  CallLeafDirect_rule,
+  /* 1075 */  CallLeafDirectVector_rule,
+  /* 1076 */  CallLeafNoFPDirect_rule,
+  /* 1077 */  Ret_rule,
+  /* 1078 */  TailCalljmpInd_rule,
+  /* 1079 */  tailjmpInd_rule,
+  /* 1080 */  ForwardExceptionjmp_rule,
+  /* 1081 */  CreateException_rule,
+  /* 1082 */  RethrowException_rule,
+  /* 1083 */  leaI_rReg_rReg_peep_rule,
+  /* 1084 */  leaI_rReg_immI_peep_rule,
+  /* 1085 */  leaI_rReg_immI2_peep_rule,
+  /* 1086 */  leaL_rReg_rReg_peep_rule,
+  /* 1087 */  leaL_rReg_immL32_peep_rule,
+  /* 1088 */  leaL_rReg_immI2_peep_rule,
+  /* 1089 */  ShouldNotReachHere_rule,
+  /* 1090 */  addF_reg_rule,
+  /* 1091 */  addF_mem_rule,
+  /* 1092 */  addF_mem_0_rule,
+  /* 1093 */  addF_imm_rule,
+  /* 1094 */  addF_reg_reg_rule,
+  /* 1095 */  addF_reg_mem_rule,
+  /* 1096 */  addF_reg_mem_0_rule,
+  /* 1097 */  addF_reg_imm_rule,
+  /* 1098 */  addD_reg_rule,
+  /* 1099 */  addD_mem_rule,
+  /* 1100 */  addD_mem_0_rule,
+  /* 1101 */  addD_imm_rule,
+  /* 1102 */  addD_reg_reg_rule,
+  /* 1103 */  addD_reg_mem_rule,
+  /* 1104 */  addD_reg_mem_0_rule,
+  /* 1105 */  addD_reg_imm_rule,
+  /* 1106 */  subF_reg_rule,
+  /* 1107 */  subF_mem_rule,
+  /* 1108 */  subF_imm_rule,
+  /* 1109 */  subF_reg_reg_rule,
+  /* 1110 */  subF_reg_mem_rule,
+  /* 1111 */  subF_reg_imm_rule,
+  /* 1112 */  subD_reg_rule,
+  /* 1113 */  subD_mem_rule,
+  /* 1114 */  subD_imm_rule,
+  /* 1115 */  subD_reg_reg_rule,
+  /* 1116 */  subD_reg_mem_rule,
+  /* 1117 */  subD_reg_imm_rule,
+  /* 1118 */  mulF_reg_rule,
+  /* 1119 */  mulF_mem_rule,
+  /* 1120 */  mulF_mem_0_rule,
+  /* 1121 */  mulF_imm_rule,
+  /* 1122 */  mulF_reg_reg_rule,
+  /* 1123 */  mulF_reg_mem_rule,
+  /* 1124 */  mulF_reg_mem_0_rule,
+  /* 1125 */  mulF_reg_imm_rule,
+  /* 1126 */  mulD_reg_rule,
+  /* 1127 */  mulD_mem_rule,
+  /* 1128 */  mulD_mem_0_rule,
+  /* 1129 */  mulD_imm_rule,
+  /* 1130 */  mulD_reg_reg_rule,
+  /* 1131 */  mulD_reg_mem_rule,
+  /* 1132 */  mulD_reg_mem_0_rule,
+  /* 1133 */  mulD_reg_imm_rule,
+  /* 1134 */  divF_reg_rule,
+  /* 1135 */  divF_mem_rule,
+  /* 1136 */  divF_imm_rule,
+  /* 1137 */  divF_reg_reg_rule,
+  /* 1138 */  divF_reg_mem_rule,
+  /* 1139 */  divF_reg_imm_rule,
+  /* 1140 */  divD_reg_rule,
+  /* 1141 */  divD_mem_rule,
+  /* 1142 */  divD_imm_rule,
+  /* 1143 */  divD_reg_reg_rule,
+  /* 1144 */  divD_reg_mem_rule,
+  /* 1145 */  divD_reg_imm_rule,
+  /* 1146 */  sqrtF_reg_rule,
+  /* 1147 */  sqrtD_reg_rule,
+  /* 1148 */  convF2HF_reg_reg_rule,
+  /* 1149 */  convF2HF_mem_reg_rule,
+  /* 1150 */  vconvF2HF_mem_reg_rule,
+  /* 1151 */  reinterpret_mask_W2B_rule,
+  /* 1152 */  reinterpret_mask_D2B_rule,
+  /* 1153 */  reinterpret_mask_Q2B_rule,
+  /* 1154 */  reinterpret_expand_rule,
+  /* 1155 */  roundD_reg_rule,
+  /* 1156 */  roundD_imm_rule,
+  /* 1157 */  vroundD_reg_rule,
+  /* 1158 */  vround8D_reg_rule,
+  /* 1159 */  vroundD_mem_rule,
+  /* 1160 */  vround8D_mem_rule,
+  /* 1161 */  onspinwait_rule,
+  /* 1162 */  fmaD_reg_rule,
+  /* 1163 */  fmaF_reg_rule,
+  /* 1164 */  loadV_rule,
+  /* 1165 */  storeV_rule,
+  /* 1166 */  gather_rule,
+  /* 1167 */  evgather_rule,
+  /* 1168 */  evgather_masked_rule,
+  /* 1169 */  vgather_subwordLE8B_rule,
+  /* 1170 */  vgather_subwordGT8B_rule,
+  /* 1171 */  vgather_subwordLE8B_off_rule,
+  /* 1172 */  vgather_subwordGT8B_off_rule,
+  /* 1173 */  vgather_masked_subwordLE8B_avx3_rule,
+  /* 1174 */  vgather_masked_subwordGT8B_avx3_rule,
+  /* 1175 */  vgather_masked_subwordLE8B_off_avx3_rule,
+  /* 1176 */  vgather_masked_subwordGT8B_off_avx3_rule,
+  /* 1177 */  vgather_masked_subwordLE8B_avx2_rule,
+  /* 1178 */  vgather_masked_subwordGT8B_avx2_rule,
+  /* 1179 */  vgather_masked_subwordLE8B_off_avx2_rule,
+  /* 1180 */  vgather_masked_subwordGT8B_off_avx2_rule,
+  /* 1181 */  scatter_rule,
+  /* 1182 */  scatter_masked_rule,
+  /* 1183 */  ReplHF_imm_rule,
+  /* 1184 */  ReplHF_reg_rule,
+  /* 1185 */  insert_rule,
+  /* 1186 */  insert32_rule,
+  /* 1187 */  insert64_rule,
+  /* 1188 */  insert2L_rule,
+  /* 1189 */  insert4L_rule,
+  /* 1190 */  insert8L_rule,
+  /* 1191 */  insertF_rule,
+  /* 1192 */  vinsertF_rule,
+  /* 1193 */  insert2D_rule,
+  /* 1194 */  insert4D_rule,
+  /* 1195 */  insert8D_rule,
+  /* 1196 */  reductionI_rule,
+  /* 1197 */  reductionI_0_rule,
+  /* 1198 */  reductionI_1_rule,
+  /* 1199 */  reductionI_2_rule,
+  /* 1200 */  reductionI_3_rule,
+  /* 1201 */  reductionI_4_rule,
+  /* 1202 */  reductionI_5_rule,
+  /* 1203 */  reductionL_rule,
+  /* 1204 */  reductionL_0_rule,
+  /* 1205 */  reductionL_1_rule,
+  /* 1206 */  reductionL_2_rule,
+  /* 1207 */  reductionL_3_rule,
+  /* 1208 */  reductionL_4_rule,
+  /* 1209 */  reductionL_5_rule,
+  /* 1210 */  reductionL_avx512dq_rule,
+  /* 1211 */  reductionL_avx512dq_0_rule,
+  /* 1212 */  reductionL_avx512dq_1_rule,
+  /* 1213 */  reductionL_avx512dq_2_rule,
+  /* 1214 */  reductionL_avx512dq_3_rule,
+  /* 1215 */  reductionL_avx512dq_4_rule,
+  /* 1216 */  reductionL_avx512dq_5_rule,
+  /* 1217 */  reductionF128_rule,
+  /* 1218 */  reductionF128_0_rule,
+  /* 1219 */  reduction8F_rule,
+  /* 1220 */  reduction8F_0_rule,
+  /* 1221 */  reduction16F_rule,
+  /* 1222 */  reduction16F_0_rule,
+  /* 1223 */  unordered_reduction2F_rule,
+  /* 1224 */  unordered_reduction2F_0_rule,
+  /* 1225 */  unordered_reduction4F_rule,
+  /* 1226 */  unordered_reduction4F_0_rule,
+  /* 1227 */  unordered_reduction8F_rule,
+  /* 1228 */  unordered_reduction8F_0_rule,
+  /* 1229 */  unordered_reduction16F_rule,
+  /* 1230 */  unordered_reduction16F_0_rule,
+  /* 1231 */  reduction2D_rule,
+  /* 1232 */  reduction2D_0_rule,
+  /* 1233 */  reduction4D_rule,
+  /* 1234 */  reduction4D_0_rule,
+  /* 1235 */  reduction8D_rule,
+  /* 1236 */  reduction8D_0_rule,
+  /* 1237 */  unordered_reduction2D_rule,
+  /* 1238 */  unordered_reduction2D_0_rule,
+  /* 1239 */  unordered_reduction4D_rule,
+  /* 1240 */  unordered_reduction4D_0_rule,
+  /* 1241 */  unordered_reduction8D_rule,
+  /* 1242 */  unordered_reduction8D_0_rule,
+  /* 1243 */  reductionB_rule,
+  /* 1244 */  reductionB_0_rule,
+  /* 1245 */  reductionB_1_rule,
+  /* 1246 */  reductionB_2_rule,
+  /* 1247 */  reductionB_3_rule,
+  /* 1248 */  reductionB_4_rule,
+  /* 1249 */  reductionB_avx512bw_rule,
+  /* 1250 */  reductionB_avx512bw_0_rule,
+  /* 1251 */  reductionB_avx512bw_1_rule,
+  /* 1252 */  reductionB_avx512bw_2_rule,
+  /* 1253 */  reductionB_avx512bw_3_rule,
+  /* 1254 */  reductionB_avx512bw_4_rule,
+  /* 1255 */  reductionS_rule,
+  /* 1256 */  reductionS_0_rule,
+  /* 1257 */  reductionS_1_rule,
+  /* 1258 */  reductionS_2_rule,
+  /* 1259 */  reductionS_3_rule,
+  /* 1260 */  reductionS_4_rule,
+  /* 1261 */  reductionS_5_rule,
+  /* 1262 */  mul_reductionB_rule,
+  /* 1263 */  mul_reduction64B_rule,
+  /* 1264 */  minmax_reduction2F_rule,
+  /* 1265 */  minmax_reduction2F_0_rule,
+  /* 1266 */  minmax_reductionF_rule,
+  /* 1267 */  minmax_reductionF_0_rule,
+  /* 1268 */  minmax_reduction2F_av_rule,
+  /* 1269 */  minmax_reduction2F_av_0_rule,
+  /* 1270 */  minmax_reductionF_av_rule,
+  /* 1271 */  minmax_reductionF_av_0_rule,
+  /* 1272 */  minmax_reduction2D_rule,
+  /* 1273 */  minmax_reduction2D_0_rule,
+  /* 1274 */  minmax_reductionD_rule,
+  /* 1275 */  minmax_reductionD_0_rule,
+  /* 1276 */  minmax_reduction2D_av_rule,
+  /* 1277 */  minmax_reduction2D_av_0_rule,
+  /* 1278 */  minmax_reductionD_av_rule,
+  /* 1279 */  minmax_reductionD_av_0_rule,
+  /* 1280 */  vaddB_rule,
+  /* 1281 */  vaddB_reg_rule,
+  /* 1282 */  vaddB_mem_rule,
+  /* 1283 */  vaddB_mem_0_rule,
+  /* 1284 */  vaddS_rule,
+  /* 1285 */  vaddS_reg_rule,
+  /* 1286 */  vaddS_mem_rule,
+  /* 1287 */  vaddS_mem_0_rule,
+  /* 1288 */  vaddI_rule,
+  /* 1289 */  vaddI_reg_rule,
+  /* 1290 */  vaddI_mem_rule,
+  /* 1291 */  vaddI_mem_0_rule,
+  /* 1292 */  vaddL_rule,
+  /* 1293 */  vaddL_reg_rule,
+  /* 1294 */  vaddL_mem_rule,
+  /* 1295 */  vaddL_mem_0_rule,
+  /* 1296 */  vaddF_rule,
+  /* 1297 */  vaddF_reg_rule,
+  /* 1298 */  vaddF_mem_rule,
+  /* 1299 */  vaddF_mem_0_rule,
+  /* 1300 */  vaddD_rule,
+  /* 1301 */  vaddD_reg_rule,
+  /* 1302 */  vaddD_mem_rule,
+  /* 1303 */  vaddD_mem_0_rule,
+  /* 1304 */  vsubB_rule,
+  /* 1305 */  vsubB_reg_rule,
+  /* 1306 */  vsubB_mem_rule,
+  /* 1307 */  vsubS_rule,
+  /* 1308 */  vsubS_reg_rule,
+  /* 1309 */  vsubS_mem_rule,
+  /* 1310 */  vsubI_rule,
+  /* 1311 */  vsubI_reg_rule,
+  /* 1312 */  vsubI_mem_rule,
+  /* 1313 */  vsubL_rule,
+  /* 1314 */  vsubL_reg_rule,
+  /* 1315 */  vsubL_mem_rule,
+  /* 1316 */  vsubF_rule,
+  /* 1317 */  vsubF_reg_rule,
+  /* 1318 */  vsubF_mem_rule,
+  /* 1319 */  vsubD_rule,
+  /* 1320 */  vsubD_reg_rule,
+  /* 1321 */  vsubD_mem_rule,
+  /* 1322 */  vmul8B_rule,
+  /* 1323 */  vmulB_rule,
+  /* 1324 */  vmulB_reg_rule,
+  /* 1325 */  vmulS_rule,
+  /* 1326 */  vmulS_reg_rule,
+  /* 1327 */  vmulS_mem_rule,
+  /* 1328 */  vmulS_mem_0_rule,
+  /* 1329 */  vmulI_rule,
+  /* 1330 */  vmulI_reg_rule,
+  /* 1331 */  vmulI_mem_rule,
+  /* 1332 */  vmulI_mem_0_rule,
+  /* 1333 */  evmulL_reg_rule,
+  /* 1334 */  evmulL_mem_rule,
+  /* 1335 */  evmulL_mem_0_rule,
+  /* 1336 */  vmulL_rule,
+  /* 1337 */  vmulL_reg_rule,
+  /* 1338 */  vmuludq_reg_rule,
+  /* 1339 */  vmuldq_reg_rule,
+  /* 1340 */  vmulF_rule,
+  /* 1341 */  vmulF_reg_rule,
+  /* 1342 */  vmulF_mem_rule,
+  /* 1343 */  vmulF_mem_0_rule,
+  /* 1344 */  vmulD_rule,
+  /* 1345 */  vmulD_reg_rule,
+  /* 1346 */  vmulD_mem_rule,
+  /* 1347 */  vmulD_mem_0_rule,
+  /* 1348 */  vdivF_rule,
+  /* 1349 */  vdivF_reg_rule,
+  /* 1350 */  vdivF_mem_rule,
+  /* 1351 */  vdivD_rule,
+  /* 1352 */  vdivD_reg_rule,
+  /* 1353 */  vdivD_mem_rule,
+  /* 1354 */  minmax_reg_sse_rule,
+  /* 1355 */  minmax_reg_sse_0_rule,
+  /* 1356 */  vminmax_reg_rule,
+  /* 1357 */  vminmax_reg_0_rule,
+  /* 1358 */  minmaxL_reg_sse_rule,
+  /* 1359 */  minmaxL_reg_sse_0_rule,
+  /* 1360 */  vminmaxL_reg_avx_rule,
+  /* 1361 */  vminmaxL_reg_avx_0_rule,
+  /* 1362 */  vminmaxL_reg_evex_rule,
+  /* 1363 */  vminmaxL_reg_evex_0_rule,
+  /* 1364 */  minmaxFP_reg_rule,
+  /* 1365 */  minmaxFP_reg_0_rule,
+  /* 1366 */  evminmaxFP_reg_eavx_rule,
+  /* 1367 */  evminmaxFP_reg_eavx_0_rule,
+  /* 1368 */  vector_uminmax_reg_rule,
+  /* 1369 */  vector_uminmax_reg_0_rule,
+  /* 1370 */  vector_uminmax_mem_rule,
+  /* 1371 */  vector_uminmax_mem_0_rule,
+  /* 1372 */  vector_uminmaxq_reg_rule,
+  /* 1373 */  vector_uminmaxq_reg_0_rule,
+  /* 1374 */  vector_uminmax_reg_masked_rule,
+  /* 1375 */  vector_uminmax_reg_masked_0_rule,
+  /* 1376 */  vector_uminmax_mem_masked_rule,
+  /* 1377 */  vector_uminmax_mem_masked_0_rule,
+  /* 1378 */  signumF_reg_rule,
+  /* 1379 */  signumD_reg_rule,
+  /* 1380 */  signumV_reg_avx_rule,
+  /* 1381 */  signumV_reg_avx_0_rule,
+  /* 1382 */  signumV_reg_evex_rule,
+  /* 1383 */  signumV_reg_evex_0_rule,
+  /* 1384 */  copySignF_reg_rule,
+  /* 1385 */  copySignD_imm_rule,
+  /* 1386 */  compressBitsI_reg_rule,
+  /* 1387 */  expandBitsI_reg_rule,
+  /* 1388 */  compressBitsI_mem_rule,
+  /* 1389 */  expandBitsI_mem_rule,
+  /* 1390 */  vshiftB_rule,
+  /* 1391 */  vshiftB_0_rule,
+  /* 1392 */  vshiftB_1_rule,
+  /* 1393 */  vshift16B_rule,
+  /* 1394 */  vshift16B_0_rule,
+  /* 1395 */  vshift16B_1_rule,
+  /* 1396 */  vshift16B_avx_rule,
+  /* 1397 */  vshift16B_avx_0_rule,
+  /* 1398 */  vshift16B_avx_1_rule,
+  /* 1399 */  vshift32B_avx_rule,
+  /* 1400 */  vshift32B_avx_0_rule,
+  /* 1401 */  vshift32B_avx_1_rule,
+  /* 1402 */  vshift64B_avx_rule,
+  /* 1403 */  vshift64B_avx_0_rule,
+  /* 1404 */  vshift64B_avx_1_rule,
+  /* 1405 */  vshiftS_rule,
+  /* 1406 */  vshiftS_0_rule,
+  /* 1407 */  vshiftS_1_rule,
+  /* 1408 */  vshiftI_rule,
+  /* 1409 */  vshiftI_0_rule,
+  /* 1410 */  vshiftI_1_rule,
+  /* 1411 */  vshiftI_imm_rule,
+  /* 1412 */  vshiftI_imm_0_rule,
+  /* 1413 */  vshiftI_imm_1_rule,
+  /* 1414 */  vshiftL_rule,
+  /* 1415 */  vshiftL_0_rule,
+  /* 1416 */  vshiftL_imm_rule,
+  /* 1417 */  vshiftL_imm_0_rule,
+  /* 1418 */  vshiftL_arith_reg_rule,
+  /* 1419 */  vshiftL_arith_reg_evex_rule,
+  /* 1420 */  vshift8B_var_nobw_rule,
+  /* 1421 */  vshift8B_var_nobw_0_rule,
+  /* 1422 */  vshift8B_var_nobw_1_rule,
+  /* 1423 */  vshift16B_var_nobw_rule,
+  /* 1424 */  vshift16B_var_nobw_0_rule,
+  /* 1425 */  vshift16B_var_nobw_1_rule,
+  /* 1426 */  vshift32B_var_nobw_rule,
+  /* 1427 */  vshift32B_var_nobw_0_rule,
+  /* 1428 */  vshift32B_var_nobw_1_rule,
+  /* 1429 */  vshiftB_var_evex_bw_rule,
+  /* 1430 */  vshiftB_var_evex_bw_0_rule,
+  /* 1431 */  vshiftB_var_evex_bw_1_rule,
+  /* 1432 */  vshift64B_var_evex_bw_rule,
+  /* 1433 */  vshift64B_var_evex_bw_0_rule,
+  /* 1434 */  vshift64B_var_evex_bw_1_rule,
+  /* 1435 */  vshift8S_var_nobw_rule,
+  /* 1436 */  vshift8S_var_nobw_0_rule,
+  /* 1437 */  vshift8S_var_nobw_1_rule,
+  /* 1438 */  vshift16S_var_nobw_rule,
+  /* 1439 */  vshift16S_var_nobw_0_rule,
+  /* 1440 */  vshift16S_var_nobw_1_rule,
+  /* 1441 */  vshift16S_var_evex_bw_rule,
+  /* 1442 */  vshift16S_var_evex_bw_0_rule,
+  /* 1443 */  vshift16S_var_evex_bw_1_rule,
+  /* 1444 */  vshiftI_var_rule,
+  /* 1445 */  vshiftI_var_0_rule,
+  /* 1446 */  vshiftI_var_1_rule,
+  /* 1447 */  vshiftL_var_rule,
+  /* 1448 */  vshiftL_var_0_rule,
+  /* 1449 */  vshiftL_arith_var_rule,
+  /* 1450 */  vshiftL_arith_var_evex_rule,
+  /* 1451 */  vand_rule,
+  /* 1452 */  vand_reg_rule,
+  /* 1453 */  vand_mem_rule,
+  /* 1454 */  vand_mem_0_rule,
+  /* 1455 */  vor_rule,
+  /* 1456 */  vor_reg_rule,
+  /* 1457 */  vor_mem_rule,
+  /* 1458 */  vor_mem_0_rule,
+  /* 1459 */  vxor_rule,
+  /* 1460 */  vxor_reg_rule,
+  /* 1461 */  vxor_mem_rule,
+  /* 1462 */  vxor_mem_0_rule,
+  /* 1463 */  vcastStoX_rule,
+  /* 1464 */  vcastItoX_rule,
+  /* 1465 */  castFtoX_reg_avx_rule,
+  /* 1466 */  castFtoX_reg_evex_rule,
+  /* 1467 */  castDtoX_reg_avx_rule,
+  /* 1468 */  castDtoX_reg_evex_rule,
+  /* 1469 */  vround_float_avx_rule,
+  /* 1470 */  vround_float_evex_rule,
+  /* 1471 */  vround_reg_evex_rule,
+  /* 1472 */  vcmpFD_rule,
+  /* 1473 */  evcmpFD64_rule,
+  /* 1474 */  evcmpFD_rule,
+  /* 1475 */  vcmp_direct_rule,
+  /* 1476 */  vcmp_negate_rule,
+  /* 1477 */  vcmpu_rule,
+  /* 1478 */  vcmp64_rule,
+  /* 1479 */  evcmp_rule,
+  /* 1480 */  extractI_rule,
+  /* 1481 */  extractI_0_rule,
+  /* 1482 */  extractI_1_rule,
+  /* 1483 */  vextractI_rule,
+  /* 1484 */  vextractI_0_rule,
+  /* 1485 */  vextractI_1_rule,
+  /* 1486 */  extractL_rule,
+  /* 1487 */  vextractL_rule,
+  /* 1488 */  extractF_rule,
+  /* 1489 */  vextractF_rule,
+  /* 1490 */  extractD_rule,
+  /* 1491 */  vextractD_rule,
+  /* 1492 */  blendvp_rule,
+  /* 1493 */  vblendvpI_rule,
+  /* 1494 */  vblendvpFD_rule,
+  /* 1495 */  vblendvp_rule,
+  /* 1496 */  evblendvp64_rule,
+  /* 1497 */  evblendvp64_masked_rule,
+  /* 1498 */  loadMask_rule,
+  /* 1499 */  loadMask64_rule,
+  /* 1500 */  loadMask_evex_rule,
+  /* 1501 */  vstoreMask1B_rule,
+  /* 1502 */  vstoreMask2B_rule,
+  /* 1503 */  vstoreMask4B_rule,
+  /* 1504 */  storeMask8B_rule,
+  /* 1505 */  storeMask8B_avx_rule,
+  /* 1506 */  vstoreMask4B_evex_novectmask_rule,
+  /* 1507 */  vstoreMask8B_evex_novectmask_rule,
+  /* 1508 */  vstoreMask_evex_vectmask_rule,
+  /* 1509 */  vstoreMask_evex_rule,
+  /* 1510 */  VectorPopulateIndex_rule,
+  /* 1511 */  VectorPopulateLIndex_rule,
+  /* 1512 */  rearrangeB_rule,
+  /* 1513 */  rearrangeB_avx_rule,
+  /* 1514 */  rearrangeB_evex_rule,
+  /* 1515 */  rearrangeB_evex_vbmi_rule,
+  /* 1516 */  loadShuffleS_rule,
+  /* 1517 */  rearrangeS_rule,
+  /* 1518 */  rearrangeS_avx_rule,
+  /* 1519 */  rearrangeS_evex_rule,
+  /* 1520 */  loadShuffleI_rule,
+  /* 1521 */  rearrangeI_rule,
+  /* 1522 */  rearrangeI_avx_rule,
+  /* 1523 */  loadShuffleL_rule,
+  /* 1524 */  rearrangeL_rule,
+  /* 1525 */  rearrangeL_evex_rule,
+  /* 1526 */  vfmaF_reg_rule,
+  /* 1527 */  vfmaF_mem_rule,
+  /* 1528 */  vfmaD_reg_rule,
+  /* 1529 */  vfmaD_mem_rule,
+  /* 1530 */  vmuladdS2I_reg_sse_rule,
+  /* 1531 */  vmuladdS2I_reg_avx_rule,
+  /* 1532 */  vmuladdaddS2I_reg_rule,
+  /* 1533 */  vmuladdaddS2I_reg_0_rule,
+  /* 1534 */  vpopcount_integral_reg_evex_masked_rule,
+  /* 1535 */  vpopcount_integral_reg_evex_masked_0_rule,
+  /* 1536 */  vpopcount_avx_reg_rule,
+  /* 1537 */  vpopcount_avx_reg_0_rule,
+  /* 1538 */  vcount_trailing_zeros_reg_evex_rule,
+  /* 1539 */  vcount_trailing_zeros_short_reg_evex_rule,
+  /* 1540 */  vcount_trailing_zeros_byte_reg_evex_rule,
+  /* 1541 */  vcount_trailing_zeros_reg_avx_rule,
+  /* 1542 */  vpternlog_rule,
+  /* 1543 */  vpternlog_mem_rule,
+  /* 1544 */  vprotate_immI8_rule,
+  /* 1545 */  vprotate_immI8_0_rule,
+  /* 1546 */  vprorate_rule,
+  /* 1547 */  vprorate_0_rule,
+  /* 1548 */  vmasked_load_avx_non_subword_rule,
+  /* 1549 */  vmasked_load_evex_rule,
+  /* 1550 */  vmasked_store_avx_non_subword_rule,
+  /* 1551 */  vmasked_store_evex_rule,
+  /* 1552 */  verify_vector_alignment_rule,
+  /* 1553 */  vmask_cmp_node_rule,
+  /* 1554 */  vmask_gen_rule,
+  /* 1555 */  vmask_gen_imm_rule,
+  /* 1556 */  vmask_tolong_evex_rule,
+  /* 1557 */  vmask_tolong_bool_rule,
+  /* 1558 */  vmask_tolong_avx_rule,
+  /* 1559 */  vmask_truecount_evex_rule,
+  /* 1560 */  vmask_truecount_bool_rule,
+  /* 1561 */  vmask_truecount_avx_rule,
+  /* 1562 */  vmask_first_or_last_true_evex_rule,
+  /* 1563 */  vmask_first_or_last_true_evex_0_rule,
+  /* 1564 */  vmask_first_or_last_true_bool_rule,
+  /* 1565 */  vmask_first_or_last_true_bool_0_rule,
+  /* 1566 */  vmask_first_or_last_true_avx_rule,
+  /* 1567 */  vmask_first_or_last_true_avx_0_rule,
+  /* 1568 */  vcompress_reg_avx_rule,
+  /* 1569 */  vcompress_reg_avx_0_rule,
+  /* 1570 */  vcompress_expand_reg_evex_rule,
+  /* 1571 */  vcompress_expand_reg_evex_0_rule,
+  /* 1572 */  vcompress_mask_reg_evex_rule,
+  /* 1573 */  vreverse_reg_rule,
+  /* 1574 */  vreverse_reg_gfni_rule,
+  /* 1575 */  vreverse_byte_reg_rule,
+  /* 1576 */  vreverse_byte64_reg_rule,
+  /* 1577 */  vcount_leading_zeros_IL_reg_evex_masked_rule,
+  /* 1578 */  vcount_leading_zeros_short_reg_evex_rule,
+  /* 1579 */  vcount_leading_zeros_byte_reg_evex_rule,
+  /* 1580 */  vcount_leading_zeros_int_reg_avx_rule,
+  /* 1581 */  vcount_leading_zeros_reg_avx_rule,
+  /* 1582 */  vadd_reg_masked_rule,
+  /* 1583 */  vadd_reg_masked_0_rule,
+  /* 1584 */  vadd_reg_masked_1_rule,
+  /* 1585 */  vadd_reg_masked_2_rule,
+  /* 1586 */  vadd_reg_masked_3_rule,
+  /* 1587 */  vadd_reg_masked_4_rule,
+  /* 1588 */  vadd_mem_masked_rule,
+  /* 1589 */  vadd_mem_masked_0_rule,
+  /* 1590 */  vadd_mem_masked_1_rule,
+  /* 1591 */  vadd_mem_masked_2_rule,
+  /* 1592 */  vadd_mem_masked_3_rule,
+  /* 1593 */  vadd_mem_masked_4_rule,
+  /* 1594 */  vxor_reg_masked_rule,
+  /* 1595 */  vxor_mem_masked_rule,
+  /* 1596 */  vor_reg_masked_rule,
+  /* 1597 */  vor_mem_masked_rule,
+  /* 1598 */  vand_reg_masked_rule,
+  /* 1599 */  vand_mem_masked_rule,
+  /* 1600 */  vsub_reg_masked_rule,
+  /* 1601 */  vsub_reg_masked_0_rule,
+  /* 1602 */  vsub_reg_masked_1_rule,
+  /* 1603 */  vsub_reg_masked_2_rule,
+  /* 1604 */  vsub_reg_masked_3_rule,
+  /* 1605 */  vsub_reg_masked_4_rule,
+  /* 1606 */  vsub_mem_masked_rule,
+  /* 1607 */  vsub_mem_masked_0_rule,
+  /* 1608 */  vsub_mem_masked_1_rule,
+  /* 1609 */  vsub_mem_masked_2_rule,
+  /* 1610 */  vsub_mem_masked_3_rule,
+  /* 1611 */  vsub_mem_masked_4_rule,
+  /* 1612 */  vmul_reg_masked_rule,
+  /* 1613 */  vmul_reg_masked_0_rule,
+  /* 1614 */  vmul_reg_masked_1_rule,
+  /* 1615 */  vmul_reg_masked_2_rule,
+  /* 1616 */  vmul_reg_masked_3_rule,
+  /* 1617 */  vmul_mem_masked_rule,
+  /* 1618 */  vmul_mem_masked_0_rule,
+  /* 1619 */  vmul_mem_masked_1_rule,
+  /* 1620 */  vmul_mem_masked_2_rule,
+  /* 1621 */  vmul_mem_masked_3_rule,
+  /* 1622 */  vsqrt_reg_masked_rule,
+  /* 1623 */  vsqrt_reg_masked_0_rule,
+  /* 1624 */  vdiv_reg_masked_rule,
+  /* 1625 */  vdiv_reg_masked_0_rule,
+  /* 1626 */  vdiv_mem_masked_rule,
+  /* 1627 */  vdiv_mem_masked_0_rule,
+  /* 1628 */  vrol_imm_masked_rule,
+  /* 1629 */  vrol_imm_masked_0_rule,
+  /* 1630 */  vrol_reg_masked_rule,
+  /* 1631 */  vrol_reg_masked_0_rule,
+  /* 1632 */  vlshift_imm_masked_rule,
+  /* 1633 */  vlshift_imm_masked_0_rule,
+  /* 1634 */  vlshift_imm_masked_1_rule,
+  /* 1635 */  vlshift_reg_masked_rule,
+  /* 1636 */  vlshift_reg_masked_0_rule,
+  /* 1637 */  vlshift_reg_masked_1_rule,
+  /* 1638 */  vlshiftv_reg_masked_rule,
+  /* 1639 */  vlshiftv_reg_masked_0_rule,
+  /* 1640 */  vlshiftv_reg_masked_1_rule,
+  /* 1641 */  vrshift_imm_masked_rule,
+  /* 1642 */  vrshift_imm_masked_0_rule,
+  /* 1643 */  vrshift_imm_masked_1_rule,
+  /* 1644 */  vrshift_reg_masked_rule,
+  /* 1645 */  vrshift_reg_masked_0_rule,
+  /* 1646 */  vrshift_reg_masked_1_rule,
+  /* 1647 */  vrshiftv_reg_masked_rule,
+  /* 1648 */  vrshiftv_reg_masked_0_rule,
+  /* 1649 */  vrshiftv_reg_masked_1_rule,
+  /* 1650 */  vurshift_imm_masked_rule,
+  /* 1651 */  vurshift_imm_masked_0_rule,
+  /* 1652 */  vurshift_imm_masked_1_rule,
+  /* 1653 */  vurshift_reg_masked_rule,
+  /* 1654 */  vurshift_reg_masked_0_rule,
+  /* 1655 */  vurshift_reg_masked_1_rule,
+  /* 1656 */  vurshiftv_reg_masked_rule,
+  /* 1657 */  vurshiftv_reg_masked_0_rule,
+  /* 1658 */  vurshiftv_reg_masked_1_rule,
+  /* 1659 */  vmaxv_reg_masked_rule,
+  /* 1660 */  vmaxv_mem_masked_rule,
+  /* 1661 */  vminv_reg_masked_rule,
+  /* 1662 */  vminv_mem_masked_rule,
+  /* 1663 */  vrearrangev_reg_masked_rule,
+  /* 1664 */  vabs_masked_rule,
+  /* 1665 */  vabs_masked_0_rule,
+  /* 1666 */  vabs_masked_1_rule,
+  /* 1667 */  vabs_masked_2_rule,
+  /* 1668 */  vfma_reg_masked_rule,
+  /* 1669 */  vfma_reg_masked_0_rule,
+  /* 1670 */  vfma_mem_masked_rule,
+  /* 1671 */  vfma_mem_masked_0_rule,
+  /* 1672 */  evcmp_masked_rule,
+  /* 1673 */  mask_all_evexI_LE32_rule,
+  /* 1674 */  mask_not_immLT8_rule,
+  /* 1675 */  mask_not_imm_rule,
+  /* 1676 */  long_to_maskLE8_avx_rule,
+  /* 1677 */  long_to_maskGT8_avx_rule,
+  /* 1678 */  mask_opers_evex_rule,
+  /* 1679 */  mask_opers_evex_0_rule,
+  /* 1680 */  mask_opers_evex_1_rule,
+  /* 1681 */  vternlog_reg_masked_rule,
+  /* 1682 */  vternlogd_mem_masked_rule,
+  /* 1683 */  FloatClassCheck_reg_reg_vfpclass_rule,
+  /* 1684 */  DoubleClassCheck_reg_reg_vfpclass_rule,
+  /* 1685 */  vector_addsub_saturating_subword_reg_rule,
+  /* 1686 */  vector_addsub_saturating_subword_reg_0_rule,
+  /* 1687 */  vector_addsub_saturating_unsigned_subword_reg_rule,
+  /* 1688 */  vector_addsub_saturating_unsigned_subword_reg_0_rule,
+  /* 1689 */  vector_addsub_saturating_reg_evex_rule,
+  /* 1690 */  vector_addsub_saturating_reg_evex_0_rule,
+  /* 1691 */  vector_addsub_saturating_reg_avx_rule,
+  /* 1692 */  vector_addsub_saturating_reg_avx_0_rule,
+  /* 1693 */  vector_add_saturating_unsigned_reg_evex_rule,
+  /* 1694 */  vector_add_saturating_unsigned_reg_avx_rule,
+  /* 1695 */  vector_sub_saturating_unsigned_reg_evex_rule,
+  /* 1696 */  vector_sub_saturating_unsigned_reg_avx_rule,
+  /* 1697 */  vector_addsub_saturating_subword_mem_rule,
+  /* 1698 */  vector_addsub_saturating_subword_mem_0_rule,
+  /* 1699 */  vector_addsub_saturating_unsigned_subword_mem_rule,
+  /* 1700 */  vector_addsub_saturating_unsigned_subword_mem_0_rule,
+  /* 1701 */  vector_addsub_saturating_subword_masked_reg_rule,
+  /* 1702 */  vector_addsub_saturating_subword_masked_reg_0_rule,
+  /* 1703 */  vector_addsub_saturating_unsigned_subword_masked_reg_rule,
+  /* 1704 */  vector_addsub_saturating_unsigned_subword_masked_reg_0_rule,
+  /* 1705 */  vector_addsub_saturating_subword_masked_mem_rule,
+  /* 1706 */  vector_addsub_saturating_subword_masked_mem_0_rule,
+  /* 1707 */  vector_addsub_saturating_unsigned_subword_masked_mem_rule,
+  /* 1708 */  vector_addsub_saturating_unsigned_subword_masked_mem_0_rule,
+  /* 1709 */  vector_selectfrom_twovectors_reg_evex_rule,
+  /* 1710 */  scalar_sqrt_HF_reg_rule,
+  /* 1711 */  scalar_binOps_HF_reg_rule,
+  /* 1712 */  scalar_binOps_HF_reg_0_rule,
+  /* 1713 */  scalar_binOps_HF_reg_1_rule,
+  /* 1714 */  scalar_binOps_HF_reg_2_rule,
+  /* 1715 */  scalar_binOps_HF_reg_3_rule,
+  /* 1716 */  scalar_binOps_HF_reg_4_rule,
+  /* 1717 */  scalar_fma_HF_reg_rule,
+  /* 1718 */  compareAndSwapP_shenandoah_rule,
+  /* 1719 */  compareAndSwapP_shenandoah_0_rule,
+  /* 1720 */  compareAndSwapN_shenandoah_rule,
+  /* 1721 */  compareAndSwapN_shenandoah_0_rule,
+  /* 1722 */  compareAndExchangeN_shenandoah_rule,
+  /* 1723 */  compareAndExchangeP_shenandoah_rule,
+  /* 1724 */  zLoadP_rule,
+  /* 1725 */  zStoreP_rule,
+  /* 1726 */  zStorePNull_rule,
+  /* 1727 */  zCompareAndExchangeP_rule,
+  /* 1728 */  zCompareAndSwapP_rule,
+  /* 1729 */  zCompareAndSwapP_0_rule,
+  /* 1730 */  zXChgP_rule,
+  /* 1731 */  g1StoreP_rule,
+  /* 1732 */  g1StoreN_rule,
+  /* 1733 */  g1EncodePAndStoreN_rule,
+  /* 1734 */  g1CompareAndExchangeP_rule,
+  /* 1735 */  g1CompareAndExchangeN_rule,
+  /* 1736 */  g1CompareAndSwapP_rule,
+  /* 1737 */  g1CompareAndSwapP_0_rule,
+  /* 1738 */  g1CompareAndSwapN_rule,
+  /* 1739 */  g1CompareAndSwapN_0_rule,
+  /* 1740 */  g1GetAndSetP_rule,
+  /* 1741 */  g1GetAndSetN_rule,
+  /* 1742 */  g1LoadP_rule,
+  /* 1743 */  g1LoadN_rule,
   // last instruction
-  _BEGIN_INST_CHAIN_RULE = 304,
-  _END_INST_CHAIN_RULE  = 356,
-  _BEGIN_REMATERIALIZE   = 309,
-  _END_REMATERIALIZE    = 537,
-  _last_Mach_Node  = 1652 
+  _BEGIN_INST_CHAIN_RULE = 316,
+  _END_INST_CHAIN_RULE  = 369,
+  _BEGIN_REMATERIALIZE   = 321,
+  _END_REMATERIALIZE    = 550,
+  _last_Mach_Node  = 1744 
 };
 
 // Enumerate machine registers starting after reserved regs.
@@ -2048,6 +2152,38 @@ enum MachRegisterEncodes {
   R14_H_enc  =  14,
   R15_enc    =  15,
   R15_H_enc  =  15,
+  R16_enc    =  16,
+  R16_H_enc  =  16,
+  R17_enc    =  17,
+  R17_H_enc  =  17,
+  R18_enc    =  18,
+  R18_H_enc  =  18,
+  R19_enc    =  19,
+  R19_H_enc  =  19,
+  R20_enc    =  20,
+  R20_H_enc  =  20,
+  R21_enc    =  21,
+  R21_H_enc  =  21,
+  R22_enc    =  22,
+  R22_H_enc  =  22,
+  R23_enc    =  23,
+  R23_H_enc  =  23,
+  R24_enc    =  24,
+  R24_H_enc  =  24,
+  R25_enc    =  25,
+  R25_H_enc  =  25,
+  R26_enc    =  26,
+  R26_H_enc  =  26,
+  R27_enc    =  27,
+  R27_H_enc  =  27,
+  R28_enc    =  28,
+  R28_H_enc  =  28,
+  R29_enc    =  29,
+  R29_H_enc  =  29,
+  R30_enc    =  30,
+  R30_H_enc  =  30,
+  R31_enc    =  31,
+  R31_H_enc  =  31,
   RSP_enc    =   4,
   RSP_H_enc  =   4,
   XMM0_enc   =   0,
@@ -2691,6 +2827,7 @@ public:
   void  _sub_Op_AddI(const Node *n);
   void  _sub_Op_AddL(const Node *n);
   void  _sub_Op_AddP(const Node *n);
+  void  _sub_Op_AddHF(const Node *n);
   void  _sub_Op_AndI(const Node *n);
   void  _sub_Op_AndL(const Node *n);
   void  _sub_Op_AryEq(const Node *n);
@@ -2711,6 +2848,7 @@ public:
   void  _sub_Op_CallRuntime(const Node *n);
   void  _sub_Op_CallStaticJava(const Node *n);
   void  _sub_Op_CastDD(const Node *n);
+  void  _sub_Op_CastHH(const Node *n);
   void  _sub_Op_CastFF(const Node *n);
   void  _sub_Op_CastII(const Node *n);
   void  _sub_Op_CastLL(const Node *n);
@@ -2773,6 +2911,7 @@ public:
   void  _sub_Op_ConN(const Node *n);
   void  _sub_Op_ConNKlass(const Node *n);
   void  _sub_Op_ConD(const Node *n);
+  void  _sub_Op_ConH(const Node *n);
   void  _sub_Op_ConF(const Node *n);
   void  _sub_Op_ConI(const Node *n);
   void  _sub_Op_ConL(const Node *n);
@@ -2801,6 +2940,7 @@ public:
   void  _sub_Op_CreateEx(const Node *n);
   void  _sub_Op_DecodeN(const Node *n);
   void  _sub_Op_DecodeNKlass(const Node *n);
+  void  _sub_Op_DivHF(const Node *n);
   void  _sub_Op_DivD(const Node *n);
   void  _sub_Op_DivF(const Node *n);
   void  _sub_Op_DivI(const Node *n);
@@ -2818,6 +2958,8 @@ public:
   void  _sub_Op_FastUnlock(const Node *n);
   void  _sub_Op_FmaD(const Node *n);
   void  _sub_Op_FmaF(const Node *n);
+  void  _sub_Op_FmaHF(const Node *n);
+  void  _sub_Op_ForwardException(const Node *n);
   void  _sub_Op_Goto(const Node *n);
   void  _sub_Op_Halt(const Node *n);
   void  _sub_Op_CountPositives(const Node *n);
@@ -2840,6 +2982,7 @@ public:
   void  _sub_Op_LoadS(const Node *n);
   void  _sub_Op_MulAddS2I(const Node *n);
   void  _sub_Op_MaxI(const Node *n);
+  void  _sub_Op_MaxHF(const Node *n);
   void  _sub_Op_MaxD(const Node *n);
   void  _sub_Op_MaxF(const Node *n);
   void  _sub_Op_MemBarAcquire(const Node *n);
@@ -2852,6 +2995,7 @@ public:
   void  _sub_Op_MemBarVolatile(const Node *n);
   void  _sub_Op_MemBarStoreStore(const Node *n);
   void  _sub_Op_MinI(const Node *n);
+  void  _sub_Op_MinHF(const Node *n);
   void  _sub_Op_MinF(const Node *n);
   void  _sub_Op_MinD(const Node *n);
   void  _sub_Op_ModI(const Node *n);
@@ -2864,6 +3008,7 @@ public:
   void  _sub_Op_MoveD2L(const Node *n);
   void  _sub_Op_IsInfiniteF(const Node *n);
   void  _sub_Op_IsInfiniteD(const Node *n);
+  void  _sub_Op_MulHF(const Node *n);
   void  _sub_Op_MulD(const Node *n);
   void  _sub_Op_MulF(const Node *n);
   void  _sub_Op_MulHiL(const Node *n);
@@ -2912,17 +3057,19 @@ public:
   void  _sub_Op_ShenandoahWeakCompareAndSwapP(const Node *n);
   void  _sub_Op_CopySignD(const Node *n);
   void  _sub_Op_CopySignF(const Node *n);
+  void  _sub_Op_SaturatingAddV(const Node *n);
+  void  _sub_Op_SaturatingSubV(const Node *n);
   void  _sub_Op_SignumD(const Node *n);
   void  _sub_Op_SignumF(const Node *n);
   void  _sub_Op_SignumVF(const Node *n);
   void  _sub_Op_SignumVD(const Node *n);
   void  _sub_Op_SqrtD(const Node *n);
   void  _sub_Op_SqrtF(const Node *n);
+  void  _sub_Op_SqrtHF(const Node *n);
   void  _sub_Op_RoundF(const Node *n);
   void  _sub_Op_RoundD(const Node *n);
   void  _sub_Op_StoreB(const Node *n);
   void  _sub_Op_StoreC(const Node *n);
-  void  _sub_Op_StoreCM(const Node *n);
   void  _sub_Op_StoreD(const Node *n);
   void  _sub_Op_StoreF(const Node *n);
   void  _sub_Op_StoreI(const Node *n);
@@ -2936,6 +3083,7 @@ public:
   void  _sub_Op_StrIndexOf(const Node *n);
   void  _sub_Op_StrIndexOfChar(const Node *n);
   void  _sub_Op_StrInflatedCopy(const Node *n);
+  void  _sub_Op_SubHF(const Node *n);
   void  _sub_Op_SubD(const Node *n);
   void  _sub_Op_SubF(const Node *n);
   void  _sub_Op_SubI(const Node *n);
@@ -3011,6 +3159,8 @@ public:
   void  _sub_Op_XorReductionV(const Node *n);
   void  _sub_Op_MinV(const Node *n);
   void  _sub_Op_MaxV(const Node *n);
+  void  _sub_Op_UMinV(const Node *n);
+  void  _sub_Op_UMaxV(const Node *n);
   void  _sub_Op_MinReductionV(const Node *n);
   void  _sub_Op_MaxReductionV(const Node *n);
   void  _sub_Op_CompressV(const Node *n);
@@ -3041,6 +3191,9 @@ public:
   void  _sub_Op_ExtractL(const Node *n);
   void  _sub_Op_ExtractF(const Node *n);
   void  _sub_Op_ExtractD(const Node *n);
+  void  _sub_Op_ReinterpretS2HF(const Node *n);
+  void  _sub_Op_ReinterpretHF2S(const Node *n);
+  void  _sub_Op_SelectFromTwoVector(const Node *n);
   void  _sub_Op_VectorMaskCmp(const Node *n);
   void  _sub_Op_VectorMaskCast(const Node *n);
   void  _sub_Op_VectorTest(const Node *n);
@@ -3073,11 +3226,11 @@ public:
 
 
 // Total number of operands defined in architecture definition
-#define FIRST_OPERAND_CLASS   126
-#define NUM_OPERANDS          127
+#define FIRST_OPERAND_CLASS   128
+#define NUM_OPERANDS          129
 
 // Total number of instructions defined in architecture definition
-#define NUM_INSTRUCTIONS   1346
+#define NUM_INSTRUCTIONS   1426
 
 //----------------------------Declare classes derived from MachOper----------
 
@@ -3975,6 +4128,30 @@ public:
 #endif
 };
 
+class immHOper : public MachOper { 
+private:
+  virtual uint           num_edges() const { return 0; }
+  jshort        _c0;
+public:
+  immHOper(jshort c0)  : _c0(c0) {}
+  virtual MachOper      *clone() const;
+  virtual uint           opcode() const { return IMMH; }
+  virtual const Type    *type() const { return Type::HALF_FLOAT; }
+
+  virtual intptr_t       constant() const { ShouldNotReachHere(); return 0;  }
+  virtual jshort         constantH() const { return (jshort)_c0; }
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual void           dump_spec(outputStream *st) const {
+   st->print("#%d", _c0);
+   st->print("/0x%08x", _c0);
+  }
+  virtual const char    *Name() const { return "immH";}
+#endif
+};
+
 class immD0Oper : public MachOper { 
 private:
   virtual uint           num_edges() const { return 0; }
@@ -4593,6 +4770,23 @@ public:
   virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
   virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
   virtual const char    *Name() const { return "rdx_RegL";}
+#endif
+};
+
+class r11_RegLOper : public MachOper { 
+private:
+  virtual const RegMask *in_RegMask(int index) const;
+public:
+  r11_RegLOper() {}
+  virtual MachOper      *clone() const;
+  virtual uint           opcode() const { return R11_REGL; }
+  virtual const Type    *type() const { return TypeLong::LONG; }
+
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual const char    *Name() const { return "r11_RegL";}
 #endif
 };
 
@@ -6635,7 +6829,7 @@ public:
   virtual uint           rule() const { return MoveF2VL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegF; }
 public:
   MoveF2VLNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -6664,7 +6858,7 @@ public:
   virtual uint           rule() const { return MoveF2LEG_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegF; }
 public:
   MoveF2LEGNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -6694,7 +6888,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegF; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -6728,7 +6922,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegF; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -6761,7 +6955,7 @@ public:
   virtual uint           rule() const { return MoveD2VL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegD; }
 public:
   MoveD2VLNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -6790,7 +6984,7 @@ public:
   virtual uint           rule() const { return MoveD2LEG_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegD; }
 public:
   MoveD2LEGNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -6820,7 +7014,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegD; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -6854,7 +7048,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegD; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -6887,7 +7081,7 @@ public:
   virtual uint           rule() const { return loadB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -6918,7 +7112,7 @@ public:
   virtual uint           rule() const { return loadB2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -6949,7 +7143,7 @@ public:
   virtual uint           rule() const { return loadUB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadUB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -6980,7 +7174,7 @@ public:
   virtual uint           rule() const { return loadUB2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7011,7 +7205,7 @@ public:
   virtual uint           rule() const { return loadUB2L_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7044,7 +7238,7 @@ public:
   virtual uint           rule() const { return loadS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7075,7 +7269,7 @@ public:
   virtual uint           rule() const { return loadS2B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7107,7 +7301,7 @@ public:
   virtual uint           rule() const { return loadS2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7138,7 +7332,7 @@ public:
   virtual uint           rule() const { return loadUS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadUS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7169,7 +7363,7 @@ public:
   virtual uint           rule() const { return loadUS2B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7201,7 +7395,7 @@ public:
   virtual uint           rule() const { return loadUS2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7232,7 +7426,7 @@ public:
   virtual uint           rule() const { return loadUS2L_immI_255_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7263,7 +7457,7 @@ public:
   virtual uint           rule() const { return loadUS2L_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7296,7 +7490,7 @@ public:
   virtual uint           rule() const { return loadI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7327,7 +7521,7 @@ public:
   virtual uint           rule() const { return loadI2B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7359,7 +7553,7 @@ public:
   virtual uint           rule() const { return loadI2UB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7390,7 +7584,7 @@ public:
   virtual uint           rule() const { return loadI2S_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7422,7 +7616,7 @@ public:
   virtual uint           rule() const { return loadI2US_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7453,7 +7647,7 @@ public:
   virtual uint           rule() const { return loadI2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7484,7 +7678,7 @@ public:
   virtual uint           rule() const { return loadI2L_immI_255_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7515,7 +7709,7 @@ public:
   virtual uint           rule() const { return loadI2L_immI_65535_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7546,7 +7740,7 @@ public:
   virtual uint           rule() const { return loadI2L_immU31_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7579,7 +7773,7 @@ public:
   virtual uint           rule() const { return loadUI2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7610,7 +7804,7 @@ public:
   virtual uint           rule() const { return loadL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7641,7 +7835,7 @@ public:
   virtual uint           rule() const { return loadRange_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadRange; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7672,7 +7866,7 @@ public:
   virtual uint           rule() const { return loadP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7703,7 +7897,7 @@ public:
   virtual uint           rule() const { return loadN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7734,7 +7928,7 @@ public:
   virtual uint           rule() const { return loadKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadKlass; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7765,7 +7959,7 @@ public:
   virtual uint           rule() const { return loadNKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadNKlass; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7778,6 +7972,39 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "loadNKlass";}
+#endif
+};
+
+class loadNKlassCompactHeadersNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadNKlassCompactHeaders_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadNKlass; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  loadNKlassCompactHeadersNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(loadNKlassCompactHeadersNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadNKlassCompactHeaders";}
 #endif
 };
 
@@ -7796,7 +8023,7 @@ public:
   virtual uint           rule() const { return loadF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7827,7 +8054,7 @@ public:
   virtual uint           rule() const { return loadD_partial_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7858,7 +8085,7 @@ public:
   virtual uint           rule() const { return loadD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -7889,7 +8116,7 @@ public:
   virtual uint           rule() const { return maxF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxF; }
 public:
   maxF_regNode() {  _num_opnds = 6; _opnds = _opnd_array; }
@@ -7919,7 +8146,7 @@ public:
   virtual uint           rule() const { return maxF_reduction_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxF; }
 public:
   maxF_reduction_regNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -7949,7 +8176,7 @@ public:
   virtual uint           rule() const { return maxD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxD; }
 public:
   maxD_regNode() {  _num_opnds = 6; _opnds = _opnd_array; }
@@ -7979,7 +8206,7 @@ public:
   virtual uint           rule() const { return maxD_reduction_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxD; }
 public:
   maxD_reduction_regNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -8009,7 +8236,7 @@ public:
   virtual uint           rule() const { return minF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinF; }
 public:
   minF_regNode() {  _num_opnds = 6; _opnds = _opnd_array; }
@@ -8039,7 +8266,7 @@ public:
   virtual uint           rule() const { return minF_reduction_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinF; }
 public:
   minF_reduction_regNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -8069,7 +8296,7 @@ public:
   virtual uint           rule() const { return minD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinD; }
 public:
   minD_regNode() {  _num_opnds = 6; _opnds = _opnd_array; }
@@ -8099,7 +8326,7 @@ public:
   virtual uint           rule() const { return minD_reduction_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinD; }
 public:
   minD_reduction_regNode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -8129,7 +8356,7 @@ public:
   virtual uint           rule() const { return leaP8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8159,7 +8386,7 @@ public:
   virtual uint           rule() const { return leaP32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8189,7 +8416,7 @@ public:
   virtual uint           rule() const { return leaPIdxOff_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8219,7 +8446,7 @@ public:
   virtual uint           rule() const { return leaPIdxScale_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8249,7 +8476,7 @@ public:
   virtual uint           rule() const { return leaPPosIdxScale_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8279,7 +8506,7 @@ public:
   virtual uint           rule() const { return leaPIdxScaleOff_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8309,7 +8536,7 @@ public:
   virtual uint           rule() const { return leaPPosIdxOff_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8339,7 +8566,7 @@ public:
   virtual uint           rule() const { return leaPPosIdxScaleOff_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8369,7 +8596,7 @@ public:
   virtual uint           rule() const { return leaPCompressedOopOffset_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8399,7 +8626,7 @@ public:
   virtual uint           rule() const { return leaP8Narrow_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8429,7 +8656,7 @@ public:
   virtual uint           rule() const { return leaP32Narrow_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8459,7 +8686,7 @@ public:
   virtual uint           rule() const { return leaPIdxOffNarrow_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8489,7 +8716,7 @@ public:
   virtual uint           rule() const { return leaPIdxScaleNarrow_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8519,7 +8746,7 @@ public:
   virtual uint           rule() const { return leaPIdxScaleOffNarrow_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8549,7 +8776,7 @@ public:
   virtual uint           rule() const { return leaPPosIdxOffNarrow_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8579,7 +8806,7 @@ public:
   virtual uint           rule() const { return leaPPosIdxScaleOffNarrow_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -8609,7 +8836,7 @@ public:
   virtual uint           rule() const { return loadConI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConI; }
 public:
   loadConINode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -8642,7 +8869,7 @@ public:
   virtual uint           rule() const { return loadConI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConI; }
 public:
   loadConI0Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -8676,7 +8903,7 @@ public:
   virtual uint           rule() const { return loadConL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConL; }
 public:
   loadConLNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -8709,7 +8936,7 @@ public:
   virtual uint           rule() const { return loadConL0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConL; }
 public:
   loadConL0Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -8743,7 +8970,7 @@ public:
   virtual uint           rule() const { return loadConUL32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConL; }
 public:
   loadConUL32Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -8776,7 +9003,7 @@ public:
   virtual uint           rule() const { return loadConL32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConL; }
 public:
   loadConL32Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -8809,7 +9036,7 @@ public:
   virtual uint           rule() const { return loadConP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConP; }
   virtual int            reloc() const;
 public:
@@ -8843,7 +9070,7 @@ public:
   virtual uint           rule() const { return loadConP0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConP; }
   virtual int            reloc() const;
 public:
@@ -8878,7 +9105,7 @@ public:
   virtual uint           rule() const { return loadConP31_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConP; }
   virtual int            reloc() const;
 public:
@@ -8914,7 +9141,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -8935,6 +9162,43 @@ public:
 #endif
 };
 
+class loadConHNode : public MachConstantNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return loadConH_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           eval_constant(Compile* C);
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConH; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  loadConHNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
+  virtual uint           size_of() const { return sizeof(loadConHNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  // Rematerialize loadConH
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const class Type *bottom_type() const {
+    return  TypeH::make(opnd_array(1)->constantH());
+  };
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "loadConH";}
+#endif
+};
+
 class loadConN0Node : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -8950,7 +9214,7 @@ public:
   virtual uint           rule() const { return loadConN0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConN; }
 public:
   loadConN0Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -8984,7 +9248,7 @@ public:
   virtual uint           rule() const { return loadConN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConN; }
 public:
   loadConNNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -9017,7 +9281,7 @@ public:
   virtual uint           rule() const { return loadConNKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConNKlass; }
 public:
   loadConNKlassNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Con); }
@@ -9050,7 +9314,7 @@ public:
   virtual uint           rule() const { return loadConF0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConF; }
   virtual int            reloc() const;
 public:
@@ -9085,7 +9349,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -9121,7 +9385,7 @@ public:
   virtual uint           rule() const { return loadConD0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConD; }
   virtual int            reloc() const;
 public:
@@ -9155,7 +9419,7 @@ public:
   virtual uint           rule() const { return loadSSI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
 public:
   loadSSINode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(loadSSINode); }
@@ -9183,7 +9447,7 @@ public:
   virtual uint           rule() const { return loadSSL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
 public:
   loadSSLNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(loadSSLNode); }
@@ -9211,7 +9475,7 @@ public:
   virtual uint           rule() const { return loadSSP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
 public:
   loadSSPNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(loadSSPNode); }
@@ -9239,7 +9503,7 @@ public:
   virtual uint           rule() const { return loadSSF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
 public:
   loadSSFNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(loadSSFNode); }
@@ -9267,7 +9531,7 @@ public:
   virtual uint           rule() const { return loadSSD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
 public:
   loadSSDNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(loadSSDNode); }
@@ -9295,7 +9559,7 @@ public:
   virtual uint           rule() const { return prefetchAlloc_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9326,7 +9590,7 @@ public:
   virtual uint           rule() const { return prefetchAllocNTA_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9357,7 +9621,7 @@ public:
   virtual uint           rule() const { return prefetchAllocT0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9388,7 +9652,7 @@ public:
   virtual uint           rule() const { return prefetchAllocT2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PrefetchAllocation; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9419,7 +9683,7 @@ public:
   virtual uint           rule() const { return storeB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9450,7 +9714,7 @@ public:
   virtual uint           rule() const { return storeC_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreC; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9481,7 +9745,7 @@ public:
   virtual uint           rule() const { return storeI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9512,7 +9776,7 @@ public:
   virtual uint           rule() const { return storeL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9543,7 +9807,7 @@ public:
   virtual uint           rule() const { return storeP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9574,7 +9838,7 @@ public:
   virtual uint           rule() const { return storeImmP0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9605,7 +9869,7 @@ public:
   virtual uint           rule() const { return storeImmP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9636,7 +9900,7 @@ public:
   virtual uint           rule() const { return storeN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9667,7 +9931,7 @@ public:
   virtual uint           rule() const { return storeNKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreNKlass; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9698,7 +9962,7 @@ public:
   virtual uint           rule() const { return storeImmN0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9729,7 +9993,7 @@ public:
   virtual uint           rule() const { return storeImmN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9760,7 +10024,7 @@ public:
   virtual uint           rule() const { return storeImmNKlass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreNKlass; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9791,7 +10055,7 @@ public:
   virtual uint           rule() const { return storeImmI0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9822,7 +10086,7 @@ public:
   virtual uint           rule() const { return storeImmI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9853,7 +10117,7 @@ public:
   virtual uint           rule() const { return storeImmL0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9884,7 +10148,7 @@ public:
   virtual uint           rule() const { return storeImmL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9915,7 +10179,7 @@ public:
   virtual uint           rule() const { return storeImmC0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreC; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9946,7 +10210,7 @@ public:
   virtual uint           rule() const { return storeImmI16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreC; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -9977,7 +10241,7 @@ public:
   virtual uint           rule() const { return storeImmB0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10008,7 +10272,7 @@ public:
   virtual uint           rule() const { return storeImmB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10021,68 +10285,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "storeImmB";}
-#endif
-};
-
-class storeImmCM0_regNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return storeImmCM0_reg_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_StoreCM; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  storeImmCM0_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(storeImmCM0_regNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "storeImmCM0_reg";}
-#endif
-};
-
-class storeImmCM0Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return storeImmCM0_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_StoreCM; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  storeImmCM0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(storeImmCM0Node); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "storeImmCM0";}
 #endif
 };
 
@@ -10101,7 +10303,7 @@ public:
   virtual uint           rule() const { return storeF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10132,7 +10334,7 @@ public:
   virtual uint           rule() const { return storeF0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10163,7 +10365,7 @@ public:
   virtual uint           rule() const { return storeF_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10194,7 +10396,7 @@ public:
   virtual uint           rule() const { return storeD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10225,7 +10427,7 @@ public:
   virtual uint           rule() const { return storeD0_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10256,7 +10458,7 @@ public:
   virtual uint           rule() const { return storeD0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10287,7 +10489,7 @@ public:
   virtual uint           rule() const { return storeSSI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegI; }
 public:
   storeSSINode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Copy); }
@@ -10315,7 +10517,7 @@ public:
   virtual uint           rule() const { return storeSSL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegL; }
 public:
   storeSSLNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Copy); }
@@ -10343,7 +10545,7 @@ public:
   virtual uint           rule() const { return storeSSP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegP; }
 public:
   storeSSPNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Copy); }
@@ -10372,7 +10574,7 @@ public:
   virtual uint           rule() const { return storeSSF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegF; }
 public:
   storeSSFNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Copy); }
@@ -10400,7 +10602,7 @@ public:
   virtual uint           rule() const { return storeSSD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RegD; }
 public:
   storeSSDNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_Copy); }
@@ -10428,7 +10630,7 @@ public:
   virtual uint           rule() const { return cacheWB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CacheWB; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -10458,7 +10660,7 @@ public:
   virtual uint           rule() const { return cacheWBPreSync_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CacheWBPreSync; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -10487,7 +10689,7 @@ public:
   virtual uint           rule() const { return cacheWBPostSync_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CacheWBPostSync; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -10516,7 +10718,7 @@ public:
   virtual uint           rule() const { return bytes_reverse_int_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -10545,7 +10747,7 @@ public:
   virtual uint           rule() const { return bytes_reverse_long_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -10574,7 +10776,7 @@ public:
   virtual uint           rule() const { return bytes_reverse_unsigned_short_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesUS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -10605,7 +10807,7 @@ public:
   virtual uint           rule() const { return bytes_reverse_short_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -10637,7 +10839,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -10671,7 +10873,7 @@ public:
   virtual uint           rule() const { return countLeadingZerosI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10704,7 +10906,7 @@ public:
   virtual uint           rule() const { return countLeadingZerosI_bsr_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosI; }
 public:
   countLeadingZerosI_bsrNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -10735,7 +10937,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -10769,7 +10971,7 @@ public:
   virtual uint           rule() const { return countLeadingZerosL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10802,7 +11004,7 @@ public:
   virtual uint           rule() const { return countLeadingZerosL_bsr_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosL; }
 public:
   countLeadingZerosL_bsrNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -10833,7 +11035,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -10867,7 +11069,7 @@ public:
   virtual uint           rule() const { return countTrailingZerosI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10900,7 +11102,7 @@ public:
   virtual uint           rule() const { return countTrailingZerosI_bsf_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosI; }
 public:
   countTrailingZerosI_bsfNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -10931,7 +11133,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -10965,7 +11167,7 @@ public:
   virtual uint           rule() const { return countTrailingZerosL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -10998,7 +11200,7 @@ public:
   virtual uint           rule() const { return countTrailingZerosL_bsf_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosL; }
 public:
   countTrailingZerosL_bsfNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -11028,7 +11230,7 @@ public:
   virtual uint           rule() const { return bytes_reversebit_int_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -11059,7 +11261,7 @@ public:
   virtual uint           rule() const { return bytes_reversebit_int_gfni_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -11090,7 +11292,7 @@ public:
   virtual uint           rule() const { return bytes_reversebit_long_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -11121,7 +11323,7 @@ public:
   virtual uint           rule() const { return bytes_reversebit_long_gfni_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -11153,7 +11355,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -11187,7 +11389,7 @@ public:
   virtual uint           rule() const { return popCountI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -11221,7 +11423,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -11255,7 +11457,7 @@ public:
   virtual uint           rule() const { return popCountL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -11288,7 +11490,7 @@ public:
   virtual uint           rule() const { return membar_acquire_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarAcquire; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11319,7 +11521,7 @@ public:
   virtual uint           rule() const { return membar_acquire_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadFence; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11350,7 +11552,7 @@ public:
   virtual uint           rule() const { return membar_acquire_lock_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarAcquireLock; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11381,7 +11583,7 @@ public:
   virtual uint           rule() const { return membar_release_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarRelease; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11412,7 +11614,7 @@ public:
   virtual uint           rule() const { return membar_release_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreFence; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11443,7 +11645,7 @@ public:
   virtual uint           rule() const { return membar_release_lock_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarReleaseLock; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11474,7 +11676,7 @@ public:
   virtual uint           rule() const { return membar_volatile_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarVolatile; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11507,7 +11709,7 @@ public:
   virtual uint           rule() const { return unnecessary_membar_volatile_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarVolatile; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11538,7 +11740,7 @@ public:
   virtual uint           rule() const { return membar_storestore_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MemBarStoreStore; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11569,7 +11771,7 @@ public:
   virtual uint           rule() const { return membar_storestore_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreStoreFence; }
   virtual uint           oper_input_base() const { return 1; }
@@ -11600,7 +11802,7 @@ public:
   virtual uint           rule() const { return castX2P_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastX2P; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11630,7 +11832,7 @@ public:
   virtual uint           rule() const { return castP2X_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastP2X; }
 public:
   castP2XNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -11659,7 +11861,7 @@ public:
   virtual uint           rule() const { return convP2I_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
 public:
   convP2INode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -11687,7 +11889,7 @@ public:
   virtual uint           rule() const { return convN2I_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
 public:
   convN2INode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -11715,7 +11917,7 @@ public:
   virtual uint           rule() const { return encodeHeapOop_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11746,7 +11948,7 @@ public:
   virtual uint           rule() const { return encodeHeapOop_not_null_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeP; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11777,7 +11979,7 @@ public:
   virtual uint           rule() const { return decodeHeapOop_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11808,7 +12010,7 @@ public:
   virtual uint           rule() const { return decodeHeapOop_not_null_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeN; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11839,7 +12041,7 @@ public:
   virtual uint           rule() const { return encodeKlass_not_null_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodePKlass; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -11871,7 +12073,7 @@ public:
   virtual uint           rule() const { return decodeKlass_not_null_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DecodeNKlass; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -11908,7 +12110,7 @@ private:
   }
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Jump; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11945,7 +12147,7 @@ private:
   }
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Jump; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -11982,7 +12184,7 @@ private:
   }
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Jump; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -12014,7 +12216,7 @@ public:
   virtual uint           rule() const { return cmovI_imm_01_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12044,7 +12246,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            cisc_operand() const { return 4; }
@@ -12077,7 +12279,7 @@ public:
   virtual uint           rule() const { return cmovI_imm_01U_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12107,7 +12309,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            cisc_operand() const { return 4; }
@@ -12140,7 +12342,7 @@ public:
   virtual uint           rule() const { return cmovI_imm_01UCF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12201,7 +12403,7 @@ public:
   virtual uint           rule() const { return cmovI_regUCF2_ne_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12230,7 +12432,7 @@ public:
   virtual uint           rule() const { return cmovI_regUCF2_eq_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12259,7 +12461,7 @@ public:
   virtual uint           rule() const { return cmovI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -12291,7 +12493,7 @@ public:
   virtual uint           rule() const { return cmovI_memU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -12353,7 +12555,7 @@ public:
   virtual uint           rule() const { return cmovN_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12383,7 +12585,7 @@ public:
   virtual uint           rule() const { return cmovN_regU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12441,7 +12643,7 @@ public:
   virtual uint           rule() const { return cmovN_regUCF2_ne_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12471,7 +12673,7 @@ public:
   virtual uint           rule() const { return cmovN_regUCF2_eq_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12501,7 +12703,7 @@ public:
   virtual uint           rule() const { return cmovP_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12531,7 +12733,7 @@ public:
   virtual uint           rule() const { return cmovP_regU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12589,7 +12791,7 @@ public:
   virtual uint           rule() const { return cmovP_regUCF2_ne_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12619,7 +12821,7 @@ public:
   virtual uint           rule() const { return cmovP_regUCF2_eq_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12649,7 +12851,7 @@ public:
   virtual uint           rule() const { return cmovL_imm_01_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12679,7 +12881,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            cisc_operand() const { return 4; }
@@ -12712,7 +12914,7 @@ public:
   virtual uint           rule() const { return cmovL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -12744,7 +12946,7 @@ public:
   virtual uint           rule() const { return cmovL_imm_01U_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12774,7 +12976,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            cisc_operand() const { return 4; }
@@ -12807,7 +13009,7 @@ public:
   virtual uint           rule() const { return cmovL_imm_01UCF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12868,7 +13070,7 @@ public:
   virtual uint           rule() const { return cmovL_regUCF2_ne_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -12897,7 +13099,7 @@ public:
   virtual uint           rule() const { return cmovL_regUCF2_eq_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
@@ -12926,7 +13128,7 @@ public:
   virtual uint           rule() const { return cmovL_memU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -12988,7 +13190,7 @@ public:
   virtual uint           rule() const { return cmovF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -13017,7 +13219,7 @@ public:
   virtual uint           rule() const { return cmovF_regU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -13073,7 +13275,7 @@ public:
   virtual uint           rule() const { return cmovD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -13102,7 +13304,7 @@ public:
   virtual uint           rule() const { return cmovD_regU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CMoveD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -13159,7 +13361,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -13195,7 +13397,7 @@ public:
   virtual uint           rule() const { return addI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -13227,7 +13429,7 @@ public:
   virtual uint           rule() const { return addI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -13261,7 +13463,7 @@ public:
   virtual uint           rule() const { return addI_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -13295,7 +13497,7 @@ public:
   virtual uint           rule() const { return addI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13328,7 +13530,7 @@ public:
   virtual uint           rule() const { return addI_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13361,7 +13563,7 @@ public:
   virtual uint           rule() const { return addI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13394,7 +13596,7 @@ public:
   virtual uint           rule() const { return incI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -13426,7 +13628,7 @@ public:
   virtual uint           rule() const { return incI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13459,7 +13661,7 @@ public:
   virtual uint           rule() const { return decI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -13491,7 +13693,7 @@ public:
   virtual uint           rule() const { return decI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13524,7 +13726,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_immI2_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_immI2_immINode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -13552,7 +13754,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_rReg_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_rReg_immINode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -13580,7 +13782,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_rReg_immI2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_rReg_immI2Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -13608,7 +13810,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_rReg_immI2_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_rReg_immI2_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -13636,7 +13838,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_rReg_immI2_immI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_rReg_immI2_immINode() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -13664,7 +13866,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_rReg_immI2_immI_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_rReg_immI2_immI_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -13693,7 +13895,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -13729,7 +13931,7 @@ public:
   virtual uint           rule() const { return addL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -13761,7 +13963,7 @@ public:
   virtual uint           rule() const { return addL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -13795,7 +13997,7 @@ public:
   virtual uint           rule() const { return addL_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -13829,7 +14031,7 @@ public:
   virtual uint           rule() const { return addL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13862,7 +14064,7 @@ public:
   virtual uint           rule() const { return addL_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13895,7 +14097,7 @@ public:
   virtual uint           rule() const { return addL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13928,7 +14130,7 @@ public:
   virtual uint           rule() const { return incL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -13960,7 +14162,7 @@ public:
   virtual uint           rule() const { return incL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -13993,7 +14195,7 @@ public:
   virtual uint           rule() const { return decL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -14025,7 +14227,7 @@ public:
   virtual uint           rule() const { return decL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14058,7 +14260,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_immI2_immL32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_immI2_immL32Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -14086,7 +14288,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_rReg_immL32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_rReg_immL32Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -14114,7 +14316,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_rReg_immI2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_rReg_immI2Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -14142,7 +14344,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_rReg_immI2_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_rReg_immI2_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -14170,7 +14372,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_rReg_immI2_immL32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_rReg_immI2_immL32Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14198,7 +14400,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_rReg_immI2_immL32_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_rReg_immI2_immL32_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
@@ -14226,7 +14428,7 @@ public:
   virtual uint           rule() const { return addP_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 2; }
@@ -14258,7 +14460,7 @@ public:
   virtual uint           rule() const { return addP_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 2; }
@@ -14290,7 +14492,7 @@ public:
   virtual uint           rule() const { return checkCastPP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CheckCastPP; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -14322,7 +14524,7 @@ public:
   virtual uint           rule() const { return castPP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastPP; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -14354,7 +14556,7 @@ public:
   virtual uint           rule() const { return castII_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastII; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -14386,7 +14588,7 @@ public:
   virtual uint           rule() const { return castLL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastLL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -14418,7 +14620,7 @@ public:
   virtual uint           rule() const { return castFF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastFF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -14432,6 +14634,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "castFF";}
+#endif
+};
+
+class castHHNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castHH_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastHH; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+public:
+  castHHNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castHHNode); }
+  // Rematerialize castHH
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castHH";}
 #endif
 };
 
@@ -14450,7 +14683,7 @@ public:
   virtual uint           rule() const { return castDD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastDD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -14482,7 +14715,7 @@ public:
   virtual uint           rule() const { return compareAndSwapP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14515,7 +14748,7 @@ public:
   virtual uint           rule() const { return compareAndSwapP_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14548,7 +14781,7 @@ public:
   virtual uint           rule() const { return compareAndSwapL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14581,7 +14814,7 @@ public:
   virtual uint           rule() const { return compareAndSwapL_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14614,7 +14847,7 @@ public:
   virtual uint           rule() const { return compareAndSwapI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14647,7 +14880,7 @@ public:
   virtual uint           rule() const { return compareAndSwapI_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14680,7 +14913,7 @@ public:
   virtual uint           rule() const { return compareAndSwapB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14713,7 +14946,7 @@ public:
   virtual uint           rule() const { return compareAndSwapB_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14746,7 +14979,7 @@ public:
   virtual uint           rule() const { return compareAndSwapS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14779,7 +15012,7 @@ public:
   virtual uint           rule() const { return compareAndSwapS_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14812,7 +15045,7 @@ public:
   virtual uint           rule() const { return compareAndSwapN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14845,7 +15078,7 @@ public:
   virtual uint           rule() const { return compareAndSwapN_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -14878,7 +15111,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -14912,7 +15145,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -14946,7 +15179,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -14980,7 +15213,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15014,7 +15247,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15048,7 +15281,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15082,7 +15315,7 @@ public:
   virtual uint           rule() const { return xaddB_reg_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15115,7 +15348,7 @@ public:
   virtual uint           rule() const { return xaddB_imm_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15148,7 +15381,7 @@ public:
   virtual uint           rule() const { return xaddB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15182,7 +15415,7 @@ public:
   virtual uint           rule() const { return xaddS_reg_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15215,7 +15448,7 @@ public:
   virtual uint           rule() const { return xaddS_imm_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15248,7 +15481,7 @@ public:
   virtual uint           rule() const { return xaddS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15282,7 +15515,7 @@ public:
   virtual uint           rule() const { return xaddI_reg_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15315,7 +15548,7 @@ public:
   virtual uint           rule() const { return xaddI_imm_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15348,7 +15581,7 @@ public:
   virtual uint           rule() const { return xaddI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15382,7 +15615,7 @@ public:
   virtual uint           rule() const { return xaddL_reg_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15415,7 +15648,7 @@ public:
   virtual uint           rule() const { return xaddL_imm_no_res_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15448,7 +15681,7 @@ public:
   virtual uint           rule() const { return xaddL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndAddL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15482,7 +15715,7 @@ public:
   virtual uint           rule() const { return xchgB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15514,7 +15747,7 @@ public:
   virtual uint           rule() const { return xchgS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15546,7 +15779,7 @@ public:
   virtual uint           rule() const { return xchgI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15578,7 +15811,7 @@ public:
   virtual uint           rule() const { return xchgL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15610,7 +15843,7 @@ public:
   virtual uint           rule() const { return xchgP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15642,7 +15875,7 @@ public:
   virtual uint           rule() const { return xchgN_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -15674,7 +15907,7 @@ public:
   virtual uint           rule() const { return absI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -15705,7 +15938,7 @@ public:
   virtual uint           rule() const { return absL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -15737,7 +15970,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -15772,7 +16005,7 @@ public:
   virtual uint           rule() const { return subI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -15806,7 +16039,7 @@ public:
   virtual uint           rule() const { return subI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15840,7 +16073,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -15875,7 +16108,7 @@ public:
   virtual uint           rule() const { return subL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -15909,7 +16142,7 @@ public:
   virtual uint           rule() const { return subL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -15942,7 +16175,7 @@ public:
   virtual uint           rule() const { return subP_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 2; }
@@ -15974,7 +16207,7 @@ public:
   virtual uint           rule() const { return negI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -16005,7 +16238,7 @@ public:
   virtual uint           rule() const { return negI_rReg_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -16036,7 +16269,7 @@ public:
   virtual uint           rule() const { return negI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -16069,7 +16302,7 @@ public:
   virtual uint           rule() const { return negL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -16100,7 +16333,7 @@ public:
   virtual uint           rule() const { return negL_rReg_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -16131,7 +16364,7 @@ public:
   virtual uint           rule() const { return negL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -16165,7 +16398,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -16201,7 +16434,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -16235,7 +16468,7 @@ public:
   virtual uint           rule() const { return mulI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -16269,7 +16502,7 @@ public:
   virtual uint           rule() const { return mulI_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -16303,7 +16536,7 @@ public:
   virtual uint           rule() const { return mulI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -16365,7 +16598,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -16401,7 +16634,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -16435,7 +16668,7 @@ public:
   virtual uint           rule() const { return mulL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -16469,7 +16702,7 @@ public:
   virtual uint           rule() const { return mulL_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -16503,7 +16736,7 @@ public:
   virtual uint           rule() const { return mulL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -16536,7 +16769,7 @@ public:
   virtual uint           rule() const { return mulHiL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulHiL; }
 public:
   mulHiL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16566,7 +16799,7 @@ public:
   virtual uint           rule() const { return umulHiL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_UMulHiL; }
 public:
   umulHiL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16596,7 +16829,7 @@ public:
   virtual uint           rule() const { return divI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -16627,7 +16860,7 @@ public:
   virtual uint           rule() const { return divL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -16658,7 +16891,7 @@ public:
   virtual uint           rule() const { return udivI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_UDivI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -16689,7 +16922,7 @@ public:
   virtual uint           rule() const { return udivL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_UDivL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -16720,7 +16953,7 @@ public:
   virtual uint           rule() const { return divModI_rReg_divmod_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivModI; }
 public:
   divModI_rReg_divmodNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16750,7 +16983,7 @@ public:
   virtual uint           rule() const { return divModL_rReg_divmod_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivModL; }
 public:
   divModL_rReg_divmodNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16780,7 +17013,7 @@ public:
   virtual uint           rule() const { return udivModI_rReg_divmod_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_UDivModI; }
 public:
   udivModI_rReg_divmodNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -16810,7 +17043,7 @@ public:
   virtual uint           rule() const { return udivModL_rReg_divmod_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_UDivModL; }
 public:
   udivModL_rReg_divmodNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -16840,7 +17073,7 @@ public:
   virtual uint           rule() const { return modI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ModI; }
 public:
   modI_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16870,7 +17103,7 @@ public:
   virtual uint           rule() const { return modL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ModL; }
 public:
   modL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16900,7 +17133,7 @@ public:
   virtual uint           rule() const { return umodI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_UModI; }
 public:
   umodI_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16930,7 +17163,7 @@ public:
   virtual uint           rule() const { return umodL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_UModL; }
 public:
   umodL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -16960,7 +17193,7 @@ public:
   virtual uint           rule() const { return salI_rReg_immI2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -16992,7 +17225,7 @@ public:
   virtual uint           rule() const { return salI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17023,7 +17256,7 @@ public:
   virtual uint           rule() const { return salI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17056,7 +17289,7 @@ public:
   virtual uint           rule() const { return salI_rReg_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17087,7 +17320,7 @@ public:
   virtual uint           rule() const { return salI_mem_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17121,7 +17354,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -17153,7 +17386,7 @@ public:
   virtual uint           rule() const { return salI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17184,7 +17417,7 @@ public:
   virtual uint           rule() const { return sarI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17215,7 +17448,7 @@ public:
   virtual uint           rule() const { return sarI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17248,7 +17481,7 @@ public:
   virtual uint           rule() const { return sarI_rReg_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17279,7 +17512,7 @@ public:
   virtual uint           rule() const { return sarI_mem_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17313,7 +17546,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -17345,7 +17578,7 @@ public:
   virtual uint           rule() const { return sarI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17376,7 +17609,7 @@ public:
   virtual uint           rule() const { return shrI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17407,7 +17640,7 @@ public:
   virtual uint           rule() const { return shrI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17440,7 +17673,7 @@ public:
   virtual uint           rule() const { return shrI_rReg_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17471,7 +17704,7 @@ public:
   virtual uint           rule() const { return shrI_mem_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17505,7 +17738,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -17537,7 +17770,7 @@ public:
   virtual uint           rule() const { return shrI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17568,7 +17801,7 @@ public:
   virtual uint           rule() const { return salL_rReg_immI2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
@@ -17600,7 +17833,7 @@ public:
   virtual uint           rule() const { return salL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17631,7 +17864,7 @@ public:
   virtual uint           rule() const { return salL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17664,7 +17897,7 @@ public:
   virtual uint           rule() const { return salL_rReg_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17695,7 +17928,7 @@ public:
   virtual uint           rule() const { return salL_mem_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17729,7 +17962,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -17761,7 +17994,7 @@ public:
   virtual uint           rule() const { return salL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17792,7 +18025,7 @@ public:
   virtual uint           rule() const { return sarL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17823,7 +18056,7 @@ public:
   virtual uint           rule() const { return sarL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17856,7 +18089,7 @@ public:
   virtual uint           rule() const { return sarL_rReg_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -17887,7 +18120,7 @@ public:
   virtual uint           rule() const { return sarL_mem_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17921,7 +18154,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -17953,7 +18186,7 @@ public:
   virtual uint           rule() const { return sarL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -17984,7 +18217,7 @@ public:
   virtual uint           rule() const { return shrL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -18015,7 +18248,7 @@ public:
   virtual uint           rule() const { return shrL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18048,7 +18281,7 @@ public:
   virtual uint           rule() const { return shrL_rReg_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -18079,7 +18312,7 @@ public:
   virtual uint           rule() const { return shrL_mem_CL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18113,7 +18346,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18145,7 +18378,7 @@ public:
   virtual uint           rule() const { return shrL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18177,7 +18410,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18211,7 +18444,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18244,7 +18477,7 @@ public:
   virtual uint           rule() const { return rolI_immI8_legacy_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18277,7 +18510,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18310,7 +18543,7 @@ public:
   virtual uint           rule() const { return rolI_mem_immI8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18341,7 +18574,7 @@ public:
   virtual uint           rule() const { return rolI_rReg_Var_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18373,7 +18606,7 @@ public:
   virtual uint           rule() const { return rorI_immI8_legacy_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18406,7 +18639,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18439,7 +18672,7 @@ public:
   virtual uint           rule() const { return rorI_mem_immI8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18470,7 +18703,7 @@ public:
   virtual uint           rule() const { return rorI_rReg_Var_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18502,7 +18735,7 @@ public:
   virtual uint           rule() const { return rolL_immI8_legacy_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18535,7 +18768,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18568,7 +18801,7 @@ public:
   virtual uint           rule() const { return rolL_mem_immI8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18599,7 +18832,7 @@ public:
   virtual uint           rule() const { return rolL_rReg_Var_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18631,7 +18864,7 @@ public:
   virtual uint           rule() const { return rorL_immI8_legacy_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18664,7 +18897,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18697,7 +18930,7 @@ public:
   virtual uint           rule() const { return rorL_mem_immI8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18728,7 +18961,7 @@ public:
   virtual uint           rule() const { return rorL_rReg_Var_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -18761,7 +18994,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompressBits; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -18794,7 +19027,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExpandBits; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -18826,7 +19059,7 @@ public:
   virtual uint           rule() const { return compressBitsL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompressBits; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18857,7 +19090,7 @@ public:
   virtual uint           rule() const { return expandBitsL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExpandBits; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -18889,7 +19122,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -18925,7 +19158,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18958,7 +19191,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -18991,7 +19224,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -19024,7 +19257,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -19056,7 +19289,7 @@ public:
   virtual uint           rule() const { return convI2LAndI_reg_immIbitmask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
 public:
   convI2LAndI_reg_immIbitmaskNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -19086,7 +19319,7 @@ public:
   virtual uint           rule() const { return andI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -19117,7 +19350,7 @@ public:
   virtual uint           rule() const { return andI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -19151,7 +19384,7 @@ public:
   virtual uint           rule() const { return andI_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -19185,7 +19418,7 @@ public:
   virtual uint           rule() const { return andB_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19218,7 +19451,7 @@ public:
   virtual uint           rule() const { return andB_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19251,7 +19484,7 @@ public:
   virtual uint           rule() const { return andI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19284,7 +19517,7 @@ public:
   virtual uint           rule() const { return andI_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19317,7 +19550,7 @@ public:
   virtual uint           rule() const { return andI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19350,7 +19583,7 @@ public:
   virtual uint           rule() const { return andnI_rReg_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19383,7 +19616,7 @@ public:
   virtual uint           rule() const { return andnI_rReg_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19417,7 +19650,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            cisc_operand() const { return 3; }
   virtual MachNode      *cisc_version(int offset);
@@ -19452,7 +19685,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -19486,7 +19719,7 @@ public:
   virtual uint           rule() const { return blsiI_rReg_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
 public:
   blsiI_rReg_rRegNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -19516,7 +19749,7 @@ public:
   virtual uint           rule() const { return blsiI_rReg_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
 public:
   blsiI_rReg_rReg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -19546,7 +19779,7 @@ public:
   virtual uint           rule() const { return blsiI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19579,7 +19812,7 @@ public:
   virtual uint           rule() const { return blsiI_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19612,7 +19845,7 @@ public:
   virtual uint           rule() const { return blsmskI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19645,7 +19878,7 @@ public:
   virtual uint           rule() const { return blsmskI_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19678,7 +19911,7 @@ public:
   virtual uint           rule() const { return blsmskI_rReg_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
 public:
   blsmskI_rReg_rRegNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -19708,7 +19941,7 @@ public:
   virtual uint           rule() const { return blsmskI_rReg_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
 public:
   blsmskI_rReg_rReg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -19738,7 +19971,7 @@ public:
   virtual uint           rule() const { return blsrI_rReg_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
 public:
   blsrI_rReg_rRegNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -19768,7 +20001,7 @@ public:
   virtual uint           rule() const { return blsrI_rReg_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
 public:
   blsrI_rReg_rReg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -19798,7 +20031,7 @@ public:
   virtual uint           rule() const { return blsrI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19831,7 +20064,7 @@ public:
   virtual uint           rule() const { return blsrI_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -19865,7 +20098,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -19900,7 +20133,7 @@ public:
   virtual uint           rule() const { return orI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -19931,7 +20164,7 @@ public:
   virtual uint           rule() const { return orI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -19965,7 +20198,7 @@ public:
   virtual uint           rule() const { return orI_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -19999,7 +20232,7 @@ public:
   virtual uint           rule() const { return orB_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20032,7 +20265,7 @@ public:
   virtual uint           rule() const { return orB_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20065,7 +20298,7 @@ public:
   virtual uint           rule() const { return orI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20098,7 +20331,7 @@ public:
   virtual uint           rule() const { return orI_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20131,7 +20364,7 @@ public:
   virtual uint           rule() const { return orI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20165,7 +20398,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -20200,7 +20433,7 @@ public:
   virtual uint           rule() const { return xorI_rReg_im1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -20229,7 +20462,7 @@ public:
   virtual uint           rule() const { return xorI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -20260,7 +20493,7 @@ public:
   virtual uint           rule() const { return xorI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -20294,7 +20527,7 @@ public:
   virtual uint           rule() const { return xorI_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -20328,7 +20561,7 @@ public:
   virtual uint           rule() const { return xorB_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20361,7 +20594,7 @@ public:
   virtual uint           rule() const { return xorB_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20394,7 +20627,7 @@ public:
   virtual uint           rule() const { return xorI_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20427,7 +20660,7 @@ public:
   virtual uint           rule() const { return xorI_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20460,7 +20693,7 @@ public:
   virtual uint           rule() const { return xorI_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20494,7 +20727,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -20529,7 +20762,7 @@ public:
   virtual uint           rule() const { return andL_rReg_imm255_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
 public:
   andL_rReg_imm255Node() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -20557,7 +20790,7 @@ public:
   virtual uint           rule() const { return andL_rReg_imm65535_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
 public:
   andL_rReg_imm65535Node() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -20585,7 +20818,7 @@ public:
   virtual uint           rule() const { return andL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -20616,7 +20849,7 @@ public:
   virtual uint           rule() const { return andL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -20650,7 +20883,7 @@ public:
   virtual uint           rule() const { return andL_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -20684,7 +20917,7 @@ public:
   virtual uint           rule() const { return andL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20717,7 +20950,7 @@ public:
   virtual uint           rule() const { return andL_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20750,7 +20983,7 @@ public:
   virtual uint           rule() const { return andL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20783,7 +21016,7 @@ public:
   virtual uint           rule() const { return btrL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20816,7 +21049,7 @@ public:
   virtual uint           rule() const { return andnL_rReg_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20849,7 +21082,7 @@ public:
   virtual uint           rule() const { return andnL_rReg_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -20883,7 +21116,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            cisc_operand() const { return 3; }
   virtual MachNode      *cisc_version(int offset);
@@ -20918,7 +21151,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -20952,7 +21185,7 @@ public:
   virtual uint           rule() const { return blsiL_rReg_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
 public:
   blsiL_rReg_rRegNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -20982,7 +21215,7 @@ public:
   virtual uint           rule() const { return blsiL_rReg_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
 public:
   blsiL_rReg_rReg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -21012,7 +21245,7 @@ public:
   virtual uint           rule() const { return blsiL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21045,7 +21278,7 @@ public:
   virtual uint           rule() const { return blsiL_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21078,7 +21311,7 @@ public:
   virtual uint           rule() const { return blsmskL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21093,39 +21326,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "blsmskL_rReg_mem";}
-#endif
-};
-
-class blsmskL_rReg_mem_0Node : public MachNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return blsmskL_rReg_mem_0_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_XorL; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  blsmskL_rReg_mem_0Node() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(blsmskL_rReg_mem_0Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "blsmskL_rReg_mem_0";}
 #endif
 };
 
@@ -21144,7 +21344,7 @@ public:
   virtual uint           rule() const { return blsmskL_rReg_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
 public:
   blsmskL_rReg_rRegNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -21156,36 +21356,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "blsmskL_rReg_rReg";}
-#endif
-};
-
-class blsmskL_rReg_rReg_0Node : public MachNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return blsmskL_rReg_rReg_0_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_XorL; }
-public:
-  blsmskL_rReg_rReg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(blsmskL_rReg_rReg_0Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "blsmskL_rReg_rReg_0";}
 #endif
 };
 
@@ -21204,7 +21374,7 @@ public:
   virtual uint           rule() const { return blsrL_rReg_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
 public:
   blsrL_rReg_rRegNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -21234,7 +21404,7 @@ public:
   virtual uint           rule() const { return blsrL_rReg_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
 public:
   blsrL_rReg_rReg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -21264,7 +21434,7 @@ public:
   virtual uint           rule() const { return blsrL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21297,7 +21467,7 @@ public:
   virtual uint           rule() const { return blsrL_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21331,7 +21501,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -21366,7 +21536,7 @@ public:
   virtual uint           rule() const { return orL_rReg_castP2X_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -21397,7 +21567,7 @@ public:
   virtual uint           rule() const { return orL_rReg_castP2X_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -21428,7 +21598,7 @@ public:
   virtual uint           rule() const { return orL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -21459,7 +21629,7 @@ public:
   virtual uint           rule() const { return orL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -21493,7 +21663,7 @@ public:
   virtual uint           rule() const { return orL_rReg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -21527,7 +21697,7 @@ public:
   virtual uint           rule() const { return orL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21560,7 +21730,7 @@ public:
   virtual uint           rule() const { return orL_mem_rReg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21593,7 +21763,7 @@ public:
   virtual uint           rule() const { return orL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21626,7 +21796,7 @@ public:
   virtual uint           rule() const { return btsL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21660,7 +21830,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -21695,7 +21865,7 @@ public:
   virtual uint           rule() const { return xorL_rReg_im1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -21724,7 +21894,7 @@ public:
   virtual uint           rule() const { return xorL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -21755,7 +21925,7 @@ public:
   virtual uint           rule() const { return xorL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -21774,40 +21944,6 @@ public:
 #endif
 };
 
-class xorL_rReg_mem_0Node : public MachNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return xorL_rReg_mem_0_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_XorL; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  xorL_rReg_mem_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(xorL_rReg_mem_0Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "xorL_rReg_mem_0";}
-#endif
-};
-
 class xorL_mem_rRegNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[4];
@@ -21823,7 +21959,7 @@ public:
   virtual uint           rule() const { return xorL_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21838,39 +21974,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "xorL_mem_rReg";}
-#endif
-};
-
-class xorL_mem_rReg_0Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return xorL_mem_rReg_0_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_StoreL; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  xorL_mem_rReg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(xorL_mem_rReg_0Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "xorL_mem_rReg_0";}
 #endif
 };
 
@@ -21889,7 +21992,7 @@ public:
   virtual uint           rule() const { return xorL_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -21922,7 +22025,7 @@ public:
   virtual uint           rule() const { return cmpLTMask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpLTMask; }
 public:
   cmpLTMaskNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -21952,7 +22055,7 @@ public:
   virtual uint           rule() const { return cmpLTMask0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpLTMask; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -21983,7 +22086,7 @@ public:
   virtual uint           rule() const { return cadd_cmpLTMask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -22014,7 +22117,7 @@ public:
   virtual uint           rule() const { return cadd_cmpLTMask_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -22045,7 +22148,7 @@ public:
   virtual uint           rule() const { return cadd_cmpLTMask_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -22076,7 +22179,7 @@ public:
   virtual uint           rule() const { return cadd_cmpLTMask_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -22107,7 +22210,7 @@ public:
   virtual uint           rule() const { return and_cmpLTMask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -22138,7 +22241,7 @@ public:
   virtual uint           rule() const { return and_cmpLTMask_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -22169,7 +22272,7 @@ public:
   virtual uint           rule() const { return cmpF_cc_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF; }
 public:
   cmpF_cc_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -22199,7 +22302,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -22232,7 +22335,7 @@ public:
   virtual uint           rule() const { return cmpF_cc_memCF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -22265,7 +22368,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -22297,7 +22400,7 @@ public:
   virtual uint           rule() const { return cmpD_cc_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD; }
 public:
   cmpD_cc_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -22327,7 +22430,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -22360,7 +22463,7 @@ public:
   virtual uint           rule() const { return cmpD_cc_memCF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -22393,7 +22496,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -22426,7 +22529,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF3; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -22460,7 +22563,7 @@ public:
   virtual uint           rule() const { return cmpF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF3; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -22494,7 +22597,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpF3; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -22527,7 +22630,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD3; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -22561,7 +22664,7 @@ public:
   virtual uint           rule() const { return cmpD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD3; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -22595,7 +22698,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpD3; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -22626,16 +22729,11 @@ public:
   }
   virtual uint           rule() const { return convF2D_reg_reg_rule; }
 private:
-  const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvF2D; }
-  virtual int            cisc_operand() const { return 1; }
-  virtual MachNode      *cisc_version(int offset);
-  virtual void           use_cisc_RegMask();
-  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
 public:
-  convF2D_reg_regNode() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  convF2D_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(convF2D_reg_regNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -22660,12 +22758,12 @@ public:
   virtual uint           rule() const { return convF2D_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvF2D; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  convF2D_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  convF2D_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(convF2D_reg_memNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -22690,16 +22788,11 @@ public:
   }
   virtual uint           rule() const { return convD2F_reg_reg_rule; }
 private:
-  const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvD2F; }
-  virtual int            cisc_operand() const { return 1; }
-  virtual MachNode      *cisc_version(int offset);
-  virtual void           use_cisc_RegMask();
-  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
 public:
-  convD2F_reg_regNode() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  convD2F_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(convD2F_reg_regNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -22724,12 +22817,12 @@ public:
   virtual uint           rule() const { return convD2F_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvD2F; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  convD2F_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  convD2F_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(convD2F_reg_memNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -22755,7 +22848,7 @@ public:
   virtual uint           rule() const { return convF2I_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvF2I; }
 public:
   convF2I_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -22785,7 +22878,7 @@ public:
   virtual uint           rule() const { return convF2L_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvF2L; }
 public:
   convF2L_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -22815,7 +22908,7 @@ public:
   virtual uint           rule() const { return convD2I_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvD2I; }
 public:
   convD2I_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -22845,7 +22938,7 @@ public:
   virtual uint           rule() const { return convD2L_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvD2L; }
 public:
   convD2L_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -22875,7 +22968,7 @@ public:
   virtual uint           rule() const { return round_double_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -22906,7 +22999,7 @@ public:
   virtual uint           rule() const { return round_float_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -22937,7 +23030,7 @@ public:
   virtual uint           rule() const { return convI2F_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2F; }
 public:
   convI2F_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -22965,7 +23058,7 @@ public:
   virtual uint           rule() const { return convI2F_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2F; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -22996,7 +23089,7 @@ public:
   virtual uint           rule() const { return convI2D_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2D; }
 public:
   convI2D_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23024,7 +23117,7 @@ public:
   virtual uint           rule() const { return convI2D_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2D; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -23055,7 +23148,7 @@ public:
   virtual uint           rule() const { return convXI2F_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2F; }
 public:
   convXI2F_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23083,7 +23176,7 @@ public:
   virtual uint           rule() const { return convXI2D_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2D; }
 public:
   convXI2D_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23110,16 +23203,11 @@ public:
   }
   virtual uint           rule() const { return convL2F_reg_reg_rule; }
 private:
-  const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2F; }
-  virtual int            cisc_operand() const { return 1; }
-  virtual MachNode      *cisc_version(int offset);
-  virtual void           use_cisc_RegMask();
-  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
 public:
-  convL2F_reg_regNode() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  convL2F_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(convL2F_reg_regNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -23144,12 +23232,12 @@ public:
   virtual uint           rule() const { return convL2F_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2F; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  convL2F_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  convL2F_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(convL2F_reg_memNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -23174,16 +23262,11 @@ public:
   }
   virtual uint           rule() const { return convL2D_reg_reg_rule; }
 private:
-  const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2D; }
-  virtual int            cisc_operand() const { return 1; }
-  virtual MachNode      *cisc_version(int offset);
-  virtual void           use_cisc_RegMask();
-  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
 public:
-  convL2D_reg_regNode() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  convL2D_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(convL2D_reg_regNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -23208,12 +23291,12 @@ public:
   virtual uint           rule() const { return convL2D_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2D; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  convL2D_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  convL2D_reg_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(convL2D_reg_memNode); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -23240,7 +23323,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvI2L; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -23273,7 +23356,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -23305,7 +23388,7 @@ public:
   virtual uint           rule() const { return convI2L_reg_mem_zex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -23336,7 +23419,7 @@ public:
   virtual uint           rule() const { return zerox_long_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndL; }
 public:
   zerox_long_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -23364,7 +23447,7 @@ public:
   virtual uint           rule() const { return convL2I_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvL2I; }
 public:
   convL2I_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23392,7 +23475,7 @@ public:
   virtual uint           rule() const { return MoveF2I_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveF2I; }
 public:
   MoveF2I_stack_regNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
@@ -23421,7 +23504,7 @@ public:
   virtual uint           rule() const { return MoveI2F_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveI2F; }
 public:
   MoveI2F_stack_regNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
@@ -23450,7 +23533,7 @@ public:
   virtual uint           rule() const { return MoveD2L_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveD2L; }
 public:
   MoveD2L_stack_regNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
@@ -23479,7 +23562,7 @@ public:
   virtual uint           rule() const { return MoveL2D_stack_reg_partial_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveL2D; }
 public:
   MoveL2D_stack_reg_partialNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
@@ -23508,7 +23591,7 @@ public:
   virtual uint           rule() const { return MoveL2D_stack_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveL2D; }
 public:
   MoveL2D_stack_regNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
@@ -23537,7 +23620,7 @@ public:
   virtual uint           rule() const { return MoveF2I_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveF2I; }
 public:
   MoveF2I_reg_stackNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23565,7 +23648,7 @@ public:
   virtual uint           rule() const { return MoveI2F_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveI2F; }
 public:
   MoveI2F_reg_stackNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23593,7 +23676,7 @@ public:
   virtual uint           rule() const { return MoveD2L_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveD2L; }
 public:
   MoveD2L_reg_stackNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23621,7 +23704,7 @@ public:
   virtual uint           rule() const { return MoveL2D_reg_stack_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveL2D; }
 public:
   MoveL2D_reg_stackNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23650,7 +23733,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveF2I; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -23684,7 +23767,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveD2L; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -23718,7 +23801,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveI2F; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -23751,7 +23834,7 @@ public:
   virtual uint           rule() const { return MoveL2D_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MoveL2D; }
 public:
   MoveL2D_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -23780,7 +23863,7 @@ public:
   virtual uint           rule() const { return rep_stos_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -23811,7 +23894,7 @@ public:
   virtual uint           rule() const { return rep_stos_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -23842,7 +23925,7 @@ public:
   virtual uint           rule() const { return rep_stos_large_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -23873,7 +23956,7 @@ public:
   virtual uint           rule() const { return rep_stos_large_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -23904,7 +23987,7 @@ public:
   virtual uint           rule() const { return rep_stos_im_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -23935,7 +24018,7 @@ public:
   virtual uint           rule() const { return string_compareL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -23966,7 +24049,7 @@ public:
   virtual uint           rule() const { return string_compareL_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -23997,7 +24080,7 @@ public:
   virtual uint           rule() const { return string_compareU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24028,7 +24111,7 @@ public:
   virtual uint           rule() const { return string_compareU_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24059,7 +24142,7 @@ public:
   virtual uint           rule() const { return string_compareLU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24090,7 +24173,7 @@ public:
   virtual uint           rule() const { return string_compareLU_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24121,7 +24204,7 @@ public:
   virtual uint           rule() const { return string_compareUL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24152,7 +24235,7 @@ public:
   virtual uint           rule() const { return string_compareUL_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrComp; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24183,7 +24266,7 @@ public:
   virtual uint           rule() const { return string_indexof_conL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24214,7 +24297,7 @@ public:
   virtual uint           rule() const { return string_indexof_conU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24245,7 +24328,7 @@ public:
   virtual uint           rule() const { return string_indexof_conUL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24276,7 +24359,7 @@ public:
   virtual uint           rule() const { return string_indexofL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24307,7 +24390,7 @@ public:
   virtual uint           rule() const { return string_indexofU_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24338,7 +24421,7 @@ public:
   virtual uint           rule() const { return string_indexofUL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOf; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24369,7 +24452,7 @@ public:
   virtual uint           rule() const { return string_indexof_char_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOfChar; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24400,7 +24483,7 @@ public:
   virtual uint           rule() const { return stringL_indexof_char_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrIndexOfChar; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24431,7 +24514,7 @@ public:
   virtual uint           rule() const { return string_equals_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrEquals; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24462,7 +24545,7 @@ public:
   virtual uint           rule() const { return string_equals_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrEquals; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24493,7 +24576,7 @@ public:
   virtual uint           rule() const { return array_equalsB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AryEq; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24524,7 +24607,7 @@ public:
   virtual uint           rule() const { return array_equalsB_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AryEq; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24555,7 +24638,7 @@ public:
   virtual uint           rule() const { return array_equalsC_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AryEq; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24586,7 +24669,7 @@ public:
   virtual uint           rule() const { return array_equalsC_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AryEq; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24617,7 +24700,7 @@ public:
   virtual uint           rule() const { return arrays_hashcode_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorizedHashCode; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 2; }
@@ -24649,7 +24732,7 @@ public:
   virtual uint           rule() const { return count_positives_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountPositives; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24680,7 +24763,7 @@ public:
   virtual uint           rule() const { return count_positives_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountPositives; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24711,7 +24794,7 @@ public:
   virtual uint           rule() const { return string_compress_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrCompressedCopy; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24742,7 +24825,7 @@ public:
   virtual uint           rule() const { return string_compress_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrCompressedCopy; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24773,7 +24856,7 @@ public:
   virtual uint           rule() const { return string_inflate_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrInflatedCopy; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24804,7 +24887,7 @@ public:
   virtual uint           rule() const { return string_inflate_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StrInflatedCopy; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24835,7 +24918,7 @@ public:
   virtual uint           rule() const { return encode_iso_array_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeISOArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24866,7 +24949,7 @@ public:
   virtual uint           rule() const { return encode_ascii_array_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_EncodeISOArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -24897,7 +24980,7 @@ public:
   virtual uint           rule() const { return overflowAddI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowAddI; }
 public:
   overflowAddI_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -24927,7 +25010,7 @@ public:
   virtual uint           rule() const { return overflowAddI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowAddI; }
 public:
   overflowAddI_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -24957,7 +25040,7 @@ public:
   virtual uint           rule() const { return overflowAddL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowAddL; }
 public:
   overflowAddL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -24987,7 +25070,7 @@ public:
   virtual uint           rule() const { return overflowAddL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowAddL; }
 public:
   overflowAddL_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25017,7 +25100,7 @@ public:
   virtual uint           rule() const { return overflowSubI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubI; }
 public:
   overflowSubI_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25046,7 +25129,7 @@ public:
   virtual uint           rule() const { return overflowSubI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubI; }
 public:
   overflowSubI_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25075,7 +25158,7 @@ public:
   virtual uint           rule() const { return overflowSubL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubL; }
 public:
   overflowSubL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25104,7 +25187,7 @@ public:
   virtual uint           rule() const { return overflowSubL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubL; }
 public:
   overflowSubL_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25133,7 +25216,7 @@ public:
   virtual uint           rule() const { return overflowNegI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubI; }
 public:
   overflowNegI_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25163,7 +25246,7 @@ public:
   virtual uint           rule() const { return overflowNegL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowSubL; }
 public:
   overflowNegL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25193,7 +25276,7 @@ public:
   virtual uint           rule() const { return overflowMulI_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowMulI; }
 public:
   overflowMulI_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25223,7 +25306,7 @@ public:
   virtual uint           rule() const { return overflowMulI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowMulI; }
 public:
   overflowMulI_rReg_immNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -25254,7 +25337,7 @@ public:
   virtual uint           rule() const { return overflowMulL_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowMulL; }
 public:
   overflowMulL_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25284,7 +25367,7 @@ public:
   virtual uint           rule() const { return overflowMulL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OverflowMulL; }
 public:
   overflowMulL_rReg_immNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -25316,7 +25399,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -25349,7 +25432,7 @@ public:
   virtual uint           rule() const { return compI_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
 public:
   compI_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25378,7 +25461,7 @@ public:
   virtual uint           rule() const { return compI_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25410,7 +25493,7 @@ public:
   virtual uint           rule() const { return testI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
 public:
@@ -25440,7 +25523,7 @@ public:
   virtual uint           rule() const { return testI_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
 public:
   testI_reg_immNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -25470,7 +25553,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -25503,7 +25586,7 @@ public:
   virtual uint           rule() const { return testI_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25535,7 +25618,7 @@ public:
   virtual uint           rule() const { return testI_reg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25568,7 +25651,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpU; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -25601,7 +25684,7 @@ public:
   virtual uint           rule() const { return compU_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpU; }
 public:
   compU_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25630,7 +25713,7 @@ public:
   virtual uint           rule() const { return compU_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpU; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25662,7 +25745,7 @@ public:
   virtual uint           rule() const { return testU_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpU; }
 public:
   testU_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25691,7 +25774,7 @@ public:
   virtual uint           rule() const { return compP_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
 public:
   compP_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25720,7 +25803,7 @@ public:
   virtual uint           rule() const { return compP_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25752,7 +25835,7 @@ public:
   virtual uint           rule() const { return compP_mem_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25784,7 +25867,7 @@ public:
   virtual uint           rule() const { return testP_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
   virtual int            reloc() const;
 public:
@@ -25814,7 +25897,7 @@ public:
   virtual uint           rule() const { return testP_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25846,7 +25929,7 @@ public:
   virtual uint           rule() const { return testP_mem_reg0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25878,7 +25961,7 @@ public:
   virtual uint           rule() const { return compN_rReg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
 public:
   compN_rRegNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25907,7 +25990,7 @@ public:
   virtual uint           rule() const { return compN_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -25939,7 +26022,7 @@ public:
   virtual uint           rule() const { return compN_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
 public:
   compN_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -25968,7 +26051,7 @@ public:
   virtual uint           rule() const { return compN_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26000,7 +26083,7 @@ public:
   virtual uint           rule() const { return compN_rReg_imm_klass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
 public:
   compN_rReg_imm_klassNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26029,7 +26112,7 @@ public:
   virtual uint           rule() const { return compN_mem_imm_klass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26061,7 +26144,7 @@ public:
   virtual uint           rule() const { return testN_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
 public:
   testN_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26090,7 +26173,7 @@ public:
   virtual uint           rule() const { return testN_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26122,7 +26205,7 @@ public:
   virtual uint           rule() const { return testN_mem_reg0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26155,7 +26238,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -26188,7 +26271,7 @@ public:
   virtual uint           rule() const { return compL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
 public:
   compL_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26217,7 +26300,7 @@ public:
   virtual uint           rule() const { return compL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26249,7 +26332,7 @@ public:
   virtual uint           rule() const { return testL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
 public:
@@ -26279,7 +26362,7 @@ public:
   virtual uint           rule() const { return testL_reg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
 public:
   testL_reg_immNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -26309,7 +26392,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -26342,7 +26425,7 @@ public:
   virtual uint           rule() const { return testL_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26374,7 +26457,7 @@ public:
   virtual uint           rule() const { return testL_reg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26406,7 +26489,7 @@ public:
   virtual uint           rule() const { return testL_reg_mem2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26438,7 +26521,7 @@ public:
   virtual uint           rule() const { return testL_reg_mem2_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26470,7 +26553,7 @@ public:
   virtual uint           rule() const { return cmpU3_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpU3; }
 public:
   cmpU3_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26500,7 +26583,7 @@ public:
   virtual uint           rule() const { return cmpL3_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpL3; }
 public:
   cmpL3_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26530,7 +26613,7 @@ public:
   virtual uint           rule() const { return cmpUL3_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpUL3; }
 public:
   cmpUL3_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26561,7 +26644,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpUL; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -26594,7 +26677,7 @@ public:
   virtual uint           rule() const { return compUL_rReg_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpUL; }
 public:
   compUL_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26623,7 +26706,7 @@ public:
   virtual uint           rule() const { return compUL_rReg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpUL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26655,7 +26738,7 @@ public:
   virtual uint           rule() const { return testUL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpUL; }
 public:
   testUL_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -26684,7 +26767,7 @@ public:
   virtual uint           rule() const { return compB_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26716,7 +26799,7 @@ public:
   virtual uint           rule() const { return testUB_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26748,7 +26831,7 @@ public:
   virtual uint           rule() const { return testB_mem_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -26780,7 +26863,7 @@ public:
   virtual uint           rule() const { return cmovI_reg_g_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
   cmovI_reg_gNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -26836,7 +26919,7 @@ public:
   virtual uint           rule() const { return cmovI_reg_l_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
   cmovI_reg_lNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -26894,7 +26977,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Goto; }
   virtual uint           oper_input_base() const { return 1; }
@@ -26930,7 +27013,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
@@ -26970,7 +27053,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountedLoopEnd; }
   virtual void           negate() { 
@@ -27010,7 +27093,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
@@ -27050,7 +27133,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
@@ -27090,7 +27173,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
     opnd_array(1)->negate();
@@ -27127,7 +27210,7 @@ public:
   virtual uint           rule() const { return partialSubtypeCheck_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PartialSubtypeCheck; }
 public:
   partialSubtypeCheckNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -27142,9 +27225,9 @@ public:
 #endif
 };
 
-class partialSubtypeCheck_vs_ZeroNode : public MachNode { 
+class partialSubtypeCheckVarSuperNode : public MachNode { 
 private:
-  MachOper *_opnd_array[4];
+  MachOper *_opnd_array[7];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -27154,23 +27237,52 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
-  virtual uint           rule() const { return partialSubtypeCheck_vs_Zero_rule; }
+  virtual uint           rule() const { return partialSubtypeCheckVarSuper_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_CmpP; }
-  virtual int            reloc() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_PartialSubtypeCheck; }
 public:
-  partialSubtypeCheck_vs_ZeroNode() {  _num_opnds = 4; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(partialSubtypeCheck_vs_ZeroNode); }
+  partialSubtypeCheckVarSuperNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(partialSubtypeCheckVarSuperNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
-  // Rematerialize partialSubtypeCheck_vs_Zero
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "partialSubtypeCheck_vs_Zero";}
+  virtual const char    *Name() const { return "partialSubtypeCheckVarSuper";}
+#endif
+};
+
+class partialSubtypeCheckConstSuperNode : public MachNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return partialSubtypeCheckConstSuper_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_PartialSubtypeCheck; }
+  virtual int            reloc() const;
+public:
+  partialSubtypeCheckConstSuperNode() {  _num_opnds = 8; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(partialSubtypeCheckConstSuperNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "partialSubtypeCheckConstSuper";}
 #endif
 };
 
@@ -27191,7 +27303,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Goto; }
   virtual uint           oper_input_base() const { return 1; }
@@ -27226,7 +27338,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
@@ -27265,7 +27377,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountedLoopEnd; }
   virtual void           negate() { 
@@ -27304,7 +27416,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
@@ -27343,7 +27455,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
@@ -27382,7 +27494,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           label_set( Label* label, uint block_num );
   virtual void           save_label( Label** label, uint* block_num );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_If; }
   virtual void           negate() { 
@@ -27404,38 +27516,6 @@ public:
 #endif
 };
 
-class cmpFastLockRTMNode : public MachFastLockNode { 
-private:
-  MachOper *_opnd_array[7];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return cmpFastLockRTM_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_FastLock; }
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  cmpFastLockRTMNode() {  _num_opnds = 7; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpFastLockRTMNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  // Rematerialize cmpFastLockRTM
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpFastLockRTM";}
-#endif
-};
-
 class cmpFastLockNode : public MachFastLockNode { 
 private:
   MachOper *_opnd_array[5];
@@ -27451,7 +27531,7 @@ public:
   virtual uint           rule() const { return cmpFastLock_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastLock; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -27483,7 +27563,7 @@ public:
   virtual uint           rule() const { return cmpFastUnlock_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastUnlock; }
 public:
   cmpFastUnlockNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -27514,7 +27594,7 @@ public:
   virtual uint           rule() const { return cmpFastLockLightweight_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastLock; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -27546,7 +27626,7 @@ public:
   virtual uint           rule() const { return cmpFastUnlockLightweight_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FastUnlock; }
 public:
   cmpFastUnlockLightweightNode() {  _num_opnds = 4; _opnds = _opnd_array; }
@@ -27577,8 +27657,7 @@ public:
   virtual uint           rule() const { return safePoint_poll_tls_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SafePoint; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 5; }
@@ -27610,7 +27689,7 @@ public:
   virtual uint           rule() const { return mask_all_evexL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaskAll; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -27639,7 +27718,7 @@ public:
   virtual uint           rule() const { return mask_all_evexI_GT32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaskAll; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -27672,7 +27751,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           method_set( intptr_t method );
   virtual int            ins_alignment() const { return 4; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CallStaticJava; }
   virtual int            reloc() const;
   virtual int            alignment_required() const { return 4; }
@@ -27707,7 +27786,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           method_set( intptr_t method );
   virtual int            ins_alignment() const { return 4; }
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CallDynamicJava; }
   virtual int            reloc() const;
   virtual int            alignment_required() const { return 4; }
@@ -27741,7 +27820,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           method_set( intptr_t method );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CallRuntime; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -27773,7 +27852,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           method_set( intptr_t method );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CallLeaf; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -27805,7 +27884,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           method_set( intptr_t method );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CallLeafVector; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -27837,7 +27916,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           method_set( intptr_t method );
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CallLeafNoFP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -27868,7 +27947,7 @@ public:
   virtual uint           rule() const { return Ret_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Return; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 5; }
@@ -27900,7 +27979,7 @@ public:
   virtual uint           rule() const { return TailCalljmpInd_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_TailCall; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 5; }
@@ -27932,7 +28011,7 @@ public:
   virtual uint           rule() const { return tailjmpInd_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_TailJump; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 5; }
@@ -27946,6 +28025,38 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "tailjmpInd";}
+#endif
+};
+
+class ForwardExceptionjmpNode : public MachReturnNode { 
+private:
+  MachOper *_opnd_array[1];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return ForwardExceptionjmp_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ForwardException; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 5; }
+public:
+  ForwardExceptionjmpNode() {  _num_opnds = 1; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(ForwardExceptionjmpNode); }
+  virtual bool           pinned() const { return true; }
+  virtual const Node *is_block_proj() const { return this; }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "ForwardExceptionjmp";}
 #endif
 };
 
@@ -27964,7 +28075,7 @@ public:
   virtual uint           rule() const { return CreateException_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CreateEx; }
   virtual uint           oper_input_base() const { return 1; }
@@ -27994,7 +28105,7 @@ public:
   virtual uint           rule() const { return RethrowException_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Rethrow; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 5; }
@@ -28026,7 +28137,7 @@ public:
   virtual uint           rule() const { return tlsLoadP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ThreadLocal; }
 public:
@@ -28057,7 +28168,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_rReg_peep_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_rReg_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -28085,7 +28196,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_immI_peep_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddI; }
 public:
   leaI_rReg_immI_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -28113,7 +28224,7 @@ public:
   virtual uint           rule() const { return leaI_rReg_immI2_peep_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftI; }
 public:
   leaI_rReg_immI2_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -28141,7 +28252,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_rReg_peep_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_rReg_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -28169,7 +28280,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_immL32_peep_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddL; }
 public:
   leaL_rReg_immL32_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -28197,7 +28308,7 @@ public:
   virtual uint           rule() const { return leaL_rReg_immI2_peep_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftL; }
 public:
   leaL_rReg_immI2_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -28225,7 +28336,7 @@ public:
   virtual uint           rule() const { return ShouldNotReachHere_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Halt; }
   virtual uint           oper_input_base() const { return 5; }
 public:
@@ -28257,7 +28368,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -28290,7 +28401,7 @@ public:
   virtual uint           rule() const { return addF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -28322,7 +28433,7 @@ public:
   virtual uint           rule() const { return addF_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -28355,7 +28466,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -28388,7 +28499,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -28420,7 +28531,7 @@ public:
   virtual uint           rule() const { return addF_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -28451,7 +28562,7 @@ public:
   virtual uint           rule() const { return addF_reg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -28483,7 +28594,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -28515,7 +28626,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -28548,7 +28659,7 @@ public:
   virtual uint           rule() const { return addD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -28580,7 +28691,7 @@ public:
   virtual uint           rule() const { return addD_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -28613,7 +28724,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -28646,7 +28757,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -28678,7 +28789,7 @@ public:
   virtual uint           rule() const { return addD_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -28709,7 +28820,7 @@ public:
   virtual uint           rule() const { return addD_reg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -28741,7 +28852,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -28773,7 +28884,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -28806,7 +28917,7 @@ public:
   virtual uint           rule() const { return subF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -28839,7 +28950,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -28872,7 +28983,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubF; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -28904,7 +29015,7 @@ public:
   virtual uint           rule() const { return subF_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -28936,7 +29047,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -28968,7 +29079,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -29001,7 +29112,7 @@ public:
   virtual uint           rule() const { return subD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29034,7 +29145,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29067,7 +29178,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubD; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -29099,7 +29210,7 @@ public:
   virtual uint           rule() const { return subD_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -29131,7 +29242,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -29163,7 +29274,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -29196,7 +29307,7 @@ public:
   virtual uint           rule() const { return mulF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29228,7 +29339,7 @@ public:
   virtual uint           rule() const { return mulF_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -29261,7 +29372,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29294,7 +29405,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -29326,7 +29437,7 @@ public:
   virtual uint           rule() const { return mulF_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -29357,7 +29468,7 @@ public:
   virtual uint           rule() const { return mulF_reg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -29389,7 +29500,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -29421,7 +29532,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -29454,7 +29565,7 @@ public:
   virtual uint           rule() const { return mulD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29486,7 +29597,7 @@ public:
   virtual uint           rule() const { return mulD_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -29519,7 +29630,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29552,7 +29663,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -29584,7 +29695,7 @@ public:
   virtual uint           rule() const { return mulD_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -29615,7 +29726,7 @@ public:
   virtual uint           rule() const { return mulD_reg_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -29647,7 +29758,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -29679,7 +29790,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -29712,7 +29823,7 @@ public:
   virtual uint           rule() const { return divF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29745,7 +29856,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29778,7 +29889,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivF; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -29810,7 +29921,7 @@ public:
   virtual uint           rule() const { return divF_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -29842,7 +29953,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -29874,7 +29985,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            cisc_operand() const { return 2; }
@@ -29907,7 +30018,7 @@ public:
   virtual uint           rule() const { return divD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29940,7 +30051,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -29973,7 +30084,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivD; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -30005,7 +30116,7 @@ public:
   virtual uint           rule() const { return divD_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -30037,7 +30148,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -30068,7 +30179,7 @@ public:
   virtual uint           rule() const { return absF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -30098,7 +30209,7 @@ public:
   virtual uint           rule() const { return absF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsF; }
 public:
   absF_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -30127,7 +30238,7 @@ public:
   virtual uint           rule() const { return absD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -30157,7 +30268,7 @@ public:
   virtual uint           rule() const { return absD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsD; }
 public:
   absD_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -30186,7 +30297,7 @@ public:
   virtual uint           rule() const { return negF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -30216,7 +30327,7 @@ public:
   virtual uint           rule() const { return negF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegF; }
 public:
   negF_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -30245,7 +30356,7 @@ public:
   virtual uint           rule() const { return negD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -30275,7 +30386,7 @@ public:
   virtual uint           rule() const { return negD_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegD; }
 public:
   negD_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -30304,7 +30415,7 @@ public:
   virtual uint           rule() const { return sqrtF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -30333,7 +30444,7 @@ public:
   virtual uint           rule() const { return sqrtD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -30362,7 +30473,7 @@ public:
   virtual uint           rule() const { return convF2HF_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvF2HF; }
 public:
   convF2HF_reg_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -30392,7 +30503,7 @@ public:
   virtual uint           rule() const { return convF2HF_mem_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreC; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -30425,7 +30536,7 @@ public:
   virtual uint           rule() const { return vconvF2HF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastF2HF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30455,7 +30566,7 @@ public:
   virtual uint           rule() const { return vconvF2HF_mem_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVector; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -30486,7 +30597,7 @@ public:
   virtual uint           rule() const { return convHF2F_reg_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ConvHF2F; }
 public:
   convHF2F_reg_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -30515,7 +30626,7 @@ public:
   virtual uint           rule() const { return vconvHF2F_reg_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastHF2F; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -30547,7 +30658,7 @@ public:
   virtual uint           rule() const { return vconvHF2F_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastHF2F; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30577,7 +30688,7 @@ public:
   virtual uint           rule() const { return reinterpret_mask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -30608,7 +30719,7 @@ public:
   virtual uint           rule() const { return reinterpret_mask_W2B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30639,7 +30750,7 @@ public:
   virtual uint           rule() const { return reinterpret_mask_D2B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30670,7 +30781,7 @@ public:
   virtual uint           rule() const { return reinterpret_mask_Q2B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30701,7 +30812,7 @@ public:
   virtual uint           rule() const { return reinterpret_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -30732,7 +30843,7 @@ public:
   virtual uint           rule() const { return reinterpret_expand_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -30764,7 +30875,7 @@ public:
   virtual uint           rule() const { return vreinterpret_expand4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30794,7 +30905,7 @@ public:
   virtual uint           rule() const { return vreinterpret_expand_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30824,7 +30935,7 @@ public:
   virtual uint           rule() const { return reinterpret_shrink_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorReinterpret; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30854,7 +30965,7 @@ public:
   virtual uint           rule() const { return roundD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundDoubleMode; }
 public:
   roundD_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -30883,7 +30994,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundDoubleMode; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -30914,7 +31025,7 @@ public:
   virtual uint           rule() const { return vroundD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundDoubleModeV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30943,7 +31054,7 @@ public:
   virtual uint           rule() const { return vround8D_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundDoubleModeV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -30972,7 +31083,7 @@ public:
   virtual uint           rule() const { return vroundD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundDoubleModeV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31003,7 +31114,7 @@ public:
   virtual uint           rule() const { return vround8D_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundDoubleModeV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31034,7 +31145,7 @@ public:
   virtual uint           rule() const { return onspinwait_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OnSpinWait; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31064,7 +31175,7 @@ public:
   virtual uint           rule() const { return fmaD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -31093,7 +31204,7 @@ public:
   virtual uint           rule() const { return fmaF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -31122,7 +31233,7 @@ public:
   virtual uint           rule() const { return MoveVec2Leg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VecX; }
 public:
   MoveVec2LegNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -31151,7 +31262,7 @@ public:
   virtual uint           rule() const { return MoveLeg2Vec_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VecX; }
 public:
   MoveLeg2VecNode() {  _num_opnds = 2; _opnds = _opnd_array; }
@@ -31180,7 +31291,7 @@ public:
   virtual uint           rule() const { return loadV_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVector; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31211,7 +31322,7 @@ public:
   virtual uint           rule() const { return storeV_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVector; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31242,7 +31353,7 @@ public:
   virtual uint           rule() const { return gather_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -31276,7 +31387,7 @@ public:
   virtual uint           rule() const { return evgather_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -31310,7 +31421,7 @@ public:
   virtual uint           rule() const { return evgather_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual int            reloc() const;
@@ -31329,6 +31440,408 @@ public:
 #endif
 };
 
+class vgather_subwordLE8BNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_subwordLE8B_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_subwordLE8BNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_subwordLE8BNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_subwordLE8B";}
+#endif
+};
+
+class vgather_subwordGT8BNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[12];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_subwordGT8B_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_subwordGT8BNode() {  _num_opnds = 12; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_subwordGT8BNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_subwordGT8B";}
+#endif
+};
+
+class vgather_subwordLE8B_offNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_subwordLE8B_off_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_subwordLE8B_offNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_subwordLE8B_offNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_subwordLE8B_off";}
+#endif
+};
+
+class vgather_subwordGT8B_offNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[12];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_subwordGT8B_off_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_subwordGT8B_offNode() {  _num_opnds = 12; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_subwordGT8B_offNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_subwordGT8B_off";}
+#endif
+};
+
+class vgather_masked_subwordLE8B_avx3Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[9];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordLE8B_avx3_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordLE8B_avx3Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_avx3Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordLE8B_avx3";}
+#endif
+};
+
+class vgather_masked_subwordGT8B_avx3Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[15];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordGT8B_avx3_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordGT8B_avx3Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_avx3Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordGT8B_avx3";}
+#endif
+};
+
+class vgather_masked_subwordLE8B_off_avx3Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[9];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordLE8B_off_avx3_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordLE8B_off_avx3Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_off_avx3Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordLE8B_off_avx3";}
+#endif
+};
+
+class vgather_masked_subwordGT8B_off_avx3Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[15];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordGT8B_off_avx3_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordGT8B_off_avx3Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_off_avx3Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordGT8B_off_avx3";}
+#endif
+};
+
+class vgather_masked_subwordLE8B_avx2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[9];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordLE8B_avx2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordLE8B_avx2Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_avx2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordLE8B_avx2";}
+#endif
+};
+
+class vgather_masked_subwordGT8B_avx2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[15];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordGT8B_avx2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordGT8B_avx2Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_avx2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordGT8B_avx2";}
+#endif
+};
+
+class vgather_masked_subwordLE8B_off_avx2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[9];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordLE8B_off_avx2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordLE8B_off_avx2Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_off_avx2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordLE8B_off_avx2";}
+#endif
+};
+
+class vgather_masked_subwordGT8B_off_avx2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[15];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vgather_masked_subwordGT8B_off_avx2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vgather_masked_subwordGT8B_off_avx2Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_off_avx2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vgather_masked_subwordGT8B_off_avx2";}
+#endif
+};
+
 class scatterNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[6];
@@ -31344,7 +31857,7 @@ public:
   virtual uint           rule() const { return scatter_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVectorScatter; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31377,7 +31890,7 @@ public:
   virtual uint           rule() const { return scatter_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVectorScatterMasked; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31410,7 +31923,7 @@ public:
   virtual uint           rule() const { return vReplB_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31440,7 +31953,7 @@ public:
   virtual uint           rule() const { return ReplB_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31472,7 +31985,7 @@ public:
   virtual uint           rule() const { return vReplS_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31484,6 +31997,69 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "vReplS_reg";}
+#endif
+};
+
+class ReplHF_immNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return ReplHF_imm_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_Replicate; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  ReplHF_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(ReplHF_immNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "ReplHF_imm";}
+#endif
+};
+
+class ReplHF_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return ReplHF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_Replicate; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  ReplHF_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(ReplHF_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "ReplHF_reg";}
 #endif
 };
 
@@ -31502,7 +32078,7 @@ public:
   virtual uint           rule() const { return ReplS_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31535,7 +32111,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -31569,7 +32145,7 @@ public:
   virtual uint           rule() const { return ReplI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31602,7 +32178,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31633,7 +32209,7 @@ public:
   virtual uint           rule() const { return ReplI_zero_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31663,7 +32239,7 @@ public:
   virtual uint           rule() const { return ReplI_M1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31694,7 +32270,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -31728,7 +32304,7 @@ public:
   virtual uint           rule() const { return ReplL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31761,7 +32337,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31792,7 +32368,7 @@ public:
   virtual uint           rule() const { return ReplL_zero_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31822,7 +32398,7 @@ public:
   virtual uint           rule() const { return ReplL_M1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31853,7 +32429,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -31887,7 +32463,7 @@ public:
   virtual uint           rule() const { return ReplF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -31917,7 +32493,7 @@ public:
   virtual uint           rule() const { return ReplF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -31950,7 +32526,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -31982,7 +32558,7 @@ public:
   virtual uint           rule() const { return ReplF_zero_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -32014,7 +32590,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            cisc_operand() const { return 1; }
   virtual MachNode      *cisc_version(int offset);
@@ -32048,7 +32624,7 @@ public:
   virtual uint           rule() const { return ReplD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32078,7 +32654,7 @@ public:
   virtual uint           rule() const { return ReplD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -32111,7 +32687,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -32143,7 +32719,7 @@ public:
   virtual uint           rule() const { return ReplD_zero_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_Replicate; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 1; }
@@ -32174,7 +32750,7 @@ public:
   virtual uint           rule() const { return insert_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -32204,7 +32780,7 @@ public:
   virtual uint           rule() const { return insert32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32235,7 +32811,7 @@ public:
   virtual uint           rule() const { return insert64_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32266,7 +32842,7 @@ public:
   virtual uint           rule() const { return insert2L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -32296,7 +32872,7 @@ public:
   virtual uint           rule() const { return insert4L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32327,7 +32903,7 @@ public:
   virtual uint           rule() const { return insert8L_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32358,7 +32934,7 @@ public:
   virtual uint           rule() const { return insertF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -32388,7 +32964,7 @@ public:
   virtual uint           rule() const { return vinsertF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32419,7 +32995,7 @@ public:
   virtual uint           rule() const { return insert2D_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -32451,7 +33027,7 @@ public:
   virtual uint           rule() const { return insert4D_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32482,7 +33058,7 @@ public:
   virtual uint           rule() const { return insert8D_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorInsert; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32513,7 +33089,7 @@ public:
   virtual uint           rule() const { return reductionI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32544,7 +33120,7 @@ public:
   virtual uint           rule() const { return reductionI_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32575,7 +33151,7 @@ public:
   virtual uint           rule() const { return reductionI_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32606,7 +33182,7 @@ public:
   virtual uint           rule() const { return reductionI_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32637,7 +33213,7 @@ public:
   virtual uint           rule() const { return reductionI_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32668,7 +33244,7 @@ public:
   virtual uint           rule() const { return reductionI_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32699,7 +33275,7 @@ public:
   virtual uint           rule() const { return reductionI_5_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32730,7 +33306,7 @@ public:
   virtual uint           rule() const { return reductionL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32761,7 +33337,7 @@ public:
   virtual uint           rule() const { return reductionL_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32792,7 +33368,7 @@ public:
   virtual uint           rule() const { return reductionL_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32823,7 +33399,7 @@ public:
   virtual uint           rule() const { return reductionL_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32854,7 +33430,7 @@ public:
   virtual uint           rule() const { return reductionL_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32885,7 +33461,7 @@ public:
   virtual uint           rule() const { return reductionL_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32916,7 +33492,7 @@ public:
   virtual uint           rule() const { return reductionL_5_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32947,7 +33523,7 @@ public:
   virtual uint           rule() const { return reductionL_avx512dq_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -32978,7 +33554,7 @@ public:
   virtual uint           rule() const { return reductionL_avx512dq_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33009,7 +33585,7 @@ public:
   virtual uint           rule() const { return reductionL_avx512dq_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33040,7 +33616,7 @@ public:
   virtual uint           rule() const { return reductionL_avx512dq_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33071,7 +33647,7 @@ public:
   virtual uint           rule() const { return reductionL_avx512dq_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33102,7 +33678,7 @@ public:
   virtual uint           rule() const { return reductionL_avx512dq_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33133,7 +33709,7 @@ public:
   virtual uint           rule() const { return reductionL_avx512dq_5_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33164,7 +33740,7 @@ public:
   virtual uint           rule() const { return reductionF128_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33196,7 +33772,7 @@ public:
   virtual uint           rule() const { return reductionF128_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33228,7 +33804,7 @@ public:
   virtual uint           rule() const { return reduction8F_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33260,7 +33836,7 @@ public:
   virtual uint           rule() const { return reduction8F_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33292,7 +33868,7 @@ public:
   virtual uint           rule() const { return reduction16F_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33324,7 +33900,7 @@ public:
   virtual uint           rule() const { return reduction16F_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33338,6 +33914,262 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "reduction16F_0";}
+#endif
+};
+
+class unordered_reduction2FNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction2F_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction2FNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction2FNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction2F";}
+#endif
+};
+
+class unordered_reduction2F_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction2F_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction2F_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction2F_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction2F_0";}
+#endif
+};
+
+class unordered_reduction4FNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction4F_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction4FNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction4FNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction4F";}
+#endif
+};
+
+class unordered_reduction4F_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction4F_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction4F_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction4F_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction4F_0";}
+#endif
+};
+
+class unordered_reduction8FNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction8F_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction8FNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction8FNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction8F";}
+#endif
+};
+
+class unordered_reduction8F_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction8F_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction8F_0Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction8F_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction8F_0";}
+#endif
+};
+
+class unordered_reduction16FNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction16F_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction16FNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction16FNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction16F";}
+#endif
+};
+
+class unordered_reduction16F_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction16F_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulReductionVF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction16F_0Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction16F_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction16F_0";}
 #endif
 };
 
@@ -33356,7 +34188,7 @@ public:
   virtual uint           rule() const { return reduction2D_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33388,7 +34220,7 @@ public:
   virtual uint           rule() const { return reduction2D_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33420,7 +34252,7 @@ public:
   virtual uint           rule() const { return reduction4D_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33452,7 +34284,7 @@ public:
   virtual uint           rule() const { return reduction4D_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33484,7 +34316,7 @@ public:
   virtual uint           rule() const { return reduction8D_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33516,7 +34348,7 @@ public:
   virtual uint           rule() const { return reduction8D_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -33530,6 +34362,198 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "reduction8D_0";}
+#endif
+};
+
+class unordered_reduction2DNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction2D_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddReductionVD; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction2DNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction2DNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction2D";}
+#endif
+};
+
+class unordered_reduction2D_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction2D_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulReductionVD; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction2D_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction2D_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction2D_0";}
+#endif
+};
+
+class unordered_reduction4DNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction4D_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddReductionVD; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction4DNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction4DNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction4D";}
+#endif
+};
+
+class unordered_reduction4D_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction4D_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulReductionVD; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction4D_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction4D_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction4D_0";}
+#endif
+};
+
+class unordered_reduction8DNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction8D_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddReductionVD; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction8DNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction8DNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction8D";}
+#endif
+};
+
+class unordered_reduction8D_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return unordered_reduction8D_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulReductionVD; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  unordered_reduction8D_0Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(unordered_reduction8D_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "unordered_reduction8D_0";}
 #endif
 };
 
@@ -33548,7 +34572,7 @@ public:
   virtual uint           rule() const { return reductionB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33579,7 +34603,7 @@ public:
   virtual uint           rule() const { return reductionB_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33610,7 +34634,7 @@ public:
   virtual uint           rule() const { return reductionB_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33641,7 +34665,7 @@ public:
   virtual uint           rule() const { return reductionB_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33672,7 +34696,7 @@ public:
   virtual uint           rule() const { return reductionB_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33703,7 +34727,7 @@ public:
   virtual uint           rule() const { return reductionB_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33734,7 +34758,7 @@ public:
   virtual uint           rule() const { return reductionB_avx512bw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33765,7 +34789,7 @@ public:
   virtual uint           rule() const { return reductionB_avx512bw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33796,7 +34820,7 @@ public:
   virtual uint           rule() const { return reductionB_avx512bw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33827,7 +34851,7 @@ public:
   virtual uint           rule() const { return reductionB_avx512bw_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33858,7 +34882,7 @@ public:
   virtual uint           rule() const { return reductionB_avx512bw_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33889,7 +34913,7 @@ public:
   virtual uint           rule() const { return reductionB_avx512bw_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33920,7 +34944,7 @@ public:
   virtual uint           rule() const { return reductionS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddReductionVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33951,7 +34975,7 @@ public:
   virtual uint           rule() const { return reductionS_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -33982,7 +35006,7 @@ public:
   virtual uint           rule() const { return reductionS_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -34013,7 +35037,7 @@ public:
   virtual uint           rule() const { return reductionS_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -34044,7 +35068,7 @@ public:
   virtual uint           rule() const { return reductionS_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -34075,7 +35099,7 @@ public:
   virtual uint           rule() const { return reductionS_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -34106,7 +35130,7 @@ public:
   virtual uint           rule() const { return reductionS_5_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -34137,7 +35161,7 @@ public:
   virtual uint           rule() const { return mul_reductionB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34169,7 +35193,7 @@ public:
   virtual uint           rule() const { return mul_reduction64B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulReductionVI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34201,7 +35225,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2F_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34234,7 +35258,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2F_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34267,7 +35291,7 @@ public:
   virtual uint           rule() const { return minmax_reductionF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34300,7 +35324,7 @@ public:
   virtual uint           rule() const { return minmax_reductionF_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34333,7 +35357,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2F_av_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34365,7 +35389,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2F_av_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34397,7 +35421,7 @@ public:
   virtual uint           rule() const { return minmax_reductionF_av_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34429,7 +35453,7 @@ public:
   virtual uint           rule() const { return minmax_reductionF_av_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34461,7 +35485,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2D_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34494,7 +35518,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2D_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34527,7 +35551,7 @@ public:
   virtual uint           rule() const { return minmax_reductionD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34560,7 +35584,7 @@ public:
   virtual uint           rule() const { return minmax_reductionD_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
@@ -34593,7 +35617,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2D_av_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34625,7 +35649,7 @@ public:
   virtual uint           rule() const { return minmax_reduction2D_av_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34657,7 +35681,7 @@ public:
   virtual uint           rule() const { return minmax_reductionD_av_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34689,7 +35713,7 @@ public:
   virtual uint           rule() const { return minmax_reductionD_av_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34721,7 +35745,7 @@ public:
   virtual uint           rule() const { return vaddB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVB; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34751,7 +35775,7 @@ public:
   virtual uint           rule() const { return vaddB_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -34780,7 +35804,7 @@ public:
   virtual uint           rule() const { return vaddB_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -34811,7 +35835,7 @@ public:
   virtual uint           rule() const { return vaddB_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -34842,7 +35866,7 @@ public:
   virtual uint           rule() const { return vaddS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34872,7 +35896,7 @@ public:
   virtual uint           rule() const { return vaddS_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -34901,7 +35925,7 @@ public:
   virtual uint           rule() const { return vaddS_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -34932,7 +35956,7 @@ public:
   virtual uint           rule() const { return vaddS_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -34963,7 +35987,7 @@ public:
   virtual uint           rule() const { return vaddI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -34993,7 +36017,7 @@ public:
   virtual uint           rule() const { return vaddI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35022,7 +36046,7 @@ public:
   virtual uint           rule() const { return vaddI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35053,7 +36077,7 @@ public:
   virtual uint           rule() const { return vaddI_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35084,7 +36108,7 @@ public:
   virtual uint           rule() const { return vaddL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35114,7 +36138,7 @@ public:
   virtual uint           rule() const { return vaddL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35143,7 +36167,7 @@ public:
   virtual uint           rule() const { return vaddL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35174,7 +36198,7 @@ public:
   virtual uint           rule() const { return vaddL_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35205,7 +36229,7 @@ public:
   virtual uint           rule() const { return vaddF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35235,7 +36259,7 @@ public:
   virtual uint           rule() const { return vaddF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35264,7 +36288,7 @@ public:
   virtual uint           rule() const { return vaddF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35295,7 +36319,7 @@ public:
   virtual uint           rule() const { return vaddF_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35326,7 +36350,7 @@ public:
   virtual uint           rule() const { return vaddD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35356,7 +36380,7 @@ public:
   virtual uint           rule() const { return vaddD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35385,7 +36409,7 @@ public:
   virtual uint           rule() const { return vaddD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35416,7 +36440,7 @@ public:
   virtual uint           rule() const { return vaddD_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35447,7 +36471,7 @@ public:
   virtual uint           rule() const { return vsubB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVB; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35477,7 +36501,7 @@ public:
   virtual uint           rule() const { return vsubB_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35506,7 +36530,7 @@ public:
   virtual uint           rule() const { return vsubB_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVB; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35537,7 +36561,7 @@ public:
   virtual uint           rule() const { return vsubS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35567,7 +36591,7 @@ public:
   virtual uint           rule() const { return vsubS_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35596,7 +36620,7 @@ public:
   virtual uint           rule() const { return vsubS_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35627,7 +36651,7 @@ public:
   virtual uint           rule() const { return vsubI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35657,7 +36681,7 @@ public:
   virtual uint           rule() const { return vsubI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35686,7 +36710,7 @@ public:
   virtual uint           rule() const { return vsubI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35717,7 +36741,7 @@ public:
   virtual uint           rule() const { return vsubL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35747,7 +36771,7 @@ public:
   virtual uint           rule() const { return vsubL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35776,7 +36800,7 @@ public:
   virtual uint           rule() const { return vsubL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35807,7 +36831,7 @@ public:
   virtual uint           rule() const { return vsubF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35837,7 +36861,7 @@ public:
   virtual uint           rule() const { return vsubF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35866,7 +36890,7 @@ public:
   virtual uint           rule() const { return vsubF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35897,7 +36921,7 @@ public:
   virtual uint           rule() const { return vsubD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -35927,7 +36951,7 @@ public:
   virtual uint           rule() const { return vsubD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -35956,7 +36980,7 @@ public:
   virtual uint           rule() const { return vsubD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -35987,7 +37011,7 @@ public:
   virtual uint           rule() const { return vmul8B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36019,7 +37043,7 @@ public:
   virtual uint           rule() const { return vmulB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36051,7 +37075,7 @@ public:
   virtual uint           rule() const { return vmulB_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36082,7 +37106,7 @@ public:
   virtual uint           rule() const { return vmulS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36112,7 +37136,7 @@ public:
   virtual uint           rule() const { return vmulS_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36141,7 +37165,7 @@ public:
   virtual uint           rule() const { return vmulS_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36172,7 +37196,7 @@ public:
   virtual uint           rule() const { return vmulS_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVS; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36203,7 +37227,7 @@ public:
   virtual uint           rule() const { return vmulI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36233,7 +37257,7 @@ public:
   virtual uint           rule() const { return vmulI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36262,7 +37286,7 @@ public:
   virtual uint           rule() const { return vmulI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36293,7 +37317,7 @@ public:
   virtual uint           rule() const { return vmulI_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVI; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36324,7 +37348,7 @@ public:
   virtual uint           rule() const { return evmulL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36353,7 +37377,7 @@ public:
   virtual uint           rule() const { return evmulL_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36384,7 +37408,7 @@ public:
   virtual uint           rule() const { return evmulL_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVL; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36415,7 +37439,7 @@ public:
   virtual uint           rule() const { return vmulL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36447,7 +37471,7 @@ public:
   virtual uint           rule() const { return vmulL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36460,6 +37484,64 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "vmulL_reg";}
+#endif
+};
+
+class vmuludq_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vmuludq_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVL; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vmuludq_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vmuludq_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vmuludq_reg";}
+#endif
+};
+
+class vmuldq_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vmuldq_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVL; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vmuldq_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vmuldq_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vmuldq_reg";}
 #endif
 };
 
@@ -36478,7 +37560,7 @@ public:
   virtual uint           rule() const { return vmulF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36508,7 +37590,7 @@ public:
   virtual uint           rule() const { return vmulF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36537,7 +37619,7 @@ public:
   virtual uint           rule() const { return vmulF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36568,7 +37650,7 @@ public:
   virtual uint           rule() const { return vmulF_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36599,7 +37681,7 @@ public:
   virtual uint           rule() const { return vmulD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36629,7 +37711,7 @@ public:
   virtual uint           rule() const { return vmulD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36658,7 +37740,7 @@ public:
   virtual uint           rule() const { return vmulD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36689,7 +37771,7 @@ public:
   virtual uint           rule() const { return vmulD_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36720,7 +37802,7 @@ public:
   virtual uint           rule() const { return vdivF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36750,7 +37832,7 @@ public:
   virtual uint           rule() const { return vdivF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36779,7 +37861,7 @@ public:
   virtual uint           rule() const { return vdivF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36810,7 +37892,7 @@ public:
   virtual uint           rule() const { return vdivD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36840,7 +37922,7 @@ public:
   virtual uint           rule() const { return vdivD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36869,7 +37951,7 @@ public:
   virtual uint           rule() const { return vdivD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -36900,7 +37982,7 @@ public:
   virtual uint           rule() const { return minmax_reg_sse_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36930,7 +38012,7 @@ public:
   virtual uint           rule() const { return minmax_reg_sse_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -36960,7 +38042,7 @@ public:
   virtual uint           rule() const { return vminmax_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -36989,7 +38071,7 @@ public:
   virtual uint           rule() const { return vminmax_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37018,7 +38100,7 @@ public:
   virtual uint           rule() const { return minmaxL_reg_sse_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37050,7 +38132,7 @@ public:
   virtual uint           rule() const { return minmaxL_reg_sse_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37082,7 +38164,7 @@ public:
   virtual uint           rule() const { return vminmaxL_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37114,7 +38196,7 @@ public:
   virtual uint           rule() const { return vminmaxL_reg_avx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37146,7 +38228,7 @@ public:
   virtual uint           rule() const { return vminmaxL_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37175,7 +38257,7 @@ public:
   virtual uint           rule() const { return vminmaxL_reg_evex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37204,7 +38286,7 @@ public:
   virtual uint           rule() const { return minmaxFP_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37235,7 +38317,7 @@ public:
   virtual uint           rule() const { return minmaxFP_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37266,7 +38348,7 @@ public:
   virtual uint           rule() const { return evminmaxFP_reg_eavx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37298,7 +38380,7 @@ public:
   virtual uint           rule() const { return evminmaxFP_reg_eavx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37312,6 +38394,312 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "evminmaxFP_reg_eavx_0";}
+#endif
+};
+
+class vector_uminmax_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMinV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_uminmax_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_reg";}
+#endif
+};
+
+class vector_uminmax_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMaxV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_uminmax_reg_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_reg_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_reg_0";}
+#endif
+};
+
+class vector_uminmax_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMinV; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_uminmax_memNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_memNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_mem";}
+#endif
+};
+
+class vector_uminmax_mem_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_mem_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMaxV; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_uminmax_mem_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_mem_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_mem_0";}
+#endif
+};
+
+class vector_uminmaxq_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmaxq_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMinV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_uminmaxq_regNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_uminmaxq_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmaxq_reg";}
+#endif
+};
+
+class vector_uminmaxq_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmaxq_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMaxV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_uminmaxq_reg_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_uminmaxq_reg_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmaxq_reg_0";}
+#endif
+};
+
+class vector_uminmax_reg_maskedNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_reg_masked_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMinV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_uminmax_reg_maskedNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_reg_maskedNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_reg_masked";}
+#endif
+};
+
+class vector_uminmax_reg_masked_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_reg_masked_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMaxV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_uminmax_reg_masked_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_reg_masked_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_reg_masked_0";}
+#endif
+};
+
+class vector_uminmax_mem_maskedNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_mem_masked_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMinV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_uminmax_mem_maskedNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_mem_maskedNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_mem_masked";}
+#endif
+};
+
+class vector_uminmax_mem_masked_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_uminmax_mem_masked_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_UMaxV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_uminmax_mem_masked_0Node() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_uminmax_mem_masked_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_uminmax_mem_masked_0";}
 #endif
 };
 
@@ -37330,7 +38718,7 @@ public:
   virtual uint           rule() const { return signumF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SignumF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -37361,7 +38749,7 @@ public:
   virtual uint           rule() const { return signumD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SignumD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -37392,7 +38780,7 @@ public:
   virtual uint           rule() const { return signumV_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SignumVF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37424,7 +38812,7 @@ public:
   virtual uint           rule() const { return signumV_reg_avx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SignumVD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37456,7 +38844,7 @@ public:
   virtual uint           rule() const { return signumV_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SignumVF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37488,7 +38876,7 @@ public:
   virtual uint           rule() const { return signumV_reg_evex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SignumVD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37520,7 +38908,7 @@ public:
   virtual uint           rule() const { return copySignF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CopySignF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
 public:
@@ -37551,7 +38939,7 @@ public:
   virtual uint           rule() const { return copySignD_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CopySignD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -37584,7 +38972,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompressBits; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -37617,7 +39005,7 @@ public:
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExpandBits; }
   virtual int            cisc_operand() const { return 2; }
   virtual MachNode      *cisc_version(int offset);
@@ -37649,7 +39037,7 @@ public:
   virtual uint           rule() const { return compressBitsI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompressBits; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -37680,7 +39068,7 @@ public:
   virtual uint           rule() const { return expandBitsI_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExpandBits; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -37711,7 +39099,7 @@ public:
   virtual uint           rule() const { return vsqrtF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtVF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37741,7 +39129,7 @@ public:
   virtual uint           rule() const { return vsqrtF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtVF; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -37773,7 +39161,7 @@ public:
   virtual uint           rule() const { return vsqrtD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtVD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37803,7 +39191,7 @@ public:
   virtual uint           rule() const { return vsqrtD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtVD; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -37835,7 +39223,7 @@ public:
   virtual uint           rule() const { return vshiftcnt_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftCntV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37865,7 +39253,7 @@ public:
   virtual uint           rule() const { return vshiftcnt_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftCntV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -37895,7 +39283,7 @@ public:
   virtual uint           rule() const { return vshiftB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37927,7 +39315,7 @@ public:
   virtual uint           rule() const { return vshiftB_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37959,7 +39347,7 @@ public:
   virtual uint           rule() const { return vshiftB_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -37991,7 +39379,7 @@ public:
   virtual uint           rule() const { return vshift16B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38023,7 +39411,7 @@ public:
   virtual uint           rule() const { return vshift16B_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38055,7 +39443,7 @@ public:
   virtual uint           rule() const { return vshift16B_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38087,7 +39475,7 @@ public:
   virtual uint           rule() const { return vshift16B_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38119,7 +39507,7 @@ public:
   virtual uint           rule() const { return vshift16B_avx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38151,7 +39539,7 @@ public:
   virtual uint           rule() const { return vshift16B_avx_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38183,7 +39571,7 @@ public:
   virtual uint           rule() const { return vshift32B_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38215,7 +39603,7 @@ public:
   virtual uint           rule() const { return vshift32B_avx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38247,7 +39635,7 @@ public:
   virtual uint           rule() const { return vshift32B_avx_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38279,7 +39667,7 @@ public:
   virtual uint           rule() const { return vshift64B_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38311,7 +39699,7 @@ public:
   virtual uint           rule() const { return vshift64B_avx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38343,7 +39731,7 @@ public:
   virtual uint           rule() const { return vshift64B_avx_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38375,7 +39763,7 @@ public:
   virtual uint           rule() const { return vshiftS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38407,7 +39795,7 @@ public:
   virtual uint           rule() const { return vshiftS_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38439,7 +39827,7 @@ public:
   virtual uint           rule() const { return vshiftS_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38471,7 +39859,7 @@ public:
   virtual uint           rule() const { return vshiftI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38503,7 +39891,7 @@ public:
   virtual uint           rule() const { return vshiftI_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38535,7 +39923,7 @@ public:
   virtual uint           rule() const { return vshiftI_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38567,7 +39955,7 @@ public:
   virtual uint           rule() const { return vshiftI_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -38596,7 +39984,7 @@ public:
   virtual uint           rule() const { return vshiftI_imm_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -38625,7 +40013,7 @@ public:
   virtual uint           rule() const { return vshiftI_imm_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -38654,7 +40042,7 @@ public:
   virtual uint           rule() const { return vshiftL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38686,7 +40074,7 @@ public:
   virtual uint           rule() const { return vshiftL_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38718,7 +40106,7 @@ public:
   virtual uint           rule() const { return vshiftL_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -38747,7 +40135,7 @@ public:
   virtual uint           rule() const { return vshiftL_imm_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -38776,7 +40164,7 @@ public:
   virtual uint           rule() const { return vshiftL_arith_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38808,7 +40196,7 @@ public:
   virtual uint           rule() const { return vshiftL_arith_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -38837,7 +40225,7 @@ public:
   virtual uint           rule() const { return vshift8B_var_nobw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38869,7 +40257,7 @@ public:
   virtual uint           rule() const { return vshift8B_var_nobw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38901,7 +40289,7 @@ public:
   virtual uint           rule() const { return vshift8B_var_nobw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38933,7 +40321,7 @@ public:
   virtual uint           rule() const { return vshift16B_var_nobw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38965,7 +40353,7 @@ public:
   virtual uint           rule() const { return vshift16B_var_nobw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -38997,7 +40385,7 @@ public:
   virtual uint           rule() const { return vshift16B_var_nobw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39029,7 +40417,7 @@ public:
   virtual uint           rule() const { return vshift32B_var_nobw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39061,7 +40449,7 @@ public:
   virtual uint           rule() const { return vshift32B_var_nobw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39093,7 +40481,7 @@ public:
   virtual uint           rule() const { return vshift32B_var_nobw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39125,7 +40513,7 @@ public:
   virtual uint           rule() const { return vshiftB_var_evex_bw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39157,7 +40545,7 @@ public:
   virtual uint           rule() const { return vshiftB_var_evex_bw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39189,7 +40577,7 @@ public:
   virtual uint           rule() const { return vshiftB_var_evex_bw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39221,7 +40609,7 @@ public:
   virtual uint           rule() const { return vshift64B_var_evex_bw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39253,7 +40641,7 @@ public:
   virtual uint           rule() const { return vshift64B_var_evex_bw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39285,7 +40673,7 @@ public:
   virtual uint           rule() const { return vshift64B_var_evex_bw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVB; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39317,7 +40705,7 @@ public:
   virtual uint           rule() const { return vshift8S_var_nobw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39349,7 +40737,7 @@ public:
   virtual uint           rule() const { return vshift8S_var_nobw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39381,7 +40769,7 @@ public:
   virtual uint           rule() const { return vshift8S_var_nobw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39413,7 +40801,7 @@ public:
   virtual uint           rule() const { return vshift16S_var_nobw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39445,7 +40833,7 @@ public:
   virtual uint           rule() const { return vshift16S_var_nobw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39477,7 +40865,7 @@ public:
   virtual uint           rule() const { return vshift16S_var_nobw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39509,7 +40897,7 @@ public:
   virtual uint           rule() const { return vshift16S_var_evex_bw_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39538,7 +40926,7 @@ public:
   virtual uint           rule() const { return vshift16S_var_evex_bw_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39567,7 +40955,7 @@ public:
   virtual uint           rule() const { return vshift16S_var_evex_bw_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39596,7 +40984,7 @@ public:
   virtual uint           rule() const { return vshiftI_var_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39625,7 +41013,7 @@ public:
   virtual uint           rule() const { return vshiftI_var_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39654,7 +41042,7 @@ public:
   virtual uint           rule() const { return vshiftI_var_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39683,7 +41071,7 @@ public:
   virtual uint           rule() const { return vshiftL_var_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39712,7 +41100,7 @@ public:
   virtual uint           rule() const { return vshiftL_var_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39741,7 +41129,7 @@ public:
   virtual uint           rule() const { return vshiftL_arith_var_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39773,7 +41161,7 @@ public:
   virtual uint           rule() const { return vshiftL_arith_var_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39802,7 +41190,7 @@ public:
   virtual uint           rule() const { return vand_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39832,7 +41220,7 @@ public:
   virtual uint           rule() const { return vand_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39861,7 +41249,7 @@ public:
   virtual uint           rule() const { return vand_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -39892,7 +41280,7 @@ public:
   virtual uint           rule() const { return vand_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -39923,7 +41311,7 @@ public:
   virtual uint           rule() const { return vor_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -39953,7 +41341,7 @@ public:
   virtual uint           rule() const { return vor_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -39982,7 +41370,7 @@ public:
   virtual uint           rule() const { return vor_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -40013,7 +41401,7 @@ public:
   virtual uint           rule() const { return vor_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -40044,7 +41432,7 @@ public:
   virtual uint           rule() const { return vxor_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40074,7 +41462,7 @@ public:
   virtual uint           rule() const { return vxor_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40103,7 +41491,7 @@ public:
   virtual uint           rule() const { return vxor_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -40134,7 +41522,7 @@ public:
   virtual uint           rule() const { return vxor_mem_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorV; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -40165,7 +41553,7 @@ public:
   virtual uint           rule() const { return vcastBtoX_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastB2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40177,6 +41565,36 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "vcastBtoX";}
+#endif
+};
+
+class vcastBtoDNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vcastBtoD_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_VectorCastB2X; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vcastBtoDNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vcastBtoDNode); }
+  // Rematerialize vcastBtoD
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vcastBtoD";}
 #endif
 };
 
@@ -40195,7 +41613,7 @@ public:
   virtual uint           rule() const { return castStoX_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastS2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40225,7 +41643,7 @@ public:
   virtual uint           rule() const { return vcastStoX_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastS2X; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40257,7 +41675,7 @@ public:
   virtual uint           rule() const { return vcastStoX_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastS2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40287,7 +41705,7 @@ public:
   virtual uint           rule() const { return castItoX_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastI2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40317,7 +41735,7 @@ public:
   virtual uint           rule() const { return vcastItoX_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastI2X; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40349,7 +41767,7 @@ public:
   virtual uint           rule() const { return vcastItoX_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastI2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40379,7 +41797,7 @@ public:
   virtual uint           rule() const { return vcastLtoBS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastL2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40409,7 +41827,7 @@ public:
   virtual uint           rule() const { return vcastLtoX_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastL2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40439,7 +41857,7 @@ public:
   virtual uint           rule() const { return vcastFtoD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastF2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40469,7 +41887,7 @@ public:
   virtual uint           rule() const { return castFtoX_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastF2X; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40501,7 +41919,7 @@ public:
   virtual uint           rule() const { return castFtoX_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastF2X; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40533,7 +41951,7 @@ public:
   virtual uint           rule() const { return vcastDtoF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastD2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40563,7 +41981,7 @@ public:
   virtual uint           rule() const { return castDtoX_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastD2X; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40595,7 +42013,7 @@ public:
   virtual uint           rule() const { return castDtoX_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCastD2X; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40627,7 +42045,7 @@ public:
   virtual uint           rule() const { return vucast_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorUCastB2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40657,7 +42075,7 @@ public:
   virtual uint           rule() const { return vucast_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorUCastS2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40687,7 +42105,7 @@ public:
   virtual uint           rule() const { return vucast_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorUCastI2X; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40718,7 +42136,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundVF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40751,7 +42169,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundVF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40784,7 +42202,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RoundVD; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40816,7 +42234,7 @@ public:
   virtual uint           rule() const { return vcmpFD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40845,7 +42263,7 @@ public:
   virtual uint           rule() const { return evcmpFD64_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40876,7 +42294,7 @@ public:
   virtual uint           rule() const { return evcmpFD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40905,7 +42323,7 @@ public:
   virtual uint           rule() const { return vcmp_direct_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -40934,7 +42352,7 @@ public:
   virtual uint           rule() const { return vcmp_negate_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40967,7 +42385,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -40999,7 +42417,7 @@ public:
   virtual uint           rule() const { return vcmp64_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41030,7 +42448,7 @@ public:
   virtual uint           rule() const { return evcmp_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41059,7 +42477,7 @@ public:
   virtual uint           rule() const { return extractI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41088,7 +42506,7 @@ public:
   virtual uint           rule() const { return extractI_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41117,7 +42535,7 @@ public:
   virtual uint           rule() const { return extractI_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41146,7 +42564,7 @@ public:
   virtual uint           rule() const { return vextractI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41177,7 +42595,7 @@ public:
   virtual uint           rule() const { return vextractI_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41208,7 +42626,7 @@ public:
   virtual uint           rule() const { return vextractI_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41239,7 +42657,7 @@ public:
   virtual uint           rule() const { return extractL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41268,7 +42686,7 @@ public:
   virtual uint           rule() const { return vextractL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41299,7 +42717,7 @@ public:
   virtual uint           rule() const { return extractF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractF; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -41331,7 +42749,7 @@ public:
   virtual uint           rule() const { return vextractF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41362,7 +42780,7 @@ public:
   virtual uint           rule() const { return extractD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41391,7 +42809,7 @@ public:
   virtual uint           rule() const { return vextractD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExtractD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41422,7 +42840,7 @@ public:
   virtual uint           rule() const { return blendvp_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorBlend; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -41454,7 +42872,7 @@ public:
   virtual uint           rule() const { return vblendvpI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorBlend; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41483,7 +42901,7 @@ public:
   virtual uint           rule() const { return vblendvpFD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorBlend; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41512,7 +42930,7 @@ public:
   virtual uint           rule() const { return vblendvp_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorBlend; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -41544,7 +42962,7 @@ public:
   virtual uint           rule() const { return evblendvp64_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorBlend; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41575,7 +42993,7 @@ public:
   virtual uint           rule() const { return evblendvp64_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorBlend; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41604,7 +43022,7 @@ public:
   virtual uint           rule() const { return vabsB_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVB; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41634,7 +43052,7 @@ public:
   virtual uint           rule() const { return vabsS_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVS; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41664,7 +43082,7 @@ public:
   virtual uint           rule() const { return vabsI_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41694,7 +43112,7 @@ public:
   virtual uint           rule() const { return vabsL_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41724,7 +43142,7 @@ public:
   virtual uint           rule() const { return vabsnegF_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41754,7 +43172,7 @@ public:
   virtual uint           rule() const { return vabsnegF_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegVF; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41784,7 +43202,7 @@ public:
   virtual uint           rule() const { return vabsneg4F_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -41815,7 +43233,7 @@ public:
   virtual uint           rule() const { return vabsneg4F_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -41846,7 +43264,7 @@ public:
   virtual uint           rule() const { return vabsnegD_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41876,7 +43294,7 @@ public:
   virtual uint           rule() const { return vabsnegD_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_NegVD; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41906,7 +43324,7 @@ public:
   virtual uint           rule() const { return vptest_lt16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorTest; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41938,7 +43356,7 @@ public:
   virtual uint           rule() const { return vptest_ge16_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorTest; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -41968,7 +43386,7 @@ public:
   virtual uint           rule() const { return ktest_alltrue_le8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorTest; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42000,7 +43418,7 @@ public:
   virtual uint           rule() const { return ktest_anytrue_le8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorTest; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42032,7 +43450,7 @@ public:
   virtual uint           rule() const { return ktest_ge8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorTest; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42062,7 +43480,7 @@ public:
   virtual uint           rule() const { return loadMask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLoadMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42094,7 +43512,7 @@ public:
   virtual uint           rule() const { return loadMask64_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLoadMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42125,7 +43543,7 @@ public:
   virtual uint           rule() const { return loadMask_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLoadMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42156,7 +43574,7 @@ public:
   virtual uint           rule() const { return vstoreMask1B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42185,7 +43603,7 @@ public:
   virtual uint           rule() const { return vstoreMask2B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42217,7 +43635,7 @@ public:
   virtual uint           rule() const { return vstoreMask4B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42249,7 +43667,7 @@ public:
   virtual uint           rule() const { return storeMask8B_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42281,7 +43699,7 @@ public:
   virtual uint           rule() const { return storeMask8B_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42313,7 +43731,7 @@ public:
   virtual uint           rule() const { return vstoreMask4B_evex_novectmask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42342,7 +43760,7 @@ public:
   virtual uint           rule() const { return vstoreMask8B_evex_novectmask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42371,7 +43789,7 @@ public:
   virtual uint           rule() const { return vstoreMask_evex_vectmask_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42403,7 +43821,7 @@ public:
   virtual uint           rule() const { return vstoreMask_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorStoreMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42435,7 +43853,7 @@ public:
   virtual uint           rule() const { return vmaskcast_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCast; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42466,7 +43884,7 @@ public:
   virtual uint           rule() const { return vmaskcast_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCast; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42497,7 +43915,7 @@ public:
   virtual uint           rule() const { return vmaskcast_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCast; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42527,7 +43945,7 @@ public:
   virtual uint           rule() const { return loadIotaIndices_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLoadConst; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42557,7 +43975,7 @@ public:
   virtual uint           rule() const { return VectorPopulateIndex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopulateIndex; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42589,7 +44007,7 @@ public:
   virtual uint           rule() const { return VectorPopulateLIndex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopulateIndex; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42603,37 +44021,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "VectorPopulateLIndex";}
-#endif
-};
-
-class loadShuffleBNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return loadShuffleB_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_VectorLoadShuffle; }
-  virtual uint           two_adr() const  { return oper_input_base(); }
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  loadShuffleBNode() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(loadShuffleBNode); }
-  // Rematerialize loadShuffleB
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "loadShuffleB";}
 #endif
 };
 
@@ -42652,7 +44039,7 @@ public:
   virtual uint           rule() const { return rearrangeB_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42682,7 +44069,7 @@ public:
   virtual uint           rule() const { return rearrangeB_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42714,7 +44101,7 @@ public:
   virtual uint           rule() const { return rearrangeB_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42746,7 +44133,7 @@ public:
   virtual uint           rule() const { return rearrangeB_evex_vbmi_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42775,7 +44162,7 @@ public:
   virtual uint           rule() const { return loadShuffleS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLoadShuffle; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42807,7 +44194,7 @@ public:
   virtual uint           rule() const { return rearrangeS_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42837,7 +44224,7 @@ public:
   virtual uint           rule() const { return rearrangeS_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42851,36 +44238,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rearrangeS_avx";}
-#endif
-};
-
-class loadShuffleS_evexNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return loadShuffleS_evex_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_VectorLoadShuffle; }
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  loadShuffleS_evexNode() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(loadShuffleS_evexNode); }
-  // Rematerialize loadShuffleS_evex
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "loadShuffleS_evex";}
 #endif
 };
 
@@ -42899,7 +44256,7 @@ public:
   virtual uint           rule() const { return rearrangeS_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -42928,7 +44285,7 @@ public:
   virtual uint           rule() const { return loadShuffleI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLoadShuffle; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42960,7 +44317,7 @@ public:
   virtual uint           rule() const { return rearrangeI_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -42972,36 +44329,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rearrangeI";}
-#endif
-};
-
-class loadShuffleI_avxNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return loadShuffleI_avx_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_VectorLoadShuffle; }
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  loadShuffleI_avxNode() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(loadShuffleI_avxNode); }
-  // Rematerialize loadShuffleI_avx
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "loadShuffleI_avx";}
 #endif
 };
 
@@ -43020,7 +44347,7 @@ public:
   virtual uint           rule() const { return rearrangeI_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43049,7 +44376,7 @@ public:
   virtual uint           rule() const { return loadShuffleL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLoadShuffle; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43081,7 +44408,7 @@ public:
   virtual uint           rule() const { return rearrangeL_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43092,36 +44419,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rearrangeL";}
-#endif
-};
-
-class loadShuffleL_evexNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return loadShuffleL_evex_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_VectorLoadShuffle; }
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  loadShuffleL_evexNode() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(loadShuffleL_evexNode); }
-  // Rematerialize loadShuffleL_evex
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "loadShuffleL_evex";}
 #endif
 };
 
@@ -43140,7 +44437,7 @@ public:
   virtual uint           rule() const { return rearrangeL_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43169,7 +44466,7 @@ public:
   virtual uint           rule() const { return vfmaF_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43199,7 +44496,7 @@ public:
   virtual uint           rule() const { return vfmaF_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -43231,7 +44528,7 @@ public:
   virtual uint           rule() const { return vfmaD_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43261,7 +44558,7 @@ public:
   virtual uint           rule() const { return vfmaD_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -43293,7 +44590,7 @@ public:
   virtual uint           rule() const { return vmuladdS2I_reg_sse_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulAddVS2VI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43323,7 +44620,7 @@ public:
   virtual uint           rule() const { return vmuladdS2I_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulAddVS2VI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43352,7 +44649,7 @@ public:
   virtual uint           rule() const { return vmuladdaddS2I_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43382,7 +44679,7 @@ public:
   virtual uint           rule() const { return vmuladdaddS2I_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43412,7 +44709,7 @@ public:
   virtual uint           rule() const { return vpopcount_integral_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43442,7 +44739,7 @@ public:
   virtual uint           rule() const { return vpopcount_integral_reg_evex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43472,7 +44769,7 @@ public:
   virtual uint           rule() const { return vpopcount_integral_reg_evex_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountVI; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43501,7 +44798,7 @@ public:
   virtual uint           rule() const { return vpopcount_integral_reg_evex_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountVL; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43530,7 +44827,7 @@ public:
   virtual uint           rule() const { return vpopcount_avx_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountVI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43562,7 +44859,7 @@ public:
   virtual uint           rule() const { return vpopcount_avx_reg_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_PopCountVL; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43594,7 +44891,7 @@ public:
   virtual uint           rule() const { return vcount_trailing_zeros_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43626,7 +44923,7 @@ public:
   virtual uint           rule() const { return vcount_trailing_zeros_short_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43658,7 +44955,7 @@ public:
   virtual uint           rule() const { return vcount_trailing_zeros_byte_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43690,7 +44987,7 @@ public:
   virtual uint           rule() const { return vcount_trailing_zeros_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountTrailingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43722,7 +45019,7 @@ public:
   virtual uint           rule() const { return vpternlog_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MacroLogicV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -43754,7 +45051,7 @@ public:
   virtual uint           rule() const { return vpternlog_mem_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MacroLogicV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -43788,7 +45085,7 @@ public:
   virtual uint           rule() const { return vprotate_immI8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeftV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43817,7 +45114,7 @@ public:
   virtual uint           rule() const { return vprotate_immI8_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRightV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43846,7 +45143,7 @@ public:
   virtual uint           rule() const { return vprorate_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeftV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43875,7 +45172,7 @@ public:
   virtual uint           rule() const { return vprorate_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRightV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -43904,7 +45201,7 @@ public:
   virtual uint           rule() const { return vmasked_load_avx_non_subword_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorMasked; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -43935,7 +45232,7 @@ public:
   virtual uint           rule() const { return vmasked_load_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorMasked; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -43966,7 +45263,7 @@ public:
   virtual uint           rule() const { return vmasked_store_avx_non_subword_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVectorMasked; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -43997,7 +45294,7 @@ public:
   virtual uint           rule() const { return vmasked_store_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreVectorMasked; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -44028,7 +45325,7 @@ public:
   virtual uint           rule() const { return verify_vector_alignment_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VerifyVectorAlignment; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44060,7 +45357,7 @@ public:
   virtual uint           rule() const { return vmask_cmp_node_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorCmpMasked; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44092,7 +45389,7 @@ public:
   virtual uint           rule() const { return vmask_gen_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskGen; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -44123,7 +45420,7 @@ public:
   virtual uint           rule() const { return vmask_gen_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskGen; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -44154,7 +45451,7 @@ public:
   virtual uint           rule() const { return vmask_tolong_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskToLong; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44185,7 +45482,7 @@ public:
   virtual uint           rule() const { return vmask_tolong_bool_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskToLong; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44216,7 +45513,7 @@ public:
   virtual uint           rule() const { return vmask_tolong_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskToLong; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -44247,7 +45544,7 @@ public:
   virtual uint           rule() const { return vmask_truecount_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskTrueCount; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44278,7 +45575,7 @@ public:
   virtual uint           rule() const { return vmask_truecount_bool_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskTrueCount; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44309,7 +45606,7 @@ public:
   virtual uint           rule() const { return vmask_truecount_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskTrueCount; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -44340,7 +45637,7 @@ public:
   virtual uint           rule() const { return vmask_first_or_last_true_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskFirstTrue; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44371,7 +45668,7 @@ public:
   virtual uint           rule() const { return vmask_first_or_last_true_evex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskLastTrue; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44402,7 +45699,7 @@ public:
   virtual uint           rule() const { return vmask_first_or_last_true_bool_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskFirstTrue; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44433,7 +45730,7 @@ public:
   virtual uint           rule() const { return vmask_first_or_last_true_bool_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskLastTrue; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
 public:
@@ -44464,7 +45761,7 @@ public:
   virtual uint           rule() const { return vmask_first_or_last_true_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskFirstTrue; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -44495,7 +45792,7 @@ public:
   virtual uint           rule() const { return vmask_first_or_last_true_avx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskLastTrue; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
 public:
@@ -44526,7 +45823,7 @@ public:
   virtual uint           rule() const { return vcompress_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompressV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44558,7 +45855,7 @@ public:
   virtual uint           rule() const { return vcompress_reg_avx_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExpandV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44590,7 +45887,7 @@ public:
   virtual uint           rule() const { return vcompress_expand_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompressV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -44619,7 +45916,7 @@ public:
   virtual uint           rule() const { return vcompress_expand_reg_evex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ExpandV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -44648,7 +45945,7 @@ public:
   virtual uint           rule() const { return vcompress_mask_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompressM; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -44679,7 +45976,7 @@ public:
   virtual uint           rule() const { return vreverse_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44712,7 +46009,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           eval_constant(Compile* C);
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44744,7 +46041,7 @@ public:
   virtual uint           rule() const { return vreverse_byte_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44776,7 +46073,7 @@ public:
   virtual uint           rule() const { return vreverse_byte64_reg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ReverseBytesV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44808,7 +46105,7 @@ public:
   virtual uint           rule() const { return vcount_leading_zeros_IL_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -44838,7 +46135,7 @@ public:
   virtual uint           rule() const { return vcount_leading_zeros_IL_reg_evex_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosV; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -44867,7 +46164,7 @@ public:
   virtual uint           rule() const { return vcount_leading_zeros_short_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44899,7 +46196,7 @@ public:
   virtual uint           rule() const { return vcount_leading_zeros_byte_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44931,7 +46228,7 @@ public:
   virtual uint           rule() const { return vcount_leading_zeros_int_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44963,7 +46260,7 @@ public:
   virtual uint           rule() const { return vcount_leading_zeros_reg_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CountLeadingZerosV; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -44995,7 +46292,7 @@ public:
   virtual uint           rule() const { return vadd_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVB; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45025,7 +46322,7 @@ public:
   virtual uint           rule() const { return vadd_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45055,7 +46352,7 @@ public:
   virtual uint           rule() const { return vadd_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45085,7 +46382,7 @@ public:
   virtual uint           rule() const { return vadd_reg_masked_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45115,7 +46412,7 @@ public:
   virtual uint           rule() const { return vadd_reg_masked_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45145,7 +46442,7 @@ public:
   virtual uint           rule() const { return vadd_reg_masked_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45175,7 +46472,7 @@ public:
   virtual uint           rule() const { return vadd_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVB; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45207,7 +46504,7 @@ public:
   virtual uint           rule() const { return vadd_mem_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45239,7 +46536,7 @@ public:
   virtual uint           rule() const { return vadd_mem_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45271,7 +46568,7 @@ public:
   virtual uint           rule() const { return vadd_mem_masked_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45303,7 +46600,7 @@ public:
   virtual uint           rule() const { return vadd_mem_masked_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45335,7 +46632,7 @@ public:
   virtual uint           rule() const { return vadd_mem_masked_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45367,7 +46664,7 @@ public:
   virtual uint           rule() const { return vxor_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45397,7 +46694,7 @@ public:
   virtual uint           rule() const { return vxor_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45429,7 +46726,7 @@ public:
   virtual uint           rule() const { return vor_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45459,7 +46756,7 @@ public:
   virtual uint           rule() const { return vor_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45491,7 +46788,7 @@ public:
   virtual uint           rule() const { return vand_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45521,7 +46818,7 @@ public:
   virtual uint           rule() const { return vand_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45553,7 +46850,7 @@ public:
   virtual uint           rule() const { return vsub_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVB; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45583,7 +46880,7 @@ public:
   virtual uint           rule() const { return vsub_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45613,7 +46910,7 @@ public:
   virtual uint           rule() const { return vsub_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45643,7 +46940,7 @@ public:
   virtual uint           rule() const { return vsub_reg_masked_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45673,7 +46970,7 @@ public:
   virtual uint           rule() const { return vsub_reg_masked_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45703,7 +47000,7 @@ public:
   virtual uint           rule() const { return vsub_reg_masked_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45733,7 +47030,7 @@ public:
   virtual uint           rule() const { return vsub_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVB; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45765,7 +47062,7 @@ public:
   virtual uint           rule() const { return vsub_mem_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45797,7 +47094,7 @@ public:
   virtual uint           rule() const { return vsub_mem_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45829,7 +47126,7 @@ public:
   virtual uint           rule() const { return vsub_mem_masked_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45861,7 +47158,7 @@ public:
   virtual uint           rule() const { return vsub_mem_masked_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45893,7 +47190,7 @@ public:
   virtual uint           rule() const { return vsub_mem_masked_4_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SubVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -45925,7 +47222,7 @@ public:
   virtual uint           rule() const { return vmul_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45955,7 +47252,7 @@ public:
   virtual uint           rule() const { return vmul_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -45985,7 +47282,7 @@ public:
   virtual uint           rule() const { return vmul_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46015,7 +47312,7 @@ public:
   virtual uint           rule() const { return vmul_reg_masked_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46045,7 +47342,7 @@ public:
   virtual uint           rule() const { return vmul_reg_masked_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46075,7 +47372,7 @@ public:
   virtual uint           rule() const { return vmul_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -46107,7 +47404,7 @@ public:
   virtual uint           rule() const { return vmul_mem_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -46139,7 +47436,7 @@ public:
   virtual uint           rule() const { return vmul_mem_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -46171,7 +47468,7 @@ public:
   virtual uint           rule() const { return vmul_mem_masked_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -46203,7 +47500,7 @@ public:
   virtual uint           rule() const { return vmul_mem_masked_3_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MulVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -46235,7 +47532,7 @@ public:
   virtual uint           rule() const { return vsqrt_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46265,7 +47562,7 @@ public:
   virtual uint           rule() const { return vsqrt_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_SqrtVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46295,7 +47592,7 @@ public:
   virtual uint           rule() const { return vdiv_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46325,7 +47622,7 @@ public:
   virtual uint           rule() const { return vdiv_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46355,7 +47652,7 @@ public:
   virtual uint           rule() const { return vdiv_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -46387,7 +47684,7 @@ public:
   virtual uint           rule() const { return vdiv_mem_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_DivVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -46419,7 +47716,7 @@ public:
   virtual uint           rule() const { return vrol_imm_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeftV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46449,7 +47746,7 @@ public:
   virtual uint           rule() const { return vrol_imm_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRightV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46479,7 +47776,7 @@ public:
   virtual uint           rule() const { return vrol_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeftV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46509,7 +47806,7 @@ public:
   virtual uint           rule() const { return vrol_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRightV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46539,7 +47836,7 @@ public:
   virtual uint           rule() const { return vlshift_imm_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46569,7 +47866,7 @@ public:
   virtual uint           rule() const { return vlshift_imm_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46599,7 +47896,7 @@ public:
   virtual uint           rule() const { return vlshift_imm_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46629,7 +47926,7 @@ public:
   virtual uint           rule() const { return vlshift_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46659,7 +47956,7 @@ public:
   virtual uint           rule() const { return vlshift_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46689,7 +47986,7 @@ public:
   virtual uint           rule() const { return vlshift_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46719,7 +48016,7 @@ public:
   virtual uint           rule() const { return vlshiftv_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46749,7 +48046,7 @@ public:
   virtual uint           rule() const { return vlshiftv_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46779,7 +48076,7 @@ public:
   virtual uint           rule() const { return vlshiftv_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46809,7 +48106,7 @@ public:
   virtual uint           rule() const { return vrshift_imm_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46839,7 +48136,7 @@ public:
   virtual uint           rule() const { return vrshift_imm_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46869,7 +48166,7 @@ public:
   virtual uint           rule() const { return vrshift_imm_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46899,7 +48196,7 @@ public:
   virtual uint           rule() const { return vrshift_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46929,7 +48226,7 @@ public:
   virtual uint           rule() const { return vrshift_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46959,7 +48256,7 @@ public:
   virtual uint           rule() const { return vrshift_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -46989,7 +48286,7 @@ public:
   virtual uint           rule() const { return vrshiftv_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47019,7 +48316,7 @@ public:
   virtual uint           rule() const { return vrshiftv_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47049,7 +48346,7 @@ public:
   virtual uint           rule() const { return vrshiftv_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47079,7 +48376,7 @@ public:
   virtual uint           rule() const { return vurshift_imm_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47109,7 +48406,7 @@ public:
   virtual uint           rule() const { return vurshift_imm_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47139,7 +48436,7 @@ public:
   virtual uint           rule() const { return vurshift_imm_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47169,7 +48466,7 @@ public:
   virtual uint           rule() const { return vurshift_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47199,7 +48496,7 @@ public:
   virtual uint           rule() const { return vurshift_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47229,7 +48526,7 @@ public:
   virtual uint           rule() const { return vurshift_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47259,7 +48556,7 @@ public:
   virtual uint           rule() const { return vurshiftv_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47289,7 +48586,7 @@ public:
   virtual uint           rule() const { return vurshiftv_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47319,7 +48616,7 @@ public:
   virtual uint           rule() const { return vurshiftv_reg_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_URShiftVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47349,7 +48646,7 @@ public:
   virtual uint           rule() const { return vmaxv_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47379,7 +48676,7 @@ public:
   virtual uint           rule() const { return vmaxv_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaxV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -47411,7 +48708,7 @@ public:
   virtual uint           rule() const { return vminv_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47441,7 +48738,7 @@ public:
   virtual uint           rule() const { return vminv_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MinV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -47473,7 +48770,7 @@ public:
   virtual uint           rule() const { return vrearrangev_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorRearrange; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47503,7 +48800,7 @@ public:
   virtual uint           rule() const { return vabs_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVB; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47533,7 +48830,7 @@ public:
   virtual uint           rule() const { return vabs_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVS; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47563,7 +48860,7 @@ public:
   virtual uint           rule() const { return vabs_masked_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVI; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47593,7 +48890,7 @@ public:
   virtual uint           rule() const { return vabs_masked_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AbsVL; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47623,7 +48920,7 @@ public:
   virtual uint           rule() const { return vfma_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47653,7 +48950,7 @@ public:
   virtual uint           rule() const { return vfma_reg_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47683,7 +48980,7 @@ public:
   virtual uint           rule() const { return vfma_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVF; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -47715,7 +49012,7 @@ public:
   virtual uint           rule() const { return vfma_mem_masked_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_FmaVD; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -47747,7 +49044,7 @@ public:
   virtual uint           rule() const { return evcmp_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorMaskCmp; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -47776,7 +49073,7 @@ public:
   virtual uint           rule() const { return mask_all_evexI_LE32_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MaskAll; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -47805,7 +49102,7 @@ public:
   virtual uint           rule() const { return mask_not_immLT8_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorVMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47837,7 +49134,7 @@ public:
   virtual uint           rule() const { return mask_not_imm_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorVMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -47866,7 +49163,7 @@ public:
   virtual uint           rule() const { return long_to_maskLE8_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLongToMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47898,7 +49195,7 @@ public:
   virtual uint           rule() const { return long_to_maskGT8_avx_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLongToMask; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -47930,7 +49227,7 @@ public:
   virtual uint           rule() const { return long_to_mask_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_VectorLongToMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -47960,7 +49257,7 @@ public:
   virtual uint           rule() const { return mask_opers_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AndVMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -47991,7 +49288,7 @@ public:
   virtual uint           rule() const { return mask_opers_evex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_OrVMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -48022,7 +49319,7 @@ public:
   virtual uint           rule() const { return mask_opers_evex_1_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_XorVMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
@@ -48053,7 +49350,7 @@ public:
   virtual uint           rule() const { return vternlog_reg_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MacroLogicV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual uint           oper_input_base() const { return 1; }
@@ -48083,7 +49380,7 @@ public:
   virtual uint           rule() const { return vternlogd_mem_masked_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_MacroLogicV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
   virtual int            reloc() const;
@@ -48115,7 +49412,7 @@ public:
   virtual uint           rule() const { return castMM_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastVV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -48147,7 +49444,7 @@ public:
   virtual uint           rule() const { return castVV_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastVV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -48179,7 +49476,7 @@ public:
   virtual uint           rule() const { return castVVLeg_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual uint           size(PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CastVV; }
   virtual uint           two_adr() const  { return oper_input_base(); }
@@ -48211,7 +49508,7 @@ public:
   virtual uint           rule() const { return FloatClassCheck_reg_reg_vfpclass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_IsInfiniteF; }
 public:
   FloatClassCheck_reg_reg_vfpclassNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -48241,7 +49538,7 @@ public:
   virtual uint           rule() const { return DoubleClassCheck_reg_reg_vfpclass_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_IsInfiniteD; }
 public:
   DoubleClassCheck_reg_reg_vfpclassNode() {  _num_opnds = 3; _opnds = _opnd_array; }
@@ -48253,6 +49550,1120 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "DoubleClassCheck_reg_reg_vfpclass";}
+#endif
+};
+
+class vector_addsub_saturating_subword_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_subword_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_reg";}
+#endif
+};
+
+class vector_addsub_saturating_subword_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_subword_reg_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_reg_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_reg_0";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_unsigned_subword_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_reg";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_unsigned_subword_reg_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_reg_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_reg_0";}
+#endif
+};
+
+class vector_addsub_saturating_reg_evexNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_reg_evex_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_reg_evexNode() {  _num_opnds = 8; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_reg_evexNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_reg_evex";}
+#endif
+};
+
+class vector_addsub_saturating_reg_evex_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_reg_evex_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_reg_evex_0Node() {  _num_opnds = 8; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_reg_evex_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_reg_evex_0";}
+#endif
+};
+
+class vector_addsub_saturating_reg_avxNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_reg_avx_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_reg_avxNode() {  _num_opnds = 8; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_reg_avxNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_reg_avx";}
+#endif
+};
+
+class vector_addsub_saturating_reg_avx_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_reg_avx_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_reg_avx_0Node() {  _num_opnds = 8; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_reg_avx_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_reg_avx_0";}
+#endif
+};
+
+class vector_add_saturating_unsigned_reg_evexNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_add_saturating_unsigned_reg_evex_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_add_saturating_unsigned_reg_evexNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_add_saturating_unsigned_reg_evexNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_add_saturating_unsigned_reg_evex";}
+#endif
+};
+
+class vector_add_saturating_unsigned_reg_avxNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_add_saturating_unsigned_reg_avx_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_add_saturating_unsigned_reg_avxNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_add_saturating_unsigned_reg_avxNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_add_saturating_unsigned_reg_avx";}
+#endif
+};
+
+class vector_sub_saturating_unsigned_reg_evexNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_sub_saturating_unsigned_reg_evex_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_sub_saturating_unsigned_reg_evexNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_sub_saturating_unsigned_reg_evexNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_sub_saturating_unsigned_reg_evex";}
+#endif
+};
+
+class vector_sub_saturating_unsigned_reg_avxNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_sub_saturating_unsigned_reg_avx_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_sub_saturating_unsigned_reg_avxNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_sub_saturating_unsigned_reg_avxNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_sub_saturating_unsigned_reg_avx";}
+#endif
+};
+
+class vector_addsub_saturating_subword_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_subword_memNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_memNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_mem";}
+#endif
+};
+
+class vector_addsub_saturating_subword_mem_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_mem_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_subword_mem_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_mem_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_mem_0";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_unsigned_subword_memNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_memNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_mem";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_mem_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_mem_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_unsigned_subword_mem_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_mem_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_mem_0";}
+#endif
+};
+
+class vector_addsub_saturating_subword_masked_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_masked_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_subword_masked_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_masked_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_masked_reg";}
+#endif
+};
+
+class vector_addsub_saturating_subword_masked_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_masked_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_subword_masked_reg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_masked_reg_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_masked_reg_0";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_masked_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_masked_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_unsigned_subword_masked_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_masked_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_masked_reg";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_masked_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_masked_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_addsub_saturating_unsigned_subword_masked_reg_0Node() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_masked_reg_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_masked_reg_0";}
+#endif
+};
+
+class vector_addsub_saturating_subword_masked_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_masked_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_subword_masked_memNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_masked_memNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_masked_mem";}
+#endif
+};
+
+class vector_addsub_saturating_subword_masked_mem_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_subword_masked_mem_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_subword_masked_mem_0Node() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_subword_masked_mem_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_subword_masked_mem_0";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_masked_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_masked_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingAddV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_unsigned_subword_masked_memNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_masked_memNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_masked_mem";}
+#endif
+};
+
+class vector_addsub_saturating_unsigned_subword_masked_mem_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_addsub_saturating_unsigned_subword_masked_mem_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SaturatingSubV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_addsub_saturating_unsigned_subword_masked_mem_0Node() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_addsub_saturating_unsigned_subword_masked_mem_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_addsub_saturating_unsigned_subword_masked_mem_0";}
+#endif
+};
+
+class vector_selectfrom_twovectors_reg_evexNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_selectfrom_twovectors_reg_evex_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SelectFromTwoVector; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_selectfrom_twovectors_reg_evexNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_selectfrom_twovectors_reg_evexNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_selectfrom_twovectors_reg_evex";}
+#endif
+};
+
+class reinterpretS2HFNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return reinterpretS2HF_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReinterpretS2HF; }
+public:
+  reinterpretS2HFNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(reinterpretS2HFNode); }
+  // Rematerialize reinterpretS2HF
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "reinterpretS2HF";}
+#endif
+};
+
+class convF2HFAndS2HFNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convF2HFAndS2HF_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReinterpretS2HF; }
+public:
+  convF2HFAndS2HFNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(convF2HFAndS2HFNode); }
+  // Rematerialize convF2HFAndS2HF
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convF2HFAndS2HF";}
+#endif
+};
+
+class convHF2SAndHF2FNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convHF2SAndHF2F_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvHF2F; }
+public:
+  convHF2SAndHF2FNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(convHF2SAndHF2FNode); }
+  // Rematerialize convHF2SAndHF2F
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convHF2SAndHF2F";}
+#endif
+};
+
+class reinterpretHF2SNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return reinterpretHF2S_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReinterpretHF2S; }
+public:
+  reinterpretHF2SNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(reinterpretHF2SNode); }
+  // Rematerialize reinterpretHF2S
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "reinterpretHF2S";}
+#endif
+};
+
+class scalar_sqrt_HF_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_sqrt_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SqrtHF; }
+public:
+  scalar_sqrt_HF_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_sqrt_HF_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_sqrt_HF_reg";}
+#endif
+};
+
+class scalar_binOps_HF_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_binOps_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddHF; }
+public:
+  scalar_binOps_HF_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_binOps_HF_reg";}
+#endif
+};
+
+class scalar_binOps_HF_reg_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_binOps_HF_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_DivHF; }
+public:
+  scalar_binOps_HF_reg_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_binOps_HF_reg_0";}
+#endif
+};
+
+class scalar_binOps_HF_reg_1Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_binOps_HF_reg_1_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxHF; }
+public:
+  scalar_binOps_HF_reg_1Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_1Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_binOps_HF_reg_1";}
+#endif
+};
+
+class scalar_binOps_HF_reg_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_binOps_HF_reg_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinHF; }
+public:
+  scalar_binOps_HF_reg_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_binOps_HF_reg_2";}
+#endif
+};
+
+class scalar_binOps_HF_reg_3Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_binOps_HF_reg_3_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulHF; }
+public:
+  scalar_binOps_HF_reg_3Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_3Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_binOps_HF_reg_3";}
+#endif
+};
+
+class scalar_binOps_HF_reg_4Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_binOps_HF_reg_4_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubHF; }
+public:
+  scalar_binOps_HF_reg_4Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_4Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_binOps_HF_reg_4";}
+#endif
+};
+
+class scalar_fma_HF_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_fma_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaHF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+public:
+  scalar_fma_HF_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_fma_HF_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_fma_HF_reg";}
 #endif
 };
 
@@ -48271,7 +50682,7 @@ public:
   virtual uint           rule() const { return compareAndSwapP_shenandoah_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndSwapP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -48304,7 +50715,7 @@ public:
   virtual uint           rule() const { return compareAndSwapP_shenandoah_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ShenandoahWeakCompareAndSwapP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -48337,7 +50748,7 @@ public:
   virtual uint           rule() const { return compareAndSwapN_shenandoah_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndSwapN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -48370,7 +50781,7 @@ public:
   virtual uint           rule() const { return compareAndSwapN_shenandoah_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ShenandoahWeakCompareAndSwapN; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -48403,7 +50814,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeN_shenandoah_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndExchangeN; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -48437,7 +50848,7 @@ public:
   virtual uint           rule() const { return compareAndExchangeP_shenandoah_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_ShenandoahCompareAndExchangeP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -48456,170 +50867,6 @@ public:
 #endif
 };
 
-class xLoadPNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return xLoadP_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadP; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  xLoadPNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(xLoadPNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "xLoadP";}
-#endif
-};
-
-class xCompareAndExchangePNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[5];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return xCompareAndExchangeP_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  xCompareAndExchangePNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(xCompareAndExchangePNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "xCompareAndExchangeP";}
-#endif
-};
-
-class xCompareAndSwapPNode : public MachNode { 
-private:
-  MachOper *_opnd_array[5];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return xCompareAndSwapP_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_CompareAndSwapP; }
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  xCompareAndSwapPNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(xCompareAndSwapPNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "xCompareAndSwapP";}
-#endif
-};
-
-class xCompareAndSwapP_0Node : public MachNode { 
-private:
-  MachOper *_opnd_array[5];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return xCompareAndSwapP_0_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  xCompareAndSwapP_0Node() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(xCompareAndSwapP_0Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "xCompareAndSwapP_0";}
-#endif
-};
-
-class xXChgPNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return xXChgP_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_GetAndSetP; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  xXChgPNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(xXChgPNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "xXChgP";}
-#endif
-};
-
 class zLoadPNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[3];
@@ -48635,7 +50882,7 @@ public:
   virtual uint           rule() const { return zLoadP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual int            reloc() const;
@@ -48669,7 +50916,7 @@ public:
   virtual uint           rule() const { return zLoadPNullCheck_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CmpP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -48701,7 +50948,7 @@ public:
   virtual uint           rule() const { return zStoreP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -48734,7 +50981,7 @@ public:
   virtual uint           rule() const { return zStorePNull_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_StoreP; }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
@@ -48767,7 +51014,7 @@ public:
   virtual uint           rule() const { return zCompareAndExchangeP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 2; }
@@ -48800,7 +51047,7 @@ public:
   virtual uint           rule() const { return zCompareAndSwapP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CompareAndSwapP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -48832,7 +51079,7 @@ public:
   virtual uint           rule() const { return zCompareAndSwapP_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
   virtual uint           oper_input_base() const { return 2; }
 public:
@@ -48864,7 +51111,7 @@ public:
   virtual uint           rule() const { return zXChgP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
-  virtual void           emit(CodeBuffer &cbuf, PhaseRegAlloc *ra_) const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_GetAndSetP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
   virtual uint           oper_input_base() const { return 2; }
@@ -48882,20 +51129,451 @@ public:
 #endif
 };
 
+class g1StorePNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1StoreP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StoreP; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1StorePNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(g1StorePNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1StoreP";}
+#endif
+};
+
+class g1StoreNNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1StoreN_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StoreN; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1StoreNNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(g1StoreNNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1StoreN";}
+#endif
+};
+
+class g1EncodePAndStoreNNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1EncodePAndStoreN_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StoreN; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1EncodePAndStoreNNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(g1EncodePAndStoreNNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1EncodePAndStoreN";}
+#endif
+};
+
+class g1CompareAndExchangePNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1CompareAndExchangeP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndExchangeP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1CompareAndExchangePNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1CompareAndExchangePNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1CompareAndExchangeP";}
+#endif
+};
+
+class g1CompareAndExchangeNNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1CompareAndExchangeN_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndExchangeN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1CompareAndExchangeNNode() {  _num_opnds = 7; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1CompareAndExchangeNNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1CompareAndExchangeN";}
+#endif
+};
+
+class g1CompareAndSwapPNode : public MachNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1CompareAndSwapP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1CompareAndSwapPNode() {  _num_opnds = 8; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1CompareAndSwapPNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1CompareAndSwapP";}
+#endif
+};
+
+class g1CompareAndSwapP_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1CompareAndSwapP_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1CompareAndSwapP_0Node() {  _num_opnds = 8; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1CompareAndSwapP_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1CompareAndSwapP_0";}
+#endif
+};
+
+class g1CompareAndSwapNNode : public MachNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1CompareAndSwapN_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CompareAndSwapN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1CompareAndSwapNNode() {  _num_opnds = 8; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1CompareAndSwapNNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1CompareAndSwapN";}
+#endif
+};
+
+class g1CompareAndSwapN_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[8];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1CompareAndSwapN_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_WeakCompareAndSwapN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1CompareAndSwapN_0Node() {  _num_opnds = 8; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1CompareAndSwapN_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1CompareAndSwapN_0";}
+#endif
+};
+
+class g1GetAndSetPNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1GetAndSetP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_GetAndSetP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1GetAndSetPNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1GetAndSetPNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1GetAndSetP";}
+#endif
+};
+
+class g1GetAndSetNNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1GetAndSetN_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_GetAndSetN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1GetAndSetNNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1GetAndSetNNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1GetAndSetN";}
+#endif
+};
+
+class g1LoadPNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1LoadP_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadP; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1LoadPNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1LoadPNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1LoadP";}
+#endif
+};
+
+class g1LoadNNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1LoadN_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LoadN; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1LoadNNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(g1LoadNNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1LoadN";}
+#endif
+};
+
 //HeaderForm
 
-#line 323 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 421 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
 
 #include "peephole_x86_64.hpp"
 
 
-#line 48893 "ad_x86.hpp"
+#line 51571 "ad_x86.hpp"
 
 
 //HeaderForm
 
-#line 330 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 428 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
 
 extern RegMask _ANY_REG_mask;
@@ -48922,7 +51600,7 @@ inline const RegMask& STACK_OR_LONG_REG_mask() { return _STACK_OR_LONG_REG_mask;
 inline const RegMask& STACK_OR_INT_REG_mask()  { return _STACK_OR_INT_REG_mask;  }
 
 
-#line 48925 "ad_x86.hpp"
+#line 51603 "ad_x86.hpp"
 
 
 //HeaderForm
@@ -48962,8 +51640,8 @@ class HandlerImpl {
 
  public:
 
-  static int emit_exception_handler(CodeBuffer &cbuf);
-  static int emit_deopt_handler(CodeBuffer& cbuf);
+  static int emit_exception_handler(C2_MacroAssembler *masm);
+  static int emit_deopt_handler(C2_MacroAssembler* masm);
 
   static uint size_exception_handler() {
     // NativeCall instruction size is the same as NativeJump.
@@ -49045,7 +51723,7 @@ public:
 };
 
 
-#line 49048 "ad_x86.hpp"
+#line 51726 "ad_x86.hpp"
 
 
 //HeaderForm
@@ -49055,20 +51733,7 @@ public:
 #include "gc/shenandoah/shenandoahBarrierSetAssembler.hpp"
 #include "gc/shenandoah/c2/shenandoahSupport.hpp"
 
-#line 49058 "ad_x86.hpp"
-
-
-//HeaderForm
-
-#line 24 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/x/x_x86_64.ad"
-
-
-#include "gc/shared/gc_globals.hpp"
-#include "gc/x/c2/xBarrierSetC2.hpp"
-#include "gc/x/xThreadLocalData.hpp"
-
-
-#line 49071 "ad_x86.hpp"
+#line 51736 "ad_x86.hpp"
 
 
 //HeaderForm
@@ -49081,7 +51746,19 @@ public:
 #include "gc/z/zThreadLocalData.hpp"
 
 
-#line 49084 "ad_x86.hpp"
+#line 51749 "ad_x86.hpp"
+
+
+//HeaderForm
+
+#line 24 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+
+
+#include "gc/g1/c2/g1BarrierSetC2.hpp"
+#include "gc/shared/gc_globals.hpp"
+
+
+#line 51761 "ad_x86.hpp"
 
 
 extern const char  register_save_policy[];
@@ -49126,6 +51803,7 @@ enum machRegisterClass {
   LONG_RAX_REG,
   LONG_RCX_REG,
   LONG_RDX_REG,
+  LONG_R11_REG,
   INT_RAX_REG,
   INT_RBX_REG,
   INT_RCX_REG,
@@ -49182,95 +51860,95 @@ inline const RegMask &ALL_REG_mask() { return _ALL_REG_mask; }
 extern const RegMask _ALL_INT_REG_mask;
 inline const RegMask &ALL_INT_REG_mask() { return _ALL_INT_REG_mask; }
 inline const RegMask &ANY_REG_mask() { 
-#line 205 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 300 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _ANY_REG_mask;
 
-#line 49189 "ad_x86.hpp"
+#line 51867 "ad_x86.hpp"
  }
 inline const RegMask &PTR_REG_mask() { 
-#line 210 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 305 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _PTR_REG_mask;
 
-#line 49196 "ad_x86.hpp"
+#line 51874 "ad_x86.hpp"
  }
 inline const RegMask &PTR_REG_NO_RBP_mask() { 
-#line 215 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 310 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _PTR_REG_NO_RBP_mask;
 
-#line 49203 "ad_x86.hpp"
+#line 51881 "ad_x86.hpp"
  }
 inline const RegMask &PTR_NO_RAX_REG_mask() { 
-#line 220 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 315 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _PTR_NO_RAX_REG_mask;
 
-#line 49210 "ad_x86.hpp"
+#line 51888 "ad_x86.hpp"
  }
 inline const RegMask &PTR_NO_RAX_RBX_REG_mask() { 
-#line 225 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 320 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _PTR_NO_RAX_RBX_REG_mask;
 
-#line 49217 "ad_x86.hpp"
+#line 51895 "ad_x86.hpp"
  }
 inline const RegMask &LONG_REG_mask() { 
-#line 230 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 325 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _LONG_REG_mask;
 
-#line 49224 "ad_x86.hpp"
+#line 51902 "ad_x86.hpp"
  }
 inline const RegMask &LONG_NO_RAX_RDX_REG_mask() { 
-#line 235 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 330 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _LONG_NO_RAX_RDX_REG_mask;
 
-#line 49231 "ad_x86.hpp"
+#line 51909 "ad_x86.hpp"
  }
 inline const RegMask &LONG_NO_RCX_REG_mask() { 
-#line 240 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 335 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _LONG_NO_RCX_REG_mask;
 
-#line 49238 "ad_x86.hpp"
+#line 51916 "ad_x86.hpp"
  }
 inline const RegMask &LONG_NO_RBP_R13_REG_mask() { 
-#line 245 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 340 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _LONG_NO_RBP_R13_REG_mask;
 
-#line 49245 "ad_x86.hpp"
+#line 51923 "ad_x86.hpp"
  }
 inline const RegMask &INT_REG_mask() { 
-#line 250 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 345 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _INT_REG_mask;
 
-#line 49252 "ad_x86.hpp"
+#line 51930 "ad_x86.hpp"
  }
 inline const RegMask &INT_NO_RAX_RDX_REG_mask() { 
-#line 255 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 350 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _INT_NO_RAX_RDX_REG_mask;
 
-#line 49259 "ad_x86.hpp"
+#line 51937 "ad_x86.hpp"
  }
 inline const RegMask &INT_NO_RCX_REG_mask() { 
-#line 260 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 355 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _INT_NO_RCX_REG_mask;
 
-#line 49266 "ad_x86.hpp"
+#line 51944 "ad_x86.hpp"
  }
 inline const RegMask &INT_NO_RBP_R13_REG_mask() { 
-#line 265 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 360 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
 
   return _INT_NO_RBP_R13_REG_mask;
 
-#line 49273 "ad_x86.hpp"
+#line 51951 "ad_x86.hpp"
  }
 extern const RegMask _PTR_RAX_REG_mask;
 inline const RegMask &PTR_RAX_REG_mask() { return _PTR_RAX_REG_mask; }
@@ -49292,6 +51970,8 @@ extern const RegMask _LONG_RCX_REG_mask;
 inline const RegMask &LONG_RCX_REG_mask() { return _LONG_RCX_REG_mask; }
 extern const RegMask _LONG_RDX_REG_mask;
 inline const RegMask &LONG_RDX_REG_mask() { return _LONG_RDX_REG_mask; }
+extern const RegMask _LONG_R11_REG_mask;
+inline const RegMask &LONG_R11_REG_mask() { return _LONG_R11_REG_mask; }
 extern const RegMask _INT_RAX_REG_mask;
 inline const RegMask &INT_RAX_REG_mask() { return _INT_RAX_REG_mask; }
 extern const RegMask _INT_RBX_REG_mask;
@@ -49331,22 +52011,22 @@ inline const RegMask &STACK_OR_FLOAT_REG_EVEX_mask() { return _STACK_OR_FLOAT_RE
 inline const RegMask &FLOAT_REG_mask() { return (
 #line 779 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49334 "ad_x86.hpp"
+#line 52014 "ad_x86.hpp"
 ) ? FLOAT_REG_EVEX_mask() : FLOAT_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_FLOAT_REG_mask() { return (
 #line 779 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49339 "ad_x86.hpp"
+#line 52019 "ad_x86.hpp"
 ) ? STACK_OR_FLOAT_REG_EVEX_mask() : STACK_OR_FLOAT_REG_LEGACY_mask(); }
 inline const RegMask &FLOAT_REG_VL_mask() { return (
 #line 780 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 49344 "ad_x86.hpp"
+#line 52024 "ad_x86.hpp"
 ) ? FLOAT_REG_EVEX_mask() : FLOAT_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_FLOAT_REG_VL_mask() { return (
 #line 780 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 49349 "ad_x86.hpp"
+#line 52029 "ad_x86.hpp"
 ) ? STACK_OR_FLOAT_REG_EVEX_mask() : STACK_OR_FLOAT_REG_LEGACY_mask(); }
 extern const RegMask _DOUBLE_REG_LEGACY_mask;
 inline const RegMask &DOUBLE_REG_LEGACY_mask() { return _DOUBLE_REG_LEGACY_mask; }
@@ -49359,22 +52039,22 @@ inline const RegMask &STACK_OR_DOUBLE_REG_EVEX_mask() { return _STACK_OR_DOUBLE_
 inline const RegMask &DOUBLE_REG_mask() { return (
 #line 840 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49362 "ad_x86.hpp"
+#line 52042 "ad_x86.hpp"
 ) ? DOUBLE_REG_EVEX_mask() : DOUBLE_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_DOUBLE_REG_mask() { return (
 #line 840 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49367 "ad_x86.hpp"
+#line 52047 "ad_x86.hpp"
 ) ? STACK_OR_DOUBLE_REG_EVEX_mask() : STACK_OR_DOUBLE_REG_LEGACY_mask(); }
 inline const RegMask &DOUBLE_REG_VL_mask() { return (
 #line 841 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 49372 "ad_x86.hpp"
+#line 52052 "ad_x86.hpp"
 ) ? DOUBLE_REG_EVEX_mask() : DOUBLE_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_DOUBLE_REG_VL_mask() { return (
 #line 841 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 49377 "ad_x86.hpp"
+#line 52057 "ad_x86.hpp"
 ) ? STACK_OR_DOUBLE_REG_EVEX_mask() : STACK_OR_DOUBLE_REG_LEGACY_mask(); }
 extern const RegMask _VECTORS_REG_LEGACY_mask;
 inline const RegMask &VECTORS_REG_LEGACY_mask() { return _VECTORS_REG_LEGACY_mask; }
@@ -49383,12 +52063,12 @@ inline const RegMask &VECTORS_REG_EVEX_mask() { return _VECTORS_REG_EVEX_mask; }
 inline const RegMask &VECTORS_REG_mask() { return (
 #line 901 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49386 "ad_x86.hpp"
+#line 52066 "ad_x86.hpp"
 ) ? VECTORS_REG_EVEX_mask() : VECTORS_REG_LEGACY_mask(); }
 inline const RegMask &VECTORS_REG_VLBWDQ_mask() { return (
 #line 902 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 49391 "ad_x86.hpp"
+#line 52071 "ad_x86.hpp"
 ) ? VECTORS_REG_EVEX_mask() : VECTORS_REG_LEGACY_mask(); }
 extern const RegMask _VECTORD_REG_LEGACY_mask;
 inline const RegMask &VECTORD_REG_LEGACY_mask() { return _VECTORD_REG_LEGACY_mask; }
@@ -49397,12 +52077,12 @@ inline const RegMask &VECTORD_REG_EVEX_mask() { return _VECTORD_REG_EVEX_mask; }
 inline const RegMask &VECTORD_REG_mask() { return (
 #line 962 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49400 "ad_x86.hpp"
+#line 52080 "ad_x86.hpp"
 ) ? VECTORD_REG_EVEX_mask() : VECTORD_REG_LEGACY_mask(); }
 inline const RegMask &VECTORD_REG_VLBWDQ_mask() { return (
 #line 963 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 49405 "ad_x86.hpp"
+#line 52085 "ad_x86.hpp"
 ) ? VECTORD_REG_EVEX_mask() : VECTORD_REG_LEGACY_mask(); }
 extern const RegMask _VECTORX_REG_LEGACY_mask;
 inline const RegMask &VECTORX_REG_LEGACY_mask() { return _VECTORX_REG_LEGACY_mask; }
@@ -49411,12 +52091,12 @@ inline const RegMask &VECTORX_REG_EVEX_mask() { return _VECTORX_REG_EVEX_mask; }
 inline const RegMask &VECTORX_REG_mask() { return (
 #line 1023 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49414 "ad_x86.hpp"
+#line 52094 "ad_x86.hpp"
 ) ? VECTORX_REG_EVEX_mask() : VECTORX_REG_LEGACY_mask(); }
 inline const RegMask &VECTORX_REG_VLBWDQ_mask() { return (
 #line 1024 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 49419 "ad_x86.hpp"
+#line 52099 "ad_x86.hpp"
 ) ? VECTORX_REG_EVEX_mask() : VECTORX_REG_LEGACY_mask(); }
 extern const RegMask _VECTORY_REG_LEGACY_mask;
 inline const RegMask &VECTORY_REG_LEGACY_mask() { return _VECTORY_REG_LEGACY_mask; }
@@ -49425,12 +52105,12 @@ inline const RegMask &VECTORY_REG_EVEX_mask() { return _VECTORY_REG_EVEX_mask; }
 inline const RegMask &VECTORY_REG_mask() { return (
 #line 1084 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49428 "ad_x86.hpp"
+#line 52108 "ad_x86.hpp"
 ) ? VECTORY_REG_EVEX_mask() : VECTORY_REG_LEGACY_mask(); }
 inline const RegMask &VECTORY_REG_VLBWDQ_mask() { return (
 #line 1085 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 49433 "ad_x86.hpp"
+#line 52113 "ad_x86.hpp"
 ) ? VECTORY_REG_EVEX_mask() : VECTORY_REG_LEGACY_mask(); }
 extern const RegMask _VECTORZ_REG_EVEX_mask;
 inline const RegMask &VECTORZ_REG_EVEX_mask() { return _VECTORZ_REG_EVEX_mask; }
@@ -49439,12 +52119,12 @@ inline const RegMask &VECTORZ_REG_LEGACY_mask() { return _VECTORZ_REG_LEGACY_mas
 inline const RegMask &VECTORZ_REG_mask() { return (
 #line 1145 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 49442 "ad_x86.hpp"
+#line 52122 "ad_x86.hpp"
 ) ? VECTORZ_REG_EVEX_mask() : VECTORZ_REG_LEGACY_mask(); }
 inline const RegMask &VECTORZ_REG_VL_mask() { return (
 #line 1146 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 49447 "ad_x86.hpp"
+#line 52127 "ad_x86.hpp"
 ) ? VECTORZ_REG_EVEX_mask() : VECTORZ_REG_LEGACY_mask(); }
 extern const RegMask _XMM0_REG_mask;
 inline const RegMask &XMM0_REG_mask() { return _XMM0_REG_mask; }

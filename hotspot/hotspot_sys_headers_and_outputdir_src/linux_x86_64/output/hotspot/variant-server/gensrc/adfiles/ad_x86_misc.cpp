@@ -1,6 +1,6 @@
 #line 1 "ad_x86_misc.cpp"
 //
-// Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -25,7 +25,6 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_x86.hpp"
 const RegMask &MoveF2VLNode::out_RegMask() const { return (FLOAT_REG_VL_mask()); }
 const RegMask &MoveF2LEGNode::out_RegMask() const { return (FLOAT_REG_LEGACY_mask()); }
@@ -64,6 +63,7 @@ const RegMask &loadPNode::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &loadNNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &loadKlassNode::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &loadNKlassNode::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &loadNKlassCompactHeadersNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &loadFNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &loadD_partialNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &loadDNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
@@ -101,6 +101,7 @@ const RegMask &loadConPNode::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &loadConP0Node::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &loadConP31Node::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &loadConFNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &loadConHNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &loadConN0Node::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &loadConNNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &loadConNKlassNode::out_RegMask() const { return (INT_REG_mask()); }
@@ -136,8 +137,6 @@ const RegMask &storeImmC0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeImmI16Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeImmB0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeImmBNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &storeImmCM0_regNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &storeImmCM0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeFNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeF0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &storeF_immNode::out_RegMask() const { return (RegMask::Empty); }
@@ -278,6 +277,7 @@ const RegMask &castPPNode::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &castIINode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &castLLNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &castFFNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &castHHNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &castDDNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &compareAndSwapPNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &compareAndSwapP_0Node::out_RegMask() const { return (INT_REG_mask()); }
@@ -483,9 +483,7 @@ const RegMask &blsiL_rReg_rReg_0Node::out_RegMask() const { return (LONG_REG_mas
 const RegMask &blsiL_rReg_memNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &blsiL_rReg_mem_0Node::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &blsmskL_rReg_memNode::out_RegMask() const { return (LONG_REG_mask()); }
-const RegMask &blsmskL_rReg_mem_0Node::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &blsmskL_rReg_rRegNode::out_RegMask() const { return (LONG_REG_mask()); }
-const RegMask &blsmskL_rReg_rReg_0Node::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &blsrL_rReg_rRegNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &blsrL_rReg_rReg_0Node::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &blsrL_rReg_memNode::out_RegMask() const { return (LONG_REG_mask()); }
@@ -504,9 +502,7 @@ const RegMask &xorL_rRegNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &xorL_rReg_im1Node::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &xorL_rReg_immNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &xorL_rReg_memNode::out_RegMask() const { return (LONG_REG_mask()); }
-const RegMask &xorL_rReg_mem_0Node::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &xorL_mem_rRegNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &xorL_mem_rReg_0Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &xorL_mem_immNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &cmpLTMaskNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &cmpLTMask0Node::out_RegMask() const { return (INT_REG_mask()); }
@@ -540,15 +536,15 @@ const RegMask &convD2I_reg_regNode::out_RegMask() const { return (INT_REG_mask()
 const RegMask &convD2L_reg_regNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &round_double_regNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &round_float_regNode::out_RegMask() const { return (INT_REG_mask()); }
-const RegMask &convI2F_reg_regNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &convI2F_reg_regNode::out_RegMask() const { return (FLOAT_REG_VL_mask()); }
 const RegMask &convI2F_reg_memNode::out_RegMask() const { return (FLOAT_REG_mask()); }
-const RegMask &convI2D_reg_regNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &convI2D_reg_regNode::out_RegMask() const { return (DOUBLE_REG_VL_mask()); }
 const RegMask &convI2D_reg_memNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &convXI2F_regNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &convXI2D_regNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
-const RegMask &convL2F_reg_regNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &convL2F_reg_regNode::out_RegMask() const { return (FLOAT_REG_VL_mask()); }
 const RegMask &convL2F_reg_memNode::out_RegMask() const { return (FLOAT_REG_mask()); }
-const RegMask &convL2D_reg_regNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &convL2D_reg_regNode::out_RegMask() const { return (DOUBLE_REG_VL_mask()); }
 const RegMask &convL2D_reg_memNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &convI2L_reg_regNode::out_RegMask() const { return (LONG_REG_mask()); }
 const RegMask &convI2L_reg_reg_zexNode::out_RegMask() const { return (LONG_REG_mask()); }
@@ -676,14 +672,14 @@ const RegMask &jmpConUNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &jmpConUCFNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &jmpConUCF2Node::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &partialSubtypeCheckNode::out_RegMask() const { return (PTR_RDI_REG_mask()); }
-const RegMask &partialSubtypeCheck_vs_ZeroNode::out_RegMask() const { return (INT_FLAGS_mask()); }
+const RegMask &partialSubtypeCheckVarSuperNode::out_RegMask() const { return (PTR_RDI_REG_mask()); }
+const RegMask &partialSubtypeCheckConstSuperNode::out_RegMask() const { return (PTR_RDI_REG_mask()); }
 const RegMask &jmpDir_shortNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &jmpCon_shortNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &jmpLoopEnd_shortNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &jmpConU_shortNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &jmpConUCF_shortNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &jmpConUCF2_shortNode::out_RegMask() const { return (RegMask::Empty); }
-const RegMask &cmpFastLockRTMNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &cmpFastLockNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &cmpFastUnlockNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &cmpFastLockLightweightNode::out_RegMask() const { return (INT_FLAGS_mask()); }
@@ -700,6 +696,7 @@ const RegMask &CallLeafNoFPDirectNode::out_RegMask() const { return (RegMask::Em
 const RegMask &RetNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &TailCalljmpIndNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &tailjmpIndNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &ForwardExceptionjmpNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &CreateExceptionNode::out_RegMask() const { return (PTR_RAX_REG_mask()); }
 const RegMask &RethrowExceptionNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &tlsLoadPNode::out_RegMask() const { return (PTR_R15_REG_mask()); }
@@ -808,11 +805,25 @@ const RegMask &storeVNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &gatherNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &evgatherNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &evgather_maskedNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_subwordLE8BNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_subwordGT8BNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_subwordLE8B_offNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_subwordGT8B_offNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordLE8B_avx3Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordGT8B_avx3Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordLE8B_off_avx3Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordGT8B_off_avx3Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordLE8B_avx2Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordGT8B_avx2Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordLE8B_off_avx2Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vgather_masked_subwordGT8B_off_avx2Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &scatterNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &scatter_maskedNode::out_RegMask() const { return (RegMask::Empty); }
 const RegMask &vReplB_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &ReplB_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vReplS_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &ReplHF_immNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &ReplHF_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &ReplS_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &ReplI_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &ReplI_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
@@ -872,12 +883,26 @@ const RegMask &reduction8FNode::out_RegMask() const { return (FLOAT_REG_mask());
 const RegMask &reduction8F_0Node::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &reduction16FNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &reduction16F_0Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction2FNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction2F_0Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction4FNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction4F_0Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction8FNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction8F_0Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction16FNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &unordered_reduction16F_0Node::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &reduction2DNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reduction2D_0Node::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reduction4DNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reduction4D_0Node::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reduction8DNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reduction8D_0Node::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &unordered_reduction2DNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &unordered_reduction2D_0Node::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &unordered_reduction4DNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &unordered_reduction4D_0Node::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &unordered_reduction8DNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
+const RegMask &unordered_reduction8D_0Node::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &reductionBNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &reductionB_0Node::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &reductionB_1Node::out_RegMask() const { return (INT_REG_mask()); }
@@ -973,6 +998,8 @@ const RegMask &evmulL_memNode::out_RegMask() const { return (*_opnds[0]->in_RegM
 const RegMask &evmulL_mem_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vmulLNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vmulL_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vmuludq_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vmuldq_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vmulFNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vmulF_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vmulF_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
@@ -1001,6 +1028,16 @@ const RegMask &minmaxFP_regNode::out_RegMask() const { return (*_opnds[0]->in_Re
 const RegMask &minmaxFP_reg_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &evminmaxFP_reg_eavxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &evminmaxFP_reg_eavx_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_reg_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_mem_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmaxq_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmaxq_reg_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_reg_maskedNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_reg_masked_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_mem_maskedNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_uminmax_mem_masked_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &signumF_regNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &signumD_regNode::out_RegMask() const { return (DOUBLE_REG_mask()); }
 const RegMask &signumV_reg_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
@@ -1093,6 +1130,7 @@ const RegMask &vxor_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMas
 const RegMask &vxor_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vxor_mem_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vcastBtoXNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vcastBtoDNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &castStoXNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vcastStoXNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vcastStoX_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
@@ -1172,7 +1210,6 @@ const RegMask &vmaskcast_avxNode::out_RegMask() const { return (*_opnds[0]->in_R
 const RegMask &loadIotaIndicesNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &VectorPopulateIndexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &VectorPopulateLIndexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
-const RegMask &loadShuffleBNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeBNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeB_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeB_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
@@ -1180,15 +1217,12 @@ const RegMask &rearrangeB_evex_vbmiNode::out_RegMask() const { return (*_opnds[0
 const RegMask &loadShuffleSNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeSNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeS_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
-const RegMask &loadShuffleS_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeS_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &loadShuffleINode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeINode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
-const RegMask &loadShuffleI_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeI_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &loadShuffleLNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeLNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
-const RegMask &loadShuffleL_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &rearrangeL_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vfmaF_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &vfmaF_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
@@ -1356,17 +1390,49 @@ const RegMask &castVVNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(
 const RegMask &castVVLegNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
 const RegMask &FloatClassCheck_reg_reg_vfpclassNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &DoubleClassCheck_reg_reg_vfpclassNode::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &vector_addsub_saturating_subword_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_subword_reg_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_reg_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_reg_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_reg_evex_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_reg_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_reg_avx_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_add_saturating_unsigned_reg_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_add_saturating_unsigned_reg_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_sub_saturating_unsigned_reg_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_sub_saturating_unsigned_reg_avxNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_subword_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_subword_mem_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_mem_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_subword_masked_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_subword_masked_reg_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_masked_regNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_masked_reg_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_subword_masked_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_subword_masked_mem_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_masked_memNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_addsub_saturating_unsigned_subword_masked_mem_0Node::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &vector_selectfrom_twovectors_reg_evexNode::out_RegMask() const { return (*_opnds[0]->in_RegMask(0)); }
+const RegMask &reinterpretS2HFNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &convF2HFAndS2HFNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &convHF2SAndHF2FNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &reinterpretHF2SNode::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &scalar_sqrt_HF_regNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &scalar_binOps_HF_regNode::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &scalar_binOps_HF_reg_0Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &scalar_binOps_HF_reg_1Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &scalar_binOps_HF_reg_2Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &scalar_binOps_HF_reg_3Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &scalar_binOps_HF_reg_4Node::out_RegMask() const { return (FLOAT_REG_mask()); }
+const RegMask &scalar_fma_HF_regNode::out_RegMask() const { return (FLOAT_REG_mask()); }
 const RegMask &compareAndSwapP_shenandoahNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &compareAndSwapP_shenandoah_0Node::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &compareAndSwapN_shenandoahNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &compareAndSwapN_shenandoah_0Node::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &compareAndExchangeN_shenandoahNode::out_RegMask() const { return (INT_RAX_REG_mask()); }
 const RegMask &compareAndExchangeP_shenandoahNode::out_RegMask() const { return (PTR_RAX_REG_mask()); }
-const RegMask &xLoadPNode::out_RegMask() const { return (PTR_REG_mask()); }
-const RegMask &xCompareAndExchangePNode::out_RegMask() const { return (PTR_RAX_REG_mask()); }
-const RegMask &xCompareAndSwapPNode::out_RegMask() const { return (INT_REG_mask()); }
-const RegMask &xCompareAndSwapP_0Node::out_RegMask() const { return (INT_REG_mask()); }
-const RegMask &xXChgPNode::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &zLoadPNode::out_RegMask() const { return (PTR_REG_mask()); }
 const RegMask &zLoadPNullCheckNode::out_RegMask() const { return (INT_FLAGS_mask()); }
 const RegMask &zStorePNode::out_RegMask() const { return (RegMask::Empty); }
@@ -1375,6 +1441,19 @@ const RegMask &zCompareAndExchangePNode::out_RegMask() const { return (PTR_RAX_R
 const RegMask &zCompareAndSwapPNode::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &zCompareAndSwapP_0Node::out_RegMask() const { return (INT_REG_mask()); }
 const RegMask &zXChgPNode::out_RegMask() const { return (PTR_REG_mask()); }
+const RegMask &g1StorePNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1StoreNNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1EncodePAndStoreNNode::out_RegMask() const { return (RegMask::Empty); }
+const RegMask &g1CompareAndExchangePNode::out_RegMask() const { return (PTR_RAX_REG_mask()); }
+const RegMask &g1CompareAndExchangeNNode::out_RegMask() const { return (INT_RAX_REG_mask()); }
+const RegMask &g1CompareAndSwapPNode::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &g1CompareAndSwapP_0Node::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &g1CompareAndSwapNNode::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &g1CompareAndSwapN_0Node::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &g1GetAndSetPNode::out_RegMask() const { return (PTR_REG_mask()); }
+const RegMask &g1GetAndSetNNode::out_RegMask() const { return (INT_REG_mask()); }
+const RegMask &g1LoadPNode::out_RegMask() const { return (PTR_REG_mask()); }
+const RegMask &g1LoadNNode::out_RegMask() const { return (INT_REG_mask()); }
 // Check consistency of C++ compilation with ADLC options:
 // Check adlc -DLINUX=1
 #ifndef LINUX
