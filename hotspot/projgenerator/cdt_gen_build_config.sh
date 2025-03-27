@@ -384,7 +384,7 @@ function add_cxx_compiler_predifined_macros_and_include_dirs() {
     echo
     echo "adding c++ compiler predefined macros"
     
-    os_cmdline=/priv/d038402/builds/jdk_bdw214_x86_64-linux-gnu_fastdebug_async_make_walkable/hotspot/variant-server/libjvm/objs/ap_proj_cdt.o.cmdline
+    os_cmdline=`$READLINK -f $CMDLINE_DIR/ap_proj_cdt.o.cmdline`
     echo "using $os_cmdline"
 
     if [ ! -e $os_cmdline ] ; then
