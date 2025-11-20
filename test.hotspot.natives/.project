@@ -31,6 +31,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/jtreg/runtime/TLS</locationURI>
 		</link>
 		<link>
+			<name>test.hotspot.runtime.jni</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/jtreg/runtime/jni</locationURI>
+		</link>
+		<link>
 			<name>test.hotspot.serviceability.jvmti</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/test/hotspot/jtreg/serviceability/jvmti</locationURI>
