@@ -65,9 +65,8 @@ Setup
     * Download Xcode 13.4.1 from https://developer.apple.com/xcode/.
       Alternatively you can also use a newer version or just install Xcode from the app store (see below for that).
     * Unpack the xip file to /opt/Xcode_13.4.1.app.  You can unpack also to a
-      different location. In that case you should let the symbolic link
-      `hotspot/hotspot_sys_headers_and_outputdir_src/bsd_aarch64_64/sys_headers/Xcode_13.4.1.app`
-      point to that location.
+      different location. In that case you should change the build variable XCODE_PATH.
+      (HotSpot project settings > C/C++ Build > Build Variables ; select bsd_aarch64 as Configuration then edit XCODE_PATH)
     * I recommend stripping Xcode and keep only the following directories:
       ```
       Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr
@@ -75,9 +74,7 @@ Setup
       ```
       Otherwise importing and refreshing the hotspot project takes several minutes.
     * Using other Xcode versions
-      - If you installed Xcode from the app store, you should change the
-        symbolic link `hotspot/projgenerator/cdt_gen_build_config.sh` and let it
-        point to `/Applications/Xcode.app`
+      - If you installed Xcode from the app store, you should set `/Applications/Xcode.app` as value of the build variable XCODE_PATH (see above).
       - Open `hotspot/.cproject` and change the version number `13.1.6` in all occurrences of `XcodeDefault.xctoolchain/usr/lib/clang/13.1.6/` to match your version.
     
 
