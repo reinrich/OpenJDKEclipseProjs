@@ -1,104 +1,931 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
-    <storageModule moduleId="org.eclipse.cdt.core.settings">
-        <cconfiguration id="cdt.managedbuild.config.gnu.exe.debug.993353488">
-            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.993353488" moduleId="org.eclipse.cdt.core.settings" name="Debug">
-                <externalSettings/>
-                <extensions>
-                    <extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-                    <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-                    <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-                    <extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
-                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-                </extensions>
-            </storageModule>
-            <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.993353488" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
-                    <folderInfo id="cdt.managedbuild.config.gnu.exe.debug.993353488." name="/" resourcePath="">
-                        <toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.723694322" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
-                            <targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.1590412711" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
-                            <builder buildPath="${workspace_loc:/test.hotspot.natives}/Debug" id="cdt.managedbuild.target.gnu.builder.exe.debug.860411324" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
-                            <tool id="cdt.managedbuild.tool.gnu.archiver.base.869945189" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
-                            <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.574508649" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
-                                <option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1433403760" name="Optimization level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.exe.debug.option.debugging.level.1409746421" name="Debug level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1667202228" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/jdk_native/sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/jdk_native/java.base_src/unix/native/include}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/backward}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/x86_64-linux-gnu}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include-fixed}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/include}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/sysroot/usr/include}&quot;"/>
-                                </option>
-                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2108583242" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-                            </tool>
-                            <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.867795854" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
-                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.2045577349" name="Optimization level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.exe.debug.option.debugging.level.2066027246" name="Debug level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1713109274" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/jdk_native/sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/jdk_native/java.base_src/unix/native/include}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/backward}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/x86_64-linux-gnu}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include-fixed}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/include}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/sysroot/usr/include}&quot;"/>
-                                </option>
-                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1439325690" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-                            </tool>
-                            <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.412300918" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
-                                <inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1936169877" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
-                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
-                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
-                                </inputType>
-                            </tool>
-                            <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1416599637" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
-                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.920626900" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
-                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
-                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
-                                </inputType>
-                            </tool>
-                            <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.253007617" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.620466024" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/jdk_native/sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/jdk_native/java.base_src/unix/native/include}&quot;"/>
-                                </option>
-                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1325795127" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-                            </tool>
-                        </toolChain>
-                    </folderInfo>
-                    <sourceEntries>
-                        <entry excluding="test.hotspot.serviceability.jvmti/8036666/|test.hotspot.serviceability.jvmti/AddModuleExportsAndOpens/|test.hotspot.serviceability.jvmti/AddModuleReads/|test.hotspot.serviceability.jvmti/AddModuleUsesAndProvides/|test.hotspot.serviceability.jvmti/CanGenerateAllClassHook/|test.hotspot.serviceability.jvmti/FieldAccessWatch/|test.hotspot.serviceability.jvmti/GetModulesInfo/|test.hotspot.serviceability.jvmti/GetNamedModule/|test.hotspot.serviceability.jvmti/GetSystemProperty/|test.hotspot.serviceability.jvmti/HeapMonitor/|test.hotspot.serviceability.jvmti/IsModifiableModule/|test.hotspot.serviceability.jvmti/ModuleAwareAgents/|test.hotspot.serviceability.jvmti/NotifyFramePop/|test.hotspot.serviceability.jvmti/StartPhase/|test.hotspot.serviceability.jvmti/VMEvent/|test.hotspot.serviceability.jvmti/GetObjectSizeClass.java|test.hotspot.serviceability.jvmti/GetObjectSizeClassAgent.java|test.hotspot.serviceability.jvmti/GetObjectSizeOverflow.java|test.hotspot.serviceability.jvmti/GetObjectSizeOverflowAgent.java|test.hotspot.serviceability.jvmti/RetransformClassesZeroLength.java|test.hotspot.serviceability.jvmti/TestLambdaFormRetransformation.java|test.hotspot.serviceability.jvmti/TestRedefineWithUnresolvedClass.java|test.hotspot.serviceability.jvmti/UnresolvedClassAgent.java|test.hotspot.serviceability.jvmti/UnresolvedClassAgent.mf|.cproject|.project" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
-                    </sourceEntries>
-                </configuration>
-            </storageModule>
-            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-        </cconfiguration>
-    </storageModule>
-    <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-        <project id="test.hotspot.natives.cdt.managedbuild.target.gnu.exe.1282334560" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
-    </storageModule>
-    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-    <storageModule moduleId="refreshScope" versionNumber="2">
-        <configuration configurationName="Debug">
-            <resource resourceType="PROJECT" workspacePath="/test.hotspot.natives"/>
-        </configuration>
-    </storageModule>
-    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
-    <storageModule moduleId="scannerConfiguration">
-        <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.993353488;cdt.managedbuild.config.gnu.exe.debug.993353488.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.867795854;cdt.managedbuild.tool.gnu.c.compiler.input.1439325690">
-            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-        </scannerConfigBuildInfo>
-        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.993353488;cdt.managedbuild.config.gnu.exe.debug.993353488.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.574508649;cdt.managedbuild.tool.gnu.cpp.compiler.input.2108583242">
-            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-        </scannerConfigBuildInfo>
-    </storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.config.gnu.exe.debug.993353488">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.993353488" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.993353488" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.993353488." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.723694322" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.1590412711" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
+							<builder buildPath="${workspace_loc:/test.hotspot.natives}/Debug" id="cdt.managedbuild.target.gnu.builder.exe.debug.860411324" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.869945189" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.574508649" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
+								<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1433403760" name="Optimization level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.exe.debug.option.debugging.level.1409746421" name="Debug level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1667202228" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/backward}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/x86_64-linux-gnu}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include-fixed}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/sysroot/usr/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base/linux}&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.473147219" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="AMD64=1"/>
+									<listOptionValue builtIn="false" value="ASSERT=1"/>
+									<listOptionValue builtIn="false" value="CHECK_UNHANDLED_OOPS=1"/>
+									<listOptionValue builtIn="false" value="COMPILER1=1"/>
+									<listOptionValue builtIn="false" value="COMPILER2=1"/>
+									<listOptionValue builtIn="false" value="DONT_USE_PRECOMPILED_HEADER=1"/>
+									<listOptionValue builtIn="false" value="ECLIPSE_CDT"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=&quot;amd64&quot;"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
+									<listOptionValue builtIn="false" value="LIBC=gnu"/>
+									<listOptionValue builtIn="false" value="LINUX=1"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_x86=1"/>
+									<listOptionValue builtIn="false" value="TARGET_COMPILER_gcc=1"/>
+									<listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN=1"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="_GNU_SOURCE=1"/>
+									<listOptionValue builtIn="false" value="_LP64=1"/>
+									<listOptionValue builtIn="false" value="_REENTRANT=1"/>
+									<listOptionValue builtIn="false" value="_STDC_PREDEF_H=1"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_ACQUIRE=2"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_ACQ_REL=4"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_CONSUME=1"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_HLE_ACQUIRE=65536"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_HLE_RELEASE=131072"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_RELAXED=0"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_RELEASE=3"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_SEQ_CST=5"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=16"/>
+									<listOptionValue builtIn="false" value="__BYTE_ORDER__=__ORDER_LITTLE_ENDIAN__"/>
+									<listOptionValue builtIn="false" value="&quot;__CHAR16_TYPE__=short unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;__CHAR32_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__CHAR_BIT__=8"/>
+									<listOptionValue builtIn="false" value="__DBL_DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.94065645841246544176568792868221372e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.22044604925031308084726333618164062e-16L)"/>
+									<listOptionValue builtIn="false" value="__DBL_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__DBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.79769313486231570814527423731704357e+308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.22507385850720138309023271733240406e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_NORM_MAX__=double(1.79769313486231570814527423731704357e+308L)"/>
+									<listOptionValue builtIn="false" value="__DEC128_EPSILON__=1E-33DL"/>
+									<listOptionValue builtIn="false" value="__DEC128_MANT_DIG__=34"/>
+									<listOptionValue builtIn="false" value="__DEC128_MAX_EXP__=6145"/>
+									<listOptionValue builtIn="false" value="__DEC128_MAX__=9.999999999999999999999999999999999E6144DL"/>
+									<listOptionValue builtIn="false" value="__DEC128_MIN_EXP__=(-6142)"/>
+									<listOptionValue builtIn="false" value="__DEC128_MIN__=1E-6143DL"/>
+									<listOptionValue builtIn="false" value="__DEC128_SUBNORMAL_MIN__=0.000000000000000000000000000000001E-6143DL"/>
+									<listOptionValue builtIn="false" value="__DEC32_EPSILON__=1E-6DF"/>
+									<listOptionValue builtIn="false" value="__DEC32_MANT_DIG__=7"/>
+									<listOptionValue builtIn="false" value="__DEC32_MAX_EXP__=97"/>
+									<listOptionValue builtIn="false" value="__DEC32_MAX__=9.999999E96DF"/>
+									<listOptionValue builtIn="false" value="__DEC32_MIN_EXP__=(-94)"/>
+									<listOptionValue builtIn="false" value="__DEC32_MIN__=1E-95DF"/>
+									<listOptionValue builtIn="false" value="__DEC32_SUBNORMAL_MIN__=0.000001E-95DF"/>
+									<listOptionValue builtIn="false" value="__DEC64_EPSILON__=1E-15DD"/>
+									<listOptionValue builtIn="false" value="__DEC64_MANT_DIG__=16"/>
+									<listOptionValue builtIn="false" value="__DEC64_MAX_EXP__=385"/>
+									<listOptionValue builtIn="false" value="__DEC64_MAX__=9.999999999999999E384DD"/>
+									<listOptionValue builtIn="false" value="__DEC64_MIN_EXP__=(-382)"/>
+									<listOptionValue builtIn="false" value="__DEC64_MIN__=1E-383DD"/>
+									<listOptionValue builtIn="false" value="__DEC64_SUBNORMAL_MIN__=0.000000000000001E-383DD"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_BID_FORMAT__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=21"/>
+									<listOptionValue builtIn="false" value="__DEC_EVAL_METHOD__=2"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__ELF__=1"/>
+									<listOptionValue builtIn="false" value="__FINITE_MATH_ONLY__=0"/>
+									<listOptionValue builtIn="false" value="__FLOAT_WORD_ORDER__=__ORDER_LITTLE_ENDIAN__"/>
+									<listOptionValue builtIn="false" value="__FLT128_DECIMAL_DIG__=36"/>
+									<listOptionValue builtIn="false" value="__FLT128_DENORM_MIN__=6.47517511943802511092443895822764655e-4966F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_DIG__=33"/>
+									<listOptionValue builtIn="false" value="__FLT128_EPSILON__=1.92592994438723585305597794258492732e-34F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT128_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT128_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT128_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT128_MANT_DIG__=113"/>
+									<listOptionValue builtIn="false" value="__FLT128_MAX_10_EXP__=4932"/>
+									<listOptionValue builtIn="false" value="__FLT128_MAX_EXP__=16384"/>
+									<listOptionValue builtIn="false" value="__FLT128_MAX__=1.18973149535723176508575932662800702e+4932F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_MIN_10_EXP__=(-4931)"/>
+									<listOptionValue builtIn="false" value="__FLT128_MIN_EXP__=(-16381)"/>
+									<listOptionValue builtIn="false" value="__FLT128_MIN__=3.36210314311209350626267781732175260e-4932F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_NORM_MAX__=1.18973149535723176508575932662800702e+4932F128"/>
+									<listOptionValue builtIn="false" value="__FLT32X_DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__FLT32X_DENORM_MIN__=4.94065645841246544176568792868221372e-324F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__FLT32X_EPSILON__=2.22044604925031308084726333618164062e-16F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32X_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32X_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32X_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MAX__=1.79769313486231570814527423731704357e+308F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MIN__=2.22507385850720138309023271733240406e-308F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_NORM_MAX__=1.79769313486231570814527423731704357e+308F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32_DECIMAL_DIG__=9"/>
+									<listOptionValue builtIn="false" value="__FLT32_DENORM_MIN__=1.40129846432481707092372958328991613e-45F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_DIG__=6"/>
+									<listOptionValue builtIn="false" value="__FLT32_EPSILON__=1.19209289550781250000000000000000000e-7F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT32_MANT_DIG__=24"/>
+									<listOptionValue builtIn="false" value="__FLT32_MAX_10_EXP__=38"/>
+									<listOptionValue builtIn="false" value="__FLT32_MAX_EXP__=128"/>
+									<listOptionValue builtIn="false" value="__FLT32_MAX__=3.40282346638528859811704183484516925e+38F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_MIN_10_EXP__=(-37)"/>
+									<listOptionValue builtIn="false" value="__FLT32_MIN_EXP__=(-125)"/>
+									<listOptionValue builtIn="false" value="__FLT32_MIN__=1.17549435082228750796873653722224568e-38F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_NORM_MAX__=3.40282346638528859811704183484516925e+38F32"/>
+									<listOptionValue builtIn="false" value="__FLT64X_DECIMAL_DIG__=21"/>
+									<listOptionValue builtIn="false" value="__FLT64X_DENORM_MIN__=3.64519953188247460252840593361941982e-4951F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_DIG__=18"/>
+									<listOptionValue builtIn="false" value="__FLT64X_EPSILON__=1.08420217248550443400745280086994171e-19F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64X_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64X_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64X_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MANT_DIG__=64"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MAX_10_EXP__=4932"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MAX_EXP__=16384"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MAX__=1.18973149535723176502126385303097021e+4932F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MIN_10_EXP__=(-4931)"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MIN_EXP__=(-16381)"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MIN__=3.36210314311209350626267781732175260e-4932F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_NORM_MAX__=1.18973149535723176502126385303097021e+4932F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64_DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__FLT64_DENORM_MIN__=4.94065645841246544176568792868221372e-324F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__FLT64_EPSILON__=2.22044604925031308084726333618164062e-16F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT64_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__FLT64_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__FLT64_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__FLT64_MAX__=1.79769313486231570814527423731704357e+308F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__FLT64_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__FLT64_MIN__=2.22507385850720138309023271733240406e-308F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_NORM_MAX__=1.79769313486231570814527423731704357e+308F64"/>
+									<listOptionValue builtIn="false" value="__FLT_DECIMAL_DIG__=9"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.40129846432481707092372958328991613e-45F"/>
+									<listOptionValue builtIn="false" value="__FLT_DIG__=6"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.19209289550781250000000000000000000e-7F"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD_TS_18661_3__=0"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__FLT_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT_MANT_DIG__=24"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX_10_EXP__=38"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX_EXP__=128"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.40282346638528859811704183484516925e+38F"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN_10_EXP__=(-37)"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN_EXP__=(-125)"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.17549435082228750796873653722224568e-38F"/>
+									<listOptionValue builtIn="false" value="__FLT_NORM_MAX__=3.40282346638528859811704183484516925e+38F"/>
+									<listOptionValue builtIn="false" value="__FLT_RADIX__=2"/>
+									<listOptionValue builtIn="false" value="__FXSR__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_ASM_FLAG_OUTPUTS__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_BOOL_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_CHAR16_T_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_CHAR32_T_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_CHAR_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_INT_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_LLONG_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_LONG_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_POINTER_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_SHORT_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_TEST_AND_SET_TRUEVAL=1"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_WCHAR_T_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_DWARF2_CFI_ASM=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8=1"/>
+									<listOptionValue builtIn="false" value="__GCC_IEC_559=2"/>
+									<listOptionValue builtIn="false" value="__GCC_IEC_559_COMPLEX=2"/>
+									<listOptionValue builtIn="false" value="__GNUC_EXECUTION_CHARSET_NAME=&quot;UTF-8&quot;"/>
+									<listOptionValue builtIn="false" value="__GNUC_MINOR__=3"/>
+									<listOptionValue builtIn="false" value="__GNUC_PATCHLEVEL__=0"/>
+									<listOptionValue builtIn="false" value="__GNUC_STDC_INLINE__=1"/>
+									<listOptionValue builtIn="false" value="__GNUC_WIDE_EXECUTION_CHARSET_NAME=&quot;UTF-32LE&quot;"/>
+									<listOptionValue builtIn="false" value="__GNUC__=11"/>
+									<listOptionValue builtIn="false" value="__GNUG__=11"/>
+									<listOptionValue builtIn="false" value="__GXX_ABI_VERSION=1016"/>
+									<listOptionValue builtIn="false" value="__GXX_EXPERIMENTAL_CXX0X__=1"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__HAVE_SPECULATION_SAFE_VALUE=1"/>
+									<listOptionValue builtIn="false" value="__INT16_MAX__=0x7fff"/>
+									<listOptionValue builtIn="false" value="&quot;__INT16_TYPE__=short int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT32_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="__INT32_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__INT64_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT64_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT8_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="&quot;__INT8_TYPE__=signed char&quot;"/>
+									<listOptionValue builtIn="false" value="__INTMAX_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INTMAX_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INTMAX_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INTPTR_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INTPTR_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INTPTR_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST16_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST16_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST16_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST32_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST32_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST32_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST64_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST64_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST64_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST8_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST8_TYPE__=signed char&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST8_WIDTH__=8"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST16_MAX__=0x7fff"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_LEAST16_TYPE__=short int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST16_WIDTH__=16"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST32_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST32_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST32_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST64_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_LEAST64_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST64_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST8_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_LEAST8_TYPE__=signed char&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST8_WIDTH__=8"/>
+									<listOptionValue builtIn="false" value="__INT_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="__INT_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__LDBL_DECIMAL_DIG__=21"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=3.64519953188247460252840593361941982e-4951L"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=18"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=1.08420217248550443400745280086994171e-19L"/>
+									<listOptionValue builtIn="false" value="__LDBL_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=64"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=4932"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=16384"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.18973149535723176502126385303097021e+4932L"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-4931)"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-16381)"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=3.36210314311209350626267781732175260e-4932L"/>
+									<listOptionValue builtIn="false" value="__LDBL_NORM_MAX__=1.18973149535723176502126385303097021e+4932L"/>
+									<listOptionValue builtIn="false" value="__LONG_LONG_MAX__=0x7fffffffffffffffLL"/>
+									<listOptionValue builtIn="false" value="__LONG_LONG_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__LONG_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="__LONG_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__LP64__=1"/>
+									<listOptionValue builtIn="false" value="__MMX_WITH_SSE__=1"/>
+									<listOptionValue builtIn="false" value="__MMX__=1"/>
+									<listOptionValue builtIn="false" value="__OPTIMIZE__=1"/>
+									<listOptionValue builtIn="false" value="__ORDER_BIG_ENDIAN__=4321"/>
+									<listOptionValue builtIn="false" value="__ORDER_LITTLE_ENDIAN__=1234"/>
+									<listOptionValue builtIn="false" value="__ORDER_PDP_ENDIAN__=3412"/>
+									<listOptionValue builtIn="false" value="__PIC__=2"/>
+									<listOptionValue builtIn="false" value="__PRAGMA_REDEFINE_EXTNAME=1"/>
+									<listOptionValue builtIn="false" value="__PTRDIFF_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__PTRDIFF_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__PTRDIFF_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__REGISTER_PREFIX__"/>
+									<listOptionValue builtIn="false" value="__SCHAR_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="__SCHAR_WIDTH__=8"/>
+									<listOptionValue builtIn="false" value="__SEG_FS=1"/>
+									<listOptionValue builtIn="false" value="__SEG_GS=1"/>
+									<listOptionValue builtIn="false" value="__SHRT_MAX__=0x7fff"/>
+									<listOptionValue builtIn="false" value="__SHRT_WIDTH__=16"/>
+									<listOptionValue builtIn="false" value="__SIG_ATOMIC_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="&quot;__SIG_ATOMIC_MIN__=(-__SIG_ATOMIC_MAX__ - 1)&quot;"/>
+									<listOptionValue builtIn="false" value="__SIG_ATOMIC_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__SIG_ATOMIC_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_FLOAT128__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_FLOAT80__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_FLOAT__=4"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_INT128__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_INT__=4"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_LONG__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_POINTER__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_PTRDIFF_T__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_SHORT__=2"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_SIZE_T__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_WCHAR_T__=4"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_WINT_T__=4"/>
+									<listOptionValue builtIn="false" value="__SIZE_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__SIZE_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__SIZE_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__SSE2_MATH__=1"/>
+									<listOptionValue builtIn="false" value="__SSE2__=1"/>
+									<listOptionValue builtIn="false" value="__SSE_MATH__=1"/>
+									<listOptionValue builtIn="false" value="__SSE__=1"/>
+									<listOptionValue builtIn="false" value="__SSP__=1"/>
+									<listOptionValue builtIn="false" value="__STDCPP_THREADS__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_CONSTANT_MACROS=1"/>
+									<listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS=1"/>
+									<listOptionValue builtIn="false" value="__STDC_HOSTED__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_IEC_559_COMPLEX__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_IEC_559__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_ISO_10646__=201706L"/>
+									<listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS=1"/>
+									<listOptionValue builtIn="false" value="__STDC_NO_THREADS__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_UTF_16__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_UTF_32__=1"/>
+									<listOptionValue builtIn="false" value="__STDC__=1"/>
+									<listOptionValue builtIn="false" value="__STRICT_ANSI__=1"/>
+									<listOptionValue builtIn="false" value="__UINT16_MAX__=0xffff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT16_TYPE__=short unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT32_MAX__=0xffffffffU"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT32_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT64_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT64_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT8_MAX__=0xff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT8_TYPE__=unsigned char&quot;"/>
+									<listOptionValue builtIn="false" value="__UINTMAX_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINTMAX_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINTPTR_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINTPTR_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST16_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST16_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST32_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST32_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST64_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST64_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST8_MAX__=0xff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST8_TYPE__=unsigned char&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST16_MAX__=0xffff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST16_TYPE__=short unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST32_MAX__=0xffffffffU"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST32_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST64_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST64_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST8_MAX__=0xff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST8_TYPE__=unsigned char&quot;"/>
+									<listOptionValue builtIn="false" value="__USER_LABEL_PREFIX__"/>
+									<listOptionValue builtIn="false" value="__VERSION__=&quot;11.3.0&quot;"/>
+									<listOptionValue builtIn="false" value="__WCHAR_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="&quot;__WCHAR_MIN__=(-__WCHAR_MAX__ - 1)&quot;"/>
+									<listOptionValue builtIn="false" value="__WCHAR_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__WCHAR_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__WINT_MAX__=0xffffffffU"/>
+									<listOptionValue builtIn="false" value="__WINT_MIN__=0U"/>
+									<listOptionValue builtIn="false" value="&quot;__WINT_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__WINT_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__amd64=1"/>
+									<listOptionValue builtIn="false" value="__amd64__=1"/>
+									<listOptionValue builtIn="false" value="__code_model_small__=1"/>
+									<listOptionValue builtIn="false" value="__cplusplus=201402L"/>
+									<listOptionValue builtIn="false" value="__cpp_aggregate_nsdmi=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_alias_templates=200704L"/>
+									<listOptionValue builtIn="false" value="__cpp_attributes=200809L"/>
+									<listOptionValue builtIn="false" value="__cpp_binary_literals=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_constexpr=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_decltype=200707L"/>
+									<listOptionValue builtIn="false" value="__cpp_decltype_auto=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_delegating_constructors=200604L"/>
+									<listOptionValue builtIn="false" value="__cpp_digit_separators=201309L"/>
+									<listOptionValue builtIn="false" value="__cpp_generic_lambdas=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_hex_float=201603L"/>
+									<listOptionValue builtIn="false" value="__cpp_inheriting_constructors=201511L"/>
+									<listOptionValue builtIn="false" value="__cpp_init_captures=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_initializer_lists=200806L"/>
+									<listOptionValue builtIn="false" value="__cpp_lambdas=200907L"/>
+									<listOptionValue builtIn="false" value="__cpp_nsdmi=200809L"/>
+									<listOptionValue builtIn="false" value="__cpp_range_based_for=200907L"/>
+									<listOptionValue builtIn="false" value="__cpp_raw_strings=200710L"/>
+									<listOptionValue builtIn="false" value="__cpp_ref_qualifiers=200710L"/>
+									<listOptionValue builtIn="false" value="__cpp_return_type_deduction=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_runtime_arrays=198712L"/>
+									<listOptionValue builtIn="false" value="__cpp_rvalue_reference=200610L"/>
+									<listOptionValue builtIn="false" value="__cpp_rvalue_references=200610L"/>
+									<listOptionValue builtIn="false" value="__cpp_sized_deallocation=201309L"/>
+									<listOptionValue builtIn="false" value="__cpp_static_assert=200410L"/>
+									<listOptionValue builtIn="false" value="__cpp_threadsafe_static_init=200806L"/>
+									<listOptionValue builtIn="false" value="__cpp_unicode_characters=200704L"/>
+									<listOptionValue builtIn="false" value="__cpp_unicode_literals=200710L"/>
+									<listOptionValue builtIn="false" value="__cpp_user_defined_literals=200809L"/>
+									<listOptionValue builtIn="false" value="__cpp_variable_templates=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_variadic_templates=200704L"/>
+									<listOptionValue builtIn="false" value="__gnu_linux__=1"/>
+									<listOptionValue builtIn="false" value="__k8=1"/>
+									<listOptionValue builtIn="false" value="__k8__=1"/>
+									<listOptionValue builtIn="false" value="__linux=1"/>
+									<listOptionValue builtIn="false" value="__linux__=1"/>
+									<listOptionValue builtIn="false" value="__pic__=2"/>
+									<listOptionValue builtIn="false" value="__unix=1"/>
+									<listOptionValue builtIn="false" value="__unix__=1"/>
+									<listOptionValue builtIn="false" value="__x86_64=1"/>
+									<listOptionValue builtIn="false" value="__x86_64__=1"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2108583242" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.867795854" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.2045577349" name="Optimization level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.exe.debug.option.debugging.level.2066027246" name="Debug level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1713109274" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/backward}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/include/c++/11.3.0/x86_64-linux-gnu}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/lib/gcc/x86_64-linux-gnu/11.3.0/include-fixed}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/sys_headers/net/sapmnt.sapjvm_work/openjdk/tools/devkits/x86_64-linux-gnu-to-x86_64-linux-gnu-fedora27-gcc11.3.0/x86_64-linux-gnu/sysroot/usr/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/hotspot/variant-server/gensrc_lnk/adfiles}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/HotSpot/hotspot_sys_headers_and_outputdir_src/linux_x86_64/output/support/modules_include/java.base/linux}&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.1713961422" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="AMD64=1"/>
+									<listOptionValue builtIn="false" value="ASSERT=1"/>
+									<listOptionValue builtIn="false" value="CHECK_UNHANDLED_OOPS=1"/>
+									<listOptionValue builtIn="false" value="COMPILER1=1"/>
+									<listOptionValue builtIn="false" value="COMPILER2=1"/>
+									<listOptionValue builtIn="false" value="DONT_USE_PRECOMPILED_HEADER=1"/>
+									<listOptionValue builtIn="false" value="ECLIPSE_CDT"/>
+									<listOptionValue builtIn="false" value="HOTSPOT_LIB_ARCH=&quot;amd64&quot;"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_COMPILER=_gcc"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_CPU=_x86"/>
+									<listOptionValue builtIn="false" value="INCLUDE_SUFFIX_OS=_linux"/>
+									<listOptionValue builtIn="false" value="LIBC=gnu"/>
+									<listOptionValue builtIn="false" value="LINUX=1"/>
+									<listOptionValue builtIn="false" value="TARGET_ARCH_x86=1"/>
+									<listOptionValue builtIn="false" value="TARGET_COMPILER_gcc=1"/>
+									<listOptionValue builtIn="false" value="VM_LITTLE_ENDIAN=1"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BITS=64"/>
+									<listOptionValue builtIn="false" value="_FORTIFY_SOURCE=2"/>
+									<listOptionValue builtIn="false" value="_GNU_SOURCE=1"/>
+									<listOptionValue builtIn="false" value="_LP64=1"/>
+									<listOptionValue builtIn="false" value="_REENTRANT=1"/>
+									<listOptionValue builtIn="false" value="_STDC_PREDEF_H=1"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_ACQUIRE=2"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_ACQ_REL=4"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_CONSUME=1"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_HLE_ACQUIRE=65536"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_HLE_RELEASE=131072"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_RELAXED=0"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_RELEASE=3"/>
+									<listOptionValue builtIn="false" value="__ATOMIC_SEQ_CST=5"/>
+									<listOptionValue builtIn="false" value="__BIGGEST_ALIGNMENT__=16"/>
+									<listOptionValue builtIn="false" value="__BYTE_ORDER__=__ORDER_LITTLE_ENDIAN__"/>
+									<listOptionValue builtIn="false" value="&quot;__CHAR16_TYPE__=short unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;__CHAR32_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__CHAR_BIT__=8"/>
+									<listOptionValue builtIn="false" value="__DBL_DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__DBL_DENORM_MIN__=double(4.94065645841246544176568792868221372e-324L)"/>
+									<listOptionValue builtIn="false" value="__DBL_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__DBL_EPSILON__=double(2.22044604925031308084726333618164062e-16L)"/>
+									<listOptionValue builtIn="false" value="__DBL_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__DBL_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__DBL_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__DBL_MAX__=double(1.79769313486231570814527423731704357e+308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__DBL_MIN__=double(2.22507385850720138309023271733240406e-308L)"/>
+									<listOptionValue builtIn="false" value="__DBL_NORM_MAX__=double(1.79769313486231570814527423731704357e+308L)"/>
+									<listOptionValue builtIn="false" value="__DEC128_EPSILON__=1E-33DL"/>
+									<listOptionValue builtIn="false" value="__DEC128_MANT_DIG__=34"/>
+									<listOptionValue builtIn="false" value="__DEC128_MAX_EXP__=6145"/>
+									<listOptionValue builtIn="false" value="__DEC128_MAX__=9.999999999999999999999999999999999E6144DL"/>
+									<listOptionValue builtIn="false" value="__DEC128_MIN_EXP__=(-6142)"/>
+									<listOptionValue builtIn="false" value="__DEC128_MIN__=1E-6143DL"/>
+									<listOptionValue builtIn="false" value="__DEC128_SUBNORMAL_MIN__=0.000000000000000000000000000000001E-6143DL"/>
+									<listOptionValue builtIn="false" value="__DEC32_EPSILON__=1E-6DF"/>
+									<listOptionValue builtIn="false" value="__DEC32_MANT_DIG__=7"/>
+									<listOptionValue builtIn="false" value="__DEC32_MAX_EXP__=97"/>
+									<listOptionValue builtIn="false" value="__DEC32_MAX__=9.999999E96DF"/>
+									<listOptionValue builtIn="false" value="__DEC32_MIN_EXP__=(-94)"/>
+									<listOptionValue builtIn="false" value="__DEC32_MIN__=1E-95DF"/>
+									<listOptionValue builtIn="false" value="__DEC32_SUBNORMAL_MIN__=0.000001E-95DF"/>
+									<listOptionValue builtIn="false" value="__DEC64_EPSILON__=1E-15DD"/>
+									<listOptionValue builtIn="false" value="__DEC64_MANT_DIG__=16"/>
+									<listOptionValue builtIn="false" value="__DEC64_MAX_EXP__=385"/>
+									<listOptionValue builtIn="false" value="__DEC64_MAX__=9.999999999999999E384DD"/>
+									<listOptionValue builtIn="false" value="__DEC64_MIN_EXP__=(-382)"/>
+									<listOptionValue builtIn="false" value="__DEC64_MIN__=1E-383DD"/>
+									<listOptionValue builtIn="false" value="__DEC64_SUBNORMAL_MIN__=0.000000000000001E-383DD"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_BID_FORMAT__=1"/>
+									<listOptionValue builtIn="false" value="__DECIMAL_DIG__=21"/>
+									<listOptionValue builtIn="false" value="__DEC_EVAL_METHOD__=2"/>
+									<listOptionValue builtIn="false" value="__DEPRECATED=1"/>
+									<listOptionValue builtIn="false" value="__ELF__=1"/>
+									<listOptionValue builtIn="false" value="__FINITE_MATH_ONLY__=0"/>
+									<listOptionValue builtIn="false" value="__FLOAT_WORD_ORDER__=__ORDER_LITTLE_ENDIAN__"/>
+									<listOptionValue builtIn="false" value="__FLT128_DECIMAL_DIG__=36"/>
+									<listOptionValue builtIn="false" value="__FLT128_DENORM_MIN__=6.47517511943802511092443895822764655e-4966F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_DIG__=33"/>
+									<listOptionValue builtIn="false" value="__FLT128_EPSILON__=1.92592994438723585305597794258492732e-34F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT128_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT128_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT128_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT128_MANT_DIG__=113"/>
+									<listOptionValue builtIn="false" value="__FLT128_MAX_10_EXP__=4932"/>
+									<listOptionValue builtIn="false" value="__FLT128_MAX_EXP__=16384"/>
+									<listOptionValue builtIn="false" value="__FLT128_MAX__=1.18973149535723176508575932662800702e+4932F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_MIN_10_EXP__=(-4931)"/>
+									<listOptionValue builtIn="false" value="__FLT128_MIN_EXP__=(-16381)"/>
+									<listOptionValue builtIn="false" value="__FLT128_MIN__=3.36210314311209350626267781732175260e-4932F128"/>
+									<listOptionValue builtIn="false" value="__FLT128_NORM_MAX__=1.18973149535723176508575932662800702e+4932F128"/>
+									<listOptionValue builtIn="false" value="__FLT32X_DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__FLT32X_DENORM_MIN__=4.94065645841246544176568792868221372e-324F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__FLT32X_EPSILON__=2.22044604925031308084726333618164062e-16F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32X_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32X_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32X_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MAX__=1.79769313486231570814527423731704357e+308F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__FLT32X_MIN__=2.22507385850720138309023271733240406e-308F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32X_NORM_MAX__=1.79769313486231570814527423731704357e+308F32x"/>
+									<listOptionValue builtIn="false" value="__FLT32_DECIMAL_DIG__=9"/>
+									<listOptionValue builtIn="false" value="__FLT32_DENORM_MIN__=1.40129846432481707092372958328991613e-45F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_DIG__=6"/>
+									<listOptionValue builtIn="false" value="__FLT32_EPSILON__=1.19209289550781250000000000000000000e-7F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT32_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT32_MANT_DIG__=24"/>
+									<listOptionValue builtIn="false" value="__FLT32_MAX_10_EXP__=38"/>
+									<listOptionValue builtIn="false" value="__FLT32_MAX_EXP__=128"/>
+									<listOptionValue builtIn="false" value="__FLT32_MAX__=3.40282346638528859811704183484516925e+38F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_MIN_10_EXP__=(-37)"/>
+									<listOptionValue builtIn="false" value="__FLT32_MIN_EXP__=(-125)"/>
+									<listOptionValue builtIn="false" value="__FLT32_MIN__=1.17549435082228750796873653722224568e-38F32"/>
+									<listOptionValue builtIn="false" value="__FLT32_NORM_MAX__=3.40282346638528859811704183484516925e+38F32"/>
+									<listOptionValue builtIn="false" value="__FLT64X_DECIMAL_DIG__=21"/>
+									<listOptionValue builtIn="false" value="__FLT64X_DENORM_MIN__=3.64519953188247460252840593361941982e-4951F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_DIG__=18"/>
+									<listOptionValue builtIn="false" value="__FLT64X_EPSILON__=1.08420217248550443400745280086994171e-19F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64X_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64X_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64X_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MANT_DIG__=64"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MAX_10_EXP__=4932"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MAX_EXP__=16384"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MAX__=1.18973149535723176502126385303097021e+4932F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MIN_10_EXP__=(-4931)"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MIN_EXP__=(-16381)"/>
+									<listOptionValue builtIn="false" value="__FLT64X_MIN__=3.36210314311209350626267781732175260e-4932F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64X_NORM_MAX__=1.18973149535723176502126385303097021e+4932F64x"/>
+									<listOptionValue builtIn="false" value="__FLT64_DECIMAL_DIG__=17"/>
+									<listOptionValue builtIn="false" value="__FLT64_DENORM_MIN__=4.94065645841246544176568792868221372e-324F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_DIG__=15"/>
+									<listOptionValue builtIn="false" value="__FLT64_EPSILON__=2.22044604925031308084726333618164062e-16F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT64_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT64_MANT_DIG__=53"/>
+									<listOptionValue builtIn="false" value="__FLT64_MAX_10_EXP__=308"/>
+									<listOptionValue builtIn="false" value="__FLT64_MAX_EXP__=1024"/>
+									<listOptionValue builtIn="false" value="__FLT64_MAX__=1.79769313486231570814527423731704357e+308F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_MIN_10_EXP__=(-307)"/>
+									<listOptionValue builtIn="false" value="__FLT64_MIN_EXP__=(-1021)"/>
+									<listOptionValue builtIn="false" value="__FLT64_MIN__=2.22507385850720138309023271733240406e-308F64"/>
+									<listOptionValue builtIn="false" value="__FLT64_NORM_MAX__=1.79769313486231570814527423731704357e+308F64"/>
+									<listOptionValue builtIn="false" value="__FLT_DECIMAL_DIG__=9"/>
+									<listOptionValue builtIn="false" value="__FLT_DENORM_MIN__=1.40129846432481707092372958328991613e-45F"/>
+									<listOptionValue builtIn="false" value="__FLT_DIG__=6"/>
+									<listOptionValue builtIn="false" value="__FLT_EPSILON__=1.19209289550781250000000000000000000e-7F"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD_TS_18661_3__=0"/>
+									<listOptionValue builtIn="false" value="__FLT_EVAL_METHOD__=0"/>
+									<listOptionValue builtIn="false" value="__FLT_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__FLT_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__FLT_MANT_DIG__=24"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX_10_EXP__=38"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX_EXP__=128"/>
+									<listOptionValue builtIn="false" value="__FLT_MAX__=3.40282346638528859811704183484516925e+38F"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN_10_EXP__=(-37)"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN_EXP__=(-125)"/>
+									<listOptionValue builtIn="false" value="__FLT_MIN__=1.17549435082228750796873653722224568e-38F"/>
+									<listOptionValue builtIn="false" value="__FLT_NORM_MAX__=3.40282346638528859811704183484516925e+38F"/>
+									<listOptionValue builtIn="false" value="__FLT_RADIX__=2"/>
+									<listOptionValue builtIn="false" value="__FXSR__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_ASM_FLAG_OUTPUTS__=1"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_BOOL_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_CHAR16_T_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_CHAR32_T_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_CHAR_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_INT_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_LLONG_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_LONG_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_POINTER_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_SHORT_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_TEST_AND_SET_TRUEVAL=1"/>
+									<listOptionValue builtIn="false" value="__GCC_ATOMIC_WCHAR_T_LOCK_FREE=2"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_DWARF2_CFI_ASM=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4=1"/>
+									<listOptionValue builtIn="false" value="__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8=1"/>
+									<listOptionValue builtIn="false" value="__GCC_IEC_559=2"/>
+									<listOptionValue builtIn="false" value="__GCC_IEC_559_COMPLEX=2"/>
+									<listOptionValue builtIn="false" value="__GNUC_EXECUTION_CHARSET_NAME=&quot;UTF-8&quot;"/>
+									<listOptionValue builtIn="false" value="__GNUC_MINOR__=3"/>
+									<listOptionValue builtIn="false" value="__GNUC_PATCHLEVEL__=0"/>
+									<listOptionValue builtIn="false" value="__GNUC_STDC_INLINE__=1"/>
+									<listOptionValue builtIn="false" value="__GNUC_WIDE_EXECUTION_CHARSET_NAME=&quot;UTF-32LE&quot;"/>
+									<listOptionValue builtIn="false" value="__GNUC__=11"/>
+									<listOptionValue builtIn="false" value="__GNUG__=11"/>
+									<listOptionValue builtIn="false" value="__GXX_ABI_VERSION=1016"/>
+									<listOptionValue builtIn="false" value="__GXX_EXPERIMENTAL_CXX0X__=1"/>
+									<listOptionValue builtIn="false" value="__GXX_WEAK__=1"/>
+									<listOptionValue builtIn="false" value="__HAVE_SPECULATION_SAFE_VALUE=1"/>
+									<listOptionValue builtIn="false" value="__INT16_MAX__=0x7fff"/>
+									<listOptionValue builtIn="false" value="&quot;__INT16_TYPE__=short int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT32_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="__INT32_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__INT64_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT64_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT8_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="&quot;__INT8_TYPE__=signed char&quot;"/>
+									<listOptionValue builtIn="false" value="__INTMAX_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INTMAX_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INTMAX_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INTPTR_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INTPTR_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INTPTR_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST16_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST16_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST16_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST32_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST32_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST32_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST64_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST64_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST64_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_FAST8_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_FAST8_TYPE__=signed char&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_FAST8_WIDTH__=8"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST16_MAX__=0x7fff"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_LEAST16_TYPE__=short int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST16_WIDTH__=16"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST32_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST32_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST32_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST64_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_LEAST64_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST64_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST8_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="&quot;__INT_LEAST8_TYPE__=signed char&quot;"/>
+									<listOptionValue builtIn="false" value="__INT_LEAST8_WIDTH__=8"/>
+									<listOptionValue builtIn="false" value="__INT_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="__INT_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__LDBL_DECIMAL_DIG__=21"/>
+									<listOptionValue builtIn="false" value="__LDBL_DENORM_MIN__=3.64519953188247460252840593361941982e-4951L"/>
+									<listOptionValue builtIn="false" value="__LDBL_DIG__=18"/>
+									<listOptionValue builtIn="false" value="__LDBL_EPSILON__=1.08420217248550443400745280086994171e-19L"/>
+									<listOptionValue builtIn="false" value="__LDBL_HAS_DENORM__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_HAS_INFINITY__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_HAS_QUIET_NAN__=1"/>
+									<listOptionValue builtIn="false" value="__LDBL_IS_IEC_60559__=2"/>
+									<listOptionValue builtIn="false" value="__LDBL_MANT_DIG__=64"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_10_EXP__=4932"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX_EXP__=16384"/>
+									<listOptionValue builtIn="false" value="__LDBL_MAX__=1.18973149535723176502126385303097021e+4932L"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_10_EXP__=(-4931)"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN_EXP__=(-16381)"/>
+									<listOptionValue builtIn="false" value="__LDBL_MIN__=3.36210314311209350626267781732175260e-4932L"/>
+									<listOptionValue builtIn="false" value="__LDBL_NORM_MAX__=1.18973149535723176502126385303097021e+4932L"/>
+									<listOptionValue builtIn="false" value="__LONG_LONG_MAX__=0x7fffffffffffffffLL"/>
+									<listOptionValue builtIn="false" value="__LONG_LONG_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__LONG_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="__LONG_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__LP64__=1"/>
+									<listOptionValue builtIn="false" value="__MMX_WITH_SSE__=1"/>
+									<listOptionValue builtIn="false" value="__MMX__=1"/>
+									<listOptionValue builtIn="false" value="__OPTIMIZE__=1"/>
+									<listOptionValue builtIn="false" value="__ORDER_BIG_ENDIAN__=4321"/>
+									<listOptionValue builtIn="false" value="__ORDER_LITTLE_ENDIAN__=1234"/>
+									<listOptionValue builtIn="false" value="__ORDER_PDP_ENDIAN__=3412"/>
+									<listOptionValue builtIn="false" value="__PIC__=2"/>
+									<listOptionValue builtIn="false" value="__PRAGMA_REDEFINE_EXTNAME=1"/>
+									<listOptionValue builtIn="false" value="__PTRDIFF_MAX__=0x7fffffffffffffffL"/>
+									<listOptionValue builtIn="false" value="&quot;__PTRDIFF_TYPE__=long int&quot;"/>
+									<listOptionValue builtIn="false" value="__PTRDIFF_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__REGISTER_PREFIX__"/>
+									<listOptionValue builtIn="false" value="__SCHAR_MAX__=0x7f"/>
+									<listOptionValue builtIn="false" value="__SCHAR_WIDTH__=8"/>
+									<listOptionValue builtIn="false" value="__SEG_FS=1"/>
+									<listOptionValue builtIn="false" value="__SEG_GS=1"/>
+									<listOptionValue builtIn="false" value="__SHRT_MAX__=0x7fff"/>
+									<listOptionValue builtIn="false" value="__SHRT_WIDTH__=16"/>
+									<listOptionValue builtIn="false" value="__SIG_ATOMIC_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="&quot;__SIG_ATOMIC_MIN__=(-__SIG_ATOMIC_MAX__ - 1)&quot;"/>
+									<listOptionValue builtIn="false" value="__SIG_ATOMIC_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__SIG_ATOMIC_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_DOUBLE__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_FLOAT128__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_FLOAT80__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_FLOAT__=4"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_INT128__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_INT__=4"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_DOUBLE__=16"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG_LONG__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_LONG__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_POINTER__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_PTRDIFF_T__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_SHORT__=2"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_SIZE_T__=8"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_WCHAR_T__=4"/>
+									<listOptionValue builtIn="false" value="__SIZEOF_WINT_T__=4"/>
+									<listOptionValue builtIn="false" value="__SIZE_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__SIZE_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__SIZE_WIDTH__=64"/>
+									<listOptionValue builtIn="false" value="__SSE2_MATH__=1"/>
+									<listOptionValue builtIn="false" value="__SSE2__=1"/>
+									<listOptionValue builtIn="false" value="__SSE_MATH__=1"/>
+									<listOptionValue builtIn="false" value="__SSE__=1"/>
+									<listOptionValue builtIn="false" value="__SSP__=1"/>
+									<listOptionValue builtIn="false" value="__STDCPP_THREADS__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_CONSTANT_MACROS=1"/>
+									<listOptionValue builtIn="false" value="__STDC_FORMAT_MACROS=1"/>
+									<listOptionValue builtIn="false" value="__STDC_HOSTED__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_IEC_559_COMPLEX__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_IEC_559__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_ISO_10646__=201706L"/>
+									<listOptionValue builtIn="false" value="__STDC_LIMIT_MACROS=1"/>
+									<listOptionValue builtIn="false" value="__STDC_NO_THREADS__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_UTF_16__=1"/>
+									<listOptionValue builtIn="false" value="__STDC_UTF_32__=1"/>
+									<listOptionValue builtIn="false" value="__STDC__=1"/>
+									<listOptionValue builtIn="false" value="__STRICT_ANSI__=1"/>
+									<listOptionValue builtIn="false" value="__UINT16_MAX__=0xffff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT16_TYPE__=short unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT32_MAX__=0xffffffffU"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT32_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT64_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT64_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT8_MAX__=0xff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT8_TYPE__=unsigned char&quot;"/>
+									<listOptionValue builtIn="false" value="__UINTMAX_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINTMAX_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINTPTR_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINTPTR_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST16_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST16_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST32_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST32_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST64_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST64_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_FAST8_MAX__=0xff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_FAST8_TYPE__=unsigned char&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST16_MAX__=0xffff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST16_TYPE__=short unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST32_MAX__=0xffffffffU"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST32_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST64_MAX__=0xffffffffffffffffUL"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST64_TYPE__=long unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__UINT_LEAST8_MAX__=0xff"/>
+									<listOptionValue builtIn="false" value="&quot;__UINT_LEAST8_TYPE__=unsigned char&quot;"/>
+									<listOptionValue builtIn="false" value="__USER_LABEL_PREFIX__"/>
+									<listOptionValue builtIn="false" value="__VERSION__=&quot;11.3.0&quot;"/>
+									<listOptionValue builtIn="false" value="__WCHAR_MAX__=0x7fffffff"/>
+									<listOptionValue builtIn="false" value="&quot;__WCHAR_MIN__=(-__WCHAR_MAX__ - 1)&quot;"/>
+									<listOptionValue builtIn="false" value="__WCHAR_TYPE__=int"/>
+									<listOptionValue builtIn="false" value="__WCHAR_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__WINT_MAX__=0xffffffffU"/>
+									<listOptionValue builtIn="false" value="__WINT_MIN__=0U"/>
+									<listOptionValue builtIn="false" value="&quot;__WINT_TYPE__=unsigned int&quot;"/>
+									<listOptionValue builtIn="false" value="__WINT_WIDTH__=32"/>
+									<listOptionValue builtIn="false" value="__amd64=1"/>
+									<listOptionValue builtIn="false" value="__amd64__=1"/>
+									<listOptionValue builtIn="false" value="__code_model_small__=1"/>
+									<listOptionValue builtIn="false" value="__cplusplus=201402L"/>
+									<listOptionValue builtIn="false" value="__cpp_aggregate_nsdmi=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_alias_templates=200704L"/>
+									<listOptionValue builtIn="false" value="__cpp_attributes=200809L"/>
+									<listOptionValue builtIn="false" value="__cpp_binary_literals=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_constexpr=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_decltype=200707L"/>
+									<listOptionValue builtIn="false" value="__cpp_decltype_auto=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_delegating_constructors=200604L"/>
+									<listOptionValue builtIn="false" value="__cpp_digit_separators=201309L"/>
+									<listOptionValue builtIn="false" value="__cpp_generic_lambdas=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_hex_float=201603L"/>
+									<listOptionValue builtIn="false" value="__cpp_inheriting_constructors=201511L"/>
+									<listOptionValue builtIn="false" value="__cpp_init_captures=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_initializer_lists=200806L"/>
+									<listOptionValue builtIn="false" value="__cpp_lambdas=200907L"/>
+									<listOptionValue builtIn="false" value="__cpp_nsdmi=200809L"/>
+									<listOptionValue builtIn="false" value="__cpp_range_based_for=200907L"/>
+									<listOptionValue builtIn="false" value="__cpp_raw_strings=200710L"/>
+									<listOptionValue builtIn="false" value="__cpp_ref_qualifiers=200710L"/>
+									<listOptionValue builtIn="false" value="__cpp_return_type_deduction=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_runtime_arrays=198712L"/>
+									<listOptionValue builtIn="false" value="__cpp_rvalue_reference=200610L"/>
+									<listOptionValue builtIn="false" value="__cpp_rvalue_references=200610L"/>
+									<listOptionValue builtIn="false" value="__cpp_sized_deallocation=201309L"/>
+									<listOptionValue builtIn="false" value="__cpp_static_assert=200410L"/>
+									<listOptionValue builtIn="false" value="__cpp_threadsafe_static_init=200806L"/>
+									<listOptionValue builtIn="false" value="__cpp_unicode_characters=200704L"/>
+									<listOptionValue builtIn="false" value="__cpp_unicode_literals=200710L"/>
+									<listOptionValue builtIn="false" value="__cpp_user_defined_literals=200809L"/>
+									<listOptionValue builtIn="false" value="__cpp_variable_templates=201304L"/>
+									<listOptionValue builtIn="false" value="__cpp_variadic_templates=200704L"/>
+									<listOptionValue builtIn="false" value="__gnu_linux__=1"/>
+									<listOptionValue builtIn="false" value="__k8=1"/>
+									<listOptionValue builtIn="false" value="__k8__=1"/>
+									<listOptionValue builtIn="false" value="__linux=1"/>
+									<listOptionValue builtIn="false" value="__linux__=1"/>
+									<listOptionValue builtIn="false" value="__pic__=2"/>
+									<listOptionValue builtIn="false" value="__unix=1"/>
+									<listOptionValue builtIn="false" value="__unix__=1"/>
+									<listOptionValue builtIn="false" value="__x86_64=1"/>
+									<listOptionValue builtIn="false" value="__x86_64__=1"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1439325690" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.412300918" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1936169877" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1416599637" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.920626900" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.253007617" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.both.asm.option.include.paths.620466024" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1325795127" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="test.hotspot.serviceability.jvmti/8036666/|test.hotspot.serviceability.jvmti/AddModuleExportsAndOpens/|test.hotspot.serviceability.jvmti/AddModuleReads/|test.hotspot.serviceability.jvmti/AddModuleUsesAndProvides/|test.hotspot.serviceability.jvmti/CanGenerateAllClassHook/|test.hotspot.serviceability.jvmti/FieldAccessWatch/|test.hotspot.serviceability.jvmti/GetModulesInfo/|test.hotspot.serviceability.jvmti/GetNamedModule/|test.hotspot.serviceability.jvmti/GetSystemProperty/|test.hotspot.serviceability.jvmti/HeapMonitor/|test.hotspot.serviceability.jvmti/IsModifiableModule/|test.hotspot.serviceability.jvmti/ModuleAwareAgents/|test.hotspot.serviceability.jvmti/NotifyFramePop/|test.hotspot.serviceability.jvmti/StartPhase/|test.hotspot.serviceability.jvmti/VMEvent/|test.hotspot.serviceability.jvmti/GetObjectSizeClass.java|test.hotspot.serviceability.jvmti/GetObjectSizeClassAgent.java|test.hotspot.serviceability.jvmti/GetObjectSizeOverflow.java|test.hotspot.serviceability.jvmti/GetObjectSizeOverflowAgent.java|test.hotspot.serviceability.jvmti/RetransformClassesZeroLength.java|test.hotspot.serviceability.jvmti/TestLambdaFormRetransformation.java|test.hotspot.serviceability.jvmti/TestRedefineWithUnresolvedClass.java|test.hotspot.serviceability.jvmti/UnresolvedClassAgent.java|test.hotspot.serviceability.jvmti/UnresolvedClassAgent.mf|.cproject|.project" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="test.hotspot.natives.cdt.managedbuild.target.gnu.exe.1282334560" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/test.hotspot.natives"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.993353488;cdt.managedbuild.config.gnu.exe.debug.993353488.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.867795854;cdt.managedbuild.tool.gnu.c.compiler.input.1439325690">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.993353488;cdt.managedbuild.config.gnu.exe.debug.993353488.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.574508649;cdt.managedbuild.tool.gnu.cpp.compiler.input.2108583242">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
