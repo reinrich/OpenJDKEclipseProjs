@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="ProblemList-Xcomp.txt|ProblemList-aot.txt|ProblemList-graal.txt|ProblemList-non-cds-mode.txt|ProblemList-zgc.txt|ProblemList.txt|TEST.ROOT|TEST.groups|TEST.quick-groups|applications/|compiler/|containers/|gc/|gtest/|native_sanity/|resourcehogs/|sanity/|serviceability/|test_env.sh|testlibrary/|testlibrary_tests/|vmTestbase/" kind="src" path="test.hotspot"/>
+	<classpathentry kind="src" path="test.hotspot/runtime/jni"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java.base">
 		<attributes>
 			<attribute name="module" value="true"/>
