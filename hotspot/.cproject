@@ -2426,6 +2426,7 @@
 									<listOptionValue builtIn="false" value="unix=1"/>
 									<listOptionValue builtIn="false" value="vector=vector"/>
 									<listOptionValue builtIn="false" value="__nullptr=nullptr"/>
+									<listOptionValue builtIn="false" value="vmassert(p,...)"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1356421687" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
