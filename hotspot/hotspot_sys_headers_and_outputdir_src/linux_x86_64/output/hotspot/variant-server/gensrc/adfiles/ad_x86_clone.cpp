@@ -1,6 +1,6 @@
 #line 1 "ad_x86_clone.cpp"
 //
-// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2011, 2026, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -257,6 +257,9 @@ MachOper *rFlagsRegUOper::clone() const {
 MachOper *rFlagsRegUCFOper::clone() const {
   return new rFlagsRegUCFOper();
 }
+MachOper *rFlagsRegUCFEOper::clone() const {
+  return new rFlagsRegUCFEOper();
+}
 MachOper *regFOper::clone() const {
   return new regFOper();
 }
@@ -304,6 +307,9 @@ MachOper *indPosIndexOffsetOper::clone() const {
 }
 MachOper *indPosIndexScaleOffsetOper::clone() const {
   return new indPosIndexScaleOffsetOper(_c0, _c1);
+}
+MachOper *indCompressedOopOper::clone() const {
+  return new indCompressedOopOper();
 }
 MachOper *indCompressedOopOffsetOper::clone() const {
   return new indCompressedOopOffsetOper(_c0);
@@ -361,6 +367,9 @@ MachOper *cmpOpUCFOper::clone() const {
 }
 MachOper *cmpOpUCF2Oper::clone() const {
   return new cmpOpUCF2Oper(_c0);
+}
+MachOper *cmpOpUCFEOper::clone() const {
+  return new cmpOpUCFEOper(_c0);
 }
 MachOper *rxmm0Oper::clone() const {
   return new rxmm0Oper();

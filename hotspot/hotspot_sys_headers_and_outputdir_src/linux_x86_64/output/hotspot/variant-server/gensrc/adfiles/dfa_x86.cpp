@@ -1,6 +1,6 @@
 #line 1 "dfa_x86.cpp"
 //
-// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2011, 2026, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -54,6 +54,9 @@ static const int ins_short_branch = 0;
 
 // AttributeForm 
 static const int ins_alignment = 1;
+
+// AttributeForm 
+static const int ins_is_late_expanded_null_check_candidate = false;
 
 //------------------------- Macros -----------------------------------------
 #define DFA_PRODUCTION(result, rule, cost)\
@@ -333,9 +336,17 @@ void  State::_sub_Op_RegVectMask(const Node *n){
 }
 void  State::_sub_Op_RegFlags(const Node *n){
     if(         
-#line 2820 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-false
-#line 338 "dfa_x86.cpp"
+#line 5586 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && VM_Version::supports_avx10_2()
+#line 341 "dfa_x86.cpp"
+ ) {
+      unsigned int c = 0;
+        DFA_PRODUCTION(RFLAGSREGUCFE, rFlagsRegUCFE_rule, c)
+    }
+    if(         
+#line 5577 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX || !VM_Version::supports_avx10_2()
+#line 349 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(RFLAGSREGUCF, rFlagsRegUCF_rule, c)
@@ -352,9 +363,9 @@ false
 void  State::_sub_Op_AbsD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VLREGD) &&
         (
-#line 3646 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18318 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 357 "dfa_x86.cpp"
+#line 368 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGD]+150;
         DFA_PRODUCTION(VLREGD, absD_reg_reg_rule, c)
@@ -364,9 +375,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) &&
         (
-#line 3634 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 369 "dfa_x86.cpp"
+#line 18306 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 380 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -386,9 +397,9 @@ UseAVX > 0
 void  State::_sub_Op_AbsF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VLREGF) &&
         (
-#line 3621 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18293 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 391 "dfa_x86.cpp"
+#line 402 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGF]+150;
         DFA_PRODUCTION(VLREGF, absF_reg_reg_rule, c)
@@ -398,9 +409,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) &&
         (
-#line 3610 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 403 "dfa_x86.cpp"
+#line 18282 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 414 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -447,9 +458,9 @@ void  State::_sub_Op_AbsL(const Node *n){
 void  State::_sub_Op_AddD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3172 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17844 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 452 "dfa_x86.cpp"
+#line 463 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
         DFA_PRODUCTION(REGD, addD_reg_imm_rule, c)
@@ -459,9 +470,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3160 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17832 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 464 "dfa_x86.cpp"
+#line 475 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -479,9 +490,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3160 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17832 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 484 "dfa_x86.cpp"
+#line 495 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -499,9 +510,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3148 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17820 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 504 "dfa_x86.cpp"
+#line 515 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -519,9 +530,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3137 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 524 "dfa_x86.cpp"
+#line 17809 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 535 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -539,9 +550,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3125 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 544 "dfa_x86.cpp"
+#line 17797 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 555 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -559,9 +570,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3125 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 564 "dfa_x86.cpp"
+#line 17797 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 575 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -579,9 +590,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3113 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 584 "dfa_x86.cpp"
+#line 17785 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 595 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -601,9 +612,9 @@ UseAVX > 0
 void  State::_sub_Op_AddF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3101 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17773 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 606 "dfa_x86.cpp"
+#line 617 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
         DFA_PRODUCTION(REGF, addF_reg_imm_rule, c)
@@ -613,9 +624,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3089 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17761 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 618 "dfa_x86.cpp"
+#line 629 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -633,9 +644,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3089 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17761 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 638 "dfa_x86.cpp"
+#line 649 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -653,9 +664,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3077 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17749 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 658 "dfa_x86.cpp"
+#line 669 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -673,9 +684,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3066 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 678 "dfa_x86.cpp"
+#line 17738 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 689 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -693,9 +704,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3054 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 698 "dfa_x86.cpp"
+#line 17726 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 709 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -713,9 +724,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3054 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 718 "dfa_x86.cpp"
+#line 17726 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 729 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -733,9 +744,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3042 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 738 "dfa_x86.cpp"
+#line 17714 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 749 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -755,9 +766,9 @@ UseAVX > 0
 void  State::_sub_Op_AddI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 12785 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 25897 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 false
-#line 760 "dfa_x86.cpp"
+#line 771 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(RREGI, leaI_rReg_immI_peep_rule, c)
@@ -772,9 +783,9 @@ false
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 12766 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 25878 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 false
-#line 777 "dfa_x86.cpp"
+#line 788 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -935,9 +946,9 @@ false
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI__LSHIFTI_RREGI_IMMI2_RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 6778 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10239 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_3op_lea()
-#line 940 "dfa_x86.cpp"
+#line 951 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDI__LSHIFTI_RREGI_IMMI2_RREGI]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -974,9 +985,9 @@ VM_Version::supports_fast_3op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI_RREGI__LSHIFTI_RREGI_IMMI2) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 6778 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10239 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_3op_lea()
-#line 979 "dfa_x86.cpp"
+#line 990 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDI_RREGI__LSHIFTI_RREGI_IMMI2]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -1013,9 +1024,9 @@ VM_Version::supports_fast_3op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTI_RREGI_IMMI2) && STATE__VALID_CHILD(_kids[1], NO_RBP_R13_REGI) &&
         (
-#line 6765 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10226 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_2op_lea()
-#line 1018 "dfa_x86.cpp"
+#line 1029 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTI_RREGI_IMMI2]+_kids[1]->_cost[NO_RBP_R13_REGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -1048,9 +1059,9 @@ VM_Version::supports_fast_2op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], NO_RBP_R13_REGI) && STATE__VALID_CHILD(_kids[1], _LSHIFTI_RREGI_IMMI2) &&
         (
-#line 6765 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10226 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_2op_lea()
-#line 1053 "dfa_x86.cpp"
+#line 1064 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[NO_RBP_R13_REGI]+_kids[1]->_cost[_LSHIFTI_RREGI_IMMI2]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -1083,9 +1094,9 @@ VM_Version::supports_fast_2op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI_RREGI_RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 6753 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10214 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_3op_lea()
-#line 1088 "dfa_x86.cpp"
+#line 1099 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDI_RREGI_RREGI]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -1122,9 +1133,9 @@ VM_Version::supports_fast_3op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTI_RREGI_IMMI2) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 6740 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10201 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_2op_lea()
-#line 1127 "dfa_x86.cpp"
+#line 1138 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTI_RREGI_IMMI2]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -1159,11 +1170,81 @@ VM_Version::supports_fast_2op_lea()
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI_M1];
         DFA_PRODUCTION(_ADDI__LOADI_MEMORY__IMMI_M1, _AddI__LoadI_memory__immI_M1_rule, c)
     }
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI_M1) &&
+        (
+#line 10173 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 1177 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI_M1]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, decI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, decI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, decI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, decI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, decI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, decI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, decI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, decI_rReg_mem_ndd_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI_M1) &&
         (
-#line 6712 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseIncDec
-#line 1166 "dfa_x86.cpp"
+#line 10159 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 1212 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI_M1]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, decI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, decI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, decI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, decI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, decI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, decI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, decI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, decI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI_M1) &&
+        (
+#line 10146 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && UseIncDec
+#line 1247 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI_M1]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -1198,11 +1279,81 @@ UseIncDec
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI_1];
         DFA_PRODUCTION(_ADDI__LOADI_MEMORY__IMMI_1, _AddI__LoadI_memory__immI_1_rule, c)
     }
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI_1) &&
+        (
+#line 10118 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 1286 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI_1]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, incI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, incI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, incI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, incI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, incI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, incI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, incI_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, incI_rReg_mem_ndd_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI_1) &&
         (
-#line 6684 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseIncDec
-#line 1205 "dfa_x86.cpp"
+#line 10104 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 1321 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI_1]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, incI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, incI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, incI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, incI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, incI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, incI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, incI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, incI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI_1) &&
+        (
+#line 10091 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && UseIncDec
+#line 1356 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI_1]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -1245,7 +1396,82 @@ UseIncDec
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI];
         DFA_PRODUCTION(_ADDI__LOADI_MEMORY__RREGI, _AddI__LoadI_memory__rRegI_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 10047 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 1403 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, addI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 10047 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 1438 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, addI_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 10032 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 1473 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, addI_rReg_mem_0_rule, c)
@@ -1275,7 +1501,12 @@ UseIncDec
         DFA_PRODUCTION(RDI_REGI, addI_rReg_mem_0_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 10032 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 1508 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, addI_rReg_mem_rule, c)
@@ -1305,7 +1536,82 @@ UseIncDec
         DFA_PRODUCTION(RDI_REGI, addI_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 10018 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 1543 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, addI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 10004 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 1578 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, addI_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 9990 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 1613 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, addI_rReg_imm_rule, c)
@@ -1335,7 +1641,47 @@ UseIncDec
         DFA_PRODUCTION(RDI_REGI, addI_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 9976 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 1648 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, addI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, addI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, addI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, addI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, addI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, addI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, addI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, addI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 9963 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 1683 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, addI_rReg_rule, c)
@@ -1369,9 +1715,9 @@ UseIncDec
 void  State::_sub_Op_AddL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         (
-#line 12832 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 25944 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 false
-#line 1374 "dfa_x86.cpp"
+#line 1720 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
         DFA_PRODUCTION(RREGL, leaL_rReg_immL32_peep_rule, c)
@@ -1385,9 +1731,9 @@ false
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 12813 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 25925 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 false
-#line 1390 "dfa_x86.cpp"
+#line 1736 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1421,9 +1767,9 @@ false
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL__LSHIFTL_RREGL_IMMI2_RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         (
-#line 6953 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10528 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_3op_lea()
-#line 1426 "dfa_x86.cpp"
+#line 1772 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDL__LSHIFTL_RREGL_IMMI2_RREGL]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1457,9 +1803,9 @@ VM_Version::supports_fast_3op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL_RREGL__LSHIFTL_RREGL_IMMI2) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         (
-#line 6953 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10528 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_3op_lea()
-#line 1462 "dfa_x86.cpp"
+#line 1808 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDL_RREGL__LSHIFTL_RREGL_IMMI2]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1493,9 +1839,9 @@ VM_Version::supports_fast_3op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTL_RREGL_IMMI2) && STATE__VALID_CHILD(_kids[1], NO_RBP_R13_REGL) &&
         (
-#line 6940 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10515 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_2op_lea()
-#line 1498 "dfa_x86.cpp"
+#line 1844 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTL_RREGL_IMMI2]+_kids[1]->_cost[NO_RBP_R13_REGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1525,9 +1871,9 @@ VM_Version::supports_fast_2op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], NO_RBP_R13_REGL) && STATE__VALID_CHILD(_kids[1], _LSHIFTL_RREGL_IMMI2) &&
         (
-#line 6940 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10515 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_2op_lea()
-#line 1530 "dfa_x86.cpp"
+#line 1876 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[NO_RBP_R13_REGL]+_kids[1]->_cost[_LSHIFTL_RREGL_IMMI2]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1557,9 +1903,9 @@ VM_Version::supports_fast_2op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL_RREGL_RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         (
-#line 6928 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10503 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_3op_lea()
-#line 1562 "dfa_x86.cpp"
+#line 1908 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDL_RREGL_RREGL]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1593,9 +1939,9 @@ VM_Version::supports_fast_3op_lea()
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTL_RREGL_IMMI2) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         (
-#line 6915 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10490 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_fast_2op_lea()
-#line 1598 "dfa_x86.cpp"
+#line 1944 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTL_RREGL_IMMI2]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1627,11 +1973,75 @@ VM_Version::supports_fast_2op_lea()
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML_M1];
         DFA_PRODUCTION(_ADDL__LOADL_MEMORY__IMML_M1, _AddL__LoadL_memory__immL_M1_rule, c)
     }
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML_M1) &&
+        (
+#line 10462 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 1980 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML_M1]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, decL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, decL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, decL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, decL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, decL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, decL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, decL_rReg_mem_ndd_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML_M1) &&
         (
-#line 6887 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseIncDec
-#line 1634 "dfa_x86.cpp"
+#line 10448 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 2012 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML_M1]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, decL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, decL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, decL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, decL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, decL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, decL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, decL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML_M1) &&
+        (
+#line 10435 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && UseIncDec
+#line 2044 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML_M1]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -1663,22 +2073,101 @@ UseIncDec
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML1];
         DFA_PRODUCTION(_ADDL__LOADL_MEMORY__IMML1, _AddL__LoadL_memory__immL1_rule, c)
     }
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML1) &&
+        (
+#line 10407 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 2080 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML1]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, incL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, incL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, incL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, incL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, incL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, incL_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, incL_rReg_mem_ndd_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMML1) &&
         (
-#line 6859 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseIncDec
-#line 1670 "dfa_x86.cpp"
+#line 10393 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && UseIncDec
+#line 2112 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMML1]+100;
-        DFA_PRODUCTION(RREGI, incL_rReg_rule, c)
-        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
-        DFA_PRODUCTION(RAX_REGI, incL_rReg_rule, c)
-        DFA_PRODUCTION(NO_RBP_R13_REGI, incL_rReg_rule, c)
-        DFA_PRODUCTION(RBX_REGI, incL_rReg_rule, c)
-        DFA_PRODUCTION(NO_RAX_RDX_REGI, incL_rReg_rule, c)
-        DFA_PRODUCTION(RCX_REGI, incL_rReg_rule, c)
-        DFA_PRODUCTION(RDX_REGI, incL_rReg_rule, c)
-        DFA_PRODUCTION(RDI_REGI, incL_rReg_rule, c)
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, incL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, incL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, incL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, incL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, incL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, incL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, incL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML1) &&
+        (
+#line 10380 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && UseIncDec
+#line 2144 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML1]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, incL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, incL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, incL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, incL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, incL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, incL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, incL_rReg_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML32];
@@ -1692,7 +2181,76 @@ UseIncDec
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL];
         DFA_PRODUCTION(_ADDL__LOADL_MEMORY__RREGL, _AddL__LoadL_memory__rRegL_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 10337 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 2188 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, addL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, addL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, addL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, addL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, addL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, addL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, addL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 10337 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 2220 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, addL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, addL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, addL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, addL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, addL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, addL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, addL_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 10322 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 2252 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+150;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, addL_rReg_mem_0_rule, c)
@@ -1719,7 +2277,12 @@ UseIncDec
         DFA_PRODUCTION(R11_REGL, addL_rReg_mem_0_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 10322 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 2284 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, addL_rReg_mem_rule, c)
@@ -1746,7 +2309,76 @@ UseIncDec
         DFA_PRODUCTION(R11_REGL, addL_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 10308 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 2316 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, addL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, addL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, addL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, addL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, addL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, addL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, addL_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 10294 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 2348 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, addL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, addL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, addL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, addL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, addL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, addL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, addL_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 10280 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 2380 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, addL_rReg_imm_rule, c)
@@ -1773,7 +2405,44 @@ UseIncDec
         DFA_PRODUCTION(R11_REGL, addL_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 10266 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 2412 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, addL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, addL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, addL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, addL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, addL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, addL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, addL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 10252 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 2444 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, addL_rReg_rule, c)
@@ -1908,9 +2577,9 @@ void  State::_sub_Op_AddP(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP__DECODEN_RREGN___LSHIFTL__CONVI2L_RREGI__IMMI2) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3209 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5991 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0 && n->in(2)->in(3)->in(1)->as_Type()->type()->is_long()->_lo >= 0
-#line 1913 "dfa_x86.cpp"
+#line 2582 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP__DECODEN_RREGN___LSHIFTL__CONVI2L_RREGI__IMMI2]+_kids[1]->_cost[IMML32]+10;
         DFA_PRODUCTION(INDPOSINDEXSCALEOFFSETNARROW, indPosIndexScaleOffsetNarrow_rule, c)
@@ -1963,9 +2632,9 @@ CompressedOops::shift() == 0 && n->in(2)->in(3)->in(1)->as_Type()->type()->is_lo
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP__DECODEN_RREGN___CONVI2L_RREGI_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5974 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0 && n->in(2)->in(3)->as_Type()->type()->is_long()->_lo >= 0
-#line 1968 "dfa_x86.cpp"
+#line 2637 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP__DECODEN_RREGN___CONVI2L_RREGI_]+_kids[1]->_cost[IMML32]+10;
         DFA_PRODUCTION(INDPOSINDEXOFFSETNARROW, indPosIndexOffsetNarrow_rule, c)
@@ -2018,9 +2687,9 @@ CompressedOops::shift() == 0 && n->in(2)->in(3)->as_Type()->type()->is_long()->_
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP__DECODEN_RREGN___LSHIFTL_RREGL_IMMI2) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3174 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5956 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 2023 "dfa_x86.cpp"
+#line 2692 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP__DECODEN_RREGN___LSHIFTL_RREGL_IMMI2]+_kids[1]->_cost[IMML32]+10;
         DFA_PRODUCTION(INDINDEXSCALEOFFSETNARROW, indIndexScaleOffsetNarrow_rule, c)
@@ -2073,9 +2742,9 @@ CompressedOops::shift() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_RREGN_) && STATE__VALID_CHILD(_kids[1], _LSHIFTL_RREGL_IMMI2) &&
         
-#line 3157 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5939 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 2078 "dfa_x86.cpp"
+#line 2747 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_RREGN_]+_kids[1]->_cost[_LSHIFTL_RREGL_IMMI2]+10;
         DFA_PRODUCTION(INDINDEXSCALENARROW, indIndexScaleNarrow_rule, c)
@@ -2124,9 +2793,9 @@ CompressedOops::shift() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_RREGN_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         
-#line 3140 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5922 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 2129 "dfa_x86.cpp"
+#line 2798 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_RREGN_]+_kids[1]->_cost[RREGL]+10;
         DFA_PRODUCTION(INDINDEXNARROW, indIndexNarrow_rule, c)
@@ -2136,9 +2805,9 @@ CompressedOops::shift() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP__DECODEN_RREGN__RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3123 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5905 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 2141 "dfa_x86.cpp"
+#line 2810 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP__DECODEN_RREGN__RREGL]+_kids[1]->_cost[IMML32]+10;
         DFA_PRODUCTION(INDINDEXOFFSETNARROW, indIndexOffsetNarrow_rule, c)
@@ -2191,9 +2860,9 @@ CompressedOops::shift() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_RREGN_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3107 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5889 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 2196 "dfa_x86.cpp"
+#line 2865 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_RREGN_]+_kids[1]->_cost[IMML32];
         DFA_PRODUCTION(INDOFFSET32NARROW, indOffset32Narrow_rule, c)
@@ -2242,9 +2911,9 @@ CompressedOops::shift() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_RREGN_) && STATE__VALID_CHILD(_kids[1], IMML8) &&
         
-#line 3091 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5873 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 2247 "dfa_x86.cpp"
+#line 2916 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_RREGN_]+_kids[1]->_cost[IMML8];
         DFA_PRODUCTION(INDOFFSET8NARROW, indOffset8Narrow_rule, c)
@@ -2293,9 +2962,9 @@ CompressedOops::shift() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_RREGN_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3058 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5840 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::shift() == Address::times_8)
-#line 2298 "dfa_x86.cpp"
+#line 2967 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_RREGN_]+_kids[1]->_cost[IMML32]+10;
         DFA_PRODUCTION(INDCOMPRESSEDOOPOFFSET, indCompressedOopOffset_rule, c)
@@ -2344,9 +3013,9 @@ UseCompressedOops && (CompressedOops::shift() == Address::times_8)
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_ANY_REGP__LSHIFTL__CONVI2L_RREGI__IMMI2) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3041 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5807 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(3)->in(1)->as_Type()->type()->is_long()->_lo >= 0
-#line 2349 "dfa_x86.cpp"
+#line 3018 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP_ANY_REGP__LSHIFTL__CONVI2L_RREGI__IMMI2]+_kids[1]->_cost[IMML32]+10;
         DFA_PRODUCTION(INDPOSINDEXSCALEOFFSET, indPosIndexScaleOffset_rule, c)
@@ -2399,9 +3068,9 @@ n->in(2)->in(3)->in(1)->as_Type()->type()->is_long()->_lo >= 0
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_ANY_REGP__CONVI2L_RREGI_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         
-#line 3024 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5790 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(3)->as_Type()->type()->is_long()->_lo >= 0
-#line 2404 "dfa_x86.cpp"
+#line 3073 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP_ANY_REGP__CONVI2L_RREGI_]+_kids[1]->_cost[IMML32]+10;
         DFA_PRODUCTION(INDPOSINDEXOFFSET, indPosIndexOffset_rule, c)
@@ -2504,9 +3173,9 @@ n->in(2)->in(3)->as_Type()->type()->is_long()->_lo >= 0
     }
     if( STATE__VALID_CHILD(_kids[0], ANY_REGP) && STATE__VALID_CHILD(_kids[1], _LSHIFTL__CONVI2L_RREGI__IMMI2) &&
         
-#line 2991 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5757 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(3)->in(1)->as_Type()->type()->is_long()->_lo >= 0
-#line 2509 "dfa_x86.cpp"
+#line 3178 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[ANY_REGP]+_kids[1]->_cost[_LSHIFTL__CONVI2L_RREGI__IMMI2]+10;
         DFA_PRODUCTION(INDPOSINDEXSCALE, indPosIndexScale_rule, c)
@@ -2827,9 +3496,9 @@ void  State::_sub_Op_AndI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], _ADDI__LOADI_MEMORY__IMMI_M1) &&
         (
-#line 9088 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13305 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 2832 "dfa_x86.cpp"
+#line 3501 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[_ADDI__LOADI_MEMORY__IMMI_M1]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -2862,9 +3531,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI__LOADI_MEMORY__IMMI_M1) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
         (
-#line 9088 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13305 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 2867 "dfa_x86.cpp"
+#line 3536 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDI__LOADI_MEMORY__IMMI_M1]+_kids[1]->_cost[_LOADI_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -2897,9 +3566,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _ADDI_RREGI_IMMI_M1) &&
         (
-#line 9072 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13289 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 2902 "dfa_x86.cpp"
+#line 3571 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_ADDI_RREGI_IMMI_M1]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -2932,9 +3601,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI_RREGI_IMMI_M1) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 9072 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13289 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 2937 "dfa_x86.cpp"
+#line 3606 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDI_RREGI_IMMI_M1]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -2967,9 +3636,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], _SUBI_IMMI_0__LOADI_MEMORY_) &&
         (
-#line 9024 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13241 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 2972 "dfa_x86.cpp"
+#line 3641 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[_SUBI_IMMI_0__LOADI_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3002,9 +3671,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _SUBI_IMMI_0__LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
         (
-#line 9024 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13241 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3007 "dfa_x86.cpp"
+#line 3676 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[1]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_SUBI_IMMI_0__LOADI_MEMORY_]+_kids[1]->_cost[_LOADI_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3037,9 +3706,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _SUBI_IMMI_0_RREGI) &&
         (
-#line 9010 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13227 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3042 "dfa_x86.cpp"
+#line 3711 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_leaf == _kids[1]->_kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_SUBI_IMMI_0_RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3072,9 +3741,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _SUBI_IMMI_0_RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 9010 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13227 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3077 "dfa_x86.cpp"
+#line 3746 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[1]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_SUBI_IMMI_0_RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3107,9 +3776,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _XORI_RREGI_IMMI_M1) &&
         (
-#line 8996 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13213 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3112 "dfa_x86.cpp"
+#line 3781 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_XORI_RREGI_IMMI_M1]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3142,9 +3811,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _XORI_RREGI_IMMI_M1) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8996 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13213 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3147 "dfa_x86.cpp"
+#line 3816 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_XORI_RREGI_IMMI_M1]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3177,9 +3846,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], _XORI_RREGI_IMMI_M1) &&
         (
-#line 8981 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13198 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3182 "dfa_x86.cpp"
+#line 3851 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[_XORI_RREGI_IMMI_M1]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3212,9 +3881,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _XORI_RREGI_IMMI_M1) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
         (
-#line 8981 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13198 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3217 "dfa_x86.cpp"
+#line 3886 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_XORI_RREGI_IMMI_M1]+_kids[1]->_cost[_LOADI_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -3265,7 +3934,82 @@ UseBMI1Instructions
       unsigned int c = _kids[0]->_cost[_LOADB_MEMORY_]+_kids[1]->_cost[RREGI];
         DFA_PRODUCTION(_ANDI__LOADB_MEMORY__RREGI, _AndI__LoadB_memory__rRegI_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13138 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 3941 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, andI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 13138 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 3976 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, andI_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13123 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 4011 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, andI_rReg_mem_0_rule, c)
@@ -3295,7 +4039,12 @@ UseBMI1Instructions
         DFA_PRODUCTION(RDI_REGI, andI_rReg_mem_0_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 13123 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 4046 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, andI_rReg_mem_rule, c)
@@ -3325,7 +4074,82 @@ UseBMI1Instructions
         DFA_PRODUCTION(RDI_REGI, andI_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13108 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 4081 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, andI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13094 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 4116 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, andI_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13080 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 4151 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, andI_rReg_imm_rule, c)
@@ -3427,7 +4251,47 @@ UseBMI1Instructions
         DFA_PRODUCTION(RDI_REGI, andI_rReg_imm255_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13001 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 4258 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, andI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, andI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, andI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, andI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, andI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, andI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, andI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, andI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 12986 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 4293 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, andI_rReg_rule, c)
@@ -3599,9 +4463,9 @@ void  State::_sub_Op_AndL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], _ADDL__LOADL_MEMORY__IMML_M1) &&
         (
-#line 9519 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13953 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3604 "dfa_x86.cpp"
+#line 4468 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[_ADDL__LOADL_MEMORY__IMML_M1]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3631,9 +4495,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL__LOADL_MEMORY__IMML_M1) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
         (
-#line 9519 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13953 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3636 "dfa_x86.cpp"
+#line 4500 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDL__LOADL_MEMORY__IMML_M1]+_kids[1]->_cost[_LOADL_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3663,9 +4527,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _ADDL_RREGL_IMML_M1) &&
         (
-#line 9503 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13937 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3668 "dfa_x86.cpp"
+#line 4532 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_ADDL_RREGL_IMML_M1]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3695,9 +4559,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL_RREGL_IMML_M1) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 9503 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13937 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3700 "dfa_x86.cpp"
+#line 4564 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDL_RREGL_IMML_M1]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3727,9 +4591,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], _SUBL_IMML0__LOADL_MEMORY_) &&
         (
-#line 9455 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13889 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3732 "dfa_x86.cpp"
+#line 4596 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[_SUBL_IMML0__LOADL_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3759,9 +4623,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _SUBL_IMML0__LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
         (
-#line 9455 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13889 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3764 "dfa_x86.cpp"
+#line 4628 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[1]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_SUBL_IMML0__LOADL_MEMORY_]+_kids[1]->_cost[_LOADL_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3791,9 +4655,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _SUBL_IMML0_RREGL) &&
         (
-#line 9441 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13875 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3796 "dfa_x86.cpp"
+#line 4660 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_leaf == _kids[1]->_kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_SUBL_IMML0_RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3823,9 +4687,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _SUBL_IMML0_RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 9441 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13875 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3828 "dfa_x86.cpp"
+#line 4692 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[1]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_SUBL_IMML0_RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3855,9 +4719,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _XORL_RREGL_IMML_M1) &&
         (
-#line 9427 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13861 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3860 "dfa_x86.cpp"
+#line 4724 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_XORL_RREGL_IMML_M1]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3887,9 +4751,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _XORL_RREGL_IMML_M1) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 9427 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13861 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3892 "dfa_x86.cpp"
+#line 4756 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_XORL_RREGL_IMML_M1]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3919,9 +4783,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], _XORL_RREGL_IMML_M1) &&
         (
-#line 9412 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13846 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3924 "dfa_x86.cpp"
+#line 4788 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[_XORL_RREGL_IMML_M1]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3951,9 +4815,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _XORL_RREGL_IMML_M1) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
         (
-#line 9412 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13846 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 3956 "dfa_x86.cpp"
+#line 4820 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_XORL_RREGL_IMML_M1]+_kids[1]->_cost[_LOADL_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -3997,7 +4861,76 @@ UseBMI1Instructions
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL];
         DFA_PRODUCTION(_ANDL__LOADL_MEMORY__RREGL, _AndL__LoadL_memory__rRegL_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 13783 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 4868 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, andL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, andL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, andL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, andL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, andL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, andL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, andL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 13783 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 4900 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, andL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, andL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, andL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, andL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, andL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, andL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, andL_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 13768 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 4932 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+150;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, andL_rReg_mem_0_rule, c)
@@ -4024,7 +4957,12 @@ UseBMI1Instructions
         DFA_PRODUCTION(R11_REGL, andL_rReg_mem_0_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 13768 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 4964 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, andL_rReg_mem_rule, c)
@@ -4051,7 +4989,76 @@ UseBMI1Instructions
         DFA_PRODUCTION(R11_REGL, andL_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 13753 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 4996 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, andL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, andL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, andL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, andL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, andL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, andL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, andL_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 13739 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 5028 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, andL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, andL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, andL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, andL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, andL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, andL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, andL_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 13725 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 5060 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, andL_rReg_imm_rule, c)
@@ -4132,7 +5139,44 @@ UseBMI1Instructions
         DFA_PRODUCTION(R11_REGL, andL_rReg_imm255_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 13683 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 5146 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, andL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, andL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, andL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, andL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, andL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, andL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, andL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 13668 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 5178 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, andL_rReg_rule, c)
@@ -4190,9 +5234,9 @@ UseBMI1Instructions
 void  State::_sub_Op_AryEq(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RDI_REGP) && STATE__VALID_CHILD(_kids[1], RSI_REGP) &&
         (
-#line 11112 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16086 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsicNode::UU
-#line 4195 "dfa_x86.cpp"
+#line 5239 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RDI_REGP]+_kids[1]->_cost[RSI_REGP]+100;
         DFA_PRODUCTION(RAX_REGI, array_equalsC_evex_rule, c)
@@ -4207,9 +5251,9 @@ VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsic
     }
     if( STATE__VALID_CHILD(_kids[0], RDI_REGP) && STATE__VALID_CHILD(_kids[1], RSI_REGP) &&
         (
-#line 11096 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16070 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsicNode::UU
-#line 4212 "dfa_x86.cpp"
+#line 5256 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RDI_REGP]+_kids[1]->_cost[RSI_REGP]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -4242,9 +5286,9 @@ VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsic
     }
     if( STATE__VALID_CHILD(_kids[0], RDI_REGP) && STATE__VALID_CHILD(_kids[1], RSI_REGP) &&
         (
-#line 11080 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16054 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 4247 "dfa_x86.cpp"
+#line 5291 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RDI_REGP]+_kids[1]->_cost[RSI_REGP]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -4277,9 +5321,9 @@ VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsic
     }
     if( STATE__VALID_CHILD(_kids[0], RDI_REGP) && STATE__VALID_CHILD(_kids[1], RSI_REGP) &&
         (
-#line 11064 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16038 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 4282 "dfa_x86.cpp"
+#line 5326 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RDI_REGP]+_kids[1]->_cost[RSI_REGP]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -4312,9 +5356,21 @@ VM_Version::supports_avx512vlbw() && ((AryEqNode*)n)->encoding() == StrIntrinsic
     }
 }
 void  State::_sub_Op_Binary(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI_4) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI_4];
+        DFA_PRODUCTION(_BINARY_RREGL_IMMI_4, _Binary_rRegL_immI_4_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI_0) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI_0];
+        DFA_PRODUCTION(_BINARY_RREGL_IMMI_0, _Binary_rRegL_immI_0_rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], RAX_REGP) && STATE__VALID_CHILD(_kids[1], NO_RAX_REGP) ) {
       unsigned int c = _kids[0]->_cost[RAX_REGP]+_kids[1]->_cost[NO_RAX_REGP];
         DFA_PRODUCTION(_BINARY_RAX_REGP_NO_RAX_REGP, _Binary_rax_RegP_no_rax_RegP_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__];
+        DFA_PRODUCTION(_BINARY_VEC__VECTORREINTERPRET__LOADVECTOR_MEMORY__, _Binary_vec__VectorReinterpret__LoadVector_memory___rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_MEMORY__BINARY_IMMU8_KREG) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_MEMORY__BINARY_IMMU8_KREG];
@@ -4388,6 +5444,10 @@ void  State::_sub_Op_Binary(const Node *n){
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[RREGL];
         DFA_PRODUCTION(_BINARY_VEC_RREGL, _Binary_vec_rRegL_rule, c)
     }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[RREGI];
+        DFA_PRODUCTION(_BINARY_VEC_RREGI, _Binary_vec_rRegI_rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_KREG) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC_KREG];
         DFA_PRODUCTION(_BINARY_VEC__BINARY_VEC_KREG, _Binary_vec__Binary_vec_kReg_rule, c)
@@ -4396,45 +5456,13 @@ void  State::_sub_Op_Binary(const Node *n){
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC];
         DFA_PRODUCTION(_BINARY_VEC_VEC, _Binary_vec_vec_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_RREGI) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[_BINARY_VEC_RREGI];
-        DFA_PRODUCTION(_BINARY_RREGP__BINARY_VEC_RREGI, _Binary_rRegP__Binary_vec_rRegI_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], VEC) ) {
+      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[VEC];
+        DFA_PRODUCTION(_BINARY_RREGP_VEC, _Binary_rRegP_vec_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
-      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[RREGI];
-        DFA_PRODUCTION(_BINARY_VEC_RREGI, _Binary_vec_rRegI_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_IMMI_0) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[_BINARY_VEC_IMMI_0];
-        DFA_PRODUCTION(_BINARY_RREGP__BINARY_VEC_IMMI_0, _Binary_rRegP__Binary_vec_immI_0_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_0) ) {
-      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_0];
-        DFA_PRODUCTION(_BINARY_VEC_IMMI_0, _Binary_vec_immI_0_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_KREG_RREGI) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[_BINARY_KREG_RREGI];
-        DFA_PRODUCTION(_BINARY_RREGP__BINARY_KREG_RREGI, _Binary_rRegP__Binary_kReg_rRegI_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
-      unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[RREGI];
-        DFA_PRODUCTION(_BINARY_KREG_RREGI, _Binary_kReg_rRegI_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_KREG_IMMI_0) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[_BINARY_KREG_IMMI_0];
-        DFA_PRODUCTION(_BINARY_RREGP__BINARY_KREG_IMMI_0, _Binary_rRegP__Binary_kReg_immI_0_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], IMMI_0) ) {
-      unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[IMMI_0];
-        DFA_PRODUCTION(_BINARY_KREG_IMMI_0, _Binary_kReg_immI_0_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[RREGI];
-        DFA_PRODUCTION(_BINARY_RREGP_RREGI, _Binary_rRegP_rRegI_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], IMMI_0) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[IMMI_0];
-        DFA_PRODUCTION(_BINARY_RREGP_IMMI_0, _Binary_rRegP_immI_0_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], KREG) ) {
+      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[KREG];
+        DFA_PRODUCTION(_BINARY_RREGP_KREG, _Binary_rRegP_kReg_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], KREG) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[KREG];
@@ -4471,6 +5499,14 @@ void  State::_sub_Op_Binary(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RDI_REGP) && STATE__VALID_CHILD(_kids[1], RCX_REGI) ) {
       unsigned int c = _kids[0]->_cost[RDI_REGP]+_kids[1]->_cost[RCX_REGI];
         DFA_PRODUCTION(_BINARY_RDI_REGP_RCX_REGI, _Binary_rdi_RegP_rcx_RegI_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMML) && STATE__VALID_CHILD(_kids[1], RREGP) ) {
+      unsigned int c = _kids[0]->_cost[IMML]+_kids[1]->_cost[RREGP];
+        DFA_PRODUCTION(_BINARY_IMML_RREGP, _Binary_immL_rRegP_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RCX_REGL) && STATE__VALID_CHILD(_kids[1], RDI_REGP) ) {
+      unsigned int c = _kids[0]->_cost[RCX_REGL]+_kids[1]->_cost[RDI_REGP];
+        DFA_PRODUCTION(_BINARY_RCX_REGL_RDI_REGP, _Binary_rcx_RegL_rdi_RegP_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], RAX_REGN) && STATE__VALID_CHILD(_kids[1], RREGN) ) {
       unsigned int c = _kids[0]->_cost[RAX_REGN]+_kids[1]->_cost[RREGN];
@@ -4524,6 +5560,10 @@ void  State::_sub_Op_Binary(const Node *n){
       unsigned int c = _kids[0]->_cost[CMPOPUCF2]+_kids[1]->_cost[RFLAGSREGUCF];
         DFA_PRODUCTION(_BINARY_CMPOPUCF2_RFLAGSREGUCF, _Binary_cmpOpUCF2_rFlagsRegUCF_rule, c)
     }
+    if( STATE__VALID_CHILD(_kids[0], CMPOPUCFE) && STATE__VALID_CHILD(_kids[1], RFLAGSREGUCFE) ) {
+      unsigned int c = _kids[0]->_cost[CMPOPUCFE]+_kids[1]->_cost[RFLAGSREGUCFE];
+        DFA_PRODUCTION(_BINARY_CMPOPUCFE_RFLAGSREGUCFE, _Binary_cmpOpUCFE_rFlagsRegUCFE_rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], CMPOPUCF) && STATE__VALID_CHILD(_kids[1], RFLAGSREGUCF) ) {
       unsigned int c = _kids[0]->_cost[CMPOPUCF]+_kids[1]->_cost[RFLAGSREGUCF];
         DFA_PRODUCTION(_BINARY_CMPOPUCF_RFLAGSREGUCF, _Binary_cmpOpUCF_rFlagsRegUCF_rule, c)
@@ -4547,23 +5587,39 @@ void  State::_sub_Op_Binary(const Node *n){
 }
 void  State::_sub_Op_Bool(const Node *n){
     if(         
-#line 3375 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-(n->as_Bool()->_test._test == BoolTest::ne ||
+#line 6185 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+(UseAPX && VM_Version::supports_avx10_2()) &&
+            (n->as_Bool()->_test._test == BoolTest::ne ||
+             n->as_Bool()->_test._test == BoolTest::eq ||
+             n->as_Bool()->_test._test == BoolTest::lt ||
+             n->as_Bool()->_test._test == BoolTest::ge ||
+             n->as_Bool()->_test._test == BoolTest::le ||
+             n->as_Bool()->_test._test == BoolTest::gt)
+#line 5598 "dfa_x86.cpp"
+ ) {
+      unsigned int c = 0;
+        DFA_PRODUCTION(CMPOPUCFE, cmpOpUCFE_rule, c)
+    }
+    if(         
+#line 6158 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+(!UseAPX || !VM_Version::supports_avx10_2()) &&
+            (n->as_Bool()->_test._test == BoolTest::ne ||
              n->as_Bool()->_test._test == BoolTest::eq) &&
             n->in(1)->in(1) != n->in(1)->in(2)
-#line 4554 "dfa_x86.cpp"
+#line 5609 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(CMPOPUCF2, cmpOpUCF2_rule, c)
     }
     if(         
-#line 3353 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-n->as_Bool()->_test._test == BoolTest::lt ||
-            n->as_Bool()->_test._test == BoolTest::ge ||
-            n->as_Bool()->_test._test == BoolTest::le ||
-            n->as_Bool()->_test._test == BoolTest::gt ||
-            n->in(1)->in(1) == n->in(1)->in(2)
-#line 4566 "dfa_x86.cpp"
+#line 6135 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+(!UseAPX || !VM_Version::supports_avx10_2()) &&
+            (n->as_Bool()->_test._test == BoolTest::lt ||
+             n->as_Bool()->_test._test == BoolTest::ge ||
+             n->as_Bool()->_test._test == BoolTest::le ||
+             n->as_Bool()->_test._test == BoolTest::gt ||
+             n->in(1)->in(1) == n->in(1)->in(2))
+#line 5622 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(CMPOPUCF, cmpOpUCF_rule, c)
@@ -4635,9 +5691,9 @@ void  State::_sub_Op_ReverseBytesS(const Node *n){
 void  State::_sub_Op_ReverseBytesV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9801 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24471 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512bw() && Matcher::vector_length_in_bytes(n) == 64
-#line 4640 "dfa_x86.cpp"
+#line 5696 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vreverse_byte64_reg_rule, c)
@@ -4645,9 +5701,9 @@ void  State::_sub_Op_ReverseBytesV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9788 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24458 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512bw() || Matcher::vector_length_in_bytes(n) < 64
-#line 4650 "dfa_x86.cpp"
+#line 5706 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -4661,9 +5717,9 @@ VM_Version::supports_avx512bw() || Matcher::vector_length_in_bytes(n) < 64
 void  State::_sub_Op_CacheWB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) &&
         (
-#line 5462 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8469 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_data_cache_line_flush()
-#line 4666 "dfa_x86.cpp"
+#line 5722 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+100;
         DFA_PRODUCTION(UNIVERSE, cacheWB_rule, c)
@@ -4671,9 +5727,9 @@ VM_Version::supports_data_cache_line_flush()
 }
 void  State::_sub_Op_CacheWBPreSync(const Node *n){
     if(         (
-#line 5477 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8484 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_data_cache_line_flush()
-#line 4676 "dfa_x86.cpp"
+#line 5732 "dfa_x86.cpp"
 ) ) {
       unsigned int c = 100;
         DFA_PRODUCTION(UNIVERSE, cacheWBPreSync_rule, c)
@@ -4681,9 +5737,9 @@ VM_Version::supports_data_cache_line_flush()
 }
 void  State::_sub_Op_CacheWBPostSync(const Node *n){
     if(         (
-#line 5490 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8497 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_data_cache_line_flush()
-#line 4686 "dfa_x86.cpp"
+#line 5742 "dfa_x86.cpp"
 ) ) {
       unsigned int c = 100;
         DFA_PRODUCTION(UNIVERSE, cacheWBPostSync_rule, c)
@@ -4702,9 +5758,24 @@ void  State::_sub_Op_CallLeaf(const Node *n){
     }
 }
 void  State::_sub_Op_CallLeafNoFP(const Node *n){
-    {
+    if(         (
+#line 17599 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+n->as_Call()->entry_point() != nullptr
+#line 5764 "dfa_x86.cpp"
+) ) {
       unsigned int c = 300;
         DFA_PRODUCTION(UNIVERSE, CallLeafNoFPDirect_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGP) &&
+        (
+#line 17584 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+n->as_Call()->entry_point() == nullptr
+#line 5773 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGP]+300;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, CallLeafNoFPInDirect_rule, c)
+      }
     }
 }
 void  State::_sub_Op_CallLeafVector(const Node *n){
@@ -4753,30 +5824,139 @@ void  State::_sub_Op_CastFF(const Node *n){
     }
 }
 void  State::_sub_Op_CastII(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGI) ) {
-      unsigned int c = _kids[0]->_cost[RREGI];
-        DFA_PRODUCTION(RREGI, castII_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], RREGI) &&
+        (
+#line 10601 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VerifyConstraintCasts > 0
+#line 5831 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+100;
+        DFA_PRODUCTION(RREGI, castII_checked_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, castII_checked_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, castII_checked_rule, c)
+        DFA_PRODUCTION(RBX_REGI, castII_checked_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, castII_checked_rule, c)
+        DFA_PRODUCTION(RCX_REGI, castII_checked_rule, c)
+        DFA_PRODUCTION(RDX_REGI, castII_checked_rule, c)
+        DFA_PRODUCTION(RDI_REGI, castII_checked_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) &&
+        (
+#line 10589 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VerifyConstraintCasts == 0
+#line 5848 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI];
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, castII_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, castII_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, castII_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, castII_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, castII_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, castII_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, castII_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, castII_rule, c)
+      }
     }
 }
 void  State::_sub_Op_CastLL(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGL) ) {
-      unsigned int c = _kids[0]->_cost[RREGL];
-        DFA_PRODUCTION(RREGL, castLL_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], RREGL) &&
+        (
+#line 10639 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VerifyConstraintCasts > 0 && !castLL_is_imm32(n)
+#line 5885 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+100;
+        DFA_PRODUCTION(RREGL, castLL_checked_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, castLL_checked_rule, c)
+        DFA_PRODUCTION(RAX_REGL, castLL_checked_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, castLL_checked_rule, c)
+        DFA_PRODUCTION(RCX_REGL, castLL_checked_rule, c)
+        DFA_PRODUCTION(RDX_REGL, castLL_checked_rule, c)
+        DFA_PRODUCTION(R11_REGL, castLL_checked_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) &&
+        (
+#line 10626 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VerifyConstraintCasts > 0 && castLL_is_imm32(n)
+#line 5901 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, castLL_checked_L32_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, castLL_checked_L32_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, castLL_checked_L32_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, castLL_checked_L32_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, castLL_checked_L32_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, castLL_checked_L32_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, castLL_checked_L32_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) &&
+        (
+#line 10614 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VerifyConstraintCasts == 0
+#line 5933 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL];
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, castLL_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, castLL_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, castLL_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, castLL_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, castLL_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, castLL_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, castLL_rule, c)
+      }
     }
 }
 void  State::_sub_Op_CastVV(const Node *n){
@@ -4817,6 +5997,13 @@ void  State::_sub_Op_CastX2P(const Node *n){
         DFA_PRODUCTION(R15_REGP, castX2P_rule, c)
     }
 }
+void  State::_sub_Op_CastI2N(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], RREGI) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+100;
+        DFA_PRODUCTION(RREGN, castI2N_rule, c)
+        DFA_PRODUCTION(RAX_REGN, castI2N_rule, c)
+    }
+}
 void  State::_sub_Op_CastP2X(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], ANY_REGP) ) {
       unsigned int c = _kids[0]->_cost[ANY_REGP];
@@ -4840,6 +6027,33 @@ void  State::_sub_Op_CastP2X(const Node *n){
         DFA_PRODUCTION(RCX_REGL, castP2X_rule, c)
         DFA_PRODUCTION(RDX_REGL, castP2X_rule, c)
         DFA_PRODUCTION(R11_REGL, castP2X_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGN) ) {
+      unsigned int c = _kids[0]->_cost[RREGN]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, castN2X_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, castN2X_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, castN2X_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, castN2X_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, castN2X_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, castN2X_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, castN2X_rule, c)
+      }
     }
 }
 void  State::_sub_Op_CastPP(const Node *n){
@@ -4879,55 +6093,100 @@ void  State::_sub_Op_CheckCastPP(const Node *n){
     }
 }
 void  State::_sub_Op_ClearArray(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IMML) && STATE__VALID_CHILD(_kids[1], RREGP) &&
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_IMML_RREGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
         (
-#line 10722 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-!((ClearArrayNode*)n)->is_large() && (MaxVectorSize >= 32) && VM_Version::supports_avx512vl()
-#line 4886 "dfa_x86.cpp"
+#line 15695 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!((ClearArrayNode*)n)->is_large() && !((ClearArrayNode*)n)->word_copy_only() &&
+            ((MaxVectorSize >= 32) && VM_Version::supports_avx512vl())
+#line 6101 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[IMML]+_kids[1]->_cost[RREGP]+100;
+      unsigned int c = _kids[0]->_cost[_BINARY_IMML_RREGP]+_kids[1]->_cost[RAX_REGL]+100;
         DFA_PRODUCTION(UNIVERSE, rep_stos_im_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RCX_REGL) && STATE__VALID_CHILD(_kids[1], RDI_REGP) &&
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
         (
-#line 10672 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-(UseAVX > 2) && ((ClearArrayNode*)n)->is_large()
-#line 4895 "dfa_x86.cpp"
+#line 15645 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+((ClearArrayNode*)n)->is_large() && ((ClearArrayNode*)n)->word_copy_only() && (UseAVX > 2)
+#line 6110 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[RCX_REGL]+_kids[1]->_cost[RDI_REGP]+100;
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+100;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, rep_stos_large_evex_word_copy_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
+        (
+#line 15595 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+((ClearArrayNode*)n)->is_large() && !((ClearArrayNode*)n)->word_copy_only() && (UseAVX > 2)
+#line 6121 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
         DFA_PRODUCTION(UNIVERSE, rep_stos_large_evex_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RCX_REGL) && STATE__VALID_CHILD(_kids[1], RDI_REGP) &&
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
         (
-#line 10621 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-(UseAVX <=2) && ((ClearArrayNode*)n)->is_large()
-#line 4906 "dfa_x86.cpp"
+#line 15548 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+((ClearArrayNode*)n)->is_large() && ((ClearArrayNode*)n)->word_copy_only() && (UseAVX <= 2)
+#line 6132 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[RCX_REGL]+_kids[1]->_cost[RDI_REGP]+100;
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+100;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, rep_stos_large_word_copy_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
+        (
+#line 15499 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+((ClearArrayNode*)n)->is_large() && !((ClearArrayNode*)n)->word_copy_only() && (UseAVX <= 2)
+#line 6143 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
         DFA_PRODUCTION(UNIVERSE, rep_stos_large_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RCX_REGL) && STATE__VALID_CHILD(_kids[1], RDI_REGP) &&
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
         (
-#line 10560 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-!((ClearArrayNode*)n)->is_large() && (UseAVX > 2)
-#line 4917 "dfa_x86.cpp"
+#line 15438 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!((ClearArrayNode*)n)->is_large() && ((ClearArrayNode*)n)->word_copy_only() && (UseAVX > 2)
+#line 6154 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[RCX_REGL]+_kids[1]->_cost[RDI_REGP]+125;
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+125;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, rep_stos_evex_word_copy_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
+        (
+#line 15378 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!((ClearArrayNode*)n)->is_large() && !((ClearArrayNode*)n)->word_copy_only() && (UseAVX > 2)
+#line 6165 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
         DFA_PRODUCTION(UNIVERSE, rep_stos_evex_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RCX_REGL) && STATE__VALID_CHILD(_kids[1], RDI_REGP) &&
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
         (
-#line 10500 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-!((ClearArrayNode*)n)->is_large() && (UseAVX <= 2)
-#line 4928 "dfa_x86.cpp"
+#line 15321 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!((ClearArrayNode*)n)->is_large() && ((ClearArrayNode*)n)->word_copy_only() && (UseAVX <= 2)
+#line 6176 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[RCX_REGL]+_kids[1]->_cost[RDI_REGP]+100;
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+100;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, rep_stos_word_copy_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_RCX_REGL_RDI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGL) &&
+        (
+#line 15262 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!((ClearArrayNode*)n)->is_large() && !((ClearArrayNode*)n)->word_copy_only() && (UseAVX <= 2)
+#line 6187 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_RCX_REGL_RDI_REGP]+_kids[1]->_cost[RAX_REGL]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
         DFA_PRODUCTION(UNIVERSE, rep_stos_rule, c)
       }
@@ -4936,9 +6195,9 @@ void  State::_sub_Op_ClearArray(const Node *n){
 void  State::_sub_Op_CompressBits(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
         (
-#line 6828 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21456 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_int()
-#line 4941 "dfa_x86.cpp"
+#line 6200 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+100;
         DFA_PRODUCTION(RREGI, compressBitsI_mem_rule, c)
@@ -4953,9 +6212,9 @@ n->bottom_type()->isa_int()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 6808 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21436 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_int()
-#line 4958 "dfa_x86.cpp"
+#line 6217 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -4988,9 +6247,9 @@ n->bottom_type()->isa_int()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
         (
-#line 8803 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12958 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_long()
-#line 4993 "dfa_x86.cpp"
+#line 6252 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+100;
         DFA_PRODUCTION(RREGL, compressBitsL_mem_rule, c)
@@ -5004,9 +6263,9 @@ n->bottom_type()->isa_long()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 8783 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12938 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_long()
-#line 5009 "dfa_x86.cpp"
+#line 6268 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -5038,9 +6297,9 @@ n->bottom_type()->isa_long()
 void  State::_sub_Op_ExpandBits(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
         (
-#line 6838 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21466 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_int()
-#line 5043 "dfa_x86.cpp"
+#line 6302 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+100;
         DFA_PRODUCTION(RREGI, expandBitsI_mem_rule, c)
@@ -5055,9 +6314,9 @@ n->bottom_type()->isa_int()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 6818 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21446 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_int()
-#line 5060 "dfa_x86.cpp"
+#line 6319 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -5090,9 +6349,9 @@ n->bottom_type()->isa_int()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
         (
-#line 8813 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12968 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_long()
-#line 5095 "dfa_x86.cpp"
+#line 6354 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+100;
         DFA_PRODUCTION(RREGL, expandBitsL_mem_rule, c)
@@ -5106,9 +6365,9 @@ n->bottom_type()->isa_long()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 8793 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12948 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_long()
-#line 5111 "dfa_x86.cpp"
+#line 6370 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -5138,12 +6397,27 @@ n->bottom_type()->isa_long()
     }
 }
 void  State::_sub_Op_CMoveD(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD_REGD) ) {
-      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_REGD_REGD]+200;
-        DFA_PRODUCTION(REGD, cmovD_regUCF_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD_REGD) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_REGD_REGD]+200;
+        DFA_PRODUCTION(REGD, cmovD_regUCFE_rule, c)
         DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
         DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
         DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD_REGD) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_REGD_REGD]+200;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, cmovD_regUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD_REGD) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_REGD_REGD]+200;
@@ -5177,12 +6451,27 @@ void  State::_sub_Op_CMoveD(const Node *n){
     }
 }
 void  State::_sub_Op_CMoveF(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF_REGF) ) {
-      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_REGF_REGF]+200;
-        DFA_PRODUCTION(REGF, cmovF_regUCF_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF_REGF) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_REGF_REGF]+200;
+        DFA_PRODUCTION(REGF, cmovF_regUCFE_rule, c)
         DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
         DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF_REGF) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_REGF_REGF]+200;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, cmovF_regUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF_REGF) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_REGF_REGF]+200;
@@ -5216,19 +6505,89 @@ void  State::_sub_Op_CMoveF(const Node *n){
     }
 }
 void  State::_sub_Op_CMoveI(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_RREGI__LOADI_MEMORY_]+250;
+        DFA_PRODUCTION(RREGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(RBX_REGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(RDI_REGI, cmovI_rReg_rReg_memUCFE_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) &&
+        (
+#line 9365 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 6524 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGI__LOADI_MEMORY_]+250;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, cmovI_rReg_rReg_memU_ndd_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGI__LOADI_MEMORY_]+250;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, cmovI_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, cmovI_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, cmovI_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, cmovI_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, cmovI_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, cmovI_memUCF_rule, c)
+      }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) &&
+        (
+#line 9343 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 6589 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGI__LOADI_MEMORY_]+250;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, cmovI_memU_rule, c)
@@ -5258,7 +6617,47 @@ void  State::_sub_Op_CMoveI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, cmovI_memU_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) &&
+        (
+#line 9329 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 6624 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGI__LOADI_MEMORY_]+250;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, cmovI_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI__LOADI_MEMORY_) &&
+        (
+#line 9315 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 6659 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGI__LOADI_MEMORY_]+250;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, cmovI_mem_rule, c)
@@ -5290,9 +6689,9 @@ void  State::_sub_Op_CMoveI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) &&
         (
-#line 6213 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9299 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
-#line 5295 "dfa_x86.cpp"
+#line 6694 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGI_RREGI]+200;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -5325,9 +6724,9 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) &&
         (
-#line 6197 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9283 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
-#line 5330 "dfa_x86.cpp"
+#line 6729 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGI_RREGI]+200;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -5356,6 +6755,36 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
       }
       if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, cmovI_regUCF2_ne_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_RREGI_RREGI]+200;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, cmovI_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, cmovI_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, cmovI_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, cmovI_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, cmovI_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, cmovI_regUCFE_ndd_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) ) {
@@ -5388,11 +6817,46 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
         DFA_PRODUCTION(RDI_REGI, cmovI_regUCF_rule, c)
       }
     }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_IMMI_1_RREGI) &&
+        (
+#line 9250 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
+#line 6824 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_IMMI_1_RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, cmovI_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, cmovI_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, cmovI_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, cmovI_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, cmovI_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, cmovI_imm_01UCFE_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_IMMI_1_RREGI) &&
         (
-#line 6176 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9236 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
-#line 5395 "dfa_x86.cpp"
+#line 6859 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_IMMI_1_RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -5423,7 +6887,47 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
         DFA_PRODUCTION(RDI_REGI, cmovI_imm_01UCF_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) &&
+        (
+#line 9223 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 6894 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGI_RREGI]+200;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, cmovI_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, cmovI_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, cmovI_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, cmovI_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, cmovI_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, cmovI_regU_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) &&
+        (
+#line 9211 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 6929 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGI_RREGI]+200;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, cmovI_regU_rule, c)
@@ -5455,9 +6959,9 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_IMMI_1_RREGI) &&
         (
-#line 6151 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9198 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
-#line 5460 "dfa_x86.cpp"
+#line 6964 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_IMMI_1_RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -5488,7 +6992,47 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
         DFA_PRODUCTION(RDI_REGI, cmovI_imm_01U_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) &&
+        (
+#line 9185 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 6999 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGI_RREGI]+200;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, cmovI_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, cmovI_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, cmovI_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, cmovI_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, cmovI_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, cmovI_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, cmovI_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, cmovI_reg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGI_RREGI) &&
+        (
+#line 9172 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 7034 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGI_RREGI]+200;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, cmovI_reg_rule, c)
@@ -5520,9 +7064,9 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IMMI_1_RREGI) &&
         (
-#line 6125 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9158 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
-#line 5525 "dfa_x86.cpp"
+#line 7069 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_IMMI_1_RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -5555,18 +7099,82 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_int() == 0
     }
 }
 void  State::_sub_Op_CMoveL(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_RREGL__LOADL_MEMORY_]+200;
+        DFA_PRODUCTION(RREGL, cmovL_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(RAX_REGL, cmovL_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGL, cmovL_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGL, cmovL_rReg_rReg_memUCFE_ndd_rule, c)
+        DFA_PRODUCTION(R11_REGL, cmovL_rReg_rReg_memUCFE_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) &&
+        (
+#line 9809 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 7117 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGL__LOADL_MEMORY_]+200;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, cmovL_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, cmovL_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, cmovL_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, cmovL_rReg_rReg_memU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, cmovL_rReg_rReg_memU_ndd_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGL__LOADL_MEMORY_]+200;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, cmovL_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, cmovL_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, cmovL_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, cmovL_memUCF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, cmovL_memUCF_rule, c)
+      }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) &&
+        (
+#line 9787 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 7176 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGL__LOADL_MEMORY_]+200;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, cmovL_memU_rule, c)
@@ -5595,9 +7203,9 @@ void  State::_sub_Op_CMoveL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) &&
         (
-#line 6490 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9772 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
-#line 5600 "dfa_x86.cpp"
+#line 7208 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGL_RREGL]+200;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -5627,9 +7235,9 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) &&
         (
-#line 6474 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9756 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
-#line 5632 "dfa_x86.cpp"
+#line 7240 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGL_RREGL]+200;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -5655,6 +7263,33 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
       }
       if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, cmovL_regUCF2_ne_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_RREGL_RREGL]+200;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, cmovL_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, cmovL_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, cmovL_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, cmovL_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, cmovL_regUCFE_ndd_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) ) {
@@ -5684,11 +7319,43 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
         DFA_PRODUCTION(R11_REGL, cmovL_regUCF_rule, c)
       }
     }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_IMML1_RREGL) &&
+        (
+#line 9722 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
+#line 7326 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_IMML1_RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, cmovL_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, cmovL_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, cmovL_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, cmovL_imm_01UCFE_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, cmovL_imm_01UCFE_rule, c)
+      }
+    }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_IMML1_RREGL) &&
         (
-#line 6453 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9708 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
-#line 5691 "dfa_x86.cpp"
+#line 7358 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_IMML1_RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -5716,7 +7383,44 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
         DFA_PRODUCTION(R11_REGL, cmovL_imm_01UCF_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) &&
+        (
+#line 9695 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 7390 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGL_RREGL]+200;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, cmovL_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, cmovL_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, cmovL_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, cmovL_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, cmovL_regU_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) &&
+        (
+#line 9682 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 7422 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGL_RREGL]+200;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, cmovL_regU_rule, c)
@@ -5745,9 +7449,9 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_IMML1_RREGL) &&
         (
-#line 6427 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9668 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
-#line 5750 "dfa_x86.cpp"
+#line 7454 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_IMML1_RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -5775,7 +7479,44 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
         DFA_PRODUCTION(R11_REGL, cmovL_imm_01U_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) &&
+        (
+#line 9655 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 7486 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGL__LOADL_MEMORY_]+200;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, cmovL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, cmovL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, cmovL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, cmovL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, cmovL_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL__LOADL_MEMORY_) &&
+        (
+#line 9642 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 7518 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGL__LOADL_MEMORY_]+200;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, cmovL_mem_rule, c)
@@ -5802,7 +7543,44 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
         DFA_PRODUCTION(R11_REGL, cmovL_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) &&
+        (
+#line 9629 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 7550 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGL_RREGL]+200;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, cmovL_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, cmovL_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, cmovL_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, cmovL_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, cmovL_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, cmovL_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, cmovL_reg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_RREGL) &&
+        (
+#line 9616 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 7582 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGL_RREGL]+200;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, cmovL_reg_rule, c)
@@ -5831,9 +7609,9 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IMML1_RREGL) &&
         (
-#line 6389 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9602 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
-#line 5836 "dfa_x86.cpp"
+#line 7614 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_IMML1_RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -5865,9 +7643,9 @@ n->in(2)->in(2)->is_Con() && n->in(2)->in(2)->get_long() == 0
 void  State::_sub_Op_CMoveP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) &&
         (
-#line 6374 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9587 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
-#line 5870 "dfa_x86.cpp"
+#line 7648 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGP_RREGP]+200;
         DFA_PRODUCTION(RREGP, cmovP_regUCF2_eq_rule, c)
@@ -5886,9 +7664,9 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) &&
         (
-#line 6358 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9571 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
-#line 5891 "dfa_x86.cpp"
+#line 7669 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGP_RREGP]+200;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
@@ -5929,6 +7707,48 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
       }
       if (STATE__NOT_YET_VALID(R15_REGP) || _cost[R15_REGP] > c) {
         DFA_PRODUCTION(R15_REGP, cmovP_regUCF2_ne_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_RREGP_RREGP]+200;
+      if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
+        DFA_PRODUCTION(RREGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+100) {
+        DFA_PRODUCTION(STACKSLOTP, storeSSP_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(ANY_REGP) || _cost[ANY_REGP] > c) {
+        DFA_PRODUCTION(ANY_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c) {
+        DFA_PRODUCTION(INDIRECT, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
+        DFA_PRODUCTION(MEMORY, indirect_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGP) || _cost[RAX_REGP] > c) {
+        DFA_PRODUCTION(RAX_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGP) || _cost[RBX_REGP] > c) {
+        DFA_PRODUCTION(RBX_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_REGP) || _cost[NO_RBP_REGP] > c) {
+        DFA_PRODUCTION(NO_RBP_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_REGP) || _cost[NO_RAX_REGP] > c) {
+        DFA_PRODUCTION(NO_RAX_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RSI_REGP) || _cost[RSI_REGP] > c) {
+        DFA_PRODUCTION(RSI_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBP_REGP) || _cost[RBP_REGP] > c) {
+        DFA_PRODUCTION(RBP_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGP) || _cost[RDI_REGP] > c) {
+        DFA_PRODUCTION(RDI_REGP, cmovP_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R15_REGP) || _cost[R15_REGP] > c) {
+        DFA_PRODUCTION(R15_REGP, cmovP_regUCFE_ndd_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) ) {
@@ -5973,7 +7793,59 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
         DFA_PRODUCTION(R15_REGP, cmovP_regUCF_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) &&
+        (
+#line 9539 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 7800 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGP_RREGP]+200;
+      if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
+        DFA_PRODUCTION(RREGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+100) {
+        DFA_PRODUCTION(STACKSLOTP, storeSSP_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(ANY_REGP) || _cost[ANY_REGP] > c) {
+        DFA_PRODUCTION(ANY_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c) {
+        DFA_PRODUCTION(INDIRECT, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
+        DFA_PRODUCTION(MEMORY, indirect_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGP) || _cost[RAX_REGP] > c) {
+        DFA_PRODUCTION(RAX_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGP) || _cost[RBX_REGP] > c) {
+        DFA_PRODUCTION(RBX_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_REGP) || _cost[NO_RBP_REGP] > c) {
+        DFA_PRODUCTION(NO_RBP_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_REGP) || _cost[NO_RAX_REGP] > c) {
+        DFA_PRODUCTION(NO_RAX_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RSI_REGP) || _cost[RSI_REGP] > c) {
+        DFA_PRODUCTION(RSI_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBP_REGP) || _cost[RBP_REGP] > c) {
+        DFA_PRODUCTION(RBP_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGP) || _cost[RDI_REGP] > c) {
+        DFA_PRODUCTION(RDI_REGP, cmovP_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R15_REGP) || _cost[R15_REGP] > c) {
+        DFA_PRODUCTION(R15_REGP, cmovP_regU_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) &&
+        (
+#line 9525 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 7847 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGP_RREGP]+200;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
         DFA_PRODUCTION(RREGP, cmovP_regU_rule, c)
@@ -6015,7 +7887,59 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
         DFA_PRODUCTION(R15_REGP, cmovP_regU_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) &&
+        (
+#line 9511 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 7894 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGP_RREGP]+200;
+      if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
+        DFA_PRODUCTION(RREGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+100) {
+        DFA_PRODUCTION(STACKSLOTP, storeSSP_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(ANY_REGP) || _cost[ANY_REGP] > c) {
+        DFA_PRODUCTION(ANY_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c) {
+        DFA_PRODUCTION(INDIRECT, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
+        DFA_PRODUCTION(MEMORY, indirect_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGP) || _cost[RAX_REGP] > c) {
+        DFA_PRODUCTION(RAX_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGP) || _cost[RBX_REGP] > c) {
+        DFA_PRODUCTION(RBX_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_REGP) || _cost[NO_RBP_REGP] > c) {
+        DFA_PRODUCTION(NO_RBP_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_REGP) || _cost[NO_RAX_REGP] > c) {
+        DFA_PRODUCTION(NO_RAX_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RSI_REGP) || _cost[RSI_REGP] > c) {
+        DFA_PRODUCTION(RSI_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBP_REGP) || _cost[RBP_REGP] > c) {
+        DFA_PRODUCTION(RBP_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGP) || _cost[RDI_REGP] > c) {
+        DFA_PRODUCTION(RDI_REGP, cmovP_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R15_REGP) || _cost[R15_REGP] > c) {
+        DFA_PRODUCTION(R15_REGP, cmovP_reg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGP) &&
+        (
+#line 9497 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 7941 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGP_RREGP]+200;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
         DFA_PRODUCTION(RREGP, cmovP_reg_rule, c)
@@ -6061,9 +7985,9 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
 void  State::_sub_Op_CMoveN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) &&
         (
-#line 6310 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9481 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
-#line 6066 "dfa_x86.cpp"
+#line 7990 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGN_RREGN]+200;
         DFA_PRODUCTION(RREGN, cmovN_regUCF2_eq_rule, c)
@@ -6071,9 +7995,9 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::eq
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF2_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) &&
         (
-#line 6294 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9465 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
-#line 6076 "dfa_x86.cpp"
+#line 8000 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCF2_RFLAGSREGUCF]+_kids[1]->_cost[_BINARY_RREGN_RREGN]+200;
       if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
@@ -6081,6 +8005,29 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
       }
       if (STATE__NOT_YET_VALID(RAX_REGN) || _cost[RAX_REGN] > c) {
         DFA_PRODUCTION(RAX_REGN, cmovN_regUCF2_ne_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCFE_RFLAGSREGUCFE) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPUCFE_RFLAGSREGUCFE]+_kids[1]->_cost[_BINARY_RREGN_RREGN]+200;
+      if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
+        DFA_PRODUCTION(RREGN, cmovN_regUCFE_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGN) || _cost[RAX_REGN] > c) {
+        DFA_PRODUCTION(RAX_REGN, cmovN_regUCFE_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) &&
+        (
+#line 9442 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 8023 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGN_RREGN]+200;
+      if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
+        DFA_PRODUCTION(RREGN, cmovN_regU_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGN) || _cost[RAX_REGN] > c) {
+        DFA_PRODUCTION(RAX_REGN, cmovN_regU_ndd_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPUCF_RFLAGSREGUCF) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) ) {
@@ -6092,7 +8039,12 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
         DFA_PRODUCTION(RAX_REGN, cmovN_regUCF_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPU_RFLAGSREGU) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) &&
+        (
+#line 9419 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 8046 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPU_RFLAGSREGU]+_kids[1]->_cost[_BINARY_RREGN_RREGN]+200;
       if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
         DFA_PRODUCTION(RREGN, cmovN_regU_rule, c)
@@ -6101,7 +8053,26 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
         DFA_PRODUCTION(RAX_REGN, cmovN_regU_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) &&
+        (
+#line 9405 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 8060 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGN_RREGN]+200;
+      if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
+        DFA_PRODUCTION(RREGN, cmovN_reg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGN) || _cost[RAX_REGN] > c) {
+        DFA_PRODUCTION(RAX_REGN, cmovN_reg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_RFLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGN_RREGN) &&
+        (
+#line 9391 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 8074 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_RFLAGSREG]+_kids[1]->_cost[_BINARY_RREGN_RREGN]+200;
       if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
         DFA_PRODUCTION(RREGN, cmovN_reg_rule, c)
@@ -6114,20 +8085,20 @@ n->in(1)->in(1)->as_Bool()->_test._test == BoolTest::ne
 void  State::_sub_Op_CmpN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADN_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMN0) &&
         (
-#line 11751 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16725 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::base() == nullptr &&
             n->in(1)->as_Load()->barrier_data() == 0
-#line 6120 "dfa_x86.cpp"
+#line 8091 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADN_MEMORY_]+_kids[1]->_cost[IMMN0]+100;
         DFA_PRODUCTION(RFLAGSREG, testN_mem_reg0_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADN_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMN0) &&
         (
-#line 11737 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16711 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::base() != nullptr &&
             n->in(1)->as_Load()->barrier_data() == 0
-#line 6130 "dfa_x86.cpp"
+#line 8101 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADN_MEMORY_]+_kids[1]->_cost[IMMN0]+500;
       if (STATE__NOT_YET_VALID(RFLAGSREG) || _cost[RFLAGSREG] > c) {
@@ -6142,9 +8113,9 @@ CompressedOops::base() != nullptr &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMNKLASS) && STATE__VALID_CHILD(_kids[1], _LOADNKLASS_MEMORY_) &&
         (
-#line 11717 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16691 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseCompactObjectHeaders
-#line 6147 "dfa_x86.cpp"
+#line 8118 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMNKLASS]+_kids[1]->_cost[_LOADNKLASS_MEMORY_]+100;
         DFA_PRODUCTION(RFLAGSREGU, compN_mem_imm_klass_rule, c)
@@ -6157,9 +8128,9 @@ CompressedOops::base() != nullptr &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMN) && STATE__VALID_CHILD(_kids[1], _LOADN_MEMORY_) &&
         (
-#line 11695 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16669 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->as_Load()->barrier_data() == 0
-#line 6162 "dfa_x86.cpp"
+#line 8133 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMN]+_kids[1]->_cost[_LOADN_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGU) || _cost[RFLAGSREGU] > c) {
@@ -6174,9 +8145,9 @@ n->in(2)->as_Load()->barrier_data() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], RREGN) && STATE__VALID_CHILD(_kids[1], _LOADN_MEMORY_) &&
         (
-#line 11673 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16647 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->as_Load()->barrier_data() == 0
-#line 6179 "dfa_x86.cpp"
+#line 8150 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGN]+_kids[1]->_cost[_LOADN_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGU) || _cost[RFLAGSREGU] > c) {
@@ -6193,7 +8164,17 @@ n->in(2)->as_Load()->barrier_data() == 0
 void  State::_sub_Op_CmpD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+100;
+        DFA_PRODUCTION(RFLAGSREGUCFE, cmpD_cc_immCFE_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+100;
         DFA_PRODUCTION(RFLAGSREGUCF, cmpD_cc_immCF_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+100;
+      if (STATE__NOT_YET_VALID(RFLAGSREGUCFE) || _cost[RFLAGSREGUCFE] > c) {
+        DFA_PRODUCTION(RFLAGSREGUCFE, cmpD_cc_memCFE_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+100;
@@ -6203,8 +8184,14 @@ void  State::_sub_Op_CmpD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+100;
+      if (STATE__NOT_YET_VALID(RFLAGSREGUCFE) || _cost[RFLAGSREGUCFE] > c) {
+        DFA_PRODUCTION(RFLAGSREGUCFE, cmpD_cc_regCFE_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGUCF) || _cost[RFLAGSREGUCF] > c) {
-        DFA_PRODUCTION(RFLAGSREGUCF, cmpD_cc_reg_CF_rule, c)
+        DFA_PRODUCTION(RFLAGSREGUCF, cmpD_cc_regCF_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
@@ -6289,7 +8276,17 @@ void  State::_sub_Op_CmpD3(const Node *n){
 void  State::_sub_Op_CmpF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+100;
+        DFA_PRODUCTION(RFLAGSREGUCFE, cmpF_cc_immCFE_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+100;
         DFA_PRODUCTION(RFLAGSREGUCF, cmpF_cc_immCF_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+100;
+      if (STATE__NOT_YET_VALID(RFLAGSREGUCFE) || _cost[RFLAGSREGUCFE] > c) {
+        DFA_PRODUCTION(RFLAGSREGUCFE, cmpF_cc_memCFE_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+100;
@@ -6299,8 +8296,14 @@ void  State::_sub_Op_CmpF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(RFLAGSREGUCFE) || _cost[RFLAGSREGUCFE] > c) {
+        DFA_PRODUCTION(RFLAGSREGUCFE, cmpF_cc_regCFE_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGUCF) || _cost[RFLAGSREGUCF] > c) {
-        DFA_PRODUCTION(RFLAGSREGUCF, cmpF_cc_reg_CF_rule, c)
+        DFA_PRODUCTION(RFLAGSREGUCF, cmpF_cc_regCF_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
@@ -6573,19 +8576,19 @@ void  State::_sub_Op_CmpLTMask(const Node *n){
 void  State::_sub_Op_CmpP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADP_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMP0) &&
         (
-#line 137 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 141 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->in(1)->as_Load()->barrier_data() != 0
-#line 6578 "dfa_x86.cpp"
+#line 8581 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADP_MEMORY_]+_kids[1]->_cost[IMMP0]+500;
         DFA_PRODUCTION(RFLAGSREG, zLoadPNullCheck_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADP_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMP0) &&
         (
-#line 11651 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16625 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr) &&
             n->in(1)->as_Load()->barrier_data() == 0
-#line 6588 "dfa_x86.cpp"
+#line 8591 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADP_MEMORY_]+_kids[1]->_cost[IMMP0]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREG) || _cost[RFLAGSREG] > c) {
@@ -6594,10 +8597,10 @@ UseCompressedOops && (CompressedOops::base() == nullptr) &&
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADP_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMP0) &&
         (
-#line 11637 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16611 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (!UseCompressedOops || (CompressedOops::base() != nullptr)) &&
             n->in(1)->as_Load()->barrier_data() == 0
-#line 6600 "dfa_x86.cpp"
+#line 8603 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADP_MEMORY_]+_kids[1]->_cost[IMMP0]+500;
       if (STATE__NOT_YET_VALID(RFLAGSREG) || _cost[RFLAGSREG] > c) {
@@ -6612,19 +8615,19 @@ UseCompressedOops && (CompressedOops::base() == nullptr) &&
     }
     if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], _LOADP_MEMORY_) &&
         (
-#line 11609 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16583 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->in(2)->bottom_type()->reloc() == relocInfo::none &&
             n->in(2)->as_Load()->barrier_data() == 0
-#line 6618 "dfa_x86.cpp"
+#line 8621 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[_LOADP_MEMORY_]+100;
         DFA_PRODUCTION(RFLAGSREGU, compP_mem_rReg_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], _LOADP_MEMORY_) &&
         (
-#line 11593 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16567 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->as_Load()->barrier_data() == 0
-#line 6627 "dfa_x86.cpp"
+#line 8630 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[_LOADP_MEMORY_]+500;
       if (STATE__NOT_YET_VALID(RFLAGSREGU) || _cost[RFLAGSREGU] > c) {
@@ -6773,9 +8776,9 @@ void  State::_sub_Op_CompareAndSwapL(const Node *n){
 void  State::_sub_Op_CompareAndSwapP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 225 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 331 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 6778 "dfa_x86.cpp"
+#line 8781 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
         DFA_PRODUCTION(RREGI, g1CompareAndSwapP_rule, c)
@@ -6790,9 +8793,9 @@ UseG1GC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 215 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->as_LoadStore()->barrier_data() != 0
-#line 6795 "dfa_x86.cpp"
+#line 8798 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -6825,9 +8828,9 @@ UseZGC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 7073 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10689 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 6830 "dfa_x86.cpp"
+#line 8833 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -6862,9 +8865,9 @@ n->as_LoadStore()->barrier_data() == 0
 void  State::_sub_Op_CompareAndSwapN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGN_RREGN) &&
         (
-#line 257 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 362 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 6867 "dfa_x86.cpp"
+#line 8870 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGN_RREGN]+100;
         DFA_PRODUCTION(RREGI, g1CompareAndSwapN_rule, c)
@@ -6879,9 +8882,9 @@ UseG1GC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGN_RREGN) &&
         (
-#line 7173 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10789 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 6884 "dfa_x86.cpp"
+#line 8887 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RAX_REGN_RREGN]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -6972,9 +8975,9 @@ void  State::_sub_Op_WeakCompareAndSwapL(const Node *n){
 void  State::_sub_Op_WeakCompareAndSwapP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 225 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 331 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 6977 "dfa_x86.cpp"
+#line 8980 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
         DFA_PRODUCTION(RREGI, g1CompareAndSwapP_0_rule, c)
@@ -6989,9 +8992,9 @@ UseG1GC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 215 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->as_LoadStore()->barrier_data() != 0
-#line 6994 "dfa_x86.cpp"
+#line 8997 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -7024,9 +9027,9 @@ UseZGC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 7073 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10689 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 7029 "dfa_x86.cpp"
+#line 9032 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -7061,9 +9064,9 @@ n->as_LoadStore()->barrier_data() == 0
 void  State::_sub_Op_WeakCompareAndSwapN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGN_RREGN) &&
         (
-#line 257 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 362 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 7066 "dfa_x86.cpp"
+#line 9069 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGN_RREGN]+100;
         DFA_PRODUCTION(RREGI, g1CompareAndSwapN_0_rule, c)
@@ -7078,9 +9081,9 @@ UseG1GC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGN_RREGN) &&
         (
-#line 7173 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10789 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 7083 "dfa_x86.cpp"
+#line 9086 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RAX_REGN_RREGN]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -7170,9 +9173,9 @@ void  State::_sub_Op_CompareAndExchangeL(const Node *n){
 void  State::_sub_Op_CompareAndExchangeP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 169 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 277 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 7175 "dfa_x86.cpp"
+#line 9178 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
         DFA_PRODUCTION(RAX_REGP, g1CompareAndExchangeP_rule, c)
@@ -7191,9 +9194,9 @@ UseG1GC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_NO_RAX_REGP) &&
         (
-#line 188 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 192 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->as_LoadStore()->barrier_data() != 0
-#line 7196 "dfa_x86.cpp"
+#line 9199 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGP_NO_RAX_REGP]+100;
       if (STATE__NOT_YET_VALID(RAX_REGP) || _cost[RAX_REGP] > c) {
@@ -7238,9 +9241,9 @@ UseZGC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_RREGP) &&
         (
-#line 7279 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10895 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 7243 "dfa_x86.cpp"
+#line 9246 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RAX_REGP_RREGP]+100;
       if (STATE__NOT_YET_VALID(RAX_REGP) || _cost[RAX_REGP] > c) {
@@ -7287,18 +9290,18 @@ n->as_LoadStore()->barrier_data() == 0
 void  State::_sub_Op_CompareAndExchangeN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGN_RREGN) &&
         (
-#line 198 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 305 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 7292 "dfa_x86.cpp"
+#line 9295 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RAX_REGN_RREGN]+100;
         DFA_PRODUCTION(RAX_REGN, g1CompareAndExchangeN_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGN_RREGN) &&
         (
-#line 7261 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10877 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 7301 "dfa_x86.cpp"
+#line 9304 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RAX_REGN_RREGN]+100;
       if (STATE__NOT_YET_VALID(RAX_REGN) || _cost[RAX_REGN] > c) {
@@ -7309,9 +9312,9 @@ n->as_LoadStore()->barrier_data() == 0
 void  State::_sub_Op_GetAndAddB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 7317 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10933 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_LoadStore()->result_not_used()
-#line 7314 "dfa_x86.cpp"
+#line 9317 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGI]+100;
         DFA_PRODUCTION(RREGI, xaddB_rule, c)
@@ -7326,18 +9329,18 @@ void  State::_sub_Op_GetAndAddB(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 7305 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10921 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->result_not_used()
-#line 7331 "dfa_x86.cpp"
+#line 9334 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(UNIVERSE, xaddB_imm_no_res_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 7293 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10909 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->result_not_used()
-#line 7340 "dfa_x86.cpp"
+#line 9343 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -7348,9 +9351,9 @@ n->as_LoadStore()->result_not_used()
 void  State::_sub_Op_GetAndAddS(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 7353 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10969 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_LoadStore()->result_not_used()
-#line 7353 "dfa_x86.cpp"
+#line 9356 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGI]+100;
         DFA_PRODUCTION(RREGI, xaddS_rule, c)
@@ -7365,18 +9368,18 @@ void  State::_sub_Op_GetAndAddS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 7341 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10957 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseStoreImmI16 && n->as_LoadStore()->result_not_used()
-#line 7370 "dfa_x86.cpp"
+#line 9373 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(UNIVERSE, xaddS_imm_no_res_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 7329 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10945 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->result_not_used()
-#line 7379 "dfa_x86.cpp"
+#line 9382 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -7387,9 +9390,9 @@ n->as_LoadStore()->result_not_used()
 void  State::_sub_Op_GetAndAddI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 7389 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 11005 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_LoadStore()->result_not_used()
-#line 7392 "dfa_x86.cpp"
+#line 9395 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGI]+100;
         DFA_PRODUCTION(RREGI, xaddI_rule, c)
@@ -7404,18 +9407,18 @@ void  State::_sub_Op_GetAndAddI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 7377 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10993 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->result_not_used()
-#line 7409 "dfa_x86.cpp"
+#line 9412 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(UNIVERSE, xaddI_imm_no_res_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 7365 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10981 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->result_not_used()
-#line 7418 "dfa_x86.cpp"
+#line 9421 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -7426,9 +9429,9 @@ n->as_LoadStore()->result_not_used()
 void  State::_sub_Op_GetAndAddL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 7425 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 11041 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_LoadStore()->result_not_used()
-#line 7431 "dfa_x86.cpp"
+#line 9434 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGL]+100;
         DFA_PRODUCTION(RREGL, xaddL_rule, c)
@@ -7442,18 +9445,18 @@ void  State::_sub_Op_GetAndAddL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMML32) &&
         (
-#line 7413 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 11029 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->result_not_used()
-#line 7447 "dfa_x86.cpp"
+#line 9450 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMML32]+100;
         DFA_PRODUCTION(UNIVERSE, xaddL_imm_no_res_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 7401 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 11017 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->result_not_used()
-#line 7456 "dfa_x86.cpp"
+#line 9459 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -7519,9 +9522,9 @@ void  State::_sub_Op_GetAndSetL(const Node *n){
 void  State::_sub_Op_GetAndSetP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], RREGP) &&
         (
-#line 290 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 394 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 7524 "dfa_x86.cpp"
+#line 9527 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[RREGP]+100;
         DFA_PRODUCTION(RREGP, g1GetAndSetP_rule, c)
@@ -7540,9 +9543,9 @@ UseG1GC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], RREGP) &&
         (
-#line 233 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 237 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->as_LoadStore()->barrier_data() != 0
-#line 7545 "dfa_x86.cpp"
+#line 9548 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[RREGP]+100;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
@@ -7587,9 +9590,9 @@ UseZGC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGP) &&
         (
-#line 7474 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 11090 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 7592 "dfa_x86.cpp"
+#line 9595 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGP]+100;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
@@ -7636,9 +9639,9 @@ n->as_LoadStore()->barrier_data() == 0
 void  State::_sub_Op_GetAndSetN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], RREGN) &&
         (
-#line 314 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 417 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_LoadStore()->barrier_data() != 0
-#line 7641 "dfa_x86.cpp"
+#line 9644 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[RREGN]+100;
         DFA_PRODUCTION(RREGN, g1GetAndSetN_rule, c)
@@ -7646,9 +9649,9 @@ UseG1GC && n->as_LoadStore()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGN) &&
         (
-#line 7483 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 11099 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_LoadStore()->barrier_data() == 0
-#line 7651 "dfa_x86.cpp"
+#line 9654 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGN]+100;
       if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
@@ -7661,9 +9664,9 @@ n->as_LoadStore()->barrier_data() == 0
 }
 void  State::_sub_Op_ConN(const Node *n){
     if(         
-#line 2227 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4984 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->get_narrowcon() == 0
-#line 7666 "dfa_x86.cpp"
+#line 9669 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMN0, immN0_rule, c)
@@ -7707,9 +9710,9 @@ void  State::_sub_Op_ConD(const Node *n){
         DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+125+95)
     }
     if(         
-#line 2398 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5155 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 jlong_cast(n->getd()) == 0
-#line 7712 "dfa_x86.cpp"
+#line 9715 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMD0, immD0_rule, c)
@@ -7755,9 +9758,9 @@ void  State::_sub_Op_ConF(const Node *n){
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+125+95)
     }
     if(         
-#line 2367 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5124 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 jint_cast(n->getf()) == 0
-#line 7760 "dfa_x86.cpp"
+#line 9763 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMF0, immF0_rule, c)
@@ -7782,138 +9785,138 @@ jint_cast(n->getf()) == 0
 void  State::_sub_Op_ConI(const Node *n){
     int _n_get_int__ = n->get_int();
     if(         
-#line 2450 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5207 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 65535
-#line 7787 "dfa_x86.cpp"
+#line 9790 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_65535, immI_65535_rule, c)
     }
     if(         
-#line 2440 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5197 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 255
-#line 7795 "dfa_x86.cpp"
+#line 9798 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_255, immI_255_rule, c)
     }
     if(         
-#line 2430 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5187 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 24
-#line 7803 "dfa_x86.cpp"
+#line 9806 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_24, immI_24_rule, c)
     }
     if(         
-#line 2421 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5178 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 16
-#line 7811 "dfa_x86.cpp"
+#line 9814 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_16, immI_16_rule, c)
     }
     if(         
-#line 2355 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5112 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (_n_get_int__ > 0)
             && is_power_of_2((juint)n->get_int() + 1)
-#line 7820 "dfa_x86.cpp"
+#line 9823 "dfa_x86.cpp"
  ) {
       unsigned int c = 20;
         DFA_PRODUCTION(IMMI_POW2M1, immI_Pow2M1_rule, c)
     }
     if(         
-#line 2179 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4936 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ >= 0
-#line 7828 "dfa_x86.cpp"
+#line 9831 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMU31, immU31_rule, c)
     }
     if(         
-#line 2168 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4925 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (-32768 <= _n_get_int__) && (_n_get_int__ <= 32767)
-#line 7836 "dfa_x86.cpp"
+#line 9839 "dfa_x86.cpp"
  ) {
       unsigned int c = 10;
         DFA_PRODUCTION(IMMI16, immI16_rule, c)
     }
     if(         
-#line 2158 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4915 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (0 <= _n_get_int__) && (_n_get_int__ <= 255)
-#line 7844 "dfa_x86.cpp"
+#line 9847 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMU8, immU8_rule, c)
     }
     if(         
-#line 2148 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4905 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (-0x80 <= _n_get_int__) && (_n_get_int__ < 0x80)
-#line 7852 "dfa_x86.cpp"
+#line 9855 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMI8, immI8_rule, c)
     }
     if(         
-#line 2138 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4895 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (0 <= _n_get_int__) && (_n_get_int__ <= 0x7F)
-#line 7860 "dfa_x86.cpp"
+#line 9863 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMU7, immU7_rule, c)
     }
     if(         
-#line 2129 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4886 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 0 <= _n_get_int__ && (_n_get_int__ <= 3)
-#line 7868 "dfa_x86.cpp"
+#line 9871 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI2, immI2_rule, c)
     }
     if(         
-#line 2118 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4875 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 8
-#line 7876 "dfa_x86.cpp"
+#line 9879 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_8, immI_8_rule, c)
     }
     if(         
-#line 2108 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4865 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 4
-#line 7884 "dfa_x86.cpp"
+#line 9887 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_4, immI_4_rule, c)
     }
     if(         
-#line 2098 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4855 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 2
-#line 7892 "dfa_x86.cpp"
+#line 9895 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_2, immI_2_rule, c)
     }
     if(         
-#line 2088 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4845 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == -1
-#line 7900 "dfa_x86.cpp"
+#line 9903 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_M1, immI_M1_rule, c)
     }
     if(         
-#line 2077 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4834 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 1
-#line 7908 "dfa_x86.cpp"
+#line 9911 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_1, immI_1_rule, c)
     }
     if(         
-#line 2066 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4823 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_int__ == 0
-#line 7916 "dfa_x86.cpp"
+#line 9919 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMMI_0, immI_0_rule, c)
@@ -7989,49 +9992,49 @@ _n_get_int__ == 0
 void  State::_sub_Op_ConL(const Node *n){
     jlong _n_get_long__ = n->get_long();
     if(         
-#line 2470 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5227 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == 65535
-#line 7994 "dfa_x86.cpp"
+#line 9997 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMML_65535, immL_65535_rule, c)
     }
     if(         
-#line 2460 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5217 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == 255
-#line 8002 "dfa_x86.cpp"
+#line 10005 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMML_255, immL_255_rule, c)
     }
     if(         
-#line 2344 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5101 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == 0xFFFFFFFFL
-#line 8010 "dfa_x86.cpp"
+#line 10013 "dfa_x86.cpp"
  ) {
       unsigned int c = 20;
         DFA_PRODUCTION(IMML_32BITS, immL_32bits_rule, c)
     }
     if(         
-#line 2334 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5091 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == -1
-#line 8018 "dfa_x86.cpp"
+#line 10021 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMML_M1, immL_M1_rule, c)
     }
     if(         
-#line 2324 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5081 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == 1
-#line 8026 "dfa_x86.cpp"
+#line 10029 "dfa_x86.cpp"
  ) {
       unsigned int c = 0;
         DFA_PRODUCTION(IMML1, immL1_rule, c)
     }
     if(         
-#line 2313 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5070 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == 0L
-#line 8034 "dfa_x86.cpp"
+#line 10037 "dfa_x86.cpp"
  ) {
       unsigned int c = 10;
         DFA_PRODUCTION(IMML0, immL0_rule, c)
@@ -8045,25 +10048,25 @@ _n_get_long__ == 0L
         DFA_PRODUCTION(R11_REGL, loadConL0_rule, c+50)
     }
     if(         
-#line 2302 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5059 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_power_of_2((julong)~n->get_long())
-#line 8050 "dfa_x86.cpp"
+#line 10053 "dfa_x86.cpp"
  ) {
       unsigned int c = 15;
         DFA_PRODUCTION(IMML_NOTPOW2, immL_NotPow2_rule, c)
     }
     if(         
-#line 2292 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5049 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_power_of_2((julong)n->get_long())
-#line 8058 "dfa_x86.cpp"
+#line 10061 "dfa_x86.cpp"
  ) {
       unsigned int c = 15;
         DFA_PRODUCTION(IMML_POW2, immL_Pow2_rule, c)
     }
     if(         
-#line 2282 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5039 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == (int) (_n_get_long__)
-#line 8066 "dfa_x86.cpp"
+#line 10069 "dfa_x86.cpp"
  ) {
       unsigned int c = 15;
         DFA_PRODUCTION(IMML32, immL32_rule, c)
@@ -8093,9 +10096,9 @@ _n_get_long__ == (int) (_n_get_long__)
       }
     }
     if(         
-#line 2271 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5028 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 _n_get_long__ == (unsigned int) (_n_get_long__)
-#line 8098 "dfa_x86.cpp"
+#line 10101 "dfa_x86.cpp"
  ) {
       unsigned int c = 10;
         DFA_PRODUCTION(IMMUL32, immUL32_rule, c)
@@ -8125,9 +10128,9 @@ _n_get_long__ == (unsigned int) (_n_get_long__)
       }
     }
     if(         
-#line 2260 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5017 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 -0x80L <= _n_get_long__ && _n_get_long__ < 0x80L
-#line 8130 "dfa_x86.cpp"
+#line 10133 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMML8, immL8_rule, c)
@@ -8187,10 +10190,10 @@ _n_get_long__ == (unsigned int) (_n_get_long__)
 }
 void  State::_sub_Op_ConP(const Node *n){
     if(         
-#line 2237 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4994 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Type()->type()->reloc() == relocInfo::none
             && (n->get_ptr() >> 31) == 0
-#line 8193 "dfa_x86.cpp"
+#line 10196 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMP31, immP31_rule, c)
@@ -8209,9 +10212,9 @@ n->as_Type()->type()->reloc() == relocInfo::none
         DFA_PRODUCTION(R15_REGP, loadConP31_rule, c+60)
     }
     if(         
-#line 2200 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 4957 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->get_ptr() == 0
-#line 8214 "dfa_x86.cpp"
+#line 10217 "dfa_x86.cpp"
  ) {
       unsigned int c = 5;
         DFA_PRODUCTION(IMMP0, immP0_rule, c)
@@ -8341,9 +10344,9 @@ n->get_ptr() == 0
 void  State::_sub_Op_ConvD2F(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) &&
         (
-#line 10068 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14737 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 8346 "dfa_x86.cpp"
+#line 10349 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+100;
         DFA_PRODUCTION(REGF, convD2F_reg_mem_rule, c)
@@ -8368,38 +10371,182 @@ UseAVX == 0
     }
 }
 void  State::_sub_Op_ConvD2I(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGD) ) {
-      unsigned int c = _kids[0]->_cost[REGD]+100;
-        DFA_PRODUCTION(RREGI, convD2I_reg_reg_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) &&
+        (
+#line 14841 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10378 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+100;
+        DFA_PRODUCTION(RREGI, convD2I_reg_mem_avx10_2_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, convD2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, convD2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RBX_REGI, convD2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, convD2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RCX_REGI, convD2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RDX_REGI, convD2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RDI_REGI, convD2I_reg_mem_avx10_2_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) &&
+        (
+#line 14830 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10395 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, convD2I_reg_reg_avx10_2_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) &&
+        (
+#line 14818 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 10430 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, convD2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, convD2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, convD2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, convD2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, convD2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, convD2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, convD2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, convD2I_reg_reg_rule, c)
+      }
     }
 }
 void  State::_sub_Op_ConvD2L(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGD) ) {
-      unsigned int c = _kids[0]->_cost[REGD]+100;
-        DFA_PRODUCTION(RREGL, convD2L_reg_reg_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) &&
+        (
+#line 14875 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10467 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+100;
+        DFA_PRODUCTION(RREGL, convD2L_reg_mem_avx10_2_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, convD2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RAX_REGL, convD2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, convD2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RCX_REGL, convD2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RDX_REGL, convD2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(R11_REGL, convD2L_reg_mem_avx10_2_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) &&
+        (
+#line 14864 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10483 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, convD2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, convD2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, convD2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, convD2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, convD2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, convD2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, convD2L_reg_reg_avx10_2_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) &&
+        (
+#line 14852 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 10515 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, convD2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, convD2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, convD2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, convD2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, convD2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, convD2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, convD2L_reg_reg_rule, c)
+      }
     }
 }
 void  State::_sub_Op_ConvF2D(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) &&
         (
-#line 10045 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14714 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 8402 "dfa_x86.cpp"
+#line 10549 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+100;
         DFA_PRODUCTION(REGD, convF2D_reg_mem_rule, c)
@@ -8424,38 +10571,182 @@ UseAVX == 0
     }
 }
 void  State::_sub_Op_ConvF2I(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
-      unsigned int c = _kids[0]->_cost[REGF]+100;
-        DFA_PRODUCTION(RREGI, convF2I_reg_reg_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) &&
+        (
+#line 14773 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10578 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+100;
+        DFA_PRODUCTION(RREGI, convF2I_reg_mem_avx10_2_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, convF2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, convF2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RBX_REGI, convF2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, convF2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RCX_REGI, convF2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RDX_REGI, convF2I_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RDI_REGI, convF2I_reg_mem_avx10_2_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) &&
+        (
+#line 14762 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10595 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, convF2I_reg_reg_avx10_2_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) &&
+        (
+#line 14750 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 10630 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, convF2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, convF2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, convF2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, convF2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, convF2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, convF2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, convF2I_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, convF2I_reg_reg_rule, c)
+      }
     }
 }
 void  State::_sub_Op_ConvF2L(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
-      unsigned int c = _kids[0]->_cost[REGF]+100;
-        DFA_PRODUCTION(RREGL, convF2L_reg_reg_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) &&
+        (
+#line 14807 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10667 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+100;
+        DFA_PRODUCTION(RREGL, convF2L_reg_mem_avx10_2_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, convF2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RAX_REGL, convF2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, convF2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RCX_REGL, convF2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(RDX_REGL, convF2L_reg_mem_avx10_2_rule, c)
+        DFA_PRODUCTION(R11_REGL, convF2L_reg_mem_avx10_2_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) &&
+        (
+#line 14796 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 10683 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, convF2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, convF2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, convF2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, convF2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, convF2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, convF2L_reg_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, convF2L_reg_reg_avx10_2_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) &&
+        (
+#line 14784 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 10715 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, convF2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, convF2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, convF2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, convF2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, convF2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, convF2L_reg_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, convF2L_reg_reg_rule, c)
+      }
     }
 }
 void  State::_sub_Op_ConvI2D(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 10215 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14976 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseXmmI2D
-#line 8458 "dfa_x86.cpp"
+#line 10749 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
         DFA_PRODUCTION(REGD, convXI2D_reg_rule, c)
@@ -8465,9 +10756,9 @@ UseXmmI2D
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) &&
         (
-#line 10189 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14950 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 8470 "dfa_x86.cpp"
+#line 10761 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -8485,9 +10776,9 @@ UseAVX == 0
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 10174 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14935 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseXmmI2D
-#line 8490 "dfa_x86.cpp"
+#line 10781 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c) {
@@ -8507,9 +10798,9 @@ UseAVX == 0
 void  State::_sub_Op_ConvI2F(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 10201 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14962 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseXmmI2F
-#line 8512 "dfa_x86.cpp"
+#line 10803 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
         DFA_PRODUCTION(REGF, convXI2F_reg_rule, c)
@@ -8519,9 +10810,9 @@ UseXmmI2F
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) &&
         (
-#line 10162 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14923 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 8524 "dfa_x86.cpp"
+#line 10815 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -8539,9 +10830,9 @@ UseAVX == 0
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 10147 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14908 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseXmmI2F
-#line 8544 "dfa_x86.cpp"
+#line 10835 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c) {
@@ -8572,9 +10863,9 @@ void  State::_sub_Op_ConvI2L(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _ANDI_RREGI_IMMI_POW2M1) &&
         (
-#line 8893 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13065 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 8577 "dfa_x86.cpp"
+#line 10868 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ANDI_RREGI_IMMI_POW2M1]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -8965,9 +11256,9 @@ VM_Version::supports_bmi2()
 void  State::_sub_Op_ConvL2D(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) &&
         (
-#line 10269 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15030 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 8970 "dfa_x86.cpp"
+#line 11261 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+100;
         DFA_PRODUCTION(REGD, convL2D_reg_mem_rule, c)
@@ -8994,9 +11285,9 @@ UseAVX == 0
 void  State::_sub_Op_ConvL2F(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) &&
         (
-#line 10243 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15004 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 8999 "dfa_x86.cpp"
+#line 11290 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+100;
         DFA_PRODUCTION(REGF, convL2F_reg_mem_rule, c)
@@ -9035,9 +11326,9 @@ void  State::_sub_Op_ConvL2I(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _CASTP2X__DECODEN_RREGN__) &&
         (
-#line 5965 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8998 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 9040 "dfa_x86.cpp"
+#line 11331 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_CASTP2X__DECODEN_RREGN__]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9150,9 +11441,9 @@ void  State::_sub_Op_CountedLoopEnd(const Node *n){
 void  State::_sub_Op_CountLeadingZerosI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 5575 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8582 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseCountLeadingZerosInstruction
-#line 9155 "dfa_x86.cpp"
+#line 11446 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
         DFA_PRODUCTION(RREGI, countLeadingZerosI_bsr_rule, c)
@@ -9167,9 +11458,9 @@ void  State::_sub_Op_CountLeadingZerosI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) &&
         (
-#line 5563 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8570 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountLeadingZerosInstruction
-#line 9172 "dfa_x86.cpp"
+#line 11463 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9202,9 +11493,9 @@ UseCountLeadingZerosInstruction
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 5551 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8558 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountLeadingZerosInstruction
-#line 9207 "dfa_x86.cpp"
+#line 11498 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9239,9 +11530,9 @@ UseCountLeadingZerosInstruction
 void  State::_sub_Op_CountLeadingZerosL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 5624 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8631 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseCountLeadingZerosInstruction
-#line 9244 "dfa_x86.cpp"
+#line 11535 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
         DFA_PRODUCTION(RREGI, countLeadingZerosL_bsr_rule, c)
@@ -9256,9 +11547,9 @@ void  State::_sub_Op_CountLeadingZerosL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) &&
         (
-#line 5612 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8619 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountLeadingZerosInstruction
-#line 9261 "dfa_x86.cpp"
+#line 11552 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9291,9 +11582,9 @@ UseCountLeadingZerosInstruction
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 5600 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8607 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountLeadingZerosInstruction
-#line 9296 "dfa_x86.cpp"
+#line 11587 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9328,10 +11619,10 @@ UseCountLeadingZerosInstruction
 void  State::_sub_Op_CountLeadingZerosV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9892 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24562 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(1)) != T_INT &&
             !VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n->in(1)) < 64
-#line 9334 "dfa_x86.cpp"
+#line 11625 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vcount_leading_zeros_reg_avx_rule, c)
@@ -9339,10 +11630,10 @@ Matcher::vector_element_basic_type(n->in(1)) != T_INT &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9877 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24547 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(1)) == T_INT &&
             !VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n->in(1)) < 64
-#line 9345 "dfa_x86.cpp"
+#line 11636 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9354,9 +11645,9 @@ Matcher::vector_element_basic_type(n->in(1)) == T_INT &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9862 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24532 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(1)) == T_BYTE && VM_Version::supports_avx512vlbw()
-#line 9359 "dfa_x86.cpp"
+#line 11650 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9368,11 +11659,11 @@ Matcher::vector_element_basic_type(n->in(1)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9846 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24516 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(1)) == T_SHORT &&
             VM_Version::supports_avx512cd() &&
             (VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64)
-#line 9375 "dfa_x86.cpp"
+#line 11666 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9384,10 +11675,10 @@ Matcher::vector_element_basic_type(n->in(1)) == T_SHORT &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 9831 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24501 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_clz_non_subword_predicate_evex(Matcher::vector_element_basic_type(n->in(1)),
                                               Matcher::vector_length_in_bytes(n->in(1)))
-#line 9390 "dfa_x86.cpp"
+#line 11681 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9399,10 +11690,10 @@ is_clz_non_subword_predicate_evex(Matcher::vector_element_basic_type(n->in(1)),
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9817 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24487 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_clz_non_subword_predicate_evex(Matcher::vector_element_basic_type(n->in(1)),
                                               Matcher::vector_length_in_bytes(n->in(1)))
-#line 9405 "dfa_x86.cpp"
+#line 11696 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9416,9 +11707,9 @@ is_clz_non_subword_predicate_evex(Matcher::vector_element_basic_type(n->in(1)),
 void  State::_sub_Op_CountTrailingZerosI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 5673 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8680 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseCountTrailingZerosInstruction
-#line 9421 "dfa_x86.cpp"
+#line 11712 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
         DFA_PRODUCTION(RREGI, countTrailingZerosI_bsf_rule, c)
@@ -9433,9 +11724,9 @@ void  State::_sub_Op_CountTrailingZerosI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) &&
         (
-#line 5661 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8668 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountTrailingZerosInstruction
-#line 9438 "dfa_x86.cpp"
+#line 11729 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9468,9 +11759,9 @@ UseCountTrailingZerosInstruction
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 5649 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8656 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountTrailingZerosInstruction
-#line 9473 "dfa_x86.cpp"
+#line 11764 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9505,9 +11796,9 @@ UseCountTrailingZerosInstruction
 void  State::_sub_Op_CountTrailingZerosL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 5717 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8724 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseCountTrailingZerosInstruction
-#line 9510 "dfa_x86.cpp"
+#line 11801 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
         DFA_PRODUCTION(RREGI, countTrailingZerosL_bsf_rule, c)
@@ -9522,9 +11813,9 @@ void  State::_sub_Op_CountTrailingZerosL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) &&
         (
-#line 5705 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8712 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountTrailingZerosInstruction
-#line 9527 "dfa_x86.cpp"
+#line 11818 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9557,9 +11848,9 @@ UseCountTrailingZerosInstruction
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 5693 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8700 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCountTrailingZerosInstruction
-#line 9562 "dfa_x86.cpp"
+#line 11853 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -9594,9 +11885,9 @@ UseCountTrailingZerosInstruction
 void  State::_sub_Op_CountTrailingZerosV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9378 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24053 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n->in(1)) < 64
-#line 9599 "dfa_x86.cpp"
+#line 11890 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vcount_trailing_zeros_reg_avx_rule, c)
@@ -9604,9 +11895,9 @@ void  State::_sub_Op_CountTrailingZerosV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9362 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24037 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(1)) == T_BYTE && VM_Version::supports_avx512vlbw()
-#line 9609 "dfa_x86.cpp"
+#line 11900 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+400;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9618,11 +11909,11 @@ Matcher::vector_element_basic_type(n->in(1)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9345 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24020 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(1)) == T_SHORT &&
             VM_Version::supports_avx512cd() &&
             (VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64)
-#line 9625 "dfa_x86.cpp"
+#line 11916 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+400;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9634,10 +11925,10 @@ Matcher::vector_element_basic_type(n->in(1)) == T_SHORT &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9329 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24004 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_clz_non_subword_predicate_evex(Matcher::vector_element_basic_type(n->in(1)),
                                               Matcher::vector_length_in_bytes(n->in(1)))
-#line 9640 "dfa_x86.cpp"
+#line 11931 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+400;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -9669,10 +11960,10 @@ void  State::_sub_Op_CreateEx(const Node *n){
 void  State::_sub_Op_DecodeN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGN) &&
         (
-#line 6021 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9054 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->is_ptr()->ptr() == TypePtr::NotNull ||
             n->bottom_type()->is_ptr()->ptr() == TypePtr::Constant
-#line 9675 "dfa_x86.cpp"
+#line 11966 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGN]+100;
         DFA_PRODUCTION(RREGP, decodeHeapOop_not_null_rule, c)
@@ -9691,10 +11982,10 @@ n->bottom_type()->is_ptr()->ptr() == TypePtr::NotNull ||
     }
     if( STATE__VALID_CHILD(_kids[0], RREGN) &&
         (
-#line 6004 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9037 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->is_ptr()->ptr() != TypePtr::NotNull &&
             n->bottom_type()->is_ptr()->ptr() != TypePtr::Constant
-#line 9697 "dfa_x86.cpp"
+#line 11988 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGN]+100;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
@@ -9739,9 +12030,9 @@ n->bottom_type()->is_ptr()->ptr() != TypePtr::NotNull &&
     }
     if( STATE__VALID_CHILD(_kids[0], RREGN) &&
         
-#line 3075 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 5857 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::shift() == 0
-#line 9744 "dfa_x86.cpp"
+#line 12035 "dfa_x86.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[RREGN];
         DFA_PRODUCTION(INDIRECTNARROW, indirectNarrow_rule, c)
@@ -9752,6 +12043,18 @@ CompressedOops::shift() == 0
     if( STATE__VALID_CHILD(_kids[0], RREGN) ) {
       unsigned int c = _kids[0]->_cost[RREGN];
         DFA_PRODUCTION(_DECODEN_RREGN_, _DecodeN_rRegN__rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGN) &&
+        
+#line 5822 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseCompressedOops && (CompressedOops::shift() == Address::times_8)
+#line 12051 "dfa_x86.cpp"
+ ) {
+      unsigned int c = _kids[0]->_cost[RREGN]+10;
+        DFA_PRODUCTION(INDCOMPRESSEDOOP, indCompressedOop_rule, c)
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
+        DFA_PRODUCTION(MEMORY, indCompressedOop_rule, c)
+      }
     }
 }
 void  State::_sub_Op_DecodeNKlass(const Node *n){
@@ -9784,9 +12087,9 @@ void  State::_sub_Op_DivHF(const Node *n){
 void  State::_sub_Op_DivD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3598 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18270 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 9789 "dfa_x86.cpp"
+#line 12092 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
         DFA_PRODUCTION(REGD, divD_reg_imm_rule, c)
@@ -9796,9 +12099,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3586 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18258 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 9801 "dfa_x86.cpp"
+#line 12104 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -9816,9 +12119,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3574 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18246 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 9821 "dfa_x86.cpp"
+#line 12124 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -9836,9 +12139,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3563 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 9841 "dfa_x86.cpp"
+#line 18235 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 12144 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -9856,9 +12159,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3551 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 9861 "dfa_x86.cpp"
+#line 18223 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 12164 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -9876,9 +12179,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3539 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 9881 "dfa_x86.cpp"
+#line 18211 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 12184 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -9898,9 +12201,9 @@ UseAVX > 0
 void  State::_sub_Op_DivF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3527 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18199 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 9903 "dfa_x86.cpp"
+#line 12206 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
         DFA_PRODUCTION(REGF, divF_reg_imm_rule, c)
@@ -9910,9 +12213,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3515 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18187 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 9915 "dfa_x86.cpp"
+#line 12218 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -9930,9 +12233,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3503 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18175 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 9935 "dfa_x86.cpp"
+#line 12238 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -9950,9 +12253,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3492 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 9955 "dfa_x86.cpp"
+#line 18164 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 12258 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -9970,9 +12273,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3480 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 9975 "dfa_x86.cpp"
+#line 18152 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 12278 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -9990,9 +12293,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3468 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 9995 "dfa_x86.cpp"
+#line 18140 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 12298 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -10090,9 +12393,9 @@ void  State::_sub_Op_UDivModL(const Node *n){
 void  State::_sub_Op_EncodeISOArray(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RDX_REGI) &&
         (
-#line 11267 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16241 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 ((EncodeISOArrayNode*)n)->is_ascii()
-#line 10095 "dfa_x86.cpp"
+#line 12398 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[_BINARY_RDI_REGP_RDX_REGI]+100;
         DFA_PRODUCTION(RAX_REGI, encode_ascii_array_rule, c)
@@ -10107,9 +12410,9 @@ void  State::_sub_Op_EncodeISOArray(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RDX_REGI) &&
         (
-#line 11250 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16224 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !((EncodeISOArrayNode*)n)->is_ascii()
-#line 10112 "dfa_x86.cpp"
+#line 12415 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[_BINARY_RDI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -10148,9 +12451,9 @@ void  State::_sub_Op_EncodeP(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], RREGP) &&
         (
-#line 5993 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9026 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->make_ptr()->ptr() == TypePtr::NotNull
-#line 10153 "dfa_x86.cpp"
+#line 12456 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGP]+100;
         DFA_PRODUCTION(RREGN, encodeHeapOop_not_null_rule, c)
@@ -10158,9 +12461,9 @@ n->bottom_type()->make_ptr()->ptr() == TypePtr::NotNull
     }
     if( STATE__VALID_CHILD(_kids[0], RREGP) &&
         (
-#line 5977 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9010 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->make_ptr()->ptr() != TypePtr::NotNull
-#line 10163 "dfa_x86.cpp"
+#line 12466 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGP]+100;
       if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
@@ -10179,47 +12482,15 @@ void  State::_sub_Op_EncodePKlass(const Node *n){
     }
 }
 void  State::_sub_Op_FastLock(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], RBX_REGP) &&
-        (
-#line 12411 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-LockingMode == LM_LIGHTWEIGHT
-#line 10186 "dfa_x86.cpp"
-) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], RBX_REGP) ) {
       unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[RBX_REGP]+300;
-        DFA_PRODUCTION(RFLAGSREG, cmpFastLockLightweight_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], RBX_REGP) &&
-        (
-#line 12386 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-LockingMode != LM_LIGHTWEIGHT
-#line 10195 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[RBX_REGP]+300;
-      if (STATE__NOT_YET_VALID(RFLAGSREG) || _cost[RFLAGSREG] > c) {
         DFA_PRODUCTION(RFLAGSREG, cmpFastLock_rule, c)
-      }
     }
 }
 void  State::_sub_Op_FastUnlock(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], RAX_REGP) &&
-        (
-#line 12423 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-LockingMode == LM_LIGHTWEIGHT
-#line 10208 "dfa_x86.cpp"
-) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], RAX_REGP) ) {
       unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[RAX_REGP]+300;
-        DFA_PRODUCTION(RFLAGSREG, cmpFastUnlockLightweight_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RREGP) && STATE__VALID_CHILD(_kids[1], RAX_REGP) &&
-        (
-#line 12399 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-LockingMode != LM_LIGHTWEIGHT
-#line 10217 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[RREGP]+_kids[1]->_cost[RAX_REGP]+300;
-      if (STATE__NOT_YET_VALID(RFLAGSREG) || _cost[RFLAGSREG] > c) {
         DFA_PRODUCTION(RFLAGSREG, cmpFastUnlock_rule, c)
-      }
     }
 }
 void  State::_sub_Op_FmaD(const Node *n){
@@ -10270,9 +12541,9 @@ void  State::_sub_Op_Halt(const Node *n){
 void  State::_sub_Op_CountPositives(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 11170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16144 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
-#line 10275 "dfa_x86.cpp"
+#line 12546 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[RCX_REGI]+100;
         DFA_PRODUCTION(RAX_REGI, count_positives_evex_rule, c)
@@ -10287,9 +12558,9 @@ VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 11154 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16128 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() || !VM_Version::supports_bmi2()
-#line 10292 "dfa_x86.cpp"
+#line 12563 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -10322,9 +12593,15 @@ VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
     }
 }
 void  State::_sub_Op_If(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], CMPOPUCFE) && STATE__VALID_CHILD(_kids[1], RFLAGSREGUCFE) ) {
+      unsigned int c = _kids[0]->_cost[CMPOPUCFE]+_kids[1]->_cost[RFLAGSREGUCFE]+200;
+        DFA_PRODUCTION(UNIVERSE, jmpConUCFE_rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], CMPOPUCF2) && STATE__VALID_CHILD(_kids[1], RFLAGSREGUCF) ) {
       unsigned int c = _kids[0]->_cost[CMPOPUCF2]+_kids[1]->_cost[RFLAGSREGUCF]+200;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
         DFA_PRODUCTION(UNIVERSE, jmpConUCF2_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPUCF) && STATE__VALID_CHILD(_kids[1], RFLAGSREGUCF) ) {
       unsigned int c = _kids[0]->_cost[CMPOPUCF]+_kids[1]->_cost[RFLAGSREGUCF]+200;
@@ -10358,9 +12635,9 @@ void  State::_sub_Op_Jump(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTL_RREGL_IMMI2) &&
         (
-#line 6064 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 9097 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 false
-#line 10363 "dfa_x86.cpp"
+#line 12640 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTL_RREGL_IMMI2]+350;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -10371,9 +12648,9 @@ false
 void  State::_sub_Op_LShiftI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI2) &&
         (
-#line 12796 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 25908 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 false
-#line 10376 "dfa_x86.cpp"
+#line 12653 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI2]+100;
         DFA_PRODUCTION(RREGI, leaI_rReg_immI2_peep_rule, c)
@@ -10396,9 +12673,9 @@ false
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8136 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12069 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 10401 "dfa_x86.cpp"
+#line 12678 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -10431,9 +12708,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8124 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12057 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 10436 "dfa_x86.cpp"
+#line 12713 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -10470,9 +12747,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8097 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12030 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 10475 "dfa_x86.cpp"
+#line 12752 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -10507,7 +12784,82 @@ VM_Version::supports_bmi2()
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8];
         DFA_PRODUCTION(_LSHIFTI__LOADI_MEMORY__IMMI8, _LShiftI__LoadI_memory__immI8_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12003 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 12791 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, salI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 11989 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 12826 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, salI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, salI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, salI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, salI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, salI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, salI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, salI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, salI_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 11975 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 12861 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, salI_rReg_imm_rule, c)
@@ -10537,7 +12889,47 @@ VM_Version::supports_bmi2()
         DFA_PRODUCTION(RDI_REGI, salI_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI2) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI2) &&
+        (
+#line 11960 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 12896 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI2]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, salI_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, salI_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, salI_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, salI_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, salI_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, salI_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, salI_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, salI_rReg_immI2_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI2) &&
+        (
+#line 11946 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 12931 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI2]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, salI_rReg_immI2_rule, c)
@@ -10591,9 +12983,9 @@ VM_Version::supports_bmi2()
 void  State::_sub_Op_LShiftL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI2) &&
         (
-#line 12843 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 25955 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 false
-#line 10596 "dfa_x86.cpp"
+#line 12988 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI2]+100;
         DFA_PRODUCTION(RREGL, leaL_rReg_immI2_peep_rule, c)
@@ -10607,9 +12999,9 @@ false
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8384 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12420 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 10612 "dfa_x86.cpp"
+#line 13004 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGI]+175;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -10639,9 +13031,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8372 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12408 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 10644 "dfa_x86.cpp"
+#line 13036 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -10675,9 +13067,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8345 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12381 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 10680 "dfa_x86.cpp"
+#line 13072 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -10709,7 +13101,76 @@ VM_Version::supports_bmi2()
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI8];
         DFA_PRODUCTION(_LSHIFTL__LOADL_MEMORY__IMMI8, _LShiftL__LoadL_memory__immI8_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12354 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 13108 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, salL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, salL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, salL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, salL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, salL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, salL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, salL_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12340 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 13140 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, salL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, salL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, salL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, salL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, salL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, salL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, salL_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12326 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 13172 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, salL_rReg_imm_rule, c)
@@ -10736,7 +13197,44 @@ VM_Version::supports_bmi2()
         DFA_PRODUCTION(R11_REGL, salL_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI2) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI2) &&
+        (
+#line 12311 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 13204 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI2]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, salL_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, salL_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, salL_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, salL_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, salL_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, salL_rReg_immI2_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, salL_rReg_immI2_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI2) &&
+        (
+#line 12297 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 13236 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI2]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, salL_rReg_immI2_rule, c)
@@ -10833,9 +13331,9 @@ void  State::_sub_Op_LoadD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 4421 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 7384 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseXmmLoadAndClearUpper
-#line 10838 "dfa_x86.cpp"
+#line 13336 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+145;
         DFA_PRODUCTION(REGD, loadD_rule, c)
@@ -10845,9 +13343,9 @@ UseXmmLoadAndClearUpper
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 4408 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 7371 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseXmmLoadAndClearUpper
-#line 10850 "dfa_x86.cpp"
+#line 13348 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+145;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -10920,9 +13418,9 @@ void  State::_sub_Op_LoadNKlass(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 4377 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 7335 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompactObjectHeaders
-#line 10925 "dfa_x86.cpp"
+#line 13423 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
         DFA_PRODUCTION(RREGN, loadNKlassCompactHeaders_rule, c)
@@ -10930,9 +13428,9 @@ UseCompactObjectHeaders
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 4364 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 7322 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseCompactObjectHeaders
-#line 10935 "dfa_x86.cpp"
+#line 13433 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
       if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
@@ -10963,9 +13461,9 @@ void  State::_sub_Op_LoadL(const Node *n){
 void  State::_sub_Op_LoadP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 339 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 441 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_Load()->barrier_data() != 0
-#line 10968 "dfa_x86.cpp"
+#line 13466 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
         DFA_PRODUCTION(RREGP, g1LoadP_rule, c)
@@ -10984,9 +13482,9 @@ UseG1GC && n->as_Load()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 118 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 118 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->as_Load()->barrier_data() != 0
-#line 10989 "dfa_x86.cpp"
+#line 13487 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
@@ -11035,9 +13533,9 @@ UseZGC && n->as_Load()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 4323 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 7281 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Load()->barrier_data() == 0
-#line 11040 "dfa_x86.cpp"
+#line 13538 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
       if (STATE__NOT_YET_VALID(RREGP) || _cost[RREGP] > c) {
@@ -11084,9 +13582,9 @@ n->as_Load()->barrier_data() == 0
 void  State::_sub_Op_LoadN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 356 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 458 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_Load()->barrier_data() != 0
-#line 11089 "dfa_x86.cpp"
+#line 13587 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
         DFA_PRODUCTION(RREGN, g1LoadN_rule, c)
@@ -11098,9 +13596,9 @@ UseG1GC && n->as_Load()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 4336 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 7294 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Load()->barrier_data() == 0
-#line 11103 "dfa_x86.cpp"
+#line 13601 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
       if (STATE__NOT_YET_VALID(RREGN) || _cost[RREGN] > c) {
@@ -11158,34 +13656,99 @@ void  State::_sub_Op_MulAddS2I(const Node *n){
     }
 }
 void  State::_sub_Op_MaxI(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 17069 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 13663 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+200;
-        DFA_PRODUCTION(RREGI, maxI_rReg_rule, c)
+        DFA_PRODUCTION(RREGI, maxI_rReg_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, maxI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, maxI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RBX_REGI, maxI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, maxI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGI, maxI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGI, maxI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RDI_REGI, maxI_rReg_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 17056 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 13680 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+200;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, maxI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, maxI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, maxI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, maxI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, maxI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, maxI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, maxI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, maxI_rReg_rule, c)
+      }
     }
 }
 void  State::_sub_Op_MaxHF(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
+        (
+#line 25631 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 13717 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
-        DFA_PRODUCTION(REGF, scalar_binOps_HF_reg_1_rule, c)
+        DFA_PRODUCTION(REGF, scalar_minmax_HF_reg_rule, c)
         DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
         DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
+        (
+#line 25618 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 13729 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, scalar_minmax_HF_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
     }
 }
 void  State::_sub_Op_MaxD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGREGD) &&
         (
-#line 4470 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && VLoopReductions::is_reduction(n)
-#line 11188 "dfa_x86.cpp"
+#line 7455 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && VLoopReductions::is_reduction(n)
+#line 13751 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGREGD]+100;
         DFA_PRODUCTION(LEGREGD, maxD_reduction_reg_rule, c)
@@ -11195,9 +13758,9 @@ UseAVX > 0 && VLoopReductions::is_reduction(n)
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGREGD) &&
         (
-#line 4459 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && !VLoopReductions::is_reduction(n)
-#line 11200 "dfa_x86.cpp"
+#line 7444 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && !VLoopReductions::is_reduction(n)
+#line 13763 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGREGD]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -11213,13 +13776,33 @@ UseAVX > 0 && !VLoopReductions::is_reduction(n)
         DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
       }
     }
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
+        (
+#line 7433 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 13783 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, maxD_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
+    }
 }
 void  State::_sub_Op_MaxF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGREGF) &&
         (
-#line 4445 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && VLoopReductions::is_reduction(n)
-#line 11222 "dfa_x86.cpp"
+#line 7419 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && VLoopReductions::is_reduction(n)
+#line 13805 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGREGF]+100;
         DFA_PRODUCTION(LEGREGF, maxF_reduction_reg_rule, c)
@@ -11229,9 +13812,9 @@ UseAVX > 0 && VLoopReductions::is_reduction(n)
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGREGF) &&
         (
-#line 4434 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && !VLoopReductions::is_reduction(n)
-#line 11234 "dfa_x86.cpp"
+#line 7408 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && !VLoopReductions::is_reduction(n)
+#line 13817 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGREGF]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -11245,6 +13828,26 @@ UseAVX > 0 && !VLoopReductions::is_reduction(n)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+100+95) {
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+100+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
+        (
+#line 7397 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 13837 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, maxF_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
       }
     }
 }
@@ -11292,9 +13895,9 @@ void  State::_sub_Op_MemBarReleaseLock(const Node *n){
 }
 void  State::_sub_Op_MemBarVolatile(const Node *n){
     if(         (
-#line 5901 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8908 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::post_store_load_barrier(n)
-#line 11297 "dfa_x86.cpp"
+#line 13900 "dfa_x86.cpp"
 ) ) {
       unsigned int c = 0;
         DFA_PRODUCTION(UNIVERSE, unnecessary_membar_volatile_rule, c)
@@ -11313,34 +13916,99 @@ void  State::_sub_Op_MemBarStoreStore(const Node *n){
     }
 }
 void  State::_sub_Op_MinI(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 17017 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 13923 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+200;
-        DFA_PRODUCTION(RREGI, minI_rReg_rule, c)
+        DFA_PRODUCTION(RREGI, minI_rReg_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, minI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, minI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RBX_REGI, minI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, minI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGI, minI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGI, minI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RDI_REGI, minI_rReg_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 17004 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 13940 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+200;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, minI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, minI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, minI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, minI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, minI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, minI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, minI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, minI_rReg_rule, c)
+      }
     }
 }
 void  State::_sub_Op_MinHF(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
+        (
+#line 25631 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 13977 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
-        DFA_PRODUCTION(REGF, scalar_binOps_HF_reg_2_rule, c)
+        DFA_PRODUCTION(REGF, scalar_minmax_HF_reg_0_rule, c)
         DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
         DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
+        (
+#line 25618 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 13989 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, scalar_minmax_HF_reg_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
     }
 }
 void  State::_sub_Op_MinF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGREGF) &&
         (
-#line 4495 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && VLoopReductions::is_reduction(n)
-#line 11343 "dfa_x86.cpp"
+#line 7491 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && VLoopReductions::is_reduction(n)
+#line 14011 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGREGF]+100;
         DFA_PRODUCTION(LEGREGF, minF_reduction_reg_rule, c)
@@ -11350,9 +14018,9 @@ UseAVX > 0 && VLoopReductions::is_reduction(n)
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGREGF) &&
         (
-#line 4484 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && !VLoopReductions::is_reduction(n)
-#line 11355 "dfa_x86.cpp"
+#line 7480 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && !VLoopReductions::is_reduction(n)
+#line 14023 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGREGF]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -11368,13 +14036,33 @@ UseAVX > 0 && !VLoopReductions::is_reduction(n)
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+100+95)
       }
     }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
+        (
+#line 7469 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 14043 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, minF_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
+    }
 }
 void  State::_sub_Op_MinD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGREGD) &&
         (
-#line 4520 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && VLoopReductions::is_reduction(n)
-#line 11377 "dfa_x86.cpp"
+#line 7527 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && VLoopReductions::is_reduction(n)
+#line 14065 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGREGD]+100;
         DFA_PRODUCTION(LEGREGD, minD_reduction_reg_rule, c)
@@ -11384,9 +14072,9 @@ UseAVX > 0 && VLoopReductions::is_reduction(n)
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGREGD) &&
         (
-#line 4509 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-UseAVX > 0 && !VLoopReductions::is_reduction(n)
-#line 11389 "dfa_x86.cpp"
+#line 7516 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && UseAVX > 0 && !VLoopReductions::is_reduction(n)
+#line 14077 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGREGD]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -11400,6 +14088,26 @@ UseAVX > 0 && !VLoopReductions::is_reduction(n)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+100+95) {
         DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
+        (
+#line 7505 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 14097 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, minD_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
       }
     }
 }
@@ -11595,9 +14303,9 @@ void  State::_sub_Op_MoveL2D(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], STACKSLOTL) &&
         (
-#line 10390 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15151 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseXmmLoadAndClearUpper
-#line 11600 "dfa_x86.cpp"
+#line 14308 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[STACKSLOTL]+125;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11615,9 +14323,9 @@ UseXmmLoadAndClearUpper
     }
     if( STATE__VALID_CHILD(_kids[0], STACKSLOTL) &&
         (
-#line 10377 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15138 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseXmmLoadAndClearUpper
-#line 11620 "dfa_x86.cpp"
+#line 14328 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[STACKSLOTL]+125;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11732,7 +14440,7 @@ void  State::_sub_Op_IsInfiniteD(const Node *n){
 void  State::_sub_Op_MulHF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
-        DFA_PRODUCTION(REGF, scalar_binOps_HF_reg_3_rule, c)
+        DFA_PRODUCTION(REGF, scalar_binOps_HF_reg_1_rule, c)
         DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
         DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
@@ -11741,9 +14449,9 @@ void  State::_sub_Op_MulHF(const Node *n){
 void  State::_sub_Op_MulD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3456 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18128 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11746 "dfa_x86.cpp"
+#line 14454 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
         DFA_PRODUCTION(REGD, mulD_reg_imm_rule, c)
@@ -11753,9 +14461,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3444 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18116 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11758 "dfa_x86.cpp"
+#line 14466 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11773,9 +14481,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3444 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18116 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11778 "dfa_x86.cpp"
+#line 14486 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11793,9 +14501,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3432 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18104 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11798 "dfa_x86.cpp"
+#line 14506 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11813,9 +14521,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3421 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 11818 "dfa_x86.cpp"
+#line 18093 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14526 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11833,9 +14541,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3409 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 11838 "dfa_x86.cpp"
+#line 18081 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14546 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11853,9 +14561,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3409 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 11858 "dfa_x86.cpp"
+#line 18081 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14566 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11873,9 +14581,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3397 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 11878 "dfa_x86.cpp"
+#line 18069 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14586 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -11895,9 +14603,9 @@ UseAVX > 0
 void  State::_sub_Op_MulF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3385 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18057 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11900 "dfa_x86.cpp"
+#line 14608 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
         DFA_PRODUCTION(REGF, mulF_reg_imm_rule, c)
@@ -11907,9 +14615,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3373 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18045 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11912 "dfa_x86.cpp"
+#line 14620 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -11927,9 +14635,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3373 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18045 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11932 "dfa_x86.cpp"
+#line 14640 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -11947,9 +14655,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3361 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18033 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 11952 "dfa_x86.cpp"
+#line 14660 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -11967,9 +14675,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3350 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 11972 "dfa_x86.cpp"
+#line 18022 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14680 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -11987,9 +14695,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3338 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 11992 "dfa_x86.cpp"
+#line 18010 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14700 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -12007,9 +14715,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3338 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 12012 "dfa_x86.cpp"
+#line 18010 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14720 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -12027,9 +14735,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3326 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 12032 "dfa_x86.cpp"
+#line 17998 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 14740 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -12085,7 +14793,82 @@ void  State::_sub_Op_MulI(const Node *n){
         DFA_PRODUCTION(RDX_REGI, mulI_mem_imm_rule, c)
         DFA_PRODUCTION(RDI_REGI, mulI_mem_imm_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11591 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 14800 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+350;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, mulI_rReg_rReg_mem_ndd_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 11591 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 14835 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+350;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, mulI_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11577 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 14870 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+350;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, mulI_mem_0_rule, c)
@@ -12115,7 +14898,12 @@ void  State::_sub_Op_MulI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, mulI_mem_0_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 11577 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 14905 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+350;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, mulI_mem_rule, c)
@@ -12175,7 +14963,47 @@ void  State::_sub_Op_MulI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, mulI_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11549 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 14970 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+300;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, mulI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, mulI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, mulI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, mulI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, mulI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, mulI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, mulI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, mulI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11535 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15005 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+300;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, mulI_rReg_rule, c)
@@ -12218,7 +15046,76 @@ void  State::_sub_Op_MulL(const Node *n){
         DFA_PRODUCTION(RDX_REGL, mulL_mem_imm_rule, c)
         DFA_PRODUCTION(R11_REGL, mulL_mem_imm_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11685 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15053 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+350;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, mulL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, mulL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, mulL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, mulL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, mulL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, mulL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, mulL_rReg_rReg_mem_ndd_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 11685 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15085 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+350;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, mulL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, mulL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, mulL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, mulL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, mulL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, mulL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, mulL_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11671 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15117 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+350;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, mulL_mem_0_rule, c)
@@ -12245,7 +15142,12 @@ void  State::_sub_Op_MulL(const Node *n){
         DFA_PRODUCTION(R11_REGL, mulL_mem_0_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 11671 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15149 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+350;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, mulL_mem_rule, c)
@@ -12299,7 +15201,44 @@ void  State::_sub_Op_MulL(const Node *n){
         DFA_PRODUCTION(R11_REGL, mulL_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11643 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15208 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+300;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, mulL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, mulL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, mulL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, mulL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, mulL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, mulL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, mulL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11629 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15240 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+300;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, mulL_rReg_rule, c)
@@ -12328,38 +15267,115 @@ void  State::_sub_Op_MulL(const Node *n){
     }
 }
 void  State::_sub_Op_NegI(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) &&
+        (
+#line 11435 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15274 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
-        DFA_PRODUCTION(RREGI, negI_rReg_2_rule, c)
+        DFA_PRODUCTION(RREGI, negI_rReg_2_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, negI_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, negI_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(RBX_REGI, negI_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, negI_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGI, negI_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGI, negI_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(RDI_REGI, negI_rReg_2_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) &&
+        (
+#line 11421 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15291 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, negI_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, negI_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, negI_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, negI_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, negI_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, negI_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, negI_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, negI_rReg_2_rule, c)
+      }
     }
 }
 void  State::_sub_Op_NegL(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) &&
+        (
+#line 11504 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15328 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
-        DFA_PRODUCTION(RREGL, negL_rReg_2_rule, c)
+        DFA_PRODUCTION(RREGL, negL_rReg_2_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, negL_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(RAX_REGL, negL_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, negL_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGL, negL_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGL, negL_rReg_2_ndd_rule, c)
+        DFA_PRODUCTION(R11_REGL, negL_rReg_2_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) &&
+        (
+#line 11490 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15344 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, negL_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, negL_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, negL_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, negL_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, negL_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, negL_rReg_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, negL_rReg_2_rule, c)
+      }
     }
 }
 void  State::_sub_Op_NegD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VLREGD) &&
         (
-#line 3695 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18367 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 12362 "dfa_x86.cpp"
+#line 15378 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGD]+150;
         DFA_PRODUCTION(VLREGD, negD_reg_reg_rule, c)
@@ -12369,9 +15385,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) &&
         (
-#line 3683 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 12374 "dfa_x86.cpp"
+#line 18355 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 15390 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -12391,9 +15407,9 @@ UseAVX > 0
 void  State::_sub_Op_NegF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VLREGF) &&
         (
-#line 3671 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18343 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 12396 "dfa_x86.cpp"
+#line 15412 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGF]+150;
         DFA_PRODUCTION(VLREGF, negF_reg_reg_rule, c)
@@ -12403,9 +15419,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) &&
         (
-#line 3660 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 12408 "dfa_x86.cpp"
+#line 18332 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 15424 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -12449,19 +15465,99 @@ void  State::_sub_Op_OrI(const Node *n){
       unsigned int c = _kids[0]->_cost[_LOADB_MEMORY_]+_kids[1]->_cost[RREGI];
         DFA_PRODUCTION(_ORI__LOADB_MEMORY__RREGI, _OrI__LoadB_memory__rRegI_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13425 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15472 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
-        DFA_PRODUCTION(RREGI, orI_rReg_mem_0_rule, c)
+        DFA_PRODUCTION(RREGI, orI_rReg_rReg_mem_ndd_0_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
-        DFA_PRODUCTION(RAX_REGI, orI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RBX_REGI, orI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RCX_REGI, orI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RDX_REGI, orI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RDI_REGI, orI_rReg_mem_0_rule, c)
+        DFA_PRODUCTION(RAX_REGI, orI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RBX_REGI, orI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RCX_REGI, orI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RDX_REGI, orI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RDI_REGI, orI_rReg_rReg_mem_ndd_0_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 13425 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15489 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, orI_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13410 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15524 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, orI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, orI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, orI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, orI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, orI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, orI_rReg_mem_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 13410 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15559 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, orI_rReg_mem_rule, c)
@@ -12491,7 +15587,117 @@ void  State::_sub_Op_OrI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, orI_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13395 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15594 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, orI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13381 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15629 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI]+_kids[1]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, orI_rReg_imm_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13367 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15664 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, orI_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13353 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15699 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, orI_rReg_imm_rule, c)
@@ -12521,7 +15727,47 @@ void  State::_sub_Op_OrI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, orI_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13338 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15734 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, orI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, orI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, orI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, orI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, orI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, orI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, orI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, orI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13323 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15769 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, orI_rReg_rule, c)
@@ -12569,18 +15815,92 @@ void  State::_sub_Op_OrL(const Node *n){
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL];
         DFA_PRODUCTION(_ORL__LOADL_MEMORY__RREGL, _OrL__LoadL_memory__rRegL_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 14100 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15822 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+150;
-        DFA_PRODUCTION(RREGL, orL_rReg_mem_0_rule, c)
+        DFA_PRODUCTION(RREGL, orL_rReg_rReg_mem_ndd_0_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
-        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RAX_REGL, orL_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RCX_REGL, orL_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RDX_REGL, orL_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(R11_REGL, orL_rReg_mem_0_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(R11_REGL, orL_rReg_rReg_mem_ndd_0_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 14100 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15838 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 14085 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15870 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_mem_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 14085 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 15902 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, orL_rReg_mem_rule, c)
@@ -12607,7 +15927,108 @@ void  State::_sub_Op_OrL(const Node *n){
         DFA_PRODUCTION(R11_REGL, orL_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 14070 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15934 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMML32) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 14055 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15966 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMML32]+_kids[1]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_imm_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_imm_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 14041 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 15998 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 14027 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 16030 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, orL_rReg_imm_rule, c)
@@ -12632,6 +16053,60 @@ void  State::_sub_Op_OrL(const Node *n){
       }
       if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, orL_rReg_imm_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _CASTP2X_ANY_REGP_) && STATE__VALID_CHILD(_kids[1], ANY_REGP) ) {
+      unsigned int c = _kids[0]->_cost[_CASTP2X_ANY_REGP_]+_kids[1]->_cost[ANY_REGP]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_castP2X_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_castP2X_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_castP2X_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_castP2X_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_castP2X_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_castP2X_ndd_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_castP2X_ndd_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], ANY_REGP) && STATE__VALID_CHILD(_kids[1], _CASTP2X_ANY_REGP_) ) {
+      unsigned int c = _kids[0]->_cost[ANY_REGP]+_kids[1]->_cost[_CASTP2X_ANY_REGP_]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_castP2X_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_castP2X_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_castP2X_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_castP2X_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_castP2X_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_castP2X_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_castP2X_ndd_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CASTP2X_ANY_REGP_) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
@@ -12688,7 +16163,44 @@ void  State::_sub_Op_OrL(const Node *n){
         DFA_PRODUCTION(R11_REGL, orL_rReg_castP2X_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 13986 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 16170 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, orL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, orL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, orL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, orL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, orL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, orL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, orL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 13971 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 16202 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, orL_rReg_rule, c)
@@ -12803,9 +16315,9 @@ void  State::_sub_Op_OverflowMulL(const Node *n){
 void  State::_sub_Op_PartialSubtypeCheck(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RAX_REGP_IMMP) &&
         (
-#line 12237 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 17282 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSecondarySupersTable
-#line 12808 "dfa_x86.cpp"
+#line 16320 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[_BINARY_RAX_REGP_IMMP]+700;
         DFA_PRODUCTION(RDI_REGP, partialSubtypeCheckConstSuper_rule, c)
@@ -12824,9 +16336,9 @@ UseSecondarySupersTable
     }
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGP) &&
         (
-#line 12218 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 17263 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSecondarySupersTable
-#line 12829 "dfa_x86.cpp"
+#line 16341 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[RAX_REGP]+1000;
       if (STATE__NOT_YET_VALID(RDI_REGP) || _cost[RDI_REGP] > c) {
@@ -12871,9 +16383,9 @@ UseSecondarySupersTable
     }
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], RAX_REGP) &&
         (
-#line 12176 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 17221 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseSecondarySupersTable
-#line 12876 "dfa_x86.cpp"
+#line 16388 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[RAX_REGP]+1100;
       if (STATE__NOT_YET_VALID(RDI_REGP) || _cost[RDI_REGP] > c) {
@@ -12920,9 +16432,9 @@ UseSecondarySupersTable
 void  State::_sub_Op_PopCountI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) &&
         (
-#line 5796 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8803 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UsePopCountInstruction
-#line 12925 "dfa_x86.cpp"
+#line 16437 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+100;
         DFA_PRODUCTION(RREGI, popCountI_mem_rule, c)
@@ -12937,9 +16449,9 @@ UsePopCountInstruction
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 5784 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8791 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UsePopCountInstruction
-#line 12942 "dfa_x86.cpp"
+#line 16454 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -12974,9 +16486,9 @@ UsePopCountInstruction
 void  State::_sub_Op_PopCountL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) &&
         (
-#line 5822 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8829 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UsePopCountInstruction
-#line 12979 "dfa_x86.cpp"
+#line 16491 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+100;
         DFA_PRODUCTION(RREGI, popCountL_mem_rule, c)
@@ -12991,9 +16503,9 @@ UsePopCountInstruction
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 5809 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8816 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UsePopCountInstruction
-#line 12996 "dfa_x86.cpp"
+#line 16508 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -13028,9 +16540,9 @@ UsePopCountInstruction
 void  State::_sub_Op_PopCountVI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9311 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23986 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
-#line 13033 "dfa_x86.cpp"
+#line 16545 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vpopcount_avx_reg_rule, c)
@@ -13038,9 +16550,9 @@ void  State::_sub_Op_PopCountVI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 9297 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23972 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
-#line 13043 "dfa_x86.cpp"
+#line 16555 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -13052,9 +16564,9 @@ is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9283 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23958 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
-#line 13057 "dfa_x86.cpp"
+#line 16569 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -13068,9 +16580,9 @@ is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
 void  State::_sub_Op_PopCountVL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9311 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23986 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
-#line 13073 "dfa_x86.cpp"
+#line 16585 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vpopcount_avx_reg_0_rule, c)
@@ -13078,9 +16590,9 @@ void  State::_sub_Op_PopCountVL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 9297 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23972 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
-#line 13083 "dfa_x86.cpp"
+#line 16595 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -13092,9 +16604,9 @@ is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9283 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23958 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_vector_popcount_predicate(Matcher::vector_element_basic_type(n->in(1)))
-#line 13097 "dfa_x86.cpp"
+#line 16609 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -13124,18 +16636,18 @@ void  State::_sub_Op_PopulateIndex(const Node *n){
 void  State::_sub_Op_PrefetchAllocation(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 5041 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8048 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 AllocatePrefetchInstr==2
-#line 13129 "dfa_x86.cpp"
+#line 16641 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
         DFA_PRODUCTION(UNIVERSE, prefetchAllocT2_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 5029 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8036 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 AllocatePrefetchInstr==1
-#line 13138 "dfa_x86.cpp"
+#line 16650 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -13144,9 +16656,9 @@ AllocatePrefetchInstr==1
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 5017 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8024 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 AllocatePrefetchInstr==0
-#line 13149 "dfa_x86.cpp"
+#line 16661 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -13155,9 +16667,9 @@ AllocatePrefetchInstr==0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 5005 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8012 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 AllocatePrefetchInstr==3
-#line 13160 "dfa_x86.cpp"
+#line 16672 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -13212,9 +16724,9 @@ void  State::_sub_Op_RShiftI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8214 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12176 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 13217 "dfa_x86.cpp"
+#line 16729 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -13247,9 +16759,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8202 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12164 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 13252 "dfa_x86.cpp"
+#line 16764 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -13286,9 +16798,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8175 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12137 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 13291 "dfa_x86.cpp"
+#line 16803 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -13323,7 +16835,82 @@ VM_Version::supports_bmi2()
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8];
         DFA_PRODUCTION(_RSHIFTI__LOADI_MEMORY__IMMI8, _RShiftI__LoadI_memory__immI8_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12110 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 16842 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, sarI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12096 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 16877 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, sarI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, sarI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, sarI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, sarI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, sarI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, sarI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, sarI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, sarI_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12082 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 16912 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, sarI_rReg_imm_rule, c)
@@ -13481,9 +17068,9 @@ VM_Version::supports_bmi2()
 void  State::_sub_Op_RShiftL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8462 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12527 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 13486 "dfa_x86.cpp"
+#line 17073 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGI]+175;
         DFA_PRODUCTION(RREGL, sarL_mem_rReg_rule, c)
@@ -13497,9 +17084,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8450 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12515 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 13502 "dfa_x86.cpp"
+#line 17089 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -13533,9 +17120,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8423 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12488 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 13538 "dfa_x86.cpp"
+#line 17125 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -13567,7 +17154,76 @@ VM_Version::supports_bmi2()
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI];
         DFA_PRODUCTION(_RSHIFTL__LOADL_MEMORY__IMMI, _RShiftL__LoadL_memory__immI_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 12461 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 17161 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, sarL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, sarL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, sarL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, sarL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, sarL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, sarL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, sarL_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 12447 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 17193 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, sarL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, sarL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, sarL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, sarL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, sarL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, sarL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, sarL_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 12433 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 17225 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, sarL_rReg_imm_rule, c)
@@ -13610,9 +17266,9 @@ void  State::_sub_Op_Return(const Node *n){
 void  State::_sub_Op_ReverseI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 5749 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8756 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_gfni()
-#line 13615 "dfa_x86.cpp"
+#line 17271 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
         DFA_PRODUCTION(RREGI, bytes_reversebit_int_gfni_rule, c)
@@ -13627,9 +17283,9 @@ VM_Version::supports_gfni()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 5738 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8745 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_gfni()
-#line 13632 "dfa_x86.cpp"
+#line 17288 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -13664,9 +17320,9 @@ VM_Version::supports_gfni()
 void  State::_sub_Op_ReverseL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 5771 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8778 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_gfni()
-#line 13669 "dfa_x86.cpp"
+#line 17325 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
         DFA_PRODUCTION(RREGL, bytes_reversebit_long_gfni_rule, c)
@@ -13680,9 +17336,9 @@ VM_Version::supports_gfni()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 5760 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8767 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_gfni()
-#line 13685 "dfa_x86.cpp"
+#line 17341 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -13714,9 +17370,9 @@ VM_Version::supports_gfni()
 void  State::_sub_Op_ReverseV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9773 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24443 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_gfni()
-#line 13719 "dfa_x86.cpp"
+#line 17375 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vreverse_reg_gfni_rule, c)
@@ -13724,9 +17380,9 @@ VM_Version::supports_gfni()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9759 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24429 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_gfni()
-#line 13729 "dfa_x86.cpp"
+#line 17385 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -13764,9 +17420,9 @@ void  State::_sub_Op_RoundDoubleMode(const Node *n){
 void  State::_sub_Op_RoundDoubleModeV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 4032 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18701 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 8
-#line 13769 "dfa_x86.cpp"
+#line 17425 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[IMMU8]+100;
         DFA_PRODUCTION(VEC, vround8D_mem_rule, c)
@@ -13774,9 +17430,9 @@ Matcher::vector_length(n) == 8
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 4020 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18689 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) < 8
-#line 13779 "dfa_x86.cpp"
+#line 17435 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -13788,9 +17444,9 @@ Matcher::vector_length(n) < 8
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 4009 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 8
-#line 13793 "dfa_x86.cpp"
+#line 17449 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -13802,9 +17458,9 @@ Matcher::vector_length(n) == 8
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 3997 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18666 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) < 8
-#line 13807 "dfa_x86.cpp"
+#line 17463 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -13818,25 +17474,57 @@ Matcher::vector_length(n) < 8
 void  State::_sub_Op_RotateLeft(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8720 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-n->bottom_type()->basic_type() == T_LONG
-#line 13823 "dfa_x86.cpp"
+#line 12858 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && n->bottom_type()->basic_type() == T_LONG
+#line 17479 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RCX_REGI]+100;
-        DFA_PRODUCTION(RREGL, rolL_rReg_Var_rule, c)
+        DFA_PRODUCTION(RREGL, rolL_rReg_Var_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, rolL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RAX_REGL, rolL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, rolL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGL, rolL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGL, rolL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(R11_REGL, rolL_rReg_Var_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
+        (
+#line 12844 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && n->bottom_type()->basic_type() == T_LONG
+#line 17495 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RCX_REGI]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, rolL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, rolL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, rolL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, rolL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, rolL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, rolL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, rolL_rReg_Var_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8706 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12830 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
-#line 13839 "dfa_x86.cpp"
+#line 17527 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI8]+175;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -13866,9 +17554,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8694 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
-#line 13871 "dfa_x86.cpp"
+#line 12818 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
+#line 17559 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -13898,9 +17586,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8682 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12806 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
-#line 13903 "dfa_x86.cpp"
+#line 17591 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -13930,26 +17618,61 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8619 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-n->bottom_type()->basic_type() == T_INT
-#line 13935 "dfa_x86.cpp"
+#line 12726 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && n->bottom_type()->basic_type() == T_INT
+#line 17623 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RCX_REGI]+100;
-        DFA_PRODUCTION(RREGI, rolI_rReg_Var_rule, c)
+        DFA_PRODUCTION(RREGI, rolI_rReg_Var_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, rolI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, rolI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RBX_REGI, rolI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, rolI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGI, rolI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGI, rolI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RDI_REGI, rolI_rReg_Var_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
+        (
+#line 12713 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && n->bottom_type()->basic_type() == T_INT
+#line 17640 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RCX_REGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, rolI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, rolI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, rolI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, rolI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, rolI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, rolI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, rolI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, rolI_rReg_Var_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8605 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12699 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
-#line 13952 "dfa_x86.cpp"
+#line 17675 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -13982,9 +17705,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8593 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
-#line 13987 "dfa_x86.cpp"
+#line 12687 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
+#line 17710 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -14017,9 +17740,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8581 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12675 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
-#line 14022 "dfa_x86.cpp"
+#line 17745 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -14088,25 +17811,57 @@ void  State::_sub_Op_RotateLeftV(const Node *n){
 void  State::_sub_Op_RotateRight(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8770 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-n->bottom_type()->basic_type() == T_LONG
-#line 14093 "dfa_x86.cpp"
+#line 12923 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && n->bottom_type()->basic_type() == T_LONG
+#line 17816 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RCX_REGI]+100;
-        DFA_PRODUCTION(RREGL, rorL_rReg_Var_rule, c)
+        DFA_PRODUCTION(RREGL, rorL_rReg_Var_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, rorL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RAX_REGL, rorL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, rorL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGL, rorL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGL, rorL_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(R11_REGL, rorL_rReg_Var_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
+        (
+#line 12910 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && n->bottom_type()->basic_type() == T_LONG
+#line 17832 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RCX_REGI]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, rorL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, rorL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, rorL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, rorL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, rorL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, rorL_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, rorL_rReg_Var_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8757 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12897 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
-#line 14109 "dfa_x86.cpp"
+#line 17864 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI8]+175;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -14136,9 +17891,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8746 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12886 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
-#line 14141 "dfa_x86.cpp"
+#line 17896 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -14168,9 +17923,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8733 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12873 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
-#line 14173 "dfa_x86.cpp"
+#line 17928 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -14200,26 +17955,61 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8669 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-n->bottom_type()->basic_type() == T_INT
-#line 14205 "dfa_x86.cpp"
+#line 12791 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && n->bottom_type()->basic_type() == T_INT
+#line 17960 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RCX_REGI]+100;
-        DFA_PRODUCTION(RREGI, rorI_rReg_Var_rule, c)
+        DFA_PRODUCTION(RREGI, rorI_rReg_Var_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, rorI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, rorI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RBX_REGI, rorI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, rorI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGI, rorI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGI, rorI_rReg_Var_ndd_rule, c)
+        DFA_PRODUCTION(RDI_REGI, rorI_rReg_Var_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
+        (
+#line 12778 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && n->bottom_type()->basic_type() == T_INT
+#line 17977 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RCX_REGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, rorI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, rorI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, rorI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, rorI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, rorI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, rorI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, rorI_rReg_Var_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, rorI_rReg_Var_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8656 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12765 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
-#line 14222 "dfa_x86.cpp"
+#line 18012 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8]+175;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -14252,9 +18042,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8645 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
-VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
-#line 14257 "dfa_x86.cpp"
+#line 12754 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
+#line 18047 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -14287,9 +18077,9 @@ VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8632 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12741 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2() && n->bottom_type()->basic_type() == T_INT
-#line 14292 "dfa_x86.cpp"
+#line 18082 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -14462,10 +18252,10 @@ void  State::_sub_Op_CopySignF(const Node *n){
 void  State::_sub_Op_SaturatingAddV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC__LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10858 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25526 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14468 "dfa_x86.cpp"
+#line 18258 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC__LOADVECTOR_MEMORY_]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vector_addsub_saturating_unsigned_subword_masked_mem_rule, c)
@@ -14473,10 +18263,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC__LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10843 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25511 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14479 "dfa_x86.cpp"
+#line 18269 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC__LOADVECTOR_MEMORY_]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14488,10 +18278,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10828 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25496 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14494 "dfa_x86.cpp"
+#line 18284 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14503,10 +18293,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10813 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25481 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14509 "dfa_x86.cpp"
+#line 18299 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14518,10 +18308,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 10798 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25466 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14524 "dfa_x86.cpp"
+#line 18314 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14533,10 +18323,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 10782 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25450 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14539 "dfa_x86.cpp"
+#line 18329 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14548,11 +18338,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10731 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25399 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned() &&
             Matcher::vector_length_in_bytes(n) <= 32 && !VM_Version::supports_avx512vl()
-#line 14555 "dfa_x86.cpp"
+#line 18345 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14564,11 +18354,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10714 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25382 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned() &&
             (Matcher::vector_length_in_bytes(n) == 64 || VM_Version::supports_avx512vl())
-#line 14571 "dfa_x86.cpp"
+#line 18361 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14580,11 +18370,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10695 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25363 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned() &&
             Matcher::vector_length_in_bytes(n) <= 32 && !VM_Version::supports_avx512vl()
-#line 14587 "dfa_x86.cpp"
+#line 18377 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14596,11 +18386,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10675 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25343 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned() &&
             (Matcher::vector_length_in_bytes(n) == 64 || VM_Version::supports_avx512vl())
-#line 14603 "dfa_x86.cpp"
+#line 18393 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14612,10 +18402,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10659 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25327 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14618 "dfa_x86.cpp"
+#line 18408 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14627,10 +18417,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10643 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25311 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14633 "dfa_x86.cpp"
+#line 18423 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14644,10 +18434,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
 void  State::_sub_Op_SaturatingSubV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC__LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10858 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25526 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14650 "dfa_x86.cpp"
+#line 18440 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC__LOADVECTOR_MEMORY_]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vector_addsub_saturating_unsigned_subword_masked_mem_0_rule, c)
@@ -14655,10 +18445,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC__LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10843 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25511 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14661 "dfa_x86.cpp"
+#line 18451 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC__LOADVECTOR_MEMORY_]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14670,10 +18460,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10828 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25496 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14676 "dfa_x86.cpp"
+#line 18466 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14685,10 +18475,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10813 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25481 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14691 "dfa_x86.cpp"
+#line 18481 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14700,10 +18490,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 10798 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25466 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14706 "dfa_x86.cpp"
+#line 18496 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14715,10 +18505,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 10782 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25450 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14721 "dfa_x86.cpp"
+#line 18511 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14730,11 +18520,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10765 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25433 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned() &&
             Matcher::vector_length_in_bytes(n) <= 32 && !VM_Version::supports_avx512vl()
-#line 14737 "dfa_x86.cpp"
+#line 18527 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14746,11 +18536,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10748 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25416 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned() &&
             (Matcher::vector_length_in_bytes(n) == 64 || VM_Version::supports_avx512vl())
-#line 14753 "dfa_x86.cpp"
+#line 18543 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14762,11 +18552,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10695 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25363 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned() &&
             Matcher::vector_length_in_bytes(n) <= 32 && !VM_Version::supports_avx512vl()
-#line 14769 "dfa_x86.cpp"
+#line 18559 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14778,11 +18568,11 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10675 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25343 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned() &&
             (Matcher::vector_length_in_bytes(n) == 64 || VM_Version::supports_avx512vl())
-#line 14785 "dfa_x86.cpp"
+#line 18575 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14794,10 +18584,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10659 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25327 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && n->as_SaturatingVector()->is_unsigned()
-#line 14800 "dfa_x86.cpp"
+#line 18590 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14809,10 +18599,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 10643 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25311 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) &&
             n->is_SaturatingVector() && !n->as_SaturatingVector()->is_unsigned()
-#line 14815 "dfa_x86.cpp"
+#line 18605 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14844,9 +18634,9 @@ void  State::_sub_Op_SignumF(const Node *n){
 void  State::_sub_Op_SignumVF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_VEC) &&
         (
-#line 6743 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21374 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
-#line 14849 "dfa_x86.cpp"
+#line 18639 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC_VEC]+100;
         DFA_PRODUCTION(VEC, signumV_reg_evex_rule, c)
@@ -14854,9 +18644,9 @@ VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_VEC) &&
         (
-#line 6728 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21359 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n) <= 32
-#line 14859 "dfa_x86.cpp"
+#line 18649 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC_VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14870,9 +18660,9 @@ VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
 void  State::_sub_Op_SignumVD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_VEC) &&
         (
-#line 6743 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21374 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
-#line 14875 "dfa_x86.cpp"
+#line 18665 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC_VEC]+100;
         DFA_PRODUCTION(VEC, signumV_reg_evex_0_rule, c)
@@ -14880,9 +18670,9 @@ VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_VEC) &&
         (
-#line 6728 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21359 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n) <= 32
-#line 14885 "dfa_x86.cpp"
+#line 18675 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC_VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -14894,12 +18684,7 @@ VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
     }
 }
 void  State::_sub_Op_SqrtD(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGD) &&
-        (
-#line 3722 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-UseSSE>=2
-#line 14901 "dfa_x86.cpp"
-) ) {
+    if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+100;
         DFA_PRODUCTION(REGD, sqrtD_reg_rule, c)
         DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
@@ -14908,12 +18693,7 @@ UseSSE>=2
     }
 }
 void  State::_sub_Op_SqrtF(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGF) &&
-        (
-#line 3710 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-UseSSE>=1
-#line 14915 "dfa_x86.cpp"
-) ) {
+    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+100;
         DFA_PRODUCTION(REGF, sqrtF_reg_rule, c)
         DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
@@ -15006,9 +18786,9 @@ void  State::_sub_Op_StoreB(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI_0) &&
         (
-#line 5298 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8305 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr)
-#line 15011 "dfa_x86.cpp"
+#line 18791 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI_0]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15025,18 +18805,18 @@ UseCompressedOops && (CompressedOops::base() == nullptr)
 void  State::_sub_Op_StoreC(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _CONVF2HF_REGF_) &&
         (
-#line 3743 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18413 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 2) && VM_Version::supports_avx512vl()
-#line 15030 "dfa_x86.cpp"
+#line 18810 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_CONVF2HF_REGF_]+100;
         DFA_PRODUCTION(UNIVERSE, convF2HF_mem_reg_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI16) &&
         (
-#line 5284 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8291 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseStoreImmI16
-#line 15039 "dfa_x86.cpp"
+#line 18819 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI16]+150;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15045,9 +18825,9 @@ UseStoreImmI16
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI_0) &&
         (
-#line 5271 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8278 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr)
-#line 15050 "dfa_x86.cpp"
+#line 18830 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI_0]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15064,18 +18844,18 @@ UseCompressedOops && (CompressedOops::base() == nullptr)
 void  State::_sub_Op_StoreD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMD0) &&
         (
-#line 5389 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8396 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr)
-#line 15069 "dfa_x86.cpp"
+#line 18849 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMD0]+25;
         DFA_PRODUCTION(UNIVERSE, storeD0_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMD0) &&
         (
-#line 5376 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8383 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !UseCompressedOops || (CompressedOops::base() != nullptr)
-#line 15078 "dfa_x86.cpp"
+#line 18858 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMD0]+50;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15096,9 +18876,9 @@ void  State::_sub_Op_StoreF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMF0) &&
         (
-#line 5337 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8344 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr)
-#line 15101 "dfa_x86.cpp"
+#line 18881 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMF0]+25;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15176,9 +18956,9 @@ void  State::_sub_Op_StoreI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _URSHIFTI__LOADI_MEMORY__RCX_REGI) &&
         (
-#line 8267 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12258 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 15181 "dfa_x86.cpp"
+#line 18961 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_URSHIFTI__LOADI_MEMORY__RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15194,9 +18974,9 @@ void  State::_sub_Op_StoreI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _RSHIFTI__LOADI_MEMORY__RCX_REGI) &&
         (
-#line 8189 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12151 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 15199 "dfa_x86.cpp"
+#line 18979 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_RSHIFTI__LOADI_MEMORY__RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15212,9 +18992,9 @@ void  State::_sub_Op_StoreI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _LSHIFTI__LOADI_MEMORY__RCX_REGI) &&
         (
-#line 8111 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12044 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 15217 "dfa_x86.cpp"
+#line 18997 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_LSHIFTI__LOADI_MEMORY__RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15244,9 +19024,9 @@ void  State::_sub_Op_StoreI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _ADDI__LOADI_MEMORY__IMMI_M1) &&
         (
-#line 6726 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10187 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseIncDec
-#line 15249 "dfa_x86.cpp"
+#line 19029 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_ADDI__LOADI_MEMORY__IMMI_M1]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15255,9 +19035,9 @@ UseIncDec
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _ADDI__LOADI_MEMORY__IMMI_1) &&
         (
-#line 6697 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10131 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseIncDec
-#line 15260 "dfa_x86.cpp"
+#line 19040 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_ADDI__LOADI_MEMORY__IMMI_1]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15293,9 +19073,9 @@ UseIncDec
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI_0) &&
         (
-#line 5219 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8226 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr)
-#line 15298 "dfa_x86.cpp"
+#line 19078 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI_0]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15324,9 +19104,9 @@ void  State::_sub_Op_StoreL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _ORL__LOADL_MEMORY__IMML_POW2) &&
         (
-#line 9625 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 14147 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 log2i_graceful(n->in(3)->in(2)->get_long()) > 31
-#line 15329 "dfa_x86.cpp"
+#line 19109 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_ORL__LOADL_MEMORY__IMML_POW2]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15356,9 +19136,9 @@ log2i_graceful(n->in(3)->in(2)->get_long()) > 31
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _ANDL__LOADL_MEMORY__IMML_NOTPOW2) &&
         (
-#line 9396 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13830 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 log2i_graceful(~n->in(3)->in(2)->get_long()) > 30
-#line 15361 "dfa_x86.cpp"
+#line 19141 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_ANDL__LOADL_MEMORY__IMML_NOTPOW2]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15388,9 +19168,9 @@ log2i_graceful(~n->in(3)->in(2)->get_long()) > 30
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _URSHIFTL__LOADL_MEMORY__RCX_REGI) &&
         (
-#line 8515 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12609 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 15393 "dfa_x86.cpp"
+#line 19173 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_URSHIFTL__LOADL_MEMORY__RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15406,9 +19186,9 @@ log2i_graceful(~n->in(3)->in(2)->get_long()) > 30
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _RSHIFTL__LOADL_MEMORY__RCX_REGI) &&
         (
-#line 8437 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12502 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 15411 "dfa_x86.cpp"
+#line 19191 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_RSHIFTL__LOADL_MEMORY__RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15424,9 +19204,9 @@ log2i_graceful(~n->in(3)->in(2)->get_long()) > 30
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _LSHIFTL__LOADL_MEMORY__RCX_REGI) &&
         (
-#line 8359 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12395 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 15429 "dfa_x86.cpp"
+#line 19209 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_LSHIFTL__LOADL_MEMORY__RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15456,9 +19236,9 @@ log2i_graceful(~n->in(3)->in(2)->get_long()) > 30
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _ADDL__LOADL_MEMORY__IMML_M1) &&
         (
-#line 6901 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10476 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseIncDec
-#line 15461 "dfa_x86.cpp"
+#line 19241 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_ADDL__LOADL_MEMORY__IMML_M1]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15467,9 +19247,9 @@ UseIncDec
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _ADDL__LOADL_MEMORY__IMML1) &&
         (
-#line 6872 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 10420 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseIncDec
-#line 15472 "dfa_x86.cpp"
+#line 19252 "dfa_x86.cpp"
 ) && /*dst*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_ADDL__LOADL_MEMORY__IMML1]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15505,9 +19285,9 @@ UseIncDec
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMML0) &&
         (
-#line 5245 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8252 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr)
-#line 15510 "dfa_x86.cpp"
+#line 19290 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMML0]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15521,21 +19301,54 @@ UseCompressedOops && (CompressedOops::base() == nullptr)
       }
     }
 }
+void  State::_sub_Op_StoreLSpecial(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 168 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+UseG1GC
+#line 19309 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGL]+100;
+        DFA_PRODUCTION(UNIVERSE, g1StoreLSpecialTwoOops_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_IMMI_4) &&
+        (
+#line 135 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+UseG1GC
+#line 19318 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGL_IMMI_4]+100;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, g1StoreLSpecialOneOopOff4_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGL_IMMI_0) &&
+        (
+#line 106 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+UseG1GC
+#line 19329 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGL_IMMI_0]+100;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, g1StoreLSpecialOneOopOff0_rule, c)
+      }
+    }
+}
 void  State::_sub_Op_StoreP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], ANY_REGP) &&
         (
-#line 77 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 76 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_Store()->barrier_data() != 0
-#line 15529 "dfa_x86.cpp"
+#line 19342 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[ANY_REGP]+125;
         DFA_PRODUCTION(UNIVERSE, g1StoreP_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMP0) &&
         (
-#line 169 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 173 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->as_Store()->barrier_data() != 0
-#line 15538 "dfa_x86.cpp"
+#line 19351 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMP0]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15544,9 +19357,9 @@ UseZGC && n->as_Store()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], ANY_REGP) &&
         (
-#line 153 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 157 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 UseZGC && n->as_Store()->barrier_data() != 0
-#line 15549 "dfa_x86.cpp"
+#line 19362 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[ANY_REGP]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15555,9 +19368,9 @@ UseZGC && n->as_Store()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMP31) &&
         (
-#line 5136 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8143 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Store()->barrier_data() == 0
-#line 15560 "dfa_x86.cpp"
+#line 19373 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMP31]+150;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15566,9 +19379,9 @@ n->as_Store()->barrier_data() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMP0) &&
         (
-#line 5122 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8129 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseCompressedOops && (CompressedOops::base() == nullptr) && n->as_Store()->barrier_data() == 0
-#line 15571 "dfa_x86.cpp"
+#line 19384 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMP0]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15577,9 +19390,9 @@ UseCompressedOops && (CompressedOops::base() == nullptr) && n->as_Store()->barri
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], ANY_REGP) &&
         (
-#line 5109 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8116 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Store()->barrier_data() == 0
-#line 15582 "dfa_x86.cpp"
+#line 19395 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[ANY_REGP]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15590,18 +19403,18 @@ n->as_Store()->barrier_data() == 0
 void  State::_sub_Op_StoreN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _ENCODEP_ANY_REGP_) &&
         (
-#line 138 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 247 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_Store()->barrier_data() != 0
-#line 15595 "dfa_x86.cpp"
+#line 19408 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_ENCODEP_ANY_REGP_]+125;
         DFA_PRODUCTION(UNIVERSE, g1EncodePAndStoreN_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGN) &&
         (
-#line 106 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 216 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 UseG1GC && n->as_Store()->barrier_data() != 0
-#line 15604 "dfa_x86.cpp"
+#line 19417 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGN]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15610,9 +19423,9 @@ UseG1GC && n->as_Store()->barrier_data() != 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMN) &&
         (
-#line 5188 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8195 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Store()->barrier_data() == 0
-#line 15615 "dfa_x86.cpp"
+#line 19428 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMN]+150;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15621,9 +19434,9 @@ n->as_Store()->barrier_data() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMN0) &&
         (
-#line 5175 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8182 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 CompressedOops::base() == nullptr && n->as_Store()->barrier_data() == 0
-#line 15626 "dfa_x86.cpp"
+#line 19439 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMN0]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15632,9 +19445,9 @@ CompressedOops::base() == nullptr && n->as_Store()->barrier_data() == 0
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGN) &&
         (
-#line 5150 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 8157 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Store()->barrier_data() == 0
-#line 15637 "dfa_x86.cpp"
+#line 19450 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGN]+125;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -15657,9 +19470,9 @@ void  State::_sub_Op_StoreNKlass(const Node *n){
 void  State::_sub_Op_StrComp(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RSI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RCX_REGI) &&
         (
-#line 10848 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15822 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::UL
-#line 15662 "dfa_x86.cpp"
+#line 19475 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RSI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RDI_REGP_RCX_REGI]+100;
         DFA_PRODUCTION(RAX_REGI, string_compareUL_evex_rule, c)
@@ -15674,9 +19487,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RSI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RCX_REGI) &&
         (
-#line 10832 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15806 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::UL
-#line 15679 "dfa_x86.cpp"
+#line 19492 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RSI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RDI_REGP_RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15709,9 +19522,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RCX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RDX_REGI) &&
         (
-#line 10816 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15790 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::LU
-#line 15714 "dfa_x86.cpp"
+#line 19527 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RCX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15744,9 +19557,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RCX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RDX_REGI) &&
         (
-#line 10800 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15774 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::LU
-#line 15749 "dfa_x86.cpp"
+#line 19562 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RCX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15779,9 +19592,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RCX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RDX_REGI) &&
         (
-#line 10784 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15758 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::UU
-#line 15784 "dfa_x86.cpp"
+#line 19597 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RCX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15814,9 +19627,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RCX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RDX_REGI) &&
         (
-#line 10768 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15742 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::UU
-#line 15819 "dfa_x86.cpp"
+#line 19632 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RCX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15849,9 +19662,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RCX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RDX_REGI) &&
         (
-#line 10752 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15726 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 15854 "dfa_x86.cpp"
+#line 19667 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RCX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15884,9 +19697,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RCX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RDX_REGI) &&
         (
-#line 10736 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15710 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 15889 "dfa_x86.cpp"
+#line 19702 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RCX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15921,9 +19734,9 @@ VM_Version::supports_avx512vlbw() && ((StrCompNode*)n)->encoding() == StrIntrins
 void  State::_sub_Op_StrCompressedCopy(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RDX_REGI) &&
         (
-#line 11203 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16177 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
-#line 15926 "dfa_x86.cpp"
+#line 19739 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[_BINARY_RDI_REGP_RDX_REGI]+100;
         DFA_PRODUCTION(RAX_REGI, string_compress_evex_rule, c)
@@ -15938,9 +19751,9 @@ VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RDX_REGI) &&
         (
-#line 11186 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16160 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() || !VM_Version::supports_bmi2()
-#line 15943 "dfa_x86.cpp"
+#line 19756 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[_BINARY_RDI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -15975,9 +19788,9 @@ VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
 void  State::_sub_Op_StrEquals(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RSI_REGP) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 11047 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16021 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw()
-#line 15980 "dfa_x86.cpp"
+#line 19793 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RSI_REGP]+_kids[1]->_cost[RCX_REGI]+100;
         DFA_PRODUCTION(RAX_REGI, string_equals_evex_rule, c)
@@ -15992,9 +19805,9 @@ VM_Version::supports_avx512vlbw()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RSI_REGP) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 11031 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16005 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw()
-#line 15997 "dfa_x86.cpp"
+#line 19810 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RSI_REGP]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
@@ -16029,9 +19842,9 @@ VM_Version::supports_avx512vlbw()
 void  State::_sub_Op_StrIndexOf(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RAX_REGI) &&
         (
-#line 10985 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15959 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UL)
-#line 16034 "dfa_x86.cpp"
+#line 19847 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RAX_REGI]+100;
         DFA_PRODUCTION(RBX_REGI, string_indexofUL_rule, c)
@@ -16046,9 +19859,9 @@ UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UL)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RAX_REGI) &&
         (
-#line 10968 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15942 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UU)
-#line 16051 "dfa_x86.cpp"
+#line 19864 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RAX_REGI]+100;
       if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
@@ -16081,9 +19894,9 @@ UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UU)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_RAX_REGI) &&
         (
-#line 10951 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15925 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::LL)
-#line 16086 "dfa_x86.cpp"
+#line 19899 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_RAX_REGI]+100;
       if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
@@ -16116,9 +19929,9 @@ UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::LL)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_IMMI) &&
         (
-#line 10923 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15897 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UL)
-#line 16121 "dfa_x86.cpp"
+#line 19934 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_IMMI]+100;
       if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
@@ -16151,9 +19964,9 @@ UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UL)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_IMMI) &&
         (
-#line 10894 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15868 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UU)
-#line 16156 "dfa_x86.cpp"
+#line 19969 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_IMMI]+100;
       if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
@@ -16186,9 +19999,9 @@ UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UU)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RSI_REGP_IMMI) &&
         (
-#line 10865 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15839 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::LL)
-#line 16191 "dfa_x86.cpp"
+#line 20004 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RSI_REGP_IMMI]+100;
       if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
@@ -16223,9 +20036,9 @@ UseSSE42Intrinsics && (((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::LL)
 void  State::_sub_Op_StrIndexOfChar(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], RAX_REGI) &&
         (
-#line 11016 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15990 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfCharNode*)n)->encoding() == StrIntrinsicNode::L)
-#line 16228 "dfa_x86.cpp"
+#line 20041 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[RAX_REGI]+100;
         DFA_PRODUCTION(RBX_REGI, stringL_indexof_char_rule, c)
@@ -16240,9 +20053,9 @@ UseSSE42Intrinsics && (((StrIndexOfCharNode*)n)->encoding() == StrIntrinsicNode:
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], RAX_REGI) &&
         (
-#line 11002 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 15976 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE42Intrinsics && (((StrIndexOfCharNode*)n)->encoding() == StrIntrinsicNode::U)
-#line 16245 "dfa_x86.cpp"
+#line 20058 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[RAX_REGI]+100;
       if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
@@ -16277,18 +20090,18 @@ UseSSE42Intrinsics && (((StrIndexOfCharNode*)n)->encoding() == StrIntrinsicNode:
 void  State::_sub_Op_StrInflatedCopy(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RDX_REGI) &&
         (
-#line 11234 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16208 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
-#line 16282 "dfa_x86.cpp"
+#line 20095 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[_BINARY_RDI_REGP_RDX_REGI]+100;
         DFA_PRODUCTION(UNIVERSE, string_inflate_evex_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], RSI_REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RDI_REGP_RDX_REGI) &&
         (
-#line 11220 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16194 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() || !VM_Version::supports_bmi2()
-#line 16291 "dfa_x86.cpp"
+#line 20104 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RSI_REGP]+_kids[1]->_cost[_BINARY_RDI_REGP_RDX_REGI]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -16299,7 +20112,7 @@ VM_Version::supports_avx512vlbw() && VM_Version::supports_bmi2()
 void  State::_sub_Op_SubHF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+100;
-        DFA_PRODUCTION(REGF, scalar_binOps_HF_reg_4_rule, c)
+        DFA_PRODUCTION(REGF, scalar_binOps_HF_reg_2_rule, c)
         DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
         DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
         DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
@@ -16308,9 +20121,9 @@ void  State::_sub_Op_SubHF(const Node *n){
 void  State::_sub_Op_SubD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3314 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17986 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 16313 "dfa_x86.cpp"
+#line 20126 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
         DFA_PRODUCTION(REGD, subD_reg_imm_rule, c)
@@ -16320,9 +20133,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3302 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17974 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 16325 "dfa_x86.cpp"
+#line 20138 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -16340,9 +20153,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3290 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17962 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 16345 "dfa_x86.cpp"
+#line 20158 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -16360,9 +20173,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMD) &&
         (
-#line 3279 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 16365 "dfa_x86.cpp"
+#line 17951 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 20178 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -16380,9 +20193,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORY_) &&
         (
-#line 3267 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 16385 "dfa_x86.cpp"
+#line 17939 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 20198 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -16400,9 +20213,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) &&
         (
-#line 3255 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=2) && (UseAVX == 0)
-#line 16405 "dfa_x86.cpp"
+#line 17927 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 20218 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+150;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -16422,9 +20235,9 @@ UseAVX > 0
 void  State::_sub_Op_SubF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3243 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17915 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 16427 "dfa_x86.cpp"
+#line 20240 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
         DFA_PRODUCTION(REGF, subF_reg_imm_rule, c)
@@ -16434,9 +20247,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3231 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17903 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 16439 "dfa_x86.cpp"
+#line 20252 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -16454,9 +20267,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3219 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 17891 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 16459 "dfa_x86.cpp"
+#line 20272 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -16474,9 +20287,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMF) &&
         (
-#line 3208 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 16479 "dfa_x86.cpp"
+#line 17880 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 20292 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -16494,9 +20307,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORY_) &&
         (
-#line 3196 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 16499 "dfa_x86.cpp"
+#line 17868 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 20312 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -16514,9 +20327,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) &&
         (
-#line 3184 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(UseSSE>=1) && (UseAVX == 0)
-#line 16519 "dfa_x86.cpp"
+#line 17856 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAVX == 0
+#line 20332 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+150;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -16542,17 +20355,57 @@ void  State::_sub_Op_SubI(const Node *n){
       unsigned int c = _kids[0]->_cost[IMMI_0]+_kids[1]->_cost[_LOADI_MEMORY_];
         DFA_PRODUCTION(_SUBI_IMMI_0__LOADI_MEMORY_, _SubI_immI_0__LoadI_memory__rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], IMMI_0) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], IMMI_0) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11407 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20362 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0]+_kids[1]->_cost[RREGI]+100;
-        DFA_PRODUCTION(RREGI, negI_rReg_rule, c)
+        DFA_PRODUCTION(RREGI, negI_rReg_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+        DFA_PRODUCTION(RAX_REGI, negI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, negI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RBX_REGI, negI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, negI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGI, negI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGI, negI_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RDI_REGI, negI_rReg_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_0) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11393 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 20379 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_0]+_kids[1]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, negI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
         DFA_PRODUCTION(RAX_REGI, negI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGI, negI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
         DFA_PRODUCTION(RBX_REGI, negI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGI, negI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
         DFA_PRODUCTION(RCX_REGI, negI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
         DFA_PRODUCTION(RDX_REGI, negI_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
         DFA_PRODUCTION(RDI_REGI, negI_rReg_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], IMMI_0) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0]+_kids[1]->_cost[RREGI];
@@ -16562,7 +20415,82 @@ void  State::_sub_Op_SubI(const Node *n){
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI];
         DFA_PRODUCTION(_SUBI__LOADI_MEMORY__RREGI, _SubI__LoadI_memory__rRegI_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11235 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20422 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, subI_rReg_mem_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 11220 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20457 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, subI_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 11205 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 20492 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, subI_rReg_mem_rule, c)
@@ -16592,7 +20520,117 @@ void  State::_sub_Op_SubI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, subI_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 11191 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20527 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, subI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 11177 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20562 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, subI_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11163 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20597 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, subI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, subI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, subI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, subI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, subI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, subI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, subI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, subI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 11149 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 20632 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, subI_rReg_rule, c)
@@ -16632,22 +20670,128 @@ void  State::_sub_Op_SubL(const Node *n){
       unsigned int c = _kids[0]->_cost[IMML0]+_kids[1]->_cost[_LOADL_MEMORY_];
         DFA_PRODUCTION(_SUBL_IMML0__LOADL_MEMORY_, _SubL_immL0__LoadL_memory__rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], IMML0) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], IMML0) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11476 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20677 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[IMML0]+_kids[1]->_cost[RREGL]+100;
-        DFA_PRODUCTION(RREGL, negL_rReg_rule, c)
+        DFA_PRODUCTION(RREGL, negL_rReg_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, negL_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RAX_REGL, negL_rReg_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, negL_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGL, negL_rReg_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGL, negL_rReg_ndd_rule, c)
+        DFA_PRODUCTION(R11_REGL, negL_rReg_ndd_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMML0) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11462 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 20693 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMML0]+_kids[1]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, negL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
         DFA_PRODUCTION(NO_RAX_RDX_REGL, negL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
         DFA_PRODUCTION(RAX_REGL, negL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
         DFA_PRODUCTION(NO_RBP_R13_REGL, negL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
         DFA_PRODUCTION(RCX_REGL, negL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
         DFA_PRODUCTION(RDX_REGL, negL_rReg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
         DFA_PRODUCTION(R11_REGL, negL_rReg_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL];
         DFA_PRODUCTION(_SUBL__LOADL_MEMORY__RREGL, _SubL__LoadL_memory__rRegL_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11350 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20729 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, subL_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, subL_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, subL_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, subL_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, subL_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, subL_rReg_mem_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, subL_rReg_mem_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 11335 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20761 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, subL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, subL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, subL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, subL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, subL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, subL_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, subL_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 11320 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 20793 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, subL_rReg_mem_rule, c)
@@ -16674,7 +20818,108 @@ void  State::_sub_Op_SubL(const Node *n){
         DFA_PRODUCTION(R11_REGL, subL_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 11306 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20825 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, subL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, subL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, subL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, subL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, subL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, subL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, subL_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 11292 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20857 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, subL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, subL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, subL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, subL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, subL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, subL_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, subL_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11278 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 20889 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, subL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, subL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, subL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, subL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, subL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, subL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, subL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 11264 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 20921 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, subL_rReg_rule, c)
@@ -16731,9 +20976,9 @@ void  State::_sub_Op_MacroLogicV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], _BINARY__LOADVECTOR_MEMORY__IMMU8) &&
         (
-#line 9406 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24081 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)->in(1)) > 8
-#line 16736 "dfa_x86.cpp"
+#line 20981 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[_BINARY__LOADVECTOR_MEMORY__IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -16774,9 +21019,9 @@ void  State::_sub_Op_ThreadLocal(const Node *n){
 void  State::_sub_Op_URShiftI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8292 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12283 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 16779 "dfa_x86.cpp"
+#line 21024 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+175;
         DFA_PRODUCTION(RREGI, shrI_mem_rReg_rule, c)
@@ -16791,9 +21036,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8280 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12271 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 16796 "dfa_x86.cpp"
+#line 21041 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -16830,9 +21075,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8253 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12244 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 16835 "dfa_x86.cpp"
+#line 21080 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -16867,7 +21112,82 @@ VM_Version::supports_bmi2()
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8];
         DFA_PRODUCTION(_URSHIFTI__LOADI_MEMORY__IMMI8, _URShiftI__LoadI_memory__immI8_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12217 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21119 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, shrI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12203 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21154 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, shrI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, shrI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, shrI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, shrI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, shrI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, shrI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, shrI_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, shrI_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12189 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 21189 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, shrI_rReg_imm_rule, c)
@@ -16901,9 +21221,9 @@ VM_Version::supports_bmi2()
 void  State::_sub_Op_URShiftL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8540 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12634 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 16906 "dfa_x86.cpp"
+#line 21226 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGI]+175;
         DFA_PRODUCTION(RREGL, shrL_mem_rReg_rule, c)
@@ -16917,9 +21237,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 8528 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12622 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_bmi2()
-#line 16922 "dfa_x86.cpp"
+#line 21242 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -16953,9 +21273,9 @@ VM_Version::supports_bmi2()
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RCX_REGI) &&
         (
-#line 8501 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 12595 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_bmi2()
-#line 16958 "dfa_x86.cpp"
+#line 21278 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RCX_REGI]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -16987,7 +21307,76 @@ VM_Version::supports_bmi2()
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI8];
         DFA_PRODUCTION(_URSHIFTL__LOADL_MEMORY__IMMI8, _URShiftL__LoadL_memory__immI8_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12568 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21314 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, shrL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, shrL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, shrL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, shrL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, shrL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, shrL_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, shrL_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12554 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21346 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, shrL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, shrL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, shrL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, shrL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, shrL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, shrL_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, shrL_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 12540 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 21378 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, shrL_rReg_imm_rule, c)
@@ -17036,19 +21425,99 @@ void  State::_sub_Op_XorI(const Node *n){
       unsigned int c = _kids[0]->_cost[_LOADB_MEMORY_]+_kids[1]->_cost[RREGI];
         DFA_PRODUCTION(_XORI__LOADB_MEMORY__RREGI, _XorI__LoadB_memory__rRegI_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13604 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21432 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
-        DFA_PRODUCTION(RREGI, xorI_rReg_mem_0_rule, c)
+        DFA_PRODUCTION(RREGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
-        DFA_PRODUCTION(RAX_REGI, xorI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RBX_REGI, xorI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RCX_REGI, xorI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RDX_REGI, xorI_rReg_mem_0_rule, c)
-        DFA_PRODUCTION(RDI_REGI, xorI_rReg_mem_0_rule, c)
+        DFA_PRODUCTION(RAX_REGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RBX_REGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RCX_REGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RDX_REGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
+        DFA_PRODUCTION(RDI_REGI, xorI_rReg_rReg_mem_ndd_0_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 13604 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21449 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, xorI_rReg_rReg_mem_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13589 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 21484 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[RREGI]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, xorI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, xorI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, xorI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, xorI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, xorI_rReg_mem_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, xorI_rReg_mem_0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
+        (
+#line 13589 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 21519 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_LOADI_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, xorI_rReg_mem_rule, c)
@@ -17078,7 +21547,82 @@ void  State::_sub_Op_XorI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, xorI_rReg_mem_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13573 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21554 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IMMI]+150;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, xorI_rReg_mem_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13558 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && n->in(2)->bottom_type()->is_int()->get_con() != -1
+#line 21589 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, xorI_rReg_rReg_imm_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
+        (
+#line 13543 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && n->in(2)->bottom_type()->is_int()->get_con() != -1
+#line 21624 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, xorI_rReg_imm_rule, c)
@@ -17108,7 +21652,47 @@ void  State::_sub_Op_XorI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, xorI_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI_M1) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI_M1) &&
+        (
+#line 13529 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21659 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI_M1]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, xorI_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, xorI_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, xorI_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, xorI_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, xorI_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, xorI_rReg_im1_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], IMMI_M1) &&
+        (
+#line 13516 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 21694 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[IMMI_M1]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, xorI_rReg_im1_rule, c)
@@ -17138,7 +21722,47 @@ void  State::_sub_Op_XorI(const Node *n){
         DFA_PRODUCTION(RDI_REGI, xorI_rReg_im1_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13501 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21729 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
+      if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
+        DFA_PRODUCTION(RREGI, xorI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+100) {
+        DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGI) || _cost[RAX_REGI] > c) {
+        DFA_PRODUCTION(RAX_REGI, xorI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGI) || _cost[NO_RBP_R13_REGI] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGI, xorI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RBX_REGI) || _cost[RBX_REGI] > c) {
+        DFA_PRODUCTION(RBX_REGI, xorI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGI) || _cost[NO_RAX_RDX_REGI] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGI, xorI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGI) || _cost[RCX_REGI] > c) {
+        DFA_PRODUCTION(RCX_REGI, xorI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGI) || _cost[RDX_REGI] > c) {
+        DFA_PRODUCTION(RDX_REGI, xorI_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDI_REGI) || _cost[RDI_REGI] > c) {
+        DFA_PRODUCTION(RDI_REGI, xorI_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], RREGI) &&
+        (
+#line 13486 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 21764 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
         DFA_PRODUCTION(RREGI, xorI_rReg_rule, c)
@@ -17170,9 +21794,9 @@ void  State::_sub_Op_XorI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], _ADDI_RREGI_IMMI_M1) &&
         (
-#line 9056 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13273 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 17175 "dfa_x86.cpp"
+#line 21799 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[_ADDI_RREGI_IMMI_M1]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -17205,9 +21829,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI_RREGI_IMMI_M1) && STATE__VALID_CHILD(_kids[1], RREGI) &&
         (
-#line 9056 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13273 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 17210 "dfa_x86.cpp"
+#line 21834 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDI_RREGI_IMMI_M1]+_kids[1]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -17240,9 +21864,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], _ADDI__LOADI_MEMORY__IMMI_M1) &&
         (
-#line 9040 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13257 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 17245 "dfa_x86.cpp"
+#line 21869 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[_ADDI__LOADI_MEMORY__IMMI_M1]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -17275,9 +21899,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI__LOADI_MEMORY__IMMI_M1) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) &&
         (
-#line 9040 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13257 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 17280 "dfa_x86.cpp"
+#line 21904 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDI__LOADI_MEMORY__IMMI_M1]+_kids[1]->_cost[_LOADI_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -17322,18 +21946,124 @@ void  State::_sub_Op_XorL(const Node *n){
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[RREGL];
         DFA_PRODUCTION(_XORL__LOADL_MEMORY__RREGL, _XorL__LoadL_memory__rRegL_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 14282 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 21953 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
-        DFA_PRODUCTION(RREGL, xorL_rReg_mem_rule, c)
+        DFA_PRODUCTION(RREGL, xorL_rReg_rReg_mem_ndd_rule, c)
         DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
-        DFA_PRODUCTION(NO_RAX_RDX_REGL, xorL_rReg_mem_rule, c)
-        DFA_PRODUCTION(RAX_REGL, xorL_rReg_mem_rule, c)
-        DFA_PRODUCTION(NO_RBP_R13_REGL, xorL_rReg_mem_rule, c)
-        DFA_PRODUCTION(RCX_REGL, xorL_rReg_mem_rule, c)
-        DFA_PRODUCTION(RDX_REGL, xorL_rReg_mem_rule, c)
-        DFA_PRODUCTION(R11_REGL, xorL_rReg_mem_rule, c)
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, xorL_rReg_rReg_mem_ndd_rule, c)
+        DFA_PRODUCTION(RAX_REGL, xorL_rReg_rReg_mem_ndd_rule, c)
+        DFA_PRODUCTION(NO_RBP_R13_REGL, xorL_rReg_rReg_mem_ndd_rule, c)
+        DFA_PRODUCTION(RCX_REGL, xorL_rReg_rReg_mem_ndd_rule, c)
+        DFA_PRODUCTION(RDX_REGL, xorL_rReg_rReg_mem_ndd_rule, c)
+        DFA_PRODUCTION(R11_REGL, xorL_rReg_rReg_mem_ndd_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
+        (
+#line 14267 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 21969 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[_LOADL_MEMORY_]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, xorL_rReg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, xorL_rReg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, xorL_rReg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, xorL_rReg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, xorL_rReg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, xorL_rReg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, xorL_rReg_mem_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 14251 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 22001 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IMML32]+150;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, xorL_rReg_mem_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, xorL_rReg_mem_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, xorL_rReg_mem_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, xorL_rReg_mem_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, xorL_rReg_mem_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, xorL_rReg_mem_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, xorL_rReg_mem_imm_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 14236 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX && n->in(2)->bottom_type()->is_long()->get_con() != -1L
+#line 22033 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, xorL_rReg_rReg_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, xorL_rReg_rReg_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, xorL_rReg_rReg_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, xorL_rReg_rReg_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, xorL_rReg_rReg_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, xorL_rReg_rReg_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, xorL_rReg_rReg_imm_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML32) &&
+        (
+#line 14221 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX && n->in(2)->bottom_type()->is_long()->get_con() != -1L
+#line 22065 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML32]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, xorL_rReg_imm_rule, c)
@@ -17360,7 +22090,44 @@ void  State::_sub_Op_XorL(const Node *n){
         DFA_PRODUCTION(R11_REGL, xorL_rReg_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML_M1) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML_M1) &&
+        (
+#line 14206 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 22097 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML_M1]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, xorL_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, xorL_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, xorL_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, xorL_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, xorL_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, xorL_rReg_im1_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, xorL_rReg_im1_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], IMML_M1) &&
+        (
+#line 14194 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 22129 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[IMML_M1]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, xorL_rReg_im1_rule, c)
@@ -17387,7 +22154,44 @@ void  State::_sub_Op_XorL(const Node *n){
         DFA_PRODUCTION(R11_REGL, xorL_rReg_im1_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) ) {
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 14179 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+UseAPX
+#line 22161 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
+      if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
+        DFA_PRODUCTION(RREGL, xorL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+100) {
+        DFA_PRODUCTION(STACKSLOTL, storeSSL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(NO_RAX_RDX_REGL) || _cost[NO_RAX_RDX_REGL] > c) {
+        DFA_PRODUCTION(NO_RAX_RDX_REGL, xorL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RAX_REGL) || _cost[RAX_REGL] > c) {
+        DFA_PRODUCTION(RAX_REGL, xorL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NO_RBP_R13_REGL) || _cost[NO_RBP_R13_REGL] > c) {
+        DFA_PRODUCTION(NO_RBP_R13_REGL, xorL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RCX_REGL) || _cost[RCX_REGL] > c) {
+        DFA_PRODUCTION(RCX_REGL, xorL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(RDX_REGL) || _cost[RDX_REGL] > c) {
+        DFA_PRODUCTION(RDX_REGL, xorL_rReg_ndd_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(R11_REGL) || _cost[R11_REGL] > c) {
+        DFA_PRODUCTION(R11_REGL, xorL_rReg_ndd_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], RREGL) &&
+        (
+#line 14164 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!UseAPX
+#line 22193 "dfa_x86.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
         DFA_PRODUCTION(RREGL, xorL_rReg_rule, c)
@@ -17416,9 +22220,9 @@ void  State::_sub_Op_XorL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL_RREGL_IMML_M1) && STATE__VALID_CHILD(_kids[1], RREGL) &&
         (
-#line 9487 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13921 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 17421 "dfa_x86.cpp"
+#line 22225 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDL_RREGL_IMML_M1]+_kids[1]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -17448,9 +22252,9 @@ UseBMI1Instructions
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL__LOADL_MEMORY__IMML_M1) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) &&
         (
-#line 9471 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 13905 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseBMI1Instructions
-#line 17453 "dfa_x86.cpp"
+#line 22257 "dfa_x86.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_ADDL__LOADL_MEMORY__IMML_M1]+_kids[1]->_cost[_LOADL_MEMORY_]+125;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -17500,10 +22304,10 @@ void  State::_sub_Op_AddVB(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5726 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20341 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17506 "dfa_x86.cpp"
+#line 22310 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17515,10 +22319,10 @@ void  State::_sub_Op_AddVB(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5726 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20341 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17521 "dfa_x86.cpp"
+#line 22325 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17530,9 +22334,9 @@ void  State::_sub_Op_AddVB(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5715 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20330 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 17535 "dfa_x86.cpp"
+#line 22339 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17544,9 +22348,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5705 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20320 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 17549 "dfa_x86.cpp"
+#line 22353 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17574,10 +22378,10 @@ void  State::_sub_Op_AddVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5760 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20375 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17580 "dfa_x86.cpp"
+#line 22384 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17589,10 +22393,10 @@ void  State::_sub_Op_AddVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5760 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20375 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17595 "dfa_x86.cpp"
+#line 22399 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17604,9 +22408,9 @@ void  State::_sub_Op_AddVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5749 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20364 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 17609 "dfa_x86.cpp"
+#line 22413 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17618,9 +22422,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5739 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20354 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 17623 "dfa_x86.cpp"
+#line 22427 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17648,9 +22452,9 @@ void  State::_sub_Op_AddVI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _MULADDVS2VI_VEC_VEC) &&
         (
-#line 9268 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23943 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512_vnni()
-#line 17653 "dfa_x86.cpp"
+#line 22457 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_MULADDVS2VI_VEC_VEC]+10;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17662,9 +22466,9 @@ VM_Version::supports_avx512_vnni()
     }
     if( STATE__VALID_CHILD(_kids[0], _MULADDVS2VI_VEC_VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9268 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23943 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512_vnni()
-#line 17667 "dfa_x86.cpp"
+#line 22471 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_MULADDVS2VI_VEC_VEC]+_kids[1]->_cost[VEC]+10;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17676,10 +22480,10 @@ VM_Version::supports_avx512_vnni()
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5795 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20410 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17682 "dfa_x86.cpp"
+#line 22486 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17691,10 +22495,10 @@ VM_Version::supports_avx512_vnni()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5795 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20410 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17697 "dfa_x86.cpp"
+#line 22501 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17706,9 +22510,9 @@ VM_Version::supports_avx512_vnni()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5783 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20398 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 17711 "dfa_x86.cpp"
+#line 22515 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17720,9 +22524,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5773 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20388 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 17725 "dfa_x86.cpp"
+#line 22529 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17736,9 +22540,9 @@ UseAVX == 0
 void  State::_sub_Op_AddReductionVI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5481 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19964 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
-#line 17741 "dfa_x86.cpp"
+#line 22545 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(RREGI, reductionS_rule, c)
@@ -17753,9 +22557,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5460 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19944 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_avx512bw()
-#line 17758 "dfa_x86.cpp"
+#line 22562 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -17788,9 +22592,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5442 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19926 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_avx512bw()
-#line 17793 "dfa_x86.cpp"
+#line 22597 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -17823,9 +22627,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19657 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_INT
-#line 17828 "dfa_x86.cpp"
+#line 22632 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -17874,10 +22678,10 @@ void  State::_sub_Op_AddVL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5829 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20444 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17880 "dfa_x86.cpp"
+#line 22684 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17889,10 +22693,10 @@ void  State::_sub_Op_AddVL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5829 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20444 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 17895 "dfa_x86.cpp"
+#line 22699 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17904,9 +22708,9 @@ void  State::_sub_Op_AddVL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5818 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20433 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 17909 "dfa_x86.cpp"
+#line 22713 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17918,9 +22722,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5808 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20423 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 17923 "dfa_x86.cpp"
+#line 22727 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -17934,9 +22738,9 @@ UseAVX == 0
 void  State::_sub_Op_AddReductionVL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19697 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_avx512dq()
-#line 17939 "dfa_x86.cpp"
+#line 22743 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(RREGL, reductionL_avx512dq_rule, c)
@@ -17950,9 +22754,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_avx512dq()
-#line 17955 "dfa_x86.cpp"
+#line 22759 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -17998,10 +22802,10 @@ void  State::_sub_Op_AddVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5863 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20478 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18004 "dfa_x86.cpp"
+#line 22808 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18013,10 +22817,10 @@ void  State::_sub_Op_AddVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5863 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20478 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18019 "dfa_x86.cpp"
+#line 22823 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18028,9 +22832,9 @@ void  State::_sub_Op_AddVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5852 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20467 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18033 "dfa_x86.cpp"
+#line 22837 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18042,9 +22846,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5842 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20457 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18047 "dfa_x86.cpp"
+#line 22851 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18055,12 +22859,37 @@ UseAVX == 0
       }
     }
 }
+void  State::_sub_Op_AddVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) && STATE__VALID_CHILD(_kids[1], VEC) ) {
+      unsigned int c = _kids[0]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(VEC, vector_binOps_HF_mem_0_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_binOps_HF_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_binOps_HF_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
 void  State::_sub_Op_AddReductionVF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5330 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19815 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 16
-#line 18063 "dfa_x86.cpp"
+#line 22892 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(REGF, unordered_reduction16F_rule, c)
@@ -18070,9 +22899,9 @@ void  State::_sub_Op_AddReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5313 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19798 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 18075 "dfa_x86.cpp"
+#line 22904 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -18090,9 +22919,9 @@ void  State::_sub_Op_AddReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5296 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19781 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 4
-#line 18095 "dfa_x86.cpp"
+#line 22924 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -18110,9 +22939,9 @@ void  State::_sub_Op_AddReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5279 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19764 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 2
-#line 18115 "dfa_x86.cpp"
+#line 22944 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -18130,9 +22959,9 @@ void  State::_sub_Op_AddReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5261 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19746 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 16
-#line 18135 "dfa_x86.cpp"
+#line 22964 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -18150,9 +22979,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5247 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19732 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 18155 "dfa_x86.cpp"
+#line 22984 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -18170,9 +22999,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5233 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19718 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) <= 4
-#line 18175 "dfa_x86.cpp"
+#line 23004 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -18206,10 +23035,10 @@ void  State::_sub_Op_AddVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5897 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20512 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18212 "dfa_x86.cpp"
+#line 23041 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18221,10 +23050,10 @@ void  State::_sub_Op_AddVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5897 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20512 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18227 "dfa_x86.cpp"
+#line 23056 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18236,9 +23065,9 @@ void  State::_sub_Op_AddVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5886 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20501 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18241 "dfa_x86.cpp"
+#line 23070 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18250,9 +23079,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5876 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20491 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18255 "dfa_x86.cpp"
+#line 23084 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18266,9 +23095,9 @@ UseAVX == 0
 void  State::_sub_Op_AddReductionVD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5425 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19910 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 18271 "dfa_x86.cpp"
+#line 23100 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(REGD, unordered_reduction8D_rule, c)
@@ -18278,9 +23107,9 @@ void  State::_sub_Op_AddReductionVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5408 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19893 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 4
-#line 18283 "dfa_x86.cpp"
+#line 23112 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -18298,9 +23127,9 @@ void  State::_sub_Op_AddReductionVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5391 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19876 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 2
-#line 18303 "dfa_x86.cpp"
+#line 23132 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -18318,9 +23147,9 @@ void  State::_sub_Op_AddReductionVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5374 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19859 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 18323 "dfa_x86.cpp"
+#line 23152 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -18338,9 +23167,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5360 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19845 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 4
-#line 18343 "dfa_x86.cpp"
+#line 23172 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -18358,9 +23187,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5346 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19831 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 2
-#line 18363 "dfa_x86.cpp"
+#line 23192 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -18394,10 +23223,10 @@ void  State::_sub_Op_SubVB(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5933 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20548 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18400 "dfa_x86.cpp"
+#line 23229 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18409,9 +23238,9 @@ void  State::_sub_Op_SubVB(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5922 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20537 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18414 "dfa_x86.cpp"
+#line 23243 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18423,9 +23252,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5912 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20527 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18428 "dfa_x86.cpp"
+#line 23257 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18453,10 +23282,10 @@ void  State::_sub_Op_SubVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 5968 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20583 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18459 "dfa_x86.cpp"
+#line 23288 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18468,9 +23297,9 @@ void  State::_sub_Op_SubVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5957 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20572 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18473 "dfa_x86.cpp"
+#line 23302 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18482,9 +23311,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5946 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20561 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18487 "dfa_x86.cpp"
+#line 23316 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18512,10 +23341,10 @@ void  State::_sub_Op_SubVI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6002 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20617 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18518 "dfa_x86.cpp"
+#line 23347 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18527,9 +23356,9 @@ void  State::_sub_Op_SubVI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5991 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20606 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18532 "dfa_x86.cpp"
+#line 23361 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18541,9 +23370,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5981 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20596 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18546 "dfa_x86.cpp"
+#line 23375 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18571,10 +23400,10 @@ void  State::_sub_Op_SubVL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6037 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20652 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18577 "dfa_x86.cpp"
+#line 23406 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18586,9 +23415,9 @@ void  State::_sub_Op_SubVL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6025 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20640 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18591 "dfa_x86.cpp"
+#line 23420 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18600,9 +23429,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6015 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20630 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18605 "dfa_x86.cpp"
+#line 23434 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18630,10 +23459,10 @@ void  State::_sub_Op_SubVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6071 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20686 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18636 "dfa_x86.cpp"
+#line 23465 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18645,9 +23474,9 @@ void  State::_sub_Op_SubVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6060 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20675 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18650 "dfa_x86.cpp"
+#line 23479 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18659,13 +23488,29 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6050 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20665 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18664 "dfa_x86.cpp"
+#line 23493 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, vsubF_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
+void  State::_sub_Op_SubVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+        DFA_PRODUCTION(VEC, vector_binOps_HF_mem_4_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_binOps_HF_reg_2_rule, c)
       }
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
@@ -18689,10 +23534,10 @@ void  State::_sub_Op_SubVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6105 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20720 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18695 "dfa_x86.cpp"
+#line 23540 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18704,9 +23549,9 @@ void  State::_sub_Op_SubVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6094 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20709 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18709 "dfa_x86.cpp"
+#line 23554 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18718,9 +23563,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6084 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20699 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18723 "dfa_x86.cpp"
+#line 23568 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18734,9 +23579,9 @@ UseAVX == 0
 void  State::_sub_Op_MulVB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6162 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20777 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && Matcher::vector_length_in_bytes(n) > 8
-#line 18739 "dfa_x86.cpp"
+#line 23584 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vmulB_reg_rule, c)
@@ -18744,9 +23589,9 @@ UseAVX > 0 && Matcher::vector_length_in_bytes(n) > 8
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6137 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20752 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0 && Matcher::vector_length_in_bytes(n) > 8
-#line 18749 "dfa_x86.cpp"
+#line 23594 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18758,9 +23603,9 @@ UseAVX == 0 && Matcher::vector_length_in_bytes(n) > 8
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6120 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20735 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) <= 8
-#line 18763 "dfa_x86.cpp"
+#line 23608 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18788,10 +23633,10 @@ void  State::_sub_Op_MulVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6206 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20821 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18794 "dfa_x86.cpp"
+#line 23639 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18803,10 +23648,10 @@ void  State::_sub_Op_MulVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6206 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20821 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18809 "dfa_x86.cpp"
+#line 23654 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18818,9 +23663,9 @@ void  State::_sub_Op_MulVS(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6195 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20810 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18823 "dfa_x86.cpp"
+#line 23668 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18832,9 +23677,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6185 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20800 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18837 "dfa_x86.cpp"
+#line 23682 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18862,10 +23707,10 @@ void  State::_sub_Op_MulVI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6241 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20856 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18868 "dfa_x86.cpp"
+#line 23713 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18877,10 +23722,10 @@ void  State::_sub_Op_MulVI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6241 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20856 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 18883 "dfa_x86.cpp"
+#line 23728 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18892,9 +23737,9 @@ void  State::_sub_Op_MulVI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6230 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20845 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 18897 "dfa_x86.cpp"
+#line 23742 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18906,9 +23751,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6219 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20834 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 18911 "dfa_x86.cpp"
+#line 23756 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -18922,10 +23767,10 @@ UseAVX == 0
 void  State::_sub_Op_MulReductionVI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5516 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19999 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE &&
             Matcher::vector_length(n->in(2)) == 64
-#line 18928 "dfa_x86.cpp"
+#line 23773 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(RREGI, mul_reduction64B_rule, c)
@@ -18940,10 +23785,10 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE &&
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5502 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19985 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE &&
             Matcher::vector_length(n->in(2)) <= 32
-#line 18946 "dfa_x86.cpp"
+#line 23791 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -18976,9 +23821,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE &&
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5481 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19964 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
-#line 18981 "dfa_x86.cpp"
+#line 23826 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -19011,9 +23856,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19657 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_INT
-#line 19016 "dfa_x86.cpp"
+#line 23861 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -19062,9 +23907,9 @@ void  State::_sub_Op_MulVL(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6344 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20959 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && n->as_MulVL()->has_int_inputs()
-#line 19067 "dfa_x86.cpp"
+#line 23912 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19076,9 +23921,9 @@ UseAVX > 0 && n->as_MulVL()->has_int_inputs()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6332 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20947 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && n->as_MulVL()->has_uint_inputs()
-#line 19081 "dfa_x86.cpp"
+#line 23926 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19090,13 +23935,13 @@ UseAVX > 0 && n->as_MulVL()->has_uint_inputs()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6307 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20922 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 &&
             ((Matcher::vector_length_in_bytes(n) == 64 &&
               !VM_Version::supports_avx512dq()) ||
              (Matcher::vector_length_in_bytes(n) < 64 &&
               !VM_Version::supports_avx512vldq()))
-#line 19099 "dfa_x86.cpp"
+#line 23944 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+500;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19108,9 +23953,9 @@ UseAVX > 0 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6285 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20900 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 19113 "dfa_x86.cpp"
+#line 23958 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+500;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19122,12 +23967,12 @@ UseAVX == 0
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6269 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20884 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length_in_bytes(n) == 64 &&
              VM_Version::supports_avx512dq()) ||
             (Matcher::vector_length_in_bytes(n) > 8 &&
              VM_Version::supports_avx512vldq())
-#line 19130 "dfa_x86.cpp"
+#line 23975 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+500;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19139,12 +23984,12 @@ UseAVX == 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6269 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20884 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length_in_bytes(n) == 64 &&
              VM_Version::supports_avx512dq()) ||
             (Matcher::vector_length_in_bytes(n) > 8 &&
              VM_Version::supports_avx512vldq())
-#line 19147 "dfa_x86.cpp"
+#line 23992 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+500;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19156,11 +24001,11 @@ UseAVX == 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6254 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20869 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length_in_bytes(n) == 64 &&
              VM_Version::supports_avx512dq()) ||
             VM_Version::supports_avx512vldq()
-#line 19163 "dfa_x86.cpp"
+#line 24008 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+500;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19174,9 +24019,9 @@ UseAVX == 0
 void  State::_sub_Op_MulReductionVL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19697 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_avx512dq()
-#line 19179 "dfa_x86.cpp"
+#line 24024 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(RREGL, reductionL_avx512dq_0_rule, c)
@@ -19190,9 +24035,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_avx512dq()
-#line 19195 "dfa_x86.cpp"
+#line 24040 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -19238,10 +24083,10 @@ void  State::_sub_Op_MulVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6378 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20993 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 19244 "dfa_x86.cpp"
+#line 24089 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19253,10 +24098,10 @@ void  State::_sub_Op_MulVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6378 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20993 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 19259 "dfa_x86.cpp"
+#line 24104 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19268,9 +24113,9 @@ void  State::_sub_Op_MulVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6367 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20982 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 19273 "dfa_x86.cpp"
+#line 24118 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19282,9 +24127,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6357 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 20972 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 19287 "dfa_x86.cpp"
+#line 24132 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19298,9 +24143,9 @@ UseAVX == 0
 void  State::_sub_Op_MulReductionVF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5330 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19815 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 16
-#line 19303 "dfa_x86.cpp"
+#line 24148 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(REGF, unordered_reduction16F_0_rule, c)
@@ -19310,9 +24155,9 @@ void  State::_sub_Op_MulReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5313 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19798 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 19315 "dfa_x86.cpp"
+#line 24160 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -19330,9 +24175,9 @@ void  State::_sub_Op_MulReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5296 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19781 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 4
-#line 19335 "dfa_x86.cpp"
+#line 24180 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -19350,9 +24195,9 @@ void  State::_sub_Op_MulReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5279 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19764 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 2
-#line 19355 "dfa_x86.cpp"
+#line 24200 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -19370,9 +24215,9 @@ void  State::_sub_Op_MulReductionVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5261 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19746 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 16
-#line 19375 "dfa_x86.cpp"
+#line 24220 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -19390,9 +24235,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5247 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19732 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 19395 "dfa_x86.cpp"
+#line 24240 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -19410,9 +24255,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5233 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19718 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) <= 4
-#line 19415 "dfa_x86.cpp"
+#line 24260 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
@@ -19446,10 +24291,10 @@ void  State::_sub_Op_MulVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6412 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21027 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 19452 "dfa_x86.cpp"
+#line 24297 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19461,10 +24306,10 @@ void  State::_sub_Op_MulVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6412 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21027 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 19467 "dfa_x86.cpp"
+#line 24312 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19476,9 +24321,9 @@ void  State::_sub_Op_MulVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6401 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21016 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 19481 "dfa_x86.cpp"
+#line 24326 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19490,9 +24335,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6391 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21006 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 19495 "dfa_x86.cpp"
+#line 24340 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19506,9 +24351,9 @@ UseAVX == 0
 void  State::_sub_Op_MulReductionVD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5425 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19910 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 19511 "dfa_x86.cpp"
+#line 24356 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(REGD, unordered_reduction8D_0_rule, c)
@@ -19518,9 +24363,9 @@ void  State::_sub_Op_MulReductionVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5408 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19893 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 4
-#line 19523 "dfa_x86.cpp"
+#line 24368 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -19538,9 +24383,9 @@ void  State::_sub_Op_MulReductionVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5391 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19876 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 2
-#line 19543 "dfa_x86.cpp"
+#line 24388 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -19558,9 +24403,9 @@ void  State::_sub_Op_MulReductionVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5374 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19859 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 8
-#line 19563 "dfa_x86.cpp"
+#line 24408 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -19578,9 +24423,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5360 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19845 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 4
-#line 19583 "dfa_x86.cpp"
+#line 24428 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -19598,9 +24443,9 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5346 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19831 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) == 2
-#line 19603 "dfa_x86.cpp"
+#line 24448 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
@@ -19617,6 +24462,31 @@ n->as_Reduction()->requires_strict_order() && Matcher::vector_length(n->in(2)) =
       }
     }
 }
+void  State::_sub_Op_MulVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) && STATE__VALID_CHILD(_kids[1], VEC) ) {
+      unsigned int c = _kids[0]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(VEC, vector_binOps_HF_mem_3_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_binOps_HF_mem_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_binOps_HF_reg_1_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
 void  State::_sub_Op_MulAddVS2VI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC];
@@ -19624,9 +24494,9 @@ void  State::_sub_Op_MulAddVS2VI(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9255 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23930 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 19629 "dfa_x86.cpp"
+#line 24499 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vmuladdS2I_reg_avx_rule, c)
@@ -19634,9 +24504,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9245 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23920 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 19639 "dfa_x86.cpp"
+#line 24509 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19664,9 +24534,9 @@ void  State::_sub_Op_FmaVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC__LOADVECTOR_MEMORY_) &&
         (
-#line 9230 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23905 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) > 8
-#line 19669 "dfa_x86.cpp"
+#line 24539 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC__LOADVECTOR_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19703,9 +24573,9 @@ void  State::_sub_Op_FmaVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC__LOADVECTOR_MEMORY_) &&
         (
-#line 9205 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23880 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) > 8
-#line 19708 "dfa_x86.cpp"
+#line 24578 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC__LOADVECTOR_MEMORY_]+150;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19719,6 +24589,38 @@ Matcher::vector_length_in_bytes(n->in(1)) > 8
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC_VEC]+150;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, vfmaF_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
+void  State::_sub_Op_FmaVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC__VECTORREINTERPRET__LOADVECTOR_MEMORY__) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC__VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+        DFA_PRODUCTION(VEC, vector_fma_HF_mem_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_VEC) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_BINARY_VEC_VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_fma_HF_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
+void  State::_sub_Op_DivVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+        DFA_PRODUCTION(VEC, vector_binOps_HF_mem_1_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_binOps_HF_reg_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
@@ -19742,10 +24644,10 @@ void  State::_sub_Op_DivVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6448 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21063 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 19748 "dfa_x86.cpp"
+#line 24650 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19757,9 +24659,9 @@ void  State::_sub_Op_DivVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6437 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21052 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 19762 "dfa_x86.cpp"
+#line 24664 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19771,9 +24673,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6427 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21042 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 19776 "dfa_x86.cpp"
+#line 24678 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19801,10 +24703,10 @@ void  State::_sub_Op_DivVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6482 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21097 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 19807 "dfa_x86.cpp"
+#line 24709 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19816,9 +24718,9 @@ void  State::_sub_Op_DivVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6471 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21086 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 19821 "dfa_x86.cpp"
+#line 24723 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19830,9 +24732,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6461 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21076 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 19835 "dfa_x86.cpp"
+#line 24737 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19910,9 +24812,9 @@ void  State::_sub_Op_AbsVL(const Node *n){
 void  State::_sub_Op_AbsVF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 8532 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23211 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 4
-#line 19915 "dfa_x86.cpp"
+#line 24817 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+150;
         DFA_PRODUCTION(VEC, vabsneg4F_rule, c)
@@ -19920,9 +24822,9 @@ Matcher::vector_length(n) == 4
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 8512 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23191 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) != 4
-#line 19925 "dfa_x86.cpp"
+#line 24827 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+150;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19943,9 +24845,9 @@ void  State::_sub_Op_AbsVD(const Node *n){
 void  State::_sub_Op_NegVF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 8532 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23211 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 4
-#line 19948 "dfa_x86.cpp"
+#line 24850 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+150;
         DFA_PRODUCTION(VEC, vabsneg4F_0_rule, c)
@@ -19953,9 +24855,9 @@ Matcher::vector_length(n) == 4
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 8512 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23191 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) != 4
-#line 19958 "dfa_x86.cpp"
+#line 24860 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+150;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -19981,9 +24883,9 @@ void  State::_sub_Op_SqrtVD(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && _kids[1] == nullptr &&
         (
-#line 6885 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21513 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) > 8
-#line 19986 "dfa_x86.cpp"
+#line 24888 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20011,9 +24913,9 @@ void  State::_sub_Op_SqrtVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && _kids[1] == nullptr &&
         (
-#line 6861 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21489 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) > 8
-#line 20016 "dfa_x86.cpp"
+#line 24918 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20027,6 +24929,22 @@ Matcher::vector_length_in_bytes(n->in(1)) > 8
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, vsqrtF_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
+void  State::_sub_Op_SqrtVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) && _kids[1] == nullptr ) {
+      unsigned int c = _kids[0]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+        DFA_PRODUCTION(VEC, vector_sqrt_HF_mem_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr ) {
+      unsigned int c = _kids[0]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_sqrt_HF_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
@@ -20058,11 +24976,11 @@ void  State::_sub_Op_RShiftCntV(const Node *n){
 void  State::_sub_Op_LShiftVB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7307 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21934 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 64 &&
             n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20065 "dfa_x86.cpp"
+#line 24983 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vshift64B_var_evex_bw_rule, c)
@@ -20070,11 +24988,11 @@ Matcher::vector_length(n) == 64 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7288 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21915 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 32 &&
             n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20077 "dfa_x86.cpp"
+#line 24995 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20086,11 +25004,11 @@ Matcher::vector_length(n) <= 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7252 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21879 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 32 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20093 "dfa_x86.cpp"
+#line 25011 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20102,11 +25020,11 @@ Matcher::vector_length(n) == 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7224 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21851 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20109 "dfa_x86.cpp"
+#line 25027 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20118,11 +25036,11 @@ Matcher::vector_length(n) == 16 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7204 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21831 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20125 "dfa_x86.cpp"
+#line 25043 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20134,9 +25052,9 @@ Matcher::vector_length(n) <= 8 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7003 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21631 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 64 && !n->as_ShiftV()->is_var_shift()
-#line 20139 "dfa_x86.cpp"
+#line 25057 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20148,9 +25066,9 @@ Matcher::vector_length(n) == 64 && !n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6978 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21606 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 32 && !n->as_ShiftV()->is_var_shift()
-#line 20153 "dfa_x86.cpp"
+#line 25071 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20162,10 +25080,10 @@ Matcher::vector_length(n) == 32 && !n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6957 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21585 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
             UseAVX > 1
-#line 20168 "dfa_x86.cpp"
+#line 25086 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20177,10 +25095,10 @@ Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6932 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21560 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
             UseAVX <= 1
-#line 20183 "dfa_x86.cpp"
+#line 25101 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20192,9 +25110,9 @@ Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6912 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21540 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 && !n->as_ShiftV()->is_var_shift()
-#line 20197 "dfa_x86.cpp"
+#line 25115 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20208,9 +25126,9 @@ Matcher::vector_length(n) <= 8 && !n->as_ShiftV()->is_var_shift()
 void  State::_sub_Op_LShiftVS(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10195 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24865 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20213 "dfa_x86.cpp"
+#line 25131 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vlshiftv_reg_masked_rule, c)
@@ -20218,9 +25136,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10179 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24849 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20223 "dfa_x86.cpp"
+#line 25141 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20241,10 +25159,10 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7392 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22019 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20247 "dfa_x86.cpp"
+#line 25165 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20256,11 +25174,11 @@ n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7356 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21983 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20263 "dfa_x86.cpp"
+#line 25181 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20272,11 +25190,11 @@ Matcher::vector_length(n) == 16 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7331 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21958 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20279 "dfa_x86.cpp"
+#line 25197 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20288,9 +25206,9 @@ Matcher::vector_length(n) <= 8 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7036 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21664 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20293 "dfa_x86.cpp"
+#line 25211 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20304,9 +25222,9 @@ Matcher::vector_length(n) <= 8 &&
 void  State::_sub_Op_LShiftVI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10195 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24865 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20309 "dfa_x86.cpp"
+#line 25227 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vlshiftv_reg_masked_0_rule, c)
@@ -20314,9 +25232,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10179 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24849 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20319 "dfa_x86.cpp"
+#line 25237 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20337,9 +25255,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7413 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22040 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20342 "dfa_x86.cpp"
+#line 25260 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20360,9 +25278,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7067 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21695 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20365 "dfa_x86.cpp"
+#line 25283 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20376,9 +25294,9 @@ n->as_ShiftV()->is_var_shift()
 void  State::_sub_Op_LShiftVL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10195 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24865 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20381 "dfa_x86.cpp"
+#line 25299 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vlshiftv_reg_masked_1_rule, c)
@@ -20386,9 +25304,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10179 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24849 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20391 "dfa_x86.cpp"
+#line 25309 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20409,9 +25327,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7430 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22057 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20414 "dfa_x86.cpp"
+#line 25332 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20432,9 +25350,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7121 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21749 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20437 "dfa_x86.cpp"
+#line 25355 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20448,11 +25366,11 @@ n->as_ShiftV()->is_var_shift()
 void  State::_sub_Op_RShiftVB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7307 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21934 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 64 &&
             n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20455 "dfa_x86.cpp"
+#line 25373 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vshift64B_var_evex_bw_0_rule, c)
@@ -20460,11 +25378,11 @@ Matcher::vector_length(n) == 64 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7288 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21915 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 32 &&
             n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20467 "dfa_x86.cpp"
+#line 25385 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20476,11 +25394,11 @@ Matcher::vector_length(n) <= 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7252 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21879 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 32 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20483 "dfa_x86.cpp"
+#line 25401 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20492,11 +25410,11 @@ Matcher::vector_length(n) == 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7224 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21851 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20499 "dfa_x86.cpp"
+#line 25417 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20508,11 +25426,11 @@ Matcher::vector_length(n) == 16 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7204 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21831 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20515 "dfa_x86.cpp"
+#line 25433 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20524,9 +25442,9 @@ Matcher::vector_length(n) <= 8 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7003 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21631 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 64 && !n->as_ShiftV()->is_var_shift()
-#line 20529 "dfa_x86.cpp"
+#line 25447 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20538,9 +25456,9 @@ Matcher::vector_length(n) == 64 && !n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6978 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21606 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 32 && !n->as_ShiftV()->is_var_shift()
-#line 20543 "dfa_x86.cpp"
+#line 25461 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20552,10 +25470,10 @@ Matcher::vector_length(n) == 32 && !n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6957 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21585 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
             UseAVX > 1
-#line 20558 "dfa_x86.cpp"
+#line 25476 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20567,10 +25485,10 @@ Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6932 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21560 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
             UseAVX <= 1
-#line 20573 "dfa_x86.cpp"
+#line 25491 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20582,9 +25500,9 @@ Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6912 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21540 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 && !n->as_ShiftV()->is_var_shift()
-#line 20587 "dfa_x86.cpp"
+#line 25505 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20598,9 +25516,9 @@ Matcher::vector_length(n) <= 8 && !n->as_ShiftV()->is_var_shift()
 void  State::_sub_Op_RShiftVS(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10242 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24912 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20603 "dfa_x86.cpp"
+#line 25521 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vrshiftv_reg_masked_rule, c)
@@ -20608,9 +25526,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10226 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24896 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20613 "dfa_x86.cpp"
+#line 25531 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20631,10 +25549,10 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7392 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22019 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20637 "dfa_x86.cpp"
+#line 25555 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20646,11 +25564,11 @@ n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7356 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21983 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20653 "dfa_x86.cpp"
+#line 25571 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20662,11 +25580,11 @@ Matcher::vector_length(n) == 16 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7331 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21958 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20669 "dfa_x86.cpp"
+#line 25587 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20678,9 +25596,9 @@ Matcher::vector_length(n) <= 8 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7036 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21664 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20683 "dfa_x86.cpp"
+#line 25601 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20694,9 +25612,9 @@ Matcher::vector_length(n) <= 8 &&
 void  State::_sub_Op_RShiftVI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10242 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24912 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20699 "dfa_x86.cpp"
+#line 25617 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vrshiftv_reg_masked_0_rule, c)
@@ -20704,9 +25622,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10226 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24896 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20709 "dfa_x86.cpp"
+#line 25627 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20727,9 +25645,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7413 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22040 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20732 "dfa_x86.cpp"
+#line 25650 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20750,9 +25668,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7067 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21695 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20755 "dfa_x86.cpp"
+#line 25673 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20766,9 +25684,9 @@ n->as_ShiftV()->is_var_shift()
 void  State::_sub_Op_RShiftVL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10242 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24912 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 20771 "dfa_x86.cpp"
+#line 25689 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vrshiftv_reg_masked_1_rule, c)
@@ -20776,9 +25694,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10226 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24896 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 20781 "dfa_x86.cpp"
+#line 25699 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20799,10 +25717,10 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7462 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22089 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift() &&
             UseAVX > 2
-#line 20805 "dfa_x86.cpp"
+#line 25723 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20814,11 +25732,11 @@ n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7446 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22073 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 4 &&
             n->as_ShiftV()->is_var_shift() &&
             UseAVX == 2
-#line 20821 "dfa_x86.cpp"
+#line 25739 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20830,9 +25748,9 @@ Matcher::vector_length(n) <= 4 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7191 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21818 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift() && UseAVX > 2
-#line 20835 "dfa_x86.cpp"
+#line 25753 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20844,9 +25762,9 @@ Matcher::vector_length(n) <= 4 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7162 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21790 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift() && UseAVX <= 2
-#line 20849 "dfa_x86.cpp"
+#line 25767 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20860,11 +25778,11 @@ Matcher::vector_length(n) <= 4 &&
 void  State::_sub_Op_URShiftVB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7307 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21934 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 64 &&
             n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20867 "dfa_x86.cpp"
+#line 25785 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vshift64B_var_evex_bw_1_rule, c)
@@ -20872,11 +25790,11 @@ Matcher::vector_length(n) == 64 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7288 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21915 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 32 &&
             n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 20879 "dfa_x86.cpp"
+#line 25797 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20888,11 +25806,11 @@ Matcher::vector_length(n) <= 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7252 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21879 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 32 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20895 "dfa_x86.cpp"
+#line 25813 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20904,11 +25822,11 @@ Matcher::vector_length(n) == 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7224 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21851 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20911 "dfa_x86.cpp"
+#line 25829 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20920,11 +25838,11 @@ Matcher::vector_length(n) == 16 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7204 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21831 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 20927 "dfa_x86.cpp"
+#line 25845 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20936,9 +25854,9 @@ Matcher::vector_length(n) <= 8 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7003 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21631 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 64 && !n->as_ShiftV()->is_var_shift()
-#line 20941 "dfa_x86.cpp"
+#line 25859 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20950,9 +25868,9 @@ Matcher::vector_length(n) == 64 && !n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6978 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21606 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 32 && !n->as_ShiftV()->is_var_shift()
-#line 20955 "dfa_x86.cpp"
+#line 25873 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20964,10 +25882,10 @@ Matcher::vector_length(n) == 32 && !n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6957 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21585 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
             UseAVX > 1
-#line 20970 "dfa_x86.cpp"
+#line 25888 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20979,10 +25897,10 @@ Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6932 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21560 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
             UseAVX <= 1
-#line 20985 "dfa_x86.cpp"
+#line 25903 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -20994,9 +25912,9 @@ Matcher::vector_length(n) == 16 && !n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6912 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21540 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 && !n->as_ShiftV()->is_var_shift()
-#line 20999 "dfa_x86.cpp"
+#line 25917 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21010,9 +25928,9 @@ Matcher::vector_length(n) <= 8 && !n->as_ShiftV()->is_var_shift()
 void  State::_sub_Op_URShiftVS(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10289 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24959 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 21015 "dfa_x86.cpp"
+#line 25933 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vurshiftv_reg_masked_rule, c)
@@ -21020,9 +25938,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10273 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24943 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 21025 "dfa_x86.cpp"
+#line 25943 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21043,10 +25961,10 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7392 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22019 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift() &&
             VM_Version::supports_avx512bw()
-#line 21049 "dfa_x86.cpp"
+#line 25967 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21058,11 +25976,11 @@ n->as_ShiftV()->is_var_shift() &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7356 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21983 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 16 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 21065 "dfa_x86.cpp"
+#line 25983 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21074,11 +25992,11 @@ Matcher::vector_length(n) == 16 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7331 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21958 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 8 &&
             n->as_ShiftV()->is_var_shift() &&
             !VM_Version::supports_avx512bw()
-#line 21081 "dfa_x86.cpp"
+#line 25999 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21090,9 +26008,9 @@ Matcher::vector_length(n) <= 8 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7036 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21664 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 21095 "dfa_x86.cpp"
+#line 26013 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21106,9 +26024,9 @@ Matcher::vector_length(n) <= 8 &&
 void  State::_sub_Op_URShiftVI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10289 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24959 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 21111 "dfa_x86.cpp"
+#line 26029 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vurshiftv_reg_masked_0_rule, c)
@@ -21116,9 +26034,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10273 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24943 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 21121 "dfa_x86.cpp"
+#line 26039 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21139,9 +26057,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7413 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22040 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 21144 "dfa_x86.cpp"
+#line 26062 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21162,9 +26080,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7067 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21695 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 21167 "dfa_x86.cpp"
+#line 26085 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21178,9 +26096,9 @@ n->as_ShiftV()->is_var_shift()
 void  State::_sub_Op_URShiftVL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10289 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24959 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 21183 "dfa_x86.cpp"
+#line 26101 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vurshiftv_reg_masked_1_rule, c)
@@ -21188,9 +26106,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 10273 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24943 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 21193 "dfa_x86.cpp"
+#line 26111 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21211,9 +26129,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7430 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22057 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_ShiftV()->is_var_shift()
-#line 21216 "dfa_x86.cpp"
+#line 26134 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21234,9 +26152,9 @@ n->as_ShiftV()->is_var_shift()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7121 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21749 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->as_ShiftV()->is_var_shift()
-#line 21239 "dfa_x86.cpp"
+#line 26157 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21264,10 +26182,10 @@ void  State::_sub_Op_AndV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7498 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22125 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 21270 "dfa_x86.cpp"
+#line 26188 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21279,10 +26197,10 @@ void  State::_sub_Op_AndV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 7498 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22125 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 21285 "dfa_x86.cpp"
+#line 26203 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21294,9 +26212,9 @@ void  State::_sub_Op_AndV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7487 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22114 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 21299 "dfa_x86.cpp"
+#line 26217 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21308,9 +26226,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7477 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22104 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 21313 "dfa_x86.cpp"
+#line 26231 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21324,9 +26242,9 @@ UseAVX == 0
 void  State::_sub_Op_AndReductionV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5481 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19964 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
-#line 21329 "dfa_x86.cpp"
+#line 26247 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(RREGI, reductionS_1_rule, c)
@@ -21341,9 +26259,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5460 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19944 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_avx512bw()
-#line 21346 "dfa_x86.cpp"
+#line 26264 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21376,9 +26294,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5442 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19926 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_avx512bw()
-#line 21381 "dfa_x86.cpp"
+#line 26299 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21411,9 +26329,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19697 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_avx512dq()
-#line 21416 "dfa_x86.cpp"
+#line 26334 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(RREGL, reductionL_avx512dq_1_rule, c)
@@ -21427,9 +26345,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_avx512dq()
-#line 21432 "dfa_x86.cpp"
+#line 26350 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -21459,9 +26377,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19657 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_INT
-#line 21464 "dfa_x86.cpp"
+#line 26382 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21510,10 +26428,10 @@ void  State::_sub_Op_OrV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7533 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22160 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 21516 "dfa_x86.cpp"
+#line 26434 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21525,10 +26443,10 @@ void  State::_sub_Op_OrV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 7533 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22160 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 21531 "dfa_x86.cpp"
+#line 26449 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21540,9 +26458,9 @@ void  State::_sub_Op_OrV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7522 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22149 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 21545 "dfa_x86.cpp"
+#line 26463 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21554,9 +26472,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7512 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22139 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 21559 "dfa_x86.cpp"
+#line 26477 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21570,9 +26488,9 @@ UseAVX == 0
 void  State::_sub_Op_OrReductionV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5481 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19964 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
-#line 21575 "dfa_x86.cpp"
+#line 26493 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(RREGI, reductionS_2_rule, c)
@@ -21587,9 +26505,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5460 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19944 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_avx512bw()
-#line 21592 "dfa_x86.cpp"
+#line 26510 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21622,9 +26540,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5442 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19926 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_avx512bw()
-#line 21627 "dfa_x86.cpp"
+#line 26545 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21657,9 +26575,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19697 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_avx512dq()
-#line 21662 "dfa_x86.cpp"
+#line 26580 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(RREGL, reductionL_avx512dq_2_rule, c)
@@ -21673,9 +26591,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_avx512dq()
-#line 21678 "dfa_x86.cpp"
+#line 26596 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -21705,9 +26623,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19657 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_INT
-#line 21710 "dfa_x86.cpp"
+#line 26628 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21756,10 +26674,10 @@ void  State::_sub_Op_XorV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7568 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22195 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 21762 "dfa_x86.cpp"
+#line 26680 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21771,10 +26689,10 @@ void  State::_sub_Op_XorV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 7568 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22195 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 0) &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 8)
-#line 21777 "dfa_x86.cpp"
+#line 26695 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21786,9 +26704,9 @@ void  State::_sub_Op_XorV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7557 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22184 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0
-#line 21791 "dfa_x86.cpp"
+#line 26709 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21800,9 +26718,9 @@ UseAVX > 0
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 7547 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22174 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 21805 "dfa_x86.cpp"
+#line 26723 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -21816,9 +26734,9 @@ UseAVX == 0
 void  State::_sub_Op_XorReductionV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5481 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19964 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
-#line 21821 "dfa_x86.cpp"
+#line 26739 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(RREGI, reductionS_3_rule, c)
@@ -21833,9 +26751,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5460 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19944 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_avx512bw()
-#line 21838 "dfa_x86.cpp"
+#line 26756 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21868,9 +26786,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5442 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19926 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_avx512bw()
-#line 21873 "dfa_x86.cpp"
+#line 26791 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -21903,9 +26821,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19697 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_avx512dq()
-#line 21908 "dfa_x86.cpp"
+#line 26826 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(RREGL, reductionL_avx512dq_3_rule, c)
@@ -21919,9 +26837,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_avx512dq()
-#line 21924 "dfa_x86.cpp"
+#line 26842 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -21951,9 +26869,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19657 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_INT
-#line 21956 "dfa_x86.cpp"
+#line 26874 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -22002,14 +26920,14 @@ void  State::_sub_Op_MinV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6609 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_length_in_bytes(n) == 64 &&
+#line 21240 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_length_in_bytes(n) == 64 &&
             is_floating_point_type(Matcher::vector_element_basic_type(n))
-#line 22008 "dfa_x86.cpp"
+#line 26926 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
-        DFA_PRODUCTION(VEC, evminmaxFP_reg_eavx_rule, c)
+        DFA_PRODUCTION(VEC, evminmaxFP_reg_evex_rule, c)
       }
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
@@ -22017,11 +26935,11 @@ Matcher::vector_length_in_bytes(n) == 64 &&
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 6587 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_length_in_bytes(n) <= 32 &&
+#line 21218 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_length_in_bytes(n) <= 32 &&
             is_floating_point_type(Matcher::vector_element_basic_type(n)) && // T_FLOAT, T_DOUBLE
             UseAVX > 0
-#line 22024 "dfa_x86.cpp"
+#line 26942 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -22033,10 +26951,25 @@ Matcher::vector_length_in_bytes(n) <= 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6567 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21202 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() &&
+            is_floating_point_type(Matcher::vector_element_basic_type(n))
+#line 26957 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, minmaxFP_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 21182 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length_in_bytes(n) == 64 || VM_Version::supports_avx512vl()) &&
             Matcher::vector_element_basic_type(n) == T_LONG
-#line 22039 "dfa_x86.cpp"
+#line 26972 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22048,10 +26981,10 @@ Matcher::vector_length_in_bytes(n) <= 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 6549 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21164 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) <= 32 && Matcher::vector_element_basic_type(n) == T_LONG &&
             UseAVX > 0 && !VM_Version::supports_avx512vl()
-#line 22054 "dfa_x86.cpp"
+#line 26987 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -22063,10 +26996,10 @@ Matcher::vector_length_in_bytes(n) <= 32 && Matcher::vector_element_basic_type(n
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6530 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21145 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) == 16 && Matcher::vector_element_basic_type(n) == T_LONG &&
             UseAVX == 0
-#line 22069 "dfa_x86.cpp"
+#line 27002 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22078,10 +27011,10 @@ Matcher::vector_length_in_bytes(n) == 16 && Matcher::vector_element_basic_type(n
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6513 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21128 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_integral_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_element_basic_type(n) != T_LONG && // T_BYTE, T_SHORT, T_INT
             UseAVX > 0
-#line 22084 "dfa_x86.cpp"
+#line 27017 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22093,10 +27026,10 @@ is_integral_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_eleme
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6497 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21112 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_integral_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_element_basic_type(n) != T_LONG && // T_BYTE, T_SHORT, T_INT
             UseAVX == 0
-#line 22099 "dfa_x86.cpp"
+#line 27032 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22124,14 +27057,14 @@ void  State::_sub_Op_MaxV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6609 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_length_in_bytes(n) == 64 &&
+#line 21240 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_length_in_bytes(n) == 64 &&
             is_floating_point_type(Matcher::vector_element_basic_type(n))
-#line 22130 "dfa_x86.cpp"
+#line 27063 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
-        DFA_PRODUCTION(VEC, evminmaxFP_reg_eavx_0_rule, c)
+        DFA_PRODUCTION(VEC, evminmaxFP_reg_evex_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
@@ -22139,11 +27072,11 @@ Matcher::vector_length_in_bytes(n) == 64 &&
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 6587 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_length_in_bytes(n) <= 32 &&
+#line 21218 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_length_in_bytes(n) <= 32 &&
             is_floating_point_type(Matcher::vector_element_basic_type(n)) && // T_FLOAT, T_DOUBLE
             UseAVX > 0
-#line 22146 "dfa_x86.cpp"
+#line 27079 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -22155,10 +27088,25 @@ Matcher::vector_length_in_bytes(n) <= 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6567 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21202 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() &&
+            is_floating_point_type(Matcher::vector_element_basic_type(n))
+#line 27094 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, minmaxFP_reg_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 21182 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length_in_bytes(n) == 64 || VM_Version::supports_avx512vl()) &&
             Matcher::vector_element_basic_type(n) == T_LONG
-#line 22161 "dfa_x86.cpp"
+#line 27109 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22170,10 +27118,10 @@ Matcher::vector_length_in_bytes(n) <= 32 &&
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 6549 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21164 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) <= 32 && Matcher::vector_element_basic_type(n) == T_LONG &&
             UseAVX > 0 && !VM_Version::supports_avx512vl()
-#line 22176 "dfa_x86.cpp"
+#line 27124 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -22185,10 +27133,10 @@ Matcher::vector_length_in_bytes(n) <= 32 && Matcher::vector_element_basic_type(n
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6530 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21145 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) == 16 && Matcher::vector_element_basic_type(n) == T_LONG &&
             UseAVX == 0
-#line 22191 "dfa_x86.cpp"
+#line 27139 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22200,10 +27148,10 @@ Matcher::vector_length_in_bytes(n) == 16 && Matcher::vector_element_basic_type(n
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6513 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21128 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_integral_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_element_basic_type(n) != T_LONG && // T_BYTE, T_SHORT, T_INT
             UseAVX > 0
-#line 22206 "dfa_x86.cpp"
+#line 27154 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22215,14 +27163,122 @@ is_integral_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_eleme
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6497 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21112 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_integral_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_element_basic_type(n) != T_LONG && // T_BYTE, T_SHORT, T_INT
             UseAVX == 0
-#line 22221 "dfa_x86.cpp"
+#line 27169 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, minmax_reg_sse_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
+void  State::_sub_Op_MinVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 25761 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 27185 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(VEC, vector_minmax_HF_reg_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 25747 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 27195 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_minmax_HF_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 25733 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 27209 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_minmax_HF_mem_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) &&
+        (
+#line 25733 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 27223 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_minmax_HF_mem_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+}
+void  State::_sub_Op_MaxVHF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 25761 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2()
+#line 27239 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(VEC, vector_minmax_HF_reg_0_rule, c)
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 25747 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 27249 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_minmax_HF_reg_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 25733 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 27263 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_minmax_HF_mem_avx10_2_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _VECTORREINTERPRET__LOADVECTOR_MEMORY__) &&
+        (
+#line 25733 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2()
+#line 27277 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_VECTORREINTERPRET__LOADVECTOR_MEMORY__]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, vector_minmax_HF_mem_avx10_2_1_rule, c)
       }
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
@@ -22246,9 +27302,9 @@ void  State::_sub_Op_UMinV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6662 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21293 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_element_basic_type(n) == T_LONG
-#line 22251 "dfa_x86.cpp"
+#line 27307 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22260,9 +27316,9 @@ void  State::_sub_Op_UMinV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6647 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21278 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_LONG
-#line 22265 "dfa_x86.cpp"
+#line 27321 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22274,9 +27330,9 @@ VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_LO
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6632 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21263 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_LONG
-#line 22279 "dfa_x86.cpp"
+#line 27335 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22304,9 +27360,9 @@ void  State::_sub_Op_UMaxV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6662 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21293 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_element_basic_type(n) == T_LONG
-#line 22309 "dfa_x86.cpp"
+#line 27365 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22318,9 +27374,9 @@ void  State::_sub_Op_UMaxV(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], _LOADVECTOR_MEMORY_) &&
         (
-#line 6647 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21278 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_LONG
-#line 22323 "dfa_x86.cpp"
+#line 27379 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[_LOADVECTOR_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22332,9 +27388,9 @@ VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_LO
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 6632 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 21263 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_LONG
-#line 22337 "dfa_x86.cpp"
+#line 27393 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -22346,25 +27402,113 @@ VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_LO
     }
 }
 void  State::_sub_Op_MinReductionV(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5682 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20299 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22354 "dfa_x86.cpp"
+#line 27410 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGVEC]+100;
-        DFA_PRODUCTION(LEGREGD, minmax_reductionD_av_rule, c)
-        DFA_PRODUCTION(REGD, MoveLEG2D_rule, c+100)
-        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100+100)
-        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(REGD, minmax_reductionD_av_avx10_2_rule, c)
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20283 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 27423 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, minmax_reduction2D_av_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20264 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 27446 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, minmax_reductionD_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20246 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 27469 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, minmax_reduction2D_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5662 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20228 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 27490 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGVEC]+100;
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
+        DFA_PRODUCTION(LEGREGD, minmax_reductionD_av_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c+100) {
+        DFA_PRODUCTION(REGD, MoveLEG2D_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+100+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+        (
+#line 20209 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22367 "dfa_x86.cpp"
+#line 27511 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -22382,12 +27526,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5639 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20187 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22390 "dfa_x86.cpp"
+#line 27534 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -22405,12 +27549,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5617 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20166 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22413 "dfa_x86.cpp"
+#line 27557 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -22426,25 +27570,113 @@ Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
         DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5595 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20148 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22434 "dfa_x86.cpp"
+#line 27578 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGVEC]+100;
-        DFA_PRODUCTION(LEGREGF, minmax_reductionF_av_rule, c)
-        DFA_PRODUCTION(REGF, MoveLEG2F_rule, c+100)
-        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100+100)
-        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+100+95)
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(REGF, minmax_reductionF_av_avx10_2_rule, c)
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20132 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 27591 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, minmax_reduction2F_av_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20114 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 27614 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, minmax_reductionF_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20096 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 27637 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, minmax_reduction2F_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5575 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20078 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 27658 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGVEC]+100;
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
+        DFA_PRODUCTION(LEGREGF, minmax_reductionF_av_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c+100) {
+        DFA_PRODUCTION(REGF, MoveLEG2F_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+100+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+100+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+        (
+#line 20058 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22447 "dfa_x86.cpp"
+#line 27679 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -22462,12 +27694,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5554 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20037 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22470 "dfa_x86.cpp"
+#line 27702 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -22485,12 +27717,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5533 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20016 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22493 "dfa_x86.cpp"
+#line 27725 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -22508,9 +27740,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5481 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19964 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
-#line 22513 "dfa_x86.cpp"
+#line 27745 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(RREGI, reductionS_4_rule, c)
@@ -22525,9 +27757,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5460 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19944 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_avx512bw()
-#line 22530 "dfa_x86.cpp"
+#line 27762 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -22560,9 +27792,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5442 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19926 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_avx512bw()
-#line 22565 "dfa_x86.cpp"
+#line 27797 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -22595,9 +27827,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19697 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_avx512dq()
-#line 22600 "dfa_x86.cpp"
+#line 27832 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(RREGL, reductionL_avx512dq_4_rule, c)
@@ -22611,9 +27843,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_avx512dq()
-#line 22616 "dfa_x86.cpp"
+#line 27848 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -22643,9 +27875,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19657 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_INT
-#line 22648 "dfa_x86.cpp"
+#line 27880 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -22678,25 +27910,113 @@ Matcher::vector_element_basic_type(n->in(2)) == T_INT
     }
 }
 void  State::_sub_Op_MaxReductionV(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5682 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20299 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22686 "dfa_x86.cpp"
+#line 27918 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGVEC]+100;
-        DFA_PRODUCTION(LEGREGD, minmax_reductionD_av_0_rule, c)
-        DFA_PRODUCTION(REGD, MoveLEG2D_rule, c+100)
-        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100+100)
-        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(REGD, minmax_reductionD_av_avx10_2_0_rule, c)
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20283 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 27931 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, minmax_reduction2D_av_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20264 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 27954 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, minmax_reductionD_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20246 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 27977 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
+        DFA_PRODUCTION(REGD, minmax_reduction2D_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c+100) {
+        DFA_PRODUCTION(LEGREGD, MoveD2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+95)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5662 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20228 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 27998 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGVEC]+100;
+      if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
+        DFA_PRODUCTION(LEGREGD, minmax_reductionD_av_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c+100) {
+        DFA_PRODUCTION(REGD, MoveLEG2D_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(VLREGD) || _cost[VLREGD] > c+100+100) {
+        DFA_PRODUCTION(VLREGD, MoveD2VL_rule, c+100+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+100+95) {
+        DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], LEGREGD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+        (
+#line 20209 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22699 "dfa_x86.cpp"
+#line 28019 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -22714,12 +28034,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5639 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20187 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22722 "dfa_x86.cpp"
+#line 28042 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -22737,12 +28057,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMD) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5617 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
+#line 20166 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeD::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeD::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22745 "dfa_x86.cpp"
+#line 28065 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMD]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -22758,25 +28078,113 @@ Matcher::vector_element_basic_type(n->in(2)) == T_DOUBLE &&
         DFA_PRODUCTION(STACKSLOTD, storeSSD_rule, c+100+95)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5595 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20148 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22766 "dfa_x86.cpp"
+#line 28086 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGVEC]+100;
-        DFA_PRODUCTION(LEGREGF, minmax_reductionF_av_0_rule, c)
-        DFA_PRODUCTION(REGF, MoveLEG2F_rule, c+100)
-        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100+100)
-        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+100+95)
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
+        DFA_PRODUCTION(REGF, minmax_reductionF_av_avx10_2_0_rule, c)
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20132 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 28099 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, minmax_reduction2F_av_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20114 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 28122 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, minmax_reductionF_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], VEC) &&
+        (
+#line 20096 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
+             (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
+            Matcher::vector_length(n->in(2)) == 2
+#line 28145 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, minmax_reduction2F_avx10_2_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c+100) {
+        DFA_PRODUCTION(LEGREGF, MoveF2LEG_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+95)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5575 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20078 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+            Matcher::vector_length(n->in(2)) >= 4
+#line 28166 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGVEC]+100;
+      if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
+        DFA_PRODUCTION(LEGREGF, minmax_reductionF_av_0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c+100) {
+        DFA_PRODUCTION(REGF, MoveLEG2F_rule, c+100)
+      }
+      if (STATE__NOT_YET_VALID(VLREGF) || _cost[VLREGF] > c+100+100) {
+        DFA_PRODUCTION(VLREGF, MoveF2VL_rule, c+100+100)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+100+95) {
+        DFA_PRODUCTION(STACKSLOTF, storeSSF_rule, c+100+95)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], LEGREGF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
+        (
+#line 20058 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22779 "dfa_x86.cpp"
+#line 28187 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGREGF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -22794,12 +28202,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5554 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20037 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) >= 4
-#line 22802 "dfa_x86.cpp"
+#line 28210 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -22817,12 +28225,12 @@ Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
     }
     if( STATE__VALID_CHILD(_kids[0], IMMF) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5533 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
+#line 20016 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() && Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
             ((n->Opcode() == Op_MinReductionV && n->in(1)->bottom_type() == TypeF::POS_INF) ||
              (n->Opcode() == Op_MaxReductionV && n->in(1)->bottom_type() == TypeF::NEG_INF)) &&
             Matcher::vector_length(n->in(2)) == 2
-#line 22825 "dfa_x86.cpp"
+#line 28233 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMF]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -22840,9 +28248,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_FLOAT &&
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5481 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19964 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
-#line 22845 "dfa_x86.cpp"
+#line 28253 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(RREGI, reductionS_5_rule, c)
@@ -22857,9 +28265,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5460 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19944 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_avx512bw()
-#line 22862 "dfa_x86.cpp"
+#line 28270 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -22892,9 +28300,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5442 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19926 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_avx512bw()
-#line 22897 "dfa_x86.cpp"
+#line 28305 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -22927,9 +28335,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_BYTE && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 5211 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19697 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_avx512dq()
-#line 22932 "dfa_x86.cpp"
+#line 28340 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[VEC]+100;
         DFA_PRODUCTION(RREGL, reductionL_avx512dq_5_rule, c)
@@ -22943,9 +28351,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && VM_Version::supports_a
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5192 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19678 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_avx512dq()
-#line 22948 "dfa_x86.cpp"
+#line 28356 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -22975,9 +28383,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_LONG && !VM_Version::supports_
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 5170 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19657 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n->in(2)) == T_INT
-#line 22980 "dfa_x86.cpp"
+#line 28388 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -23012,9 +28420,9 @@ Matcher::vector_element_basic_type(n->in(2)) == T_INT
 void  State::_sub_Op_CompressV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 9729 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24401 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
-#line 23017 "dfa_x86.cpp"
+#line 28425 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vcompress_expand_reg_evex_rule, c)
@@ -23022,9 +28430,9 @@ VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9712 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24385 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n) <= 32
-#line 23027 "dfa_x86.cpp"
+#line 28435 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23044,9 +28452,9 @@ void  State::_sub_Op_CompressM(const Node *n){
 void  State::_sub_Op_ExpandV(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 9729 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24401 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
-#line 23049 "dfa_x86.cpp"
+#line 28457 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vcompress_expand_reg_evex_0_rule, c)
@@ -23054,9 +28462,9 @@ VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9712 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24385 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n) <= 32
-#line 23059 "dfa_x86.cpp"
+#line 28467 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23079,51 +28487,23 @@ void  State::_sub_Op_LoadVector(const Node *n){
     }
 }
 void  State::_sub_Op_LoadVectorGather(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGI) &&
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGP) &&
         (
-#line 4242 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18877 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) > 8
-#line 23086 "dfa_x86.cpp"
+#line 28494 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_RREGI]+100;
-        DFA_PRODUCTION(VEC, vgather_subwordGT8B_off_rule, c)
-        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_RREGI) &&
-        (
-#line 4226 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) <= 8
-#line 23096 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_RREGI]+100;
-      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
-        DFA_PRODUCTION(VEC, vgather_subwordLE8B_off_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
-        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_IMMI_0) &&
-        (
-#line 4209 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) > 8
-#line 23110 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_IMMI_0]+100;
-      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGP]+100;
         DFA_PRODUCTION(VEC, vgather_subwordGT8B_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-      }
     }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_IMMI_0) &&
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], RREGP) &&
         (
-#line 4194 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18862 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) <= 8
-#line 23124 "dfa_x86.cpp"
+#line 28504 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_IMMI_0]+100;
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[RREGP]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, vgather_subwordLE8B_rule, c)
       }
@@ -23133,10 +28513,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 4157 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18825 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64) &&
             !is_subword_type(Matcher::vector_element_basic_type(n))
-#line 23139 "dfa_x86.cpp"
+#line 28519 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23148,10 +28528,10 @@ is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 4139 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18807 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && !is_subword_type(Matcher::vector_element_basic_type(n)) &&
             Matcher::vector_length_in_bytes(n) <= 32
-#line 23154 "dfa_x86.cpp"
+#line 28534 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -23163,51 +28543,23 @@ is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length
     }
 }
 void  State::_sub_Op_LoadVectorGatherMasked(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_VEC_RREGI) &&
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_VEC) &&
         (
-#line 4400 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18951 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) > 8
-#line 23170 "dfa_x86.cpp"
+#line 28550 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_VEC_RREGI]+100;
-        DFA_PRODUCTION(VEC, vgather_masked_subwordGT8B_off_avx2_rule, c)
-        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_VEC_RREGI) &&
-        (
-#line 4378 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-!VM_Version::supports_avx512vlbw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) <= 8
-#line 23180 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_VEC_RREGI]+100;
-      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
-        DFA_PRODUCTION(VEC, vgather_masked_subwordLE8B_off_avx2_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
-        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_VEC_IMMI_0) &&
-        (
-#line 4355 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-!VM_Version::supports_avx512vlbw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) > 8
-#line 23194 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_VEC_IMMI_0]+100;
-      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_VEC]+100;
         DFA_PRODUCTION(VEC, vgather_masked_subwordGT8B_avx2_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-      }
     }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_VEC_IMMI_0) &&
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_VEC) &&
         (
-#line 4334 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18930 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vlbw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) <= 8
-#line 23208 "dfa_x86.cpp"
+#line 28560 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_VEC_IMMI_0]+100;
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, vgather_masked_subwordLE8B_avx2_rule, c)
       }
@@ -23215,41 +28567,13 @@ void  State::_sub_Op_LoadVectorGatherMasked(const Node *n){
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_KREG_RREGI) &&
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_KREG) &&
         (
-#line 4315 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18911 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512bw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) > 8
-#line 23222 "dfa_x86.cpp"
+#line 28574 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_KREG_RREGI]+100;
-      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
-        DFA_PRODUCTION(VEC, vgather_masked_subwordGT8B_off_avx3_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
-        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_KREG_RREGI) &&
-        (
-#line 4297 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-VM_Version::supports_avx512bw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) <= 8
-#line 23236 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_KREG_RREGI]+100;
-      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
-        DFA_PRODUCTION(VEC, vgather_masked_subwordLE8B_off_avx3_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
-        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_KREG_IMMI_0) &&
-        (
-#line 4278 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-VM_Version::supports_avx512bw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) > 8
-#line 23250 "dfa_x86.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_KREG_IMMI_0]+100;
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, vgather_masked_subwordGT8B_avx3_rule, c)
       }
@@ -23257,13 +28581,13 @@ VM_Version::supports_avx512bw() && is_subword_type(Matcher::vector_element_basic
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP__BINARY_KREG_IMMI_0) &&
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_RREGP_KREG) &&
         (
-#line 4261 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18894 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512bw() && is_subword_type(Matcher::vector_element_basic_type(n)) && Matcher::vector_length_in_bytes(n) <= 8
-#line 23264 "dfa_x86.cpp"
+#line 28588 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP__BINARY_KREG_IMMI_0]+100;
+      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_RREGP_KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
         DFA_PRODUCTION(VEC, vgather_masked_subwordLE8B_avx3_rule, c)
       }
@@ -23273,10 +28597,10 @@ VM_Version::supports_avx512bw() && is_subword_type(Matcher::vector_element_basic
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_KREG) &&
         (
-#line 4173 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18841 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n) == 64) &&
             !is_subword_type(Matcher::vector_element_basic_type(n))
-#line 23279 "dfa_x86.cpp"
+#line 28603 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_VEC_KREG]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23294,9 +28618,9 @@ void  State::_sub_Op_StoreVector(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _VECTORCASTF2HF_VEC_) &&
         (
-#line 3766 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18436 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->as_StoreVector()->memory_size() >= 16
-#line 23299 "dfa_x86.cpp"
+#line 28623 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_VECTORCASTF2HF_VEC_]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -23307,9 +28631,9 @@ n->as_StoreVector()->memory_size() >= 16
 void  State::_sub_Op_StoreVectorScatter(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_VEC) &&
         (
-#line 4429 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18978 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2
-#line 23312 "dfa_x86.cpp"
+#line 28636 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_VEC_VEC]+100;
         DFA_PRODUCTION(UNIVERSE, scatter_rule, c)
@@ -23324,9 +28648,9 @@ void  State::_sub_Op_StoreVectorScatterMasked(const Node *n){
 void  State::_sub_Op_LoadVectorMasked(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 9459 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24134 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(3)->bottom_type()->isa_vectmask()
-#line 23329 "dfa_x86.cpp"
+#line 28653 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, vmasked_load_evex_rule, c)
@@ -23334,9 +28658,9 @@ n->in(3)->bottom_type()->isa_vectmask()
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9446 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24121 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->in(3)->bottom_type()->isa_vectmask()
-#line 23339 "dfa_x86.cpp"
+#line 28663 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23350,18 +28674,18 @@ n->in(3)->bottom_type()->isa_vectmask()
 void  State::_sub_Op_StoreVectorMasked(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_KREG) &&
         (
-#line 9484 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24159 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(3)->in(2)->bottom_type()->isa_vectmask()
-#line 23355 "dfa_x86.cpp"
+#line 28679 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_VEC_KREG]+100;
         DFA_PRODUCTION(UNIVERSE, vmasked_store_evex_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], _BINARY_VEC_VEC) &&
         (
-#line 9471 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24146 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->in(3)->in(2)->bottom_type()->isa_vectmask()
-#line 23364 "dfa_x86.cpp"
+#line 28688 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[_BINARY_VEC_VEC]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
@@ -23416,9 +28740,9 @@ void  State::_sub_Op_VectorMaskGen(const Node *n){
 void  State::_sub_Op_VectorMaskTrueCount(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _VECTORSTOREMASK_VEC_IMMI) &&
         (
-#line 9642 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24316 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23421 "dfa_x86.cpp"
+#line 28745 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_VECTORSTOREMASK_VEC_IMMI]+100;
         DFA_PRODUCTION(RREGI, vmask_truecount_avx_rule, c)
@@ -23433,9 +28757,9 @@ n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 9626 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24300 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23438 "dfa_x86.cpp"
+#line 28762 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -23468,9 +28792,9 @@ n->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) &&
         (
-#line 9609 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24283 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask()
-#line 23473 "dfa_x86.cpp"
+#line 28797 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -23505,9 +28829,9 @@ n->in(1)->bottom_type()->isa_vectmask()
 void  State::_sub_Op_VectorMaskFirstTrue(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _VECTORSTOREMASK_VEC_IMMI) && _kids[1] == nullptr &&
         (
-#line 9693 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24367 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23510 "dfa_x86.cpp"
+#line 28834 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_VECTORSTOREMASK_VEC_IMMI]+100;
         DFA_PRODUCTION(RREGI, vmask_first_or_last_true_avx_rule, c)
@@ -23522,9 +28846,9 @@ n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 9676 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24350 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23527 "dfa_x86.cpp"
+#line 28851 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -23557,9 +28881,9 @@ n->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) && _kids[1] == nullptr &&
         (
-#line 9658 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24332 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask()
-#line 23562 "dfa_x86.cpp"
+#line 28886 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -23594,9 +28918,9 @@ n->in(1)->bottom_type()->isa_vectmask()
 void  State::_sub_Op_VectorMaskLastTrue(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _VECTORSTOREMASK_VEC_IMMI) &&
         (
-#line 9693 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24367 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23599 "dfa_x86.cpp"
+#line 28923 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_VECTORSTOREMASK_VEC_IMMI]+100;
         DFA_PRODUCTION(RREGI, vmask_first_or_last_true_avx_0_rule, c)
@@ -23611,9 +28935,9 @@ n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 9676 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24350 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23616 "dfa_x86.cpp"
+#line 28940 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -23646,9 +28970,9 @@ n->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) &&
         (
-#line 9658 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24332 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask()
-#line 23651 "dfa_x86.cpp"
+#line 28975 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -23683,9 +29007,9 @@ n->in(1)->bottom_type()->isa_vectmask()
 void  State::_sub_Op_VectorMaskToLong(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _VECTORSTOREMASK_VEC_IMMI) &&
         (
-#line 9593 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24267 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23688 "dfa_x86.cpp"
+#line 29012 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_VECTORSTOREMASK_VEC_IMMI]+100;
         DFA_PRODUCTION(RREGL, vmask_tolong_avx_rule, c)
@@ -23699,9 +29023,9 @@ n->in(1)->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 9577 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24251 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 23704 "dfa_x86.cpp"
+#line 29028 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -23731,9 +29055,9 @@ n->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) &&
         (
-#line 9560 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 24234 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask()
-#line 23736 "dfa_x86.cpp"
+#line 29060 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -23765,18 +29089,18 @@ n->in(1)->bottom_type()->isa_vectmask()
 void  State::_sub_Op_VectorLongToMask(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 10533 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25202 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask()
-#line 23770 "dfa_x86.cpp"
+#line 29094 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
         DFA_PRODUCTION(KREG, long_to_mask_evex_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 10518 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25187 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() == nullptr && Matcher::vector_length(n) > 8
-#line 23779 "dfa_x86.cpp"
+#line 29103 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
         DFA_PRODUCTION(VEC, long_to_maskGT8_avx_rule, c)
@@ -23784,9 +29108,9 @@ n->bottom_type()->isa_vectmask() == nullptr && Matcher::vector_length(n) > 8
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 10503 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25172 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() == nullptr && Matcher::vector_length(n) <= 8
-#line 23789 "dfa_x86.cpp"
+#line 29113 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23800,9 +29124,9 @@ n->bottom_type()->isa_vectmask() == nullptr && Matcher::vector_length(n) <= 8
 void  State::_sub_Op_Replicate(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IMMD0) &&
         (
-#line 4930 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19421 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_DOUBLE
-#line 23805 "dfa_x86.cpp"
+#line 29129 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMD0]+100;
         DFA_PRODUCTION(VEC, ReplD_zero_rule, c)
@@ -23810,9 +29134,9 @@ Matcher::vector_element_basic_type(n) == T_DOUBLE
     }
     if( STATE__VALID_CHILD(_kids[0], IMMD) &&
         (
-#line 4918 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19409 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_DOUBLE
-#line 23815 "dfa_x86.cpp"
+#line 29139 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMD]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23824,9 +29148,9 @@ Matcher::vector_element_basic_type(n) == T_DOUBLE
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORY_) &&
         (
-#line 4902 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19393 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE >= 3 && Matcher::vector_element_basic_type(n) == T_DOUBLE
-#line 23829 "dfa_x86.cpp"
+#line 29153 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23838,9 +29162,9 @@ UseSSE >= 3 && Matcher::vector_element_basic_type(n) == T_DOUBLE
     }
     if( STATE__VALID_CHILD(_kids[0], VLREGD) &&
         (
-#line 4892 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19383 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE < 3 && Matcher::vector_element_basic_type(n) == T_DOUBLE
-#line 23843 "dfa_x86.cpp"
+#line 29167 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGD]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23852,9 +29176,9 @@ UseSSE < 3 && Matcher::vector_element_basic_type(n) == T_DOUBLE
     }
     if( STATE__VALID_CHILD(_kids[0], VLREGD) &&
         (
-#line 4872 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19363 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseSSE >= 3 && Matcher::vector_element_basic_type(n) == T_DOUBLE
-#line 23857 "dfa_x86.cpp"
+#line 29181 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGD]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23866,9 +29190,9 @@ UseSSE >= 3 && Matcher::vector_element_basic_type(n) == T_DOUBLE
     }
     if( STATE__VALID_CHILD(_kids[0], IMMF0) &&
         (
-#line 4854 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19345 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_FLOAT
-#line 23871 "dfa_x86.cpp"
+#line 29195 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMF0]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23880,9 +29204,9 @@ Matcher::vector_element_basic_type(n) == T_FLOAT
     }
     if( STATE__VALID_CHILD(_kids[0], IMMF) &&
         (
-#line 4841 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19332 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_FLOAT
-#line 23885 "dfa_x86.cpp"
+#line 29209 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMF]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23894,9 +29218,9 @@ Matcher::vector_element_basic_type(n) == T_FLOAT
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORY_) &&
         (
-#line 4829 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19320 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && Matcher::vector_element_basic_type(n) == T_FLOAT
-#line 23899 "dfa_x86.cpp"
+#line 29223 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23908,9 +29232,9 @@ UseAVX > 0 && Matcher::vector_element_basic_type(n) == T_FLOAT
     }
     if( STATE__VALID_CHILD(_kids[0], VLREGF) &&
         (
-#line 4819 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19310 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0 && Matcher::vector_element_basic_type(n) == T_FLOAT
-#line 23913 "dfa_x86.cpp"
+#line 29237 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGF]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23922,9 +29246,9 @@ UseAVX == 0 && Matcher::vector_element_basic_type(n) == T_FLOAT
     }
     if( STATE__VALID_CHILD(_kids[0], VLREGF) &&
         (
-#line 4799 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19290 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && Matcher::vector_element_basic_type(n) == T_FLOAT
-#line 23927 "dfa_x86.cpp"
+#line 29251 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VLREGF]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23936,9 +29260,9 @@ UseAVX > 0 && Matcher::vector_element_basic_type(n) == T_FLOAT
     }
     if( STATE__VALID_CHILD(_kids[0], IMML_M1) &&
         (
-#line 4786 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-UseSSE >= 2 && Matcher::vector_element_basic_type(n) == T_LONG
-#line 23941 "dfa_x86.cpp"
+#line 19277 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+Matcher::vector_element_basic_type(n) == T_LONG
+#line 29265 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMML_M1]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23950,9 +29274,9 @@ UseSSE >= 2 && Matcher::vector_element_basic_type(n) == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], IMML0) &&
         (
-#line 4771 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19262 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_LONG
-#line 23955 "dfa_x86.cpp"
+#line 29279 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMML0]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23964,9 +29288,9 @@ Matcher::vector_element_basic_type(n) == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], IMML) &&
         (
-#line 4759 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19250 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_LONG
-#line 23969 "dfa_x86.cpp"
+#line 29293 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMML]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23978,9 +29302,9 @@ Matcher::vector_element_basic_type(n) == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) &&
         (
-#line 4740 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19231 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_LONG
-#line 23983 "dfa_x86.cpp"
+#line 29307 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -23992,9 +29316,9 @@ Matcher::vector_element_basic_type(n) == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], RREGL) &&
         (
-#line 4665 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19211 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_LONG
-#line 23997 "dfa_x86.cpp"
+#line 29321 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGL]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24006,9 +29330,9 @@ Matcher::vector_element_basic_type(n) == T_LONG
     }
     if( STATE__VALID_CHILD(_kids[0], IMMI_M1) &&
         (
-#line 4650 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-UseSSE >= 2 && Matcher::is_non_long_integral_vector(n)
-#line 24011 "dfa_x86.cpp"
+#line 19197 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+Matcher::is_non_long_integral_vector(n)
+#line 29335 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMI_M1]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24020,9 +29344,9 @@ UseSSE >= 2 && Matcher::is_non_long_integral_vector(n)
     }
     if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
         (
-#line 4635 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19182 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::is_non_long_integral_vector(n)
-#line 24025 "dfa_x86.cpp"
+#line 29349 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24034,9 +29358,9 @@ Matcher::is_non_long_integral_vector(n)
     }
     if( STATE__VALID_CHILD(_kids[0], IMMI) &&
         (
-#line 4619 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19166 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::is_non_long_integral_vector(n)
-#line 24039 "dfa_x86.cpp"
+#line 29363 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24048,9 +29372,9 @@ Matcher::is_non_long_integral_vector(n)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) &&
         (
-#line 4601 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19148 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_INT
-#line 24053 "dfa_x86.cpp"
+#line 29377 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24062,9 +29386,9 @@ Matcher::vector_element_basic_type(n) == T_INT
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 4581 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19128 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_INT
-#line 24067 "dfa_x86.cpp"
+#line 29391 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24076,9 +29400,9 @@ Matcher::vector_element_basic_type(n) == T_INT
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADS_MEMORY_) &&
         (
-#line 4568 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19115 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX >= 2 && Matcher::vector_element_basic_type(n) == T_SHORT
-#line 24081 "dfa_x86.cpp"
+#line 29405 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADS_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24090,9 +29414,9 @@ UseAVX >= 2 && Matcher::vector_element_basic_type(n) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) &&
         (
-#line 4554 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19102 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512_fp16() && Matcher::vector_element_basic_type(n) == T_SHORT
-#line 24095 "dfa_x86.cpp"
+#line 29419 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[REGF]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24113,9 +29437,9 @@ VM_Version::supports_avx512_fp16() && Matcher::vector_element_basic_type(n) == T
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 4511 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19060 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_SHORT
-#line 24118 "dfa_x86.cpp"
+#line 29442 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24127,9 +29451,9 @@ Matcher::vector_element_basic_type(n) == T_SHORT
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADB_MEMORY_) &&
         (
-#line 4498 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19047 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX >= 2 && Matcher::vector_element_basic_type(n) == T_BYTE
-#line 24132 "dfa_x86.cpp"
+#line 29456 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADB_MEMORY_]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24141,9 +29465,9 @@ UseAVX >= 2 && Matcher::vector_element_basic_type(n) == T_BYTE
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) &&
         (
-#line 4469 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19018 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_BYTE
-#line 24146 "dfa_x86.cpp"
+#line 29470 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24157,11 +29481,11 @@ Matcher::vector_element_basic_type(n) == T_BYTE
 void  State::_sub_Op_RoundVF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7996 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22683 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (VM_Version::supports_avx512vl() ||
              Matcher::vector_length_in_bytes(n) == 64) &&
              Matcher::vector_element_basic_type(n) == T_INT
-#line 24164 "dfa_x86.cpp"
+#line 29488 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vround_float_evex_rule, c)
@@ -24169,11 +29493,11 @@ void  State::_sub_Op_RoundVF(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7979 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22666 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() &&
             Matcher::vector_length_in_bytes(n) < 64 &&
             Matcher::vector_element_basic_type(n) == T_INT
-#line 24176 "dfa_x86.cpp"
+#line 29500 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24187,9 +29511,9 @@ void  State::_sub_Op_RoundVF(const Node *n){
 void  State::_sub_Op_RoundVD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 8013 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22700 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_LONG
-#line 24192 "dfa_x86.cpp"
+#line 29516 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vround_reg_evex_rule, c)
@@ -24199,10 +29523,10 @@ Matcher::vector_element_basic_type(n) == T_LONG
 void  State::_sub_Op_ExtractB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 8252 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22935 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) == 32 || // src
             Matcher::vector_length_in_bytes(n->in(1)) == 64
-#line 24205 "dfa_x86.cpp"
+#line 29529 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(RREGI, vextractI_1_rule, c)
@@ -24217,9 +29541,9 @@ Matcher::vector_length_in_bytes(n->in(1)) == 32 || // src
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8235 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22920 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) <= 16
-#line 24222 "dfa_x86.cpp"
+#line 29546 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -24254,10 +29578,10 @@ Matcher::vector_length_in_bytes(n->in(1)) <= 16
 void  State::_sub_Op_ExtractS(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 8252 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22935 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) == 32 || // src
             Matcher::vector_length_in_bytes(n->in(1)) == 64
-#line 24260 "dfa_x86.cpp"
+#line 29584 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(RREGI, vextractI_0_rule, c)
@@ -24272,9 +29596,9 @@ Matcher::vector_length_in_bytes(n->in(1)) == 32 || // src
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8235 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22920 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) <= 16
-#line 24277 "dfa_x86.cpp"
+#line 29601 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -24309,10 +29633,10 @@ Matcher::vector_length_in_bytes(n->in(1)) <= 16
 void  State::_sub_Op_ExtractI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 8252 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22935 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) == 32 || // src
             Matcher::vector_length_in_bytes(n->in(1)) == 64
-#line 24315 "dfa_x86.cpp"
+#line 29639 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(RREGI, vextractI_rule, c)
@@ -24327,9 +29651,9 @@ Matcher::vector_length_in_bytes(n->in(1)) == 32 || // src
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8235 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22920 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) <= 16
-#line 24332 "dfa_x86.cpp"
+#line 29656 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(RREGI) || _cost[RREGI] > c) {
@@ -24364,10 +29688,10 @@ Matcher::vector_length_in_bytes(n->in(1)) <= 16
 void  State::_sub_Op_ExtractL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8286 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22966 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n->in(1)) == 4 || // src
             Matcher::vector_length(n->in(1)) == 8
-#line 24370 "dfa_x86.cpp"
+#line 29694 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
         DFA_PRODUCTION(RREGL, vextractL_rule, c)
@@ -24381,9 +29705,9 @@ Matcher::vector_length(n->in(1)) == 4 || // src
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8273 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22953 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n->in(1)) <= 2
-#line 24386 "dfa_x86.cpp"
+#line 29710 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(RREGL) || _cost[RREGL] > c) {
@@ -24415,10 +29739,10 @@ Matcher::vector_length(n->in(1)) <= 2
 void  State::_sub_Op_ExtractF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8315 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22994 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n->in(1)/*src*/) == 8 ||
             Matcher::vector_length(n->in(1)/*src*/) == 16
-#line 24421 "dfa_x86.cpp"
+#line 29745 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
         DFA_PRODUCTION(LEGREGF, vextractF_rule, c)
@@ -24428,9 +29752,9 @@ Matcher::vector_length(n->in(1)/*src*/) == 8 ||
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8302 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22981 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n->in(1)) <= 4
-#line 24433 "dfa_x86.cpp"
+#line 29757 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(LEGREGF) || _cost[LEGREGF] > c) {
@@ -24450,10 +29774,10 @@ Matcher::vector_length(n->in(1)) <= 4
 void  State::_sub_Op_ExtractD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8342 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23021 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n->in(1)) == 4 || // src
             Matcher::vector_length(n->in(1)) == 8
-#line 24456 "dfa_x86.cpp"
+#line 29780 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
         DFA_PRODUCTION(LEGREGD, vextractD_rule, c)
@@ -24463,9 +29787,9 @@ Matcher::vector_length(n->in(1)) == 4 || // src
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 8330 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23009 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n->in(1)) == 2
-#line 24468 "dfa_x86.cpp"
+#line 29792 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(LEGREGD) || _cost[LEGREGD] > c) {
@@ -24508,6 +29832,10 @@ void  State::_sub_Op_ReinterpretS2HF(const Node *n){
 }
 void  State::_sub_Op_ReinterpretHF2S(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
+      unsigned int c = _kids[0]->_cost[REGF];
+        DFA_PRODUCTION(_REINTERPRETHF2S_REGF_, _ReinterpretHF2S_regF__rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+100;
         DFA_PRODUCTION(RREGI, reinterpretHF2S_rule, c)
         DFA_PRODUCTION(STACKSLOTI, storeSSI_rule, c+100)
@@ -24518,10 +29846,6 @@ void  State::_sub_Op_ReinterpretHF2S(const Node *n){
         DFA_PRODUCTION(RCX_REGI, reinterpretHF2S_rule, c)
         DFA_PRODUCTION(RDX_REGI, reinterpretHF2S_rule, c)
         DFA_PRODUCTION(RDI_REGI, reinterpretHF2S_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
-      unsigned int c = _kids[0]->_cost[REGF];
-        DFA_PRODUCTION(_REINTERPRETHF2S_REGF_, _ReinterpretHF2S_regF__rule, c)
     }
 }
 void  State::_sub_Op_SelectFromTwoVector(const Node *n){
@@ -24538,10 +29862,10 @@ void  State::_sub_Op_VectorMaskCmp(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8195 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22880 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() &&
             is_integral_type(Matcher::vector_element_basic_type(n->in(1)->in(1)))
-#line 24544 "dfa_x86.cpp"
+#line 29868 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -24550,11 +29874,11 @@ n->bottom_type()->isa_vectmask() &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8160 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22845 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (n->bottom_type()->isa_vectmask() == nullptr &&
              Matcher::vector_length_in_bytes(n->in(1)->in(1)) == 64) && // src1
              is_integral_type(Matcher::vector_element_basic_type(n->in(1)->in(1)))
-#line 24557 "dfa_x86.cpp"
+#line 29881 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[IMMI8]+100;
         DFA_PRODUCTION(VEC, vcmp64_rule, c)
@@ -24562,13 +29886,13 @@ n->bottom_type()->isa_vectmask() &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_LEGVEC_LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8133 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22818 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() == nullptr &&
             Matcher::is_unsigned_booltest_pred(n->in(2)->get_int()) &&
             Matcher::vector_length_in_bytes(n->in(1)->in(1)) >=  4 && // src1
             Matcher::vector_length_in_bytes(n->in(1)->in(1)) <= 32 && // src1
             is_integral_type(Matcher::vector_element_basic_type(n->in(1)->in(1)))
-#line 24571 "dfa_x86.cpp"
+#line 29895 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_LEGVEC_LEGVEC]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24580,7 +29904,7 @@ n->bottom_type()->isa_vectmask() == nullptr &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_LEGVEC_LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8112 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22797 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() == nullptr &&
             !Matcher::is_unsigned_booltest_pred(n->in(2)->get_int()) &&
             Matcher::vector_length_in_bytes(n->in(1)->in(1)) >=  4 && // src1
@@ -24589,7 +29913,7 @@ n->bottom_type()->isa_vectmask() == nullptr &&
             (n->in(2)->get_int() == BoolTest::ne ||
              n->in(2)->get_int() == BoolTest::le ||
              n->in(2)->get_int() == BoolTest::ge)
-#line 24592 "dfa_x86.cpp"
+#line 29916 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_LEGVEC_LEGVEC]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24601,7 +29925,7 @@ n->bottom_type()->isa_vectmask() == nullptr &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_LEGVEC_LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8092 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22777 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() == nullptr &&
             !Matcher::is_unsigned_booltest_pred(n->in(2)->get_int()) &&
             Matcher::vector_length_in_bytes(n->in(1)->in(1)) >=  4 && // src1
@@ -24610,7 +29934,7 @@ n->bottom_type()->isa_vectmask() == nullptr &&
             (n->in(2)->get_int() == BoolTest::eq ||
              n->in(2)->get_int() == BoolTest::lt ||
              n->in(2)->get_int() == BoolTest::gt)
-#line 24613 "dfa_x86.cpp"
+#line 29937 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_LEGVEC_LEGVEC]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24622,10 +29946,10 @@ n->bottom_type()->isa_vectmask() == nullptr &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8073 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22758 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() &&
             is_floating_point_type(Matcher::vector_element_basic_type(n->in(1)->in(1)))
-#line 24628 "dfa_x86.cpp"
+#line 29952 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -24634,11 +29958,11 @@ n->bottom_type()->isa_vectmask() &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8051 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22736 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)->in(1)) == 64 && // src1
             n->bottom_type()->isa_vectmask() == nullptr &&
             is_floating_point_type(Matcher::vector_element_basic_type(n->in(1)->in(1)))
-#line 24641 "dfa_x86.cpp"
+#line 29965 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24650,12 +29974,12 @@ Matcher::vector_length_in_bytes(n->in(1)->in(1)) == 64 && // src1
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_LEGVEC_LEGVEC) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8032 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22717 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() == nullptr &&
             Matcher::vector_length_in_bytes(n->in(1)->in(1)) >=  8 && // src1
             Matcher::vector_length_in_bytes(n->in(1)->in(1)) <= 32 && // src1
             is_floating_point_type(Matcher::vector_element_basic_type(n->in(1)->in(1)))
-#line 24658 "dfa_x86.cpp"
+#line 29982 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_LEGVEC_LEGVEC]+_kids[1]->_cost[IMMI8]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24669,9 +29993,9 @@ n->bottom_type()->isa_vectmask() == nullptr &&
 void  State::_sub_Op_VectorMaskCast(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 8858 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23534 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) != Matcher::vector_length_in_bytes(n->in(1))
-#line 24674 "dfa_x86.cpp"
+#line 29998 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vmaskcast_avx_rule, c)
@@ -24679,9 +30003,9 @@ Matcher::vector_length_in_bytes(n) != Matcher::vector_length_in_bytes(n->in(1))
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 8847 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23523 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) == Matcher::vector_length_in_bytes(n->in(1))
-#line 24684 "dfa_x86.cpp"
+#line 30008 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC];
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24699,21 +30023,21 @@ Matcher::vector_length_in_bytes(n) == Matcher::vector_length_in_bytes(n->in(1))
 void  State::_sub_Op_VectorTest(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 8622 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23299 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n->in(1)) >= 16 ||
             (Matcher::vector_length(n->in(1)) == 8 && VM_Version::supports_avx512dq())
-#line 24705 "dfa_x86.cpp"
+#line 30029 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(RFLAGSREGU, ktest_ge8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 8607 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23284 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length(n->in(1)) < 8 ||
              (Matcher::vector_length(n->in(1)) == 8 && !VM_Version::supports_avx512dq())) &&
             static_cast<const VectorTestNode*>(n)->get_predicate() == BoolTest::ne
-#line 24716 "dfa_x86.cpp"
+#line 30040 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGU) || _cost[RFLAGSREGU] > c) {
@@ -24722,11 +30046,11 @@ Matcher::vector_length(n->in(1)) >= 16 ||
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 8591 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23268 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length(n->in(1)) < 8 ||
              (Matcher::vector_length(n->in(1)) == 8 && !VM_Version::supports_avx512dq())) &&
             static_cast<const VectorTestNode*>(n)->get_predicate() == BoolTest::overflow
-#line 24729 "dfa_x86.cpp"
+#line 30053 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGU) || _cost[RFLAGSREGU] > c) {
@@ -24735,9 +30059,9 @@ Matcher::vector_length(n->in(1)) >= 16 ||
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 8579 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23256 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) >= 16
-#line 24740 "dfa_x86.cpp"
+#line 30064 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGU) || _cost[RFLAGSREGU] > c) {
@@ -24746,9 +30070,9 @@ Matcher::vector_length_in_bytes(n->in(1)) >= 16
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 8566 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23243 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n->in(1)) < 16
-#line 24751 "dfa_x86.cpp"
+#line 30075 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(RFLAGSREGU) || _cost[RFLAGSREGU] > c) {
@@ -24759,11 +30083,11 @@ Matcher::vector_length_in_bytes(n->in(1)) < 16
 void  State::_sub_Op_VectorBlend(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], KREG) &&
         (
-#line 8435 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23114 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(2)->bottom_type()->isa_vectmask() &&
             (!is_subword_type(Matcher::vector_element_basic_type(n)) ||
              VM_Version::supports_avx512bw())
-#line 24766 "dfa_x86.cpp"
+#line 30090 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[KREG]+100;
         DFA_PRODUCTION(VEC, evblendvp64_masked_rule, c)
@@ -24771,10 +30095,10 @@ n->in(2)->bottom_type()->isa_vectmask() &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 8419 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23098 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) == 64 &&
             n->in(2)->bottom_type()->isa_vectmask() == nullptr
-#line 24777 "dfa_x86.cpp"
+#line 30101 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24786,11 +30110,11 @@ Matcher::vector_length_in_bytes(n) == 64 &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_LEGVEC_LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 8403 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23082 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && EnableX86ECoreOpts &&
             n->in(2)->bottom_type()->isa_vectmask() == nullptr &&
             Matcher::vector_length_in_bytes(n) <= 32
-#line 24793 "dfa_x86.cpp"
+#line 30117 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_LEGVEC_LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24802,12 +30126,12 @@ UseAVX > 0 && EnableX86ECoreOpts &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_LEGVEC_LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 8389 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23068 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && !EnableX86ECoreOpts &&
             n->in(2)->bottom_type()->isa_vectmask() == nullptr &&
             Matcher::vector_length_in_bytes(n) <= 32 &&
             !is_integral_type(Matcher::vector_element_basic_type(n))
-#line 24810 "dfa_x86.cpp"
+#line 30134 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_LEGVEC_LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24819,12 +30143,12 @@ UseAVX > 0 && !EnableX86ECoreOpts &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_LEGVEC_LEGVEC) && STATE__VALID_CHILD(_kids[1], LEGVEC) &&
         (
-#line 8375 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23054 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 && !EnableX86ECoreOpts &&
             n->in(2)->bottom_type()->isa_vectmask() == nullptr &&
             Matcher::vector_length_in_bytes(n) <= 32 &&
             is_integral_type(Matcher::vector_element_basic_type(n))
-#line 24827 "dfa_x86.cpp"
+#line 30151 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_LEGVEC_LEGVEC]+_kids[1]->_cost[LEGVEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24836,9 +30160,9 @@ UseAVX > 0 && !EnableX86ECoreOpts &&
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 8359 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23038 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0
-#line 24841 "dfa_x86.cpp"
+#line 30165 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24857,10 +30181,10 @@ void  State::_sub_Op_VectorRearrange(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9173 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23848 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBLE
             (Matcher::vector_length(n) == 8 || VM_Version::supports_avx512vl())
-#line 24863 "dfa_x86.cpp"
+#line 30187 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24872,10 +30196,10 @@ is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBL
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9159 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23834 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBLE
             Matcher::vector_length(n) < 8 && !VM_Version::supports_avx512vl()
-#line 24878 "dfa_x86.cpp"
+#line 30202 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24887,10 +30211,10 @@ is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBL
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9118 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23793 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_element_basic_type(n) == T_INT || Matcher::vector_element_basic_type(n) == T_FLOAT) &&
             UseAVX > 0
-#line 24893 "dfa_x86.cpp"
+#line 30217 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24902,10 +30226,10 @@ is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBL
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9106 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23781 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_element_basic_type(n) == T_INT || Matcher::vector_element_basic_type(n) == T_FLOAT) &&
             UseAVX == 0
-#line 24908 "dfa_x86.cpp"
+#line 30232 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24917,10 +30241,10 @@ is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBL
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9059 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23734 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_SHORT &&
             VM_Version::supports_avx512bw()
-#line 24923 "dfa_x86.cpp"
+#line 30247 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24932,10 +30256,10 @@ Matcher::vector_element_basic_type(n) == T_SHORT &&
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9037 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23712 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_SHORT &&
             Matcher::vector_length(n) == 16 && !VM_Version::supports_avx512bw()
-#line 24938 "dfa_x86.cpp"
+#line 30262 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -24947,10 +30271,10 @@ Matcher::vector_element_basic_type(n) == T_SHORT &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 9025 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23700 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_SHORT &&
             Matcher::vector_length(n) <= 8 && !VM_Version::supports_avx512bw()
-#line 24953 "dfa_x86.cpp"
+#line 30277 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24962,10 +30286,10 @@ Matcher::vector_element_basic_type(n) == T_SHORT &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 8970 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23645 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_BYTE &&
             Matcher::vector_length(n) >= 32 && VM_Version::supports_avx512_vbmi()
-#line 24968 "dfa_x86.cpp"
+#line 30292 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24977,10 +30301,10 @@ Matcher::vector_element_basic_type(n) == T_BYTE &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 8955 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23630 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_BYTE &&
             Matcher::vector_length(n) > 32 && !VM_Version::supports_avx512_vbmi()
-#line 24983 "dfa_x86.cpp"
+#line 30307 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -24992,10 +30316,10 @@ Matcher::vector_element_basic_type(n) == T_BYTE &&
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 8932 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23607 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_BYTE &&
             Matcher::vector_length(n) == 32 && !VM_Version::supports_avx512_vbmi()
-#line 24998 "dfa_x86.cpp"
+#line 30322 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -25007,10 +30331,10 @@ Matcher::vector_element_basic_type(n) == T_BYTE &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], VEC) &&
         (
-#line 8920 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23595 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_BYTE &&
             Matcher::vector_length(n) < 32
-#line 25013 "dfa_x86.cpp"
+#line 30337 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25024,18 +30348,18 @@ Matcher::vector_element_basic_type(n) == T_BYTE &&
 void  State::_sub_Op_VectorLoadMask(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 8662 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23338 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() && VM_Version::supports_avx512vlbw()
-#line 25029 "dfa_x86.cpp"
+#line 30353 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(KREG, loadMask_evex_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && _kids[1] == nullptr &&
         (
-#line 8650 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23326 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() && !VM_Version::supports_avx512vlbw()
-#line 25038 "dfa_x86.cpp"
+#line 30362 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -25044,9 +30368,9 @@ n->bottom_type()->isa_vectmask() && !VM_Version::supports_avx512vlbw()
     }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) && _kids[1] == nullptr &&
         (
-#line 8637 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23313 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() == nullptr && !VM_Version::supports_avx512vlbw()
-#line 25049 "dfa_x86.cpp"
+#line 30373 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(LEGVEC, loadMask_rule, c)
@@ -25056,10 +30380,10 @@ n->bottom_type()->isa_vectmask() == nullptr && !VM_Version::supports_avx512vlbw(
 void  State::_sub_Op_VectorLoadShuffle(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 9133 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23808 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBLE
             Matcher::vector_length(n) < 8 && !VM_Version::supports_avx512vl()
-#line 25062 "dfa_x86.cpp"
+#line 30386 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, loadShuffleL_rule, c)
@@ -25067,10 +30391,10 @@ is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBL
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 9076 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23751 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_element_basic_type(n) == T_INT || Matcher::vector_element_basic_type(n) == T_FLOAT) &&
             Matcher::vector_length(n) == 4 && UseAVX == 0
-#line 25073 "dfa_x86.cpp"
+#line 30397 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25082,10 +30406,10 @@ is_double_word_type(Matcher::vector_element_basic_type(n)) && // T_LONG, T_DOUBL
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 8984 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23659 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_SHORT &&
             !VM_Version::supports_avx512bw()
-#line 25088 "dfa_x86.cpp"
+#line 30412 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25110,9 +30434,9 @@ void  State::_sub_Op_VectorStoreMask(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 8824 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23500 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask() && VM_Version::supports_avx512vlbw()
-#line 25115 "dfa_x86.cpp"
+#line 30439 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(VEC, vstoreMask_evex_rule, c)
@@ -25120,9 +30444,9 @@ n->in(1)->bottom_type()->isa_vectmask() && VM_Version::supports_avx512vlbw()
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 8810 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23486 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->in(1)->bottom_type()->isa_vectmask() && !VM_Version::supports_avx512vlbw()
-#line 25125 "dfa_x86.cpp"
+#line 30449 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[IMMI]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25134,9 +30458,9 @@ n->in(1)->bottom_type()->isa_vectmask() && !VM_Version::supports_avx512vlbw()
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_8) &&
         (
-#line 8794 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23470 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2 && n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 25139 "dfa_x86.cpp"
+#line 30463 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25148,9 +30472,9 @@ UseAVX > 2 && n->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_4) &&
         (
-#line 8778 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23454 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2 && n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 25153 "dfa_x86.cpp"
+#line 30477 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_4]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25162,9 +30486,9 @@ UseAVX > 2 && n->in(1)->bottom_type()->isa_vectmask() == nullptr
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_8) &&
         (
-#line 8760 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23436 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX <= 2 && Matcher::vector_length(n) == 4
-#line 25167 "dfa_x86.cpp"
+#line 30491 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25176,9 +30500,9 @@ UseAVX <= 2 && Matcher::vector_length(n) == 4
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_8) &&
         (
-#line 8744 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23420 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX <= 2 && Matcher::vector_length(n) == 2
-#line 25181 "dfa_x86.cpp"
+#line 30505 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25190,9 +30514,9 @@ UseAVX <= 2 && Matcher::vector_length(n) == 2
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_4) &&
         (
-#line 8718 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23394 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX <= 2 && Matcher::vector_length(n) <= 8 && n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 25195 "dfa_x86.cpp"
+#line 30519 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_4]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25204,9 +30528,9 @@ UseAVX <= 2 && Matcher::vector_length(n) <= 8 && n->in(1)->bottom_type()->isa_ve
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_2) &&
         (
-#line 8695 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23371 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 16 && n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 25209 "dfa_x86.cpp"
+#line 30533 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_2]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25218,9 +30542,9 @@ Matcher::vector_length(n) <= 16 && n->in(1)->bottom_type()->isa_vectmask() == nu
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) && STATE__VALID_CHILD(_kids[1], IMMI_1) &&
         (
-#line 8677 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 23353 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) < 64 && n->in(1)->bottom_type()->isa_vectmask() == nullptr
-#line 25223 "dfa_x86.cpp"
+#line 30547 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+_kids[1]->_cost[IMMI_1]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25232,12 +30556,16 @@ Matcher::vector_length(n) < 64 && n->in(1)->bottom_type()->isa_vectmask() == nul
     }
 }
 void  State::_sub_Op_VectorReinterpret(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) ) {
+      unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_];
+        DFA_PRODUCTION(_VECTORREINTERPRET__LOADVECTOR_MEMORY__, _VectorReinterpret__LoadVector_memory___rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) &&
         (
-#line 3951 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18621 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->bottom_type()->isa_vectmask() &&
             Matcher::vector_length_in_bytes(n->in(1)) > Matcher::vector_length_in_bytes(n)
-#line 25240 "dfa_x86.cpp"
+#line 30568 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+125;
         DFA_PRODUCTION(VEC, reinterpret_shrink_rule, c)
@@ -25245,12 +30573,12 @@ void  State::_sub_Op_VectorReinterpret(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 3932 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18602 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 &&
             !n->bottom_type()->isa_vectmask() &&
             (Matcher::vector_length_in_bytes(n->in(1)) > 4) && // src
             (Matcher::vector_length_in_bytes(n->in(1)) < Matcher::vector_length_in_bytes(n))
-#line 25253 "dfa_x86.cpp"
+#line 30581 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+125;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -25262,12 +30590,12 @@ UseAVX > 0 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 3917 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18587 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 0 &&
             !n->bottom_type()->isa_vectmask() &&
             (Matcher::vector_length_in_bytes(n->in(1)) == 4) && // src
             (Matcher::vector_length_in_bytes(n->in(1)) < Matcher::vector_length_in_bytes(n))
-#line 25270 "dfa_x86.cpp"
+#line 30598 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+125;
       if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c) {
@@ -25279,10 +30607,10 @@ UseAVX > 0 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 3894 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18564 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX == 0 &&
             (Matcher::vector_length_in_bytes(n->in(1)) < Matcher::vector_length_in_bytes(n))
-#line 25285 "dfa_x86.cpp"
+#line 30613 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+125;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25294,10 +30622,10 @@ UseAVX == 0 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 3882 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18552 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !n->bottom_type()->isa_vectmask() &&
             Matcher::vector_length_in_bytes(n) == Matcher::vector_length_in_bytes(n->in(1))
-#line 25300 "dfa_x86.cpp"
+#line 30628 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+125;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25309,28 +30637,28 @@ UseAVX == 0 &&
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) &&
         (
-#line 3861 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18531 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2 && Matcher::vector_length(n) != Matcher::vector_length(n->in(1)) &&
             n->bottom_type()->isa_vectmask() &&
             n->in(1)->bottom_type()->isa_vectmask() &&
             (n->in(1)->bottom_type()->is_vectmask()->element_basic_type() == T_LONG ||
              n->in(1)->bottom_type()->is_vectmask()->element_basic_type() == T_DOUBLE) &&
             n->bottom_type()->is_vectmask()->element_basic_type() == T_BYTE
-#line 25319 "dfa_x86.cpp"
+#line 30647 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+100;
         DFA_PRODUCTION(KREG, reinterpret_mask_Q2B_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) &&
         (
-#line 3840 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18510 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2 && Matcher::vector_length(n) != Matcher::vector_length(n->in(1)) &&
             n->bottom_type()->isa_vectmask() &&
             n->in(1)->bottom_type()->isa_vectmask() &&
             (n->in(1)->bottom_type()->is_vectmask()->element_basic_type() == T_INT ||
              n->in(1)->bottom_type()->is_vectmask()->element_basic_type() == T_FLOAT) &&
             n->bottom_type()->is_vectmask()->element_basic_type() == T_BYTE
-#line 25333 "dfa_x86.cpp"
+#line 30661 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -25339,13 +30667,13 @@ UseAVX > 2 && Matcher::vector_length(n) != Matcher::vector_length(n->in(1)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) &&
         (
-#line 3820 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18490 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2 && Matcher::vector_length(n) != Matcher::vector_length(n->in(1)) &&
             n->bottom_type()->isa_vectmask() &&
             n->in(1)->bottom_type()->isa_vectmask() &&
             n->in(1)->bottom_type()->is_vectmask()->element_basic_type() == T_SHORT &&
             n->bottom_type()->is_vectmask()->element_basic_type() == T_BYTE
-#line 25348 "dfa_x86.cpp"
+#line 30676 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -25354,10 +30682,10 @@ UseAVX > 2 && Matcher::vector_length(n) != Matcher::vector_length(n->in(1)) &&
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) &&
         (
-#line 3808 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 18478 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 n->bottom_type()->isa_vectmask() &&
             Matcher::vector_length(n) == Matcher::vector_length(n->in(1))
-#line 25360 "dfa_x86.cpp"
+#line 30688 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+125;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -25368,9 +30696,9 @@ n->bottom_type()->isa_vectmask() &&
 void  State::_sub_Op_VectorCastB2X(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], LEGVEC) &&
         (
-#line 7594 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22221 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 !VM_Version::supports_avx512vl() && Matcher::vector_element_basic_type(n) == T_DOUBLE
-#line 25373 "dfa_x86.cpp"
+#line 30701 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[LEGVEC]+100;
         DFA_PRODUCTION(LEGVEC, vcastBtoD_rule, c)
@@ -25378,9 +30706,9 @@ void  State::_sub_Op_VectorCastB2X(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7582 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22209 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_DOUBLE
-#line 25383 "dfa_x86.cpp"
+#line 30711 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25394,10 +30722,10 @@ VM_Version::supports_avx512vl() || Matcher::vector_element_basic_type(n) != T_DO
 void  State::_sub_Op_VectorCastS2X(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7638 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22265 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX > 2 && VM_Version::supports_avx512vlbw()) ||
             (Matcher::vector_length_in_bytes(n) >= Matcher::vector_length_in_bytes(n->in(1)))
-#line 25400 "dfa_x86.cpp"
+#line 30728 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vcastStoX_evex_rule, c)
@@ -25405,11 +30733,11 @@ void  State::_sub_Op_VectorCastS2X(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7620 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22247 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX <= 2 || !VM_Version::supports_avx512vlbw()) &&
             Matcher::vector_length(n->in(1)) == 16 && // src
             Matcher::vector_element_basic_type(n) == T_BYTE
-#line 25412 "dfa_x86.cpp"
+#line 30740 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25421,11 +30749,11 @@ void  State::_sub_Op_VectorCastS2X(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7605 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22232 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (UseAVX <= 2 || !VM_Version::supports_avx512vlbw()) &&
             Matcher::vector_length(n->in(1)) <= 8 && // src
             Matcher::vector_element_basic_type(n) == T_BYTE
-#line 25428 "dfa_x86.cpp"
+#line 30756 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25439,10 +30767,10 @@ void  State::_sub_Op_VectorCastS2X(const Node *n){
 void  State::_sub_Op_VectorCastI2X(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7730 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22357 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2 ||
             (Matcher::vector_length_in_bytes(n) >= Matcher::vector_length_in_bytes(n->in(1)))
-#line 25445 "dfa_x86.cpp"
+#line 30773 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vcastItoX_evex_rule, c)
@@ -25450,11 +30778,11 @@ UseAVX > 2 ||
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7702 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22329 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX <= 2 &&
             (Matcher::vector_length_in_bytes(n->in(1)) == 32) &&
             (Matcher::vector_length_in_bytes(n) < Matcher::vector_length_in_bytes(n->in(1)))
-#line 25457 "dfa_x86.cpp"
+#line 30785 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25466,11 +30794,11 @@ UseAVX <= 2 &&
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7677 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22304 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX <= 2 &&
             (Matcher::vector_length_in_bytes(n->in(1)) <= 16) &&
             (Matcher::vector_length_in_bytes(n) < Matcher::vector_length_in_bytes(n->in(1)))
-#line 25473 "dfa_x86.cpp"
+#line 30801 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25484,12 +30812,12 @@ UseAVX <= 2 &&
 void  State::_sub_Op_VectorCastL2X(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7800 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22427 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX > 2 ||
             (Matcher::vector_element_basic_type(n) == T_INT ||
              Matcher::vector_element_basic_type(n) == T_FLOAT ||
              Matcher::vector_element_basic_type(n) == T_DOUBLE)
-#line 25492 "dfa_x86.cpp"
+#line 30820 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
         DFA_PRODUCTION(VEC, vcastLtoX_evex_rule, c)
@@ -25497,10 +30825,10 @@ UseAVX > 2 ||
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7770 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22397 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_element_basic_type(n) == T_BYTE || Matcher::vector_element_basic_type(n) == T_SHORT) &&
             UseAVX <= 2
-#line 25503 "dfa_x86.cpp"
+#line 30831 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25512,23 +30840,57 @@ UseAVX > 2 ||
     }
 }
 void  State::_sub_Op_VectorCastF2X(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], VEC) &&
+    if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) &&
         (
-#line 7895 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n->in(1)) == 64) &&
+#line 22562 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() &&
             is_integral_type(Matcher::vector_element_basic_type(n))
-#line 25520 "dfa_x86.cpp"
+#line 30848 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[VEC]+100;
-        DFA_PRODUCTION(VEC, castFtoX_reg_evex_rule, c)
+      unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+100;
+        DFA_PRODUCTION(VEC, castFtoX_mem_avx10_2_rule, c)
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7872 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-!VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n->in(1)) < 64 &&
-            type2aelembytes(Matcher::vector_element_basic_type(n)) <= 4
-#line 25531 "dfa_x86.cpp"
+#line 22549 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() &&
+            is_integral_type(Matcher::vector_element_basic_type(n))
+#line 30859 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, castFtoX_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) &&
+        (
+#line 22525 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() &&
+            (VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n->in(1)) == 64) &&
+            is_integral_type(Matcher::vector_element_basic_type(n))
+#line 30875 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, castFtoX_reg_evex_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) &&
+        (
+#line 22499 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() &&
+            !VM_Version::supports_avx512vl() &&
+            Matcher::vector_length_in_bytes(n->in(1)) < 64 &&
+            type2aelembytes(Matcher::vector_element_basic_type(n)) <= 4 &&
+            is_integral_type(Matcher::vector_element_basic_type(n))
+#line 30893 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25540,9 +30902,9 @@ void  State::_sub_Op_VectorCastF2X(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7860 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22487 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_DOUBLE
-#line 25545 "dfa_x86.cpp"
+#line 30907 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25554,23 +30916,56 @@ Matcher::vector_element_basic_type(n) == T_DOUBLE
     }
 }
 void  State::_sub_Op_VectorCastD2X(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], VEC) &&
+    if( STATE__VALID_CHILD(_kids[0], _LOADVECTOR_MEMORY_) &&
         (
-#line 7945 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-(VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n->in(1)) == 64) &&
+#line 22636 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() &&
             is_integral_type(Matcher::vector_element_basic_type(n))
-#line 25562 "dfa_x86.cpp"
+#line 30924 "dfa_x86.cpp"
 ) ) {
-      unsigned int c = _kids[0]->_cost[VEC]+100;
-        DFA_PRODUCTION(VEC, castDtoX_reg_evex_rule, c)
+      unsigned int c = _kids[0]->_cost[_LOADVECTOR_MEMORY_]+100;
+        DFA_PRODUCTION(VEC, castDtoX_mem_avx10_2_rule, c)
         DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7929 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
-!VM_Version::supports_avx512vl() && Matcher::vector_length_in_bytes(n->in(1)) < 64 &&
+#line 22623 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+VM_Version::supports_avx10_2() &&
             is_integral_type(Matcher::vector_element_basic_type(n))
-#line 25573 "dfa_x86.cpp"
+#line 30935 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, castDtoX_reg_avx10_2_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) &&
+        (
+#line 22605 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() &&
+            (VM_Version::supports_avx512vl() || Matcher::vector_length_in_bytes(n->in(1)) == 64) &&
+            is_integral_type(Matcher::vector_element_basic_type(n))
+#line 30951 "dfa_x86.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VEC]+100;
+      if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
+        DFA_PRODUCTION(VEC, castDtoX_reg_evex_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(LEGVEC) || _cost[LEGVEC] > c+100) {
+        DFA_PRODUCTION(LEGVEC, MoveVec2Leg_rule, c+100)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], VEC) &&
+        (
+#line 22587 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
+!VM_Version::supports_avx10_2() &&
+            !VM_Version::supports_avx512vl() &&
+            Matcher::vector_length_in_bytes(n->in(1)) < 64 &&
+            is_integral_type(Matcher::vector_element_basic_type(n))
+#line 30968 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25582,9 +30977,9 @@ void  State::_sub_Op_VectorCastD2X(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], VEC) &&
         (
-#line 7918 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 22576 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_element_basic_type(n) == T_FLOAT
-#line 25587 "dfa_x86.cpp"
+#line 30982 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[VEC]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25646,9 +31041,9 @@ void  State::_sub_Op_VectorUCastI2X(const Node *n){
 void  State::_sub_Op_VectorizedHashCode(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_RDI_REGP_RDX_REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_RBX_REGI_IMMU8) &&
         (
-#line 11131 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 16105 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 UseAVX >= 2
-#line 25651 "dfa_x86.cpp"
+#line 31046 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_RDI_REGP_RDX_REGI]+_kids[1]->_cost[_BINARY_RBX_REGI_IMMU8]+100;
         DFA_PRODUCTION(RBX_REGI, arrays_hashcode_rule, c)
@@ -25665,9 +31060,9 @@ UseAVX >= 2
 void  State::_sub_Op_VectorInsert(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_REGD) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 5146 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19634 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 8
-#line 25670 "dfa_x86.cpp"
+#line 31065 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_REGD]+_kids[1]->_cost[IMMI]+100;
         DFA_PRODUCTION(VEC, insert8D_rule, c)
@@ -25675,9 +31070,9 @@ Matcher::vector_length(n) == 8
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_REGD) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 5126 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19614 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 4
-#line 25680 "dfa_x86.cpp"
+#line 31075 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_REGD]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25689,9 +31084,9 @@ Matcher::vector_length(n) == 4
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_REGD) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 5110 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19598 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 2
-#line 25694 "dfa_x86.cpp"
+#line 31089 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_REGD]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25703,9 +31098,9 @@ Matcher::vector_length(n) == 2
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_REGF) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 5081 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19570 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) >= 8
-#line 25708 "dfa_x86.cpp"
+#line 31103 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_REGF]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25717,9 +31112,9 @@ Matcher::vector_length(n) >= 8
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_REGF) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 5065 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19554 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) < 8
-#line 25722 "dfa_x86.cpp"
+#line 31117 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_REGF]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25731,9 +31126,9 @@ Matcher::vector_length(n) < 8
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_RREGL) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 5046 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19536 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 8
-#line 25736 "dfa_x86.cpp"
+#line 31131 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_RREGL]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25745,9 +31140,9 @@ Matcher::vector_length(n) == 8
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_RREGL) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 5027 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19517 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 4
-#line 25750 "dfa_x86.cpp"
+#line 31145 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_RREGL]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25759,9 +31154,9 @@ Matcher::vector_length(n) == 4
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_RREGL) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 5013 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19503 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) == 2
-#line 25764 "dfa_x86.cpp"
+#line 31159 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_RREGL]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25773,9 +31168,9 @@ Matcher::vector_length(n) == 2
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_RREGI) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 4988 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19479 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) == 64
-#line 25778 "dfa_x86.cpp"
+#line 31173 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_RREGI]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25787,9 +31182,9 @@ Matcher::vector_length_in_bytes(n) == 64
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_RREGI) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 4965 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19456 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) == 32
-#line 25792 "dfa_x86.cpp"
+#line 31187 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_RREGI]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25801,9 +31196,9 @@ Matcher::vector_length_in_bytes(n) == 32
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_VEC_RREGI) && STATE__VALID_CHILD(_kids[1], IMMU8) &&
         (
-#line 4947 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 19438 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length_in_bytes(n) < 32
-#line 25806 "dfa_x86.cpp"
+#line 31201 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_VEC_RREGI]+_kids[1]->_cost[IMMU8]+100;
       if (STATE__NOT_YET_VALID(VEC) || _cost[VEC] > c) {
@@ -25821,18 +31216,18 @@ void  State::_sub_Op_MaskAll(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && _kids[1] == nullptr &&
         (
-#line 10466 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25136 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) <= 32
-#line 25826 "dfa_x86.cpp"
+#line 31221 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
         DFA_PRODUCTION(KREG, mask_all_evexI_LE32_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], RREGI) && _kids[1] == nullptr &&
         (
-#line 12465 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 17499 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) > 32
-#line 25835 "dfa_x86.cpp"
+#line 31230 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[RREGI]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -25865,11 +31260,11 @@ void  State::_sub_Op_XorVMask(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], _MASKALL_IMMI_M1_) &&
         (
-#line 10490 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25159 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 (Matcher::vector_length(n) == 8 && VM_Version::supports_avx512dq()) ||
             (Matcher::vector_length(n) == 16) ||
             (Matcher::vector_length(n) > 16 && VM_Version::supports_avx512bw())
-#line 25872 "dfa_x86.cpp"
+#line 31267 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[_MASKALL_IMMI_M1_]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -25878,9 +31273,9 @@ void  State::_sub_Op_XorVMask(const Node *n){
     }
     if( STATE__VALID_CHILD(_kids[0], KREG) && STATE__VALID_CHILD(_kids[1], _MASKALL_IMMI_M1_) &&
         (
-#line 10478 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 25147 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 Matcher::vector_length(n) < 8 && VM_Version::supports_avx512dq()
-#line 25883 "dfa_x86.cpp"
+#line 31278 "dfa_x86.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[KREG]+_kids[1]->_cost[_MASKALL_IMMI_M1_]+100;
       if (STATE__NOT_YET_VALID(KREG) || _cost[KREG] > c) {
@@ -26035,6 +31430,9 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_CastX2P: { _sub_Op_CastX2P(n);
+    break;
+  }
+  case Op_CastI2N: { _sub_Op_CastI2N(n);
     break;
   }
   case Op_CastP2X: { _sub_Op_CastP2X(n);
@@ -26697,6 +32095,9 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_StoreL: { _sub_Op_StoreL(n);
     break;
   }
+  case Op_StoreLSpecial: { _sub_Op_StoreLSpecial(n);
+    break;
+  }
   case Op_StoreP: { _sub_Op_StoreP(n);
     break;
   }
@@ -26784,6 +32185,9 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_AddVF: { _sub_Op_AddVF(n);
     break;
   }
+  case Op_AddVHF: { _sub_Op_AddVHF(n);
+    break;
+  }
   case Op_AddReductionVF: { _sub_Op_AddReductionVF(n);
     break;
   }
@@ -26806,6 +32210,9 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_SubVF: { _sub_Op_SubVF(n);
+    break;
+  }
+  case Op_SubVHF: { _sub_Op_SubVHF(n);
     break;
   }
   case Op_SubVD: { _sub_Op_SubVD(n);
@@ -26841,6 +32248,9 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_MulReductionVD: { _sub_Op_MulReductionVD(n);
     break;
   }
+  case Op_MulVHF: { _sub_Op_MulVHF(n);
+    break;
+  }
   case Op_MulAddVS2VI: { _sub_Op_MulAddVS2VI(n);
     break;
   }
@@ -26848,6 +32258,12 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_FmaVF: { _sub_Op_FmaVF(n);
+    break;
+  }
+  case Op_FmaVHF: { _sub_Op_FmaVHF(n);
+    break;
+  }
+  case Op_DivVHF: { _sub_Op_DivVHF(n);
     break;
   }
   case Op_DivVF: { _sub_Op_DivVF(n);
@@ -26884,6 +32300,9 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_SqrtVF: { _sub_Op_SqrtVF(n);
+    break;
+  }
+  case Op_SqrtVHF: { _sub_Op_SqrtVHF(n);
     break;
   }
   case Op_LShiftCntV: { _sub_Op_LShiftCntV(n);
@@ -26950,6 +32369,12 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_MaxV: { _sub_Op_MaxV(n);
+    break;
+  }
+  case Op_MinVHF: { _sub_Op_MinVHF(n);
+    break;
+  }
+  case Op_MaxVHF: { _sub_Op_MaxVHF(n);
     break;
   }
   case Op_UMinV: { _sub_Op_UMinV(n);

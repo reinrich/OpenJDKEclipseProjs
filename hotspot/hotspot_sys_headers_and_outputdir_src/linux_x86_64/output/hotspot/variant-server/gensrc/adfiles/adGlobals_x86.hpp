@@ -1,6 +1,6 @@
 #line 1 "adGlobals_x86.hpp"
 //
-// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2011, 2026, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -636,7 +636,9 @@ enum MachRegisterNumbers {
 };
 
 // Size of register-mask in ints
-#define RM_SIZE 24
+#define RM_SIZE_IN_INTS 24
+// Minimum size of register-mask in ints
+#define RM_SIZE_IN_INTS_MIN 19
 // Unroll factor for loops over the data in a RegMask
 #define FORALL_BODY BODY(0) BODY(1) BODY(2) BODY(3) BODY(4) BODY(5) BODY(6) BODY(7) BODY(8) BODY(9) BODY(10) BODY(11) BODY(12) BODY(13) BODY(14) BODY(15) BODY(16) BODY(17) BODY(18) BODY(19) BODY(20) BODY(21) BODY(22) BODY(23) 
 

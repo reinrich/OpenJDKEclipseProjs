@@ -1,6 +1,6 @@
 #line 1 "ad_x86_pipeline.cpp"
 //
-// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2011, 2026, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -168,9 +168,9 @@ Pipeline_Use_Cycle_Mask operator|(const Pipeline_Use_Cycle_Mask &in1, const Pipe
   return Pipeline_Use_Cycle_Mask(in1._mask | in2._mask);
 }
 
-static const Pipeline pipeline_class_Zero_Instructions(0, 0, true, 0, 0, false, false, false, false, nullptr, nullptr, nullptr, Pipeline_Use(0, 0, 0, nullptr));
+static const Pipeline pipeline_class_Zero_Instructions(0, 0, true, 0, 0, false, false, false, nullptr, nullptr, nullptr, Pipeline_Use(0, 0, 0, nullptr));
 
-static const Pipeline pipeline_class_Unknown_Instructions(0, 0, true, 0, 0, false, true, true, false, nullptr, nullptr, nullptr, Pipeline_Use(0, 0, 0, nullptr));
+static const Pipeline pipeline_class_Unknown_Instructions(0, 0, true, 0, 0, true, true, false, nullptr, nullptr, nullptr, Pipeline_Use(0, 0, 0, nullptr));
 
 const Pipeline_Use_Element Pipeline_Use::elaborated_elements[11] = {
   Pipeline_Use_Element(0, 0, 0, false, Pipeline_Use_Cycle_Mask(0)),
@@ -227,7 +227,7 @@ static const Pipeline_Use_Element pipeline_res_mask_001[2] = {
   Pipeline_Use_Element(0x700, 8, 10, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_001((uint)stage_undefined, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_001((uint)stage_undefined, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_001,
@@ -254,7 +254,7 @@ static const Pipeline_Use_Element pipeline_res_mask_002[2] = {
   Pipeline_Use_Element(0x700, 8, 10, true,  Pipeline_Use_Cycle_Mask(0x0000000c)) 
 };
 
-static const Pipeline pipeline_class_002((uint)stage_undefined, 1, false, 0, 2, false, false, false, false,
+static const Pipeline pipeline_class_002((uint)stage_undefined, 1, false, 0, 2, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_001,
@@ -295,7 +295,7 @@ static const Pipeline_Use_Element pipeline_res_mask_003[2] = {
   Pipeline_Use_Element(0x700, 8, 10, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_003((uint)stage_undefined, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_003((uint)stage_undefined, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_002,
@@ -303,7 +303,7 @@ static const Pipeline pipeline_class_003((uint)stage_undefined, 1, false, 0, 1, 
   Pipeline_Use(0x701, 0x1, 2, (Pipeline_Use_Element *)&pipeline_res_mask_003[0]));
 
 // Pipeline Class "ialu_reg_reg"
-static const Pipeline pipeline_class_004((uint)stage_S4, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_004((uint)stage_S4, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_001,
@@ -311,7 +311,7 @@ static const Pipeline pipeline_class_004((uint)stage_S4, 1, false, 0, 1, false, 
   Pipeline_Use(0x707, 0x0, 2, (Pipeline_Use_Element *)&pipeline_res_mask_001[0]));
 
 // Pipeline Class "ialu_reg_reg_fat"
-static const Pipeline pipeline_class_005((uint)stage_S4, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_005((uint)stage_S4, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_002,
@@ -353,7 +353,7 @@ static const Pipeline_Use_Element pipeline_res_mask_004[3] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_006((uint)stage_S5, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_006((uint)stage_S5, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_003,
@@ -394,7 +394,7 @@ static const Pipeline_Use_Element pipeline_res_mask_005[2] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_007((uint)stage_undefined, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_007((uint)stage_undefined, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_004,
@@ -407,7 +407,7 @@ static const enum machPipelineStages pipeline_reads_002[2] = {
   stage_S5 
 };
 
-static const Pipeline pipeline_class_008((uint)stage_undefined, 2, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_008((uint)stage_undefined, 2, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_002,
    (enum machPipelineStages *) pipeline_res_stages_003,
@@ -415,7 +415,7 @@ static const Pipeline pipeline_class_008((uint)stage_undefined, 2, false, 0, 1, 
   Pipeline_Use(0x739, 0x1, 3, (Pipeline_Use_Element *)&pipeline_res_mask_004[0]));
 
 // Pipeline Class "ialu_mem_imm"
-static const Pipeline pipeline_class_009((uint)stage_undefined, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_009((uint)stage_undefined, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_003,
@@ -456,7 +456,7 @@ static const Pipeline_Use_Element pipeline_res_mask_006[2] = {
   Pipeline_Use_Element(0x100, 8, 8, false, Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_010((uint)stage_S4, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_010((uint)stage_S4, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_005,
@@ -498,7 +498,7 @@ static const Pipeline_Use_Element pipeline_res_mask_007[3] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_011((uint)stage_S5, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_011((uint)stage_S5, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_006,
@@ -511,7 +511,7 @@ static const enum machPipelineStages pipeline_reads_003[2] = {
   stage_S3 
 };
 
-static const Pipeline pipeline_class_012((uint)stage_S4, 2, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_012((uint)stage_S4, 2, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_003,
    (enum machPipelineStages *) pipeline_res_stages_001,
@@ -519,7 +519,7 @@ static const Pipeline pipeline_class_012((uint)stage_S4, 2, false, 0, 1, false, 
   Pipeline_Use(0x707, 0x0, 2, (Pipeline_Use_Element *)&pipeline_res_mask_001[0]));
 
 // Pipeline Class "ialu_cr_reg_imm"
-static const Pipeline pipeline_class_013((uint)stage_S4, 1, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_013((uint)stage_S4, 1, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_001,
@@ -527,7 +527,7 @@ static const Pipeline pipeline_class_013((uint)stage_S4, 1, false, 0, 1, false, 
   Pipeline_Use(0x707, 0x0, 2, (Pipeline_Use_Element *)&pipeline_res_mask_001[0]));
 
 // Pipeline Class "ialu_cr_reg_mem"
-static const Pipeline pipeline_class_014((uint)stage_S4, 2, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_014((uint)stage_S4, 2, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_003,
    (enum machPipelineStages *) pipeline_res_stages_003,
@@ -573,7 +573,7 @@ static const Pipeline_Use_Element pipeline_res_mask_008[1] = {
   Pipeline_Use_Element(0x007, 0, 2, true,  Pipeline_Use_Cycle_Mask(0x80000008)) 
 };
 
-static const Pipeline pipeline_class_015((uint)stage_undefined, 3, false, 0, 4, false, false, false, false,
+static const Pipeline pipeline_class_015((uint)stage_undefined, 3, false, 0, 4, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_004,
    (enum machPipelineStages *) pipeline_res_stages_007,
@@ -599,7 +599,7 @@ static const Pipeline_Use_Element pipeline_res_mask_009[1] = {
   Pipeline_Use_Element(0x007, 0, 2, true,  Pipeline_Use_Cycle_Mask(0x80000001)) 
 };
 
-static const Pipeline pipeline_class_016((uint)stage_S4, 2, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_016((uint)stage_S4, 2, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_003,
    (enum machPipelineStages *) pipeline_res_stages_007,
@@ -646,7 +646,7 @@ static const Pipeline_Use_Element pipeline_res_mask_010[2] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_017((uint)stage_S4, 3, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_017((uint)stage_S4, 3, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_005,
    (enum machPipelineStages *) pipeline_res_stages_008,
@@ -672,7 +672,7 @@ static const Pipeline_Use_Element pipeline_res_mask_011[1] = {
   Pipeline_Use_Element(0x007, 0, 2, true,  Pipeline_Use_Cycle_Mask(0x80000002)) 
 };
 
-static const Pipeline pipeline_class_018((uint)stage_S4, 3, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_018((uint)stage_S4, 3, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_005,
    (enum machPipelineStages *) pipeline_res_stages_007,
@@ -713,7 +713,7 @@ static const Pipeline_Use_Element pipeline_res_mask_012[2] = {
   Pipeline_Use_Element(0x080, 7, 7, false, Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_019((uint)stage_undefined, 1, false, 0, 2, false, false, false, false,
+static const Pipeline pipeline_class_019((uint)stage_undefined, 1, false, 0, 2, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_009,
@@ -721,7 +721,7 @@ static const Pipeline pipeline_class_019((uint)stage_undefined, 1, false, 0, 2, 
   Pipeline_Use(0x87, 0x80, 2, (Pipeline_Use_Element *)&pipeline_res_mask_012[0]));
 
 // Pipeline Class "fpu_reg_reg"
-static const Pipeline pipeline_class_020((uint)stage_S4, 1, false, 0, 2, false, false, false, false,
+static const Pipeline pipeline_class_020((uint)stage_S4, 1, false, 0, 2, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_009,
@@ -748,7 +748,7 @@ static const Pipeline_Use_Element pipeline_res_mask_013[2] = {
   Pipeline_Use_Element(0x080, 7, 7, false, Pipeline_Use_Cycle_Mask(0x0000000c)) 
 };
 
-static const Pipeline pipeline_class_021((uint)stage_S4, 2, false, 0, 3, false, false, false, false,
+static const Pipeline pipeline_class_021((uint)stage_S4, 2, false, 0, 3, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_003,
    (enum machPipelineStages *) pipeline_res_stages_009,
@@ -781,7 +781,7 @@ static const Pipeline_Use_Element pipeline_res_mask_014[2] = {
   Pipeline_Use_Element(0x080, 7, 7, false, Pipeline_Use_Cycle_Mask(0x0000000c)) 
 };
 
-static const Pipeline pipeline_class_022((uint)stage_S4, 3, false, 0, 4, false, false, false, false,
+static const Pipeline pipeline_class_022((uint)stage_S4, 3, false, 0, 4, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_006,
    (enum machPipelineStages *) pipeline_res_stages_009,
@@ -824,7 +824,7 @@ static const Pipeline_Use_Element pipeline_res_mask_015[4] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_023((uint)stage_S4, 3, false, 0, 4, false, false, false, false,
+static const Pipeline pipeline_class_023((uint)stage_S4, 3, false, 0, 4, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_006,
    (enum machPipelineStages *) pipeline_res_stages_010,
@@ -867,7 +867,7 @@ static const Pipeline_Use_Element pipeline_res_mask_016[4] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_024((uint)stage_S5, 1, false, 0, 2, false, false, false, false,
+static const Pipeline pipeline_class_024((uint)stage_S5, 1, false, 0, 2, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_011,
@@ -896,7 +896,7 @@ static const Pipeline_Use_Element pipeline_res_mask_017[4] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_025((uint)stage_S5, 2, false, 0, 3, false, false, false, false,
+static const Pipeline pipeline_class_025((uint)stage_S5, 2, false, 0, 3, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_003,
    (enum machPipelineStages *) pipeline_res_stages_011,
@@ -925,7 +925,7 @@ static const Pipeline_Use_Element pipeline_res_mask_018[4] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_026((uint)stage_undefined, 2, false, 0, 2, false, false, false, false,
+static const Pipeline pipeline_class_026((uint)stage_undefined, 2, false, 0, 2, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_002,
    (enum machPipelineStages *) pipeline_res_stages_012,
@@ -940,7 +940,7 @@ static const Pipeline_Use_Element pipeline_res_mask_019[4] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_027((uint)stage_undefined, 3, false, 0, 3, false, false, false, false,
+static const Pipeline pipeline_class_027((uint)stage_undefined, 3, false, 0, 3, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_006,
    (enum machPipelineStages *) pipeline_res_stages_012,
@@ -989,7 +989,7 @@ static const Pipeline_Use_Element pipeline_res_mask_020[4] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x0000000c)) 
 };
 
-static const Pipeline pipeline_class_028((uint)stage_undefined, 3, false, 0, 3, false, false, false, false,
+static const Pipeline pipeline_class_028((uint)stage_undefined, 3, false, 0, 3, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_007,
    (enum machPipelineStages *) pipeline_res_stages_013,
@@ -1021,7 +1021,7 @@ static const Pipeline_Use_Element pipeline_res_mask_021[2] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x0000000c)) 
 };
 
-static const Pipeline pipeline_class_029((uint)stage_undefined, 2, false, 0, 2, false, false, false, false,
+static const Pipeline pipeline_class_029((uint)stage_undefined, 2, false, 0, 2, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_008,
    (enum machPipelineStages *) pipeline_res_stages_004,
@@ -1063,7 +1063,7 @@ static const Pipeline_Use_Element pipeline_res_mask_022[3] = {
   Pipeline_Use_Element(0x038, 3, 5, true,  Pipeline_Use_Cycle_Mask(0x0000001c)) 
 };
 
-static const Pipeline pipeline_class_030((uint)stage_undefined, 3, false, 0, 3, false, false, false, false,
+static const Pipeline pipeline_class_030((uint)stage_undefined, 3, false, 0, 3, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_007,
    (enum machPipelineStages *) pipeline_res_stages_014,
@@ -1076,7 +1076,7 @@ static const enum machPipelineStages pipeline_reads_009[2] = {
   stage_S4 
 };
 
-static const Pipeline pipeline_class_031((uint)stage_undefined, 2, false, 0, 3, false, false, false, false,
+static const Pipeline pipeline_class_031((uint)stage_undefined, 2, false, 0, 3, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_009,
    (enum machPipelineStages *) pipeline_res_stages_013,
@@ -1084,13 +1084,13 @@ static const Pipeline pipeline_class_031((uint)stage_undefined, 2, false, 0, 3, 
   Pipeline_Use(0xbf, 0x81, 4, (Pipeline_Use_Element *)&pipeline_res_mask_020[0]));
 
 // Pipeline Class "fpu_reg_con"
-static const Pipeline pipeline_class_032((uint)stage_S5, 0, false, 0, 2, false, false, false, false,
+static const Pipeline pipeline_class_032((uint)stage_S5, 0, false, 0, 2, false, false, false,
  nullptr,  (enum machPipelineStages *) pipeline_res_stages_011,
   (uint *) pipeline_res_cycles_016,
   Pipeline_Use(0xbf, 0x81, 4, (Pipeline_Use_Element *)&pipeline_res_mask_016[0]));
 
 // Pipeline Class "fpu_reg_reg_con"
-static const Pipeline pipeline_class_033((uint)stage_S5, 1, false, 0, 3, false, false, false, false,
+static const Pipeline pipeline_class_033((uint)stage_S5, 1, false, 0, 3, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_011,
@@ -1130,7 +1130,7 @@ static const Pipeline_Use_Element pipeline_res_mask_023[1] = {
   Pipeline_Use_Element(0x040, 6, 6, false, Pipeline_Use_Cycle_Mask(0x00000004)) 
 };
 
-static const Pipeline pipeline_class_034((uint)stage_undefined, 0, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_034((uint)stage_undefined, 0, false, 0, 1, false, false, false,
  nullptr,  (enum machPipelineStages *) pipeline_res_stages_015,
   (uint *) pipeline_res_cycles_021,
   Pipeline_Use(0x40, 0x40, 1, (Pipeline_Use_Element *)&pipeline_res_mask_023[0]));
@@ -1141,7 +1141,7 @@ static const enum machPipelineStages pipeline_reads_010[2] = {
   stage_undefined 
 };
 
-static const Pipeline pipeline_class_035((uint)stage_undefined, 2, false, 0, 1, false, false, false, false,
+static const Pipeline pipeline_class_035((uint)stage_undefined, 2, false, 0, 1, false, false, false,
 
   (enum machPipelineStages *) pipeline_reads_010,
    (enum machPipelineStages *) pipeline_res_stages_015,
@@ -1185,7 +1185,7 @@ static const Pipeline_Use_Element pipeline_res_mask_024[5] = {
   Pipeline_Use_Element(0x040, 6, 6, false, Pipeline_Use_Cycle_Mask(0x00000010)) 
 };
 
-static const Pipeline pipeline_class_036((uint)stage_S5, 1, true, 6, 1, false, false, true, false,
+static const Pipeline pipeline_class_036((uint)stage_S5, 1, true, 6, 1, false, true, false,
 
   (enum machPipelineStages *) pipeline_reads_001,
    (enum machPipelineStages *) pipeline_res_stages_016,
@@ -1193,7 +1193,7 @@ static const Pipeline pipeline_class_036((uint)stage_S5, 1, true, 6, 1, false, f
   Pipeline_Use(0x77f, 0x41, 5, (Pipeline_Use_Element *)&pipeline_res_mask_024[0]));
 
 // Pipeline Class "pipe_slow"
-static const Pipeline pipeline_class_037((uint)stage_undefined, 0, true, 100, 10, false, true, true, false,
+static const Pipeline pipeline_class_037((uint)stage_undefined, 0, true, 100, 10, true, true, false,
  nullptr,  (enum machPipelineStages *) pipeline_res_stages_004,
   (uint *) pipeline_res_cycles_019,
   Pipeline_Use(0x39, 0x1, 2, (Pipeline_Use_Element *)&pipeline_res_mask_021[0]));
@@ -1227,7 +1227,7 @@ static const uint pipeline_res_cycles_023[11] = {
   0  // ALU2
 };
 
-static const Pipeline pipeline_class_038((uint)stage_undefined, 0, false, 0, 0, false, false, false, false,
+static const Pipeline pipeline_class_038((uint)stage_undefined, 0, false, 0, 0, false, false, false,
  nullptr,  (enum machPipelineStages *) pipeline_res_stages_017,
   (uint *) pipeline_res_cycles_023,
   Pipeline_Use(0x0, 0x0, 0, (Pipeline_Use_Element *)nullptr));
@@ -1280,33 +1280,14 @@ uint Node::latency(uint i) {
   return currpipe->functional_unit_latency(delta, predpipe);
 }
 
-// Descriptions for emitting different functional unit nops
-void Bundle::initialize_nops(MachNode * nop_list[1]) {
-  nop_list[0] = (MachNode *) new MachNopNode();
-};
-
 #ifndef PRODUCT
 void Bundle::dump(outputStream *st) const {
-  static const char * bundle_flags[] = {
-    "",
-    "use nop delay",
-    "use unconditional delay",
-    "use conditional delay",
-    "used in conditional delay",
-    "used in unconditional delay",
-    "used in all conditional delays",
-  };
-
   static const char *resource_names[11] = { "D0", "D1", "D2", "MS0", "MS1", "MS2", "BR", "FPU", "ALU0", "ALU1", "ALU2" };
 
   bool needs_comma = false;
 
-  if (_flags) {
-    st->print("%s", bundle_flags[_flags]);
-    needs_comma = true;
-  };
   if (instr_count()) {
-    st->print("%s%d instr%s", needs_comma ? ", " : "", instr_count(), instr_count() != 1 ? "s" : "");
+    st->print("%d instr%s", instr_count(), instr_count() != 1 ? "s" : "");
     needs_comma = true;
   };
   uint r = resources_used();
@@ -1328,6 +1309,9 @@ const Pipeline *                                               MachNode::pipelin
 
 const Pipeline * MachNopNode::pipeline() const { return (&pipeline_class_038); }
 
+
+const Pipeline *                                     ShouldNotReachHereNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                     ShouldNotReachHereNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                               MoveF2VLNode::pipeline_class() { return (&pipeline_class_020); }
 const Pipeline *                                               MoveF2VLNode::pipeline() const { return (&pipeline_class_020); }
@@ -1452,11 +1436,17 @@ const Pipeline *                                          loadD_partialNode::pip
 const Pipeline *                                                  loadDNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                                  loadDNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                       maxF_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                       maxF_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                               maxF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                               maxF_regNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                     maxF_reduction_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                     maxF_reduction_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                       maxD_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                       maxD_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                               maxD_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                               maxD_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -1464,11 +1454,17 @@ const Pipeline *                                               maxD_regNode::pip
 const Pipeline *                                     maxD_reduction_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                     maxD_reduction_regNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                       minF_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                       minF_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                               minF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                               minF_regNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                     minF_reduction_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                     minF_reduction_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                       minD_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                       minD_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                               minD_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                               minD_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -1809,6 +1805,12 @@ const Pipeline *                                    membar_storestore_0Node::pip
 const Pipeline *                                                castX2PNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                                castX2PNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                                castI2NNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                                castI2NNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                                castN2XNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                                castN2XNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                                castP2XNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                                castP2XNode::pipeline() const { return (&pipeline_class_004); }
 
@@ -1851,14 +1853,26 @@ const Pipeline *                                           cmovI_imm_01Node::pip
 const Pipeline *                                              cmovI_regNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                              cmovI_regNode::pipeline() const { return (&pipeline_class_016); }
 
+const Pipeline *                                          cmovI_reg_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                          cmovI_reg_nddNode::pipeline() const { return (&pipeline_class_016); }
+
 const Pipeline *                                          cmovI_imm_01UNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          cmovI_imm_01UNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                             cmovI_regUNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                             cmovI_regUNode::pipeline() const { return (&pipeline_class_016); }
 
+const Pipeline *                                         cmovI_regU_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                         cmovI_regU_nddNode::pipeline() const { return (&pipeline_class_016); }
+
 const Pipeline *                                        cmovI_imm_01UCFNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                        cmovI_imm_01UCFNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                       cmovI_imm_01UCFENode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                       cmovI_imm_01UCFENode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      cmovI_regUCFE_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                      cmovI_regUCFE_nddNode::pipeline() const { return (&pipeline_class_016); }
 
 const Pipeline *                                       cmovI_regUCF2_neNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                       cmovI_regUCF2_neNode::pipeline() const { return (&pipeline_class_016); }
@@ -1869,14 +1883,32 @@ const Pipeline *                                       cmovI_regUCF2_eqNode::pip
 const Pipeline *                                              cmovI_memNode::pipeline_class() { return (&pipeline_class_017); }
 const Pipeline *                                              cmovI_memNode::pipeline() const { return (&pipeline_class_017); }
 
+const Pipeline *                                cmovI_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_017); }
+const Pipeline *                                cmovI_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_017); }
+
 const Pipeline *                                             cmovI_memUNode::pipeline_class() { return (&pipeline_class_017); }
 const Pipeline *                                             cmovI_memUNode::pipeline() const { return (&pipeline_class_017); }
+
+const Pipeline *                               cmovI_rReg_rReg_memU_nddNode::pipeline_class() { return (&pipeline_class_017); }
+const Pipeline *                               cmovI_rReg_rReg_memU_nddNode::pipeline() const { return (&pipeline_class_017); }
+
+const Pipeline *                            cmovI_rReg_rReg_memUCFE_nddNode::pipeline_class() { return (&pipeline_class_017); }
+const Pipeline *                            cmovI_rReg_rReg_memUCFE_nddNode::pipeline() const { return (&pipeline_class_017); }
 
 const Pipeline *                                              cmovN_regNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                              cmovN_regNode::pipeline() const { return (&pipeline_class_016); }
 
+const Pipeline *                                          cmovN_reg_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                          cmovN_reg_nddNode::pipeline() const { return (&pipeline_class_016); }
+
 const Pipeline *                                             cmovN_regUNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                             cmovN_regUNode::pipeline() const { return (&pipeline_class_016); }
+
+const Pipeline *                                         cmovN_regU_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                         cmovN_regU_nddNode::pipeline() const { return (&pipeline_class_016); }
+
+const Pipeline *                                      cmovN_regUCFE_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                      cmovN_regUCFE_nddNode::pipeline() const { return (&pipeline_class_016); }
 
 const Pipeline *                                       cmovN_regUCF2_neNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                       cmovN_regUCF2_neNode::pipeline() const { return (&pipeline_class_016); }
@@ -1887,8 +1919,17 @@ const Pipeline *                                       cmovN_regUCF2_eqNode::pip
 const Pipeline *                                              cmovP_regNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                              cmovP_regNode::pipeline() const { return (&pipeline_class_016); }
 
+const Pipeline *                                          cmovP_reg_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                          cmovP_reg_nddNode::pipeline() const { return (&pipeline_class_016); }
+
 const Pipeline *                                             cmovP_regUNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                             cmovP_regUNode::pipeline() const { return (&pipeline_class_016); }
+
+const Pipeline *                                         cmovP_regU_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                         cmovP_regU_nddNode::pipeline() const { return (&pipeline_class_016); }
+
+const Pipeline *                                      cmovP_regUCFE_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                      cmovP_regUCFE_nddNode::pipeline() const { return (&pipeline_class_016); }
 
 const Pipeline *                                       cmovP_regUCF2_neNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                       cmovP_regUCF2_neNode::pipeline() const { return (&pipeline_class_016); }
@@ -1902,8 +1943,14 @@ const Pipeline *                                           cmovL_imm_01Node::pip
 const Pipeline *                                              cmovL_regNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                              cmovL_regNode::pipeline() const { return (&pipeline_class_016); }
 
+const Pipeline *                                          cmovL_reg_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                          cmovL_reg_nddNode::pipeline() const { return (&pipeline_class_016); }
+
 const Pipeline *                                              cmovL_memNode::pipeline_class() { return (&pipeline_class_017); }
 const Pipeline *                                              cmovL_memNode::pipeline() const { return (&pipeline_class_017); }
+
+const Pipeline *                                cmovL_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_017); }
+const Pipeline *                                cmovL_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_017); }
 
 const Pipeline *                                          cmovL_imm_01UNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          cmovL_imm_01UNode::pipeline() const { return (&pipeline_class_001); }
@@ -1911,8 +1958,17 @@ const Pipeline *                                          cmovL_imm_01UNode::pip
 const Pipeline *                                             cmovL_regUNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                             cmovL_regUNode::pipeline() const { return (&pipeline_class_016); }
 
+const Pipeline *                                         cmovL_regU_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                         cmovL_regU_nddNode::pipeline() const { return (&pipeline_class_016); }
+
 const Pipeline *                                        cmovL_imm_01UCFNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                        cmovL_imm_01UCFNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                       cmovL_imm_01UCFENode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                       cmovL_imm_01UCFENode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      cmovL_regUCFE_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                      cmovL_regUCFE_nddNode::pipeline() const { return (&pipeline_class_016); }
 
 const Pipeline *                                       cmovL_regUCF2_neNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                       cmovL_regUCF2_neNode::pipeline() const { return (&pipeline_class_016); }
@@ -1923,11 +1979,20 @@ const Pipeline *                                       cmovL_regUCF2_eqNode::pip
 const Pipeline *                                             cmovL_memUNode::pipeline_class() { return (&pipeline_class_017); }
 const Pipeline *                                             cmovL_memUNode::pipeline() const { return (&pipeline_class_017); }
 
+const Pipeline *                               cmovL_rReg_rReg_memU_nddNode::pipeline_class() { return (&pipeline_class_017); }
+const Pipeline *                               cmovL_rReg_rReg_memU_nddNode::pipeline() const { return (&pipeline_class_017); }
+
+const Pipeline *                            cmovL_rReg_rReg_memUCFE_nddNode::pipeline_class() { return (&pipeline_class_017); }
+const Pipeline *                            cmovL_rReg_rReg_memUCFE_nddNode::pipeline() const { return (&pipeline_class_017); }
+
 const Pipeline *                                              cmovF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                              cmovF_regNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                             cmovF_regUNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                             cmovF_regUNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                          cmovF_regUCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                          cmovF_regUCFENode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                              cmovD_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                              cmovD_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -1935,17 +2000,35 @@ const Pipeline *                                              cmovD_regNode::pip
 const Pipeline *                                             cmovD_regUNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                             cmovD_regUNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                          cmovD_regUCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                          cmovD_regUCFENode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                              addI_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              addI_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                          addI_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          addI_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                          addI_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          addI_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                 addI_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                 addI_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  addI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  addI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                          addI_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          addI_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                        addI_rReg_mem_0Node::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                        addI_rReg_mem_0Node::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 addI_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 addI_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                               addI_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                               addI_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          addI_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          addI_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -1959,11 +2042,23 @@ const Pipeline *                                           addI_mem_immNode::pip
 const Pipeline *                                              incI_rRegNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                              incI_rRegNode::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                          incI_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                          incI_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      incI_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      incI_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                               incI_memNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                               incI_memNode::pipeline() const { return (&pipeline_class_009); }
 
 const Pipeline *                                              decI_rRegNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                              decI_rRegNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                          decI_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                          decI_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      decI_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      decI_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                               decI_memNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                               decI_memNode::pipeline() const { return (&pipeline_class_009); }
@@ -1989,14 +2084,29 @@ const Pipeline *                            leaI_rReg_rReg_immI2_immI_0Node::pip
 const Pipeline *                                              addL_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              addL_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                          addL_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          addL_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                          addL_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          addL_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                 addL_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                 addL_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  addL_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  addL_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                          addL_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          addL_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                        addL_rReg_mem_0Node::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                        addL_rReg_mem_0Node::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 addL_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 addL_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                               addL_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                               addL_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          addL_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          addL_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2010,11 +2120,23 @@ const Pipeline *                                           addL_mem_immNode::pip
 const Pipeline *                                              incL_rRegNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                              incL_rRegNode::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                          incL_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                          incL_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      incL_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      incL_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                               incL_memNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                               incL_memNode::pipeline() const { return (&pipeline_class_009); }
 
 const Pipeline *                                              decL_rRegNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                              decL_rRegNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                          decL_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                          decL_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      decL_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      decL_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                               decL_memNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                               decL_memNode::pipeline() const { return (&pipeline_class_009); }
@@ -2052,8 +2174,17 @@ const Pipeline *                                                 castPPNode::pip
 const Pipeline *                                                 castIINode::pipeline_class() { return (&pipeline_class_038); }
 const Pipeline *                                                 castIINode::pipeline() const { return (&pipeline_class_038); }
 
+const Pipeline *                                         castII_checkedNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         castII_checkedNode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                                 castLLNode::pipeline_class() { return (&pipeline_class_038); }
 const Pipeline *                                                 castLLNode::pipeline() const { return (&pipeline_class_038); }
+
+const Pipeline *                                     castLL_checked_L32Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                     castLL_checked_L32Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                         castLL_checkedNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         castLL_checkedNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                                 castFFNode::pipeline_class() { return (&pipeline_class_038); }
 const Pipeline *                                                 castFFNode::pipeline() const { return (&pipeline_class_038); }
@@ -2181,8 +2312,23 @@ const Pipeline *                                              absL_rRegNode::pip
 const Pipeline *                                              subI_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              subI_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                          subI_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          subI_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                 subI_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                 subI_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                  subI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                  subI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                          subI_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          subI_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 subI_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 subI_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 subI_rReg_mem_rReg_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 subI_rReg_mem_rReg_nddNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          subI_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          subI_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2190,8 +2336,23 @@ const Pipeline *                                          subI_mem_rRegNode::pip
 const Pipeline *                                              subL_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              subL_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                          subL_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          subL_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                 subL_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                 subL_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                  subL_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                  subL_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                          subL_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          subL_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 subL_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 subL_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 subL_rReg_mem_rReg_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 subL_rReg_mem_rReg_nddNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          subL_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          subL_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2202,8 +2363,14 @@ const Pipeline *                                              subP_rRegNode::pip
 const Pipeline *                                              negI_rRegNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                              negI_rRegNode::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                          negI_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                          negI_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                            negI_rReg_2Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                            negI_rReg_2Node::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                        negI_rReg_2_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                        negI_rReg_2_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                               negI_memNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                               negI_memNode::pipeline() const { return (&pipeline_class_001); }
@@ -2211,14 +2378,23 @@ const Pipeline *                                               negI_memNode::pip
 const Pipeline *                                              negL_rRegNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                              negL_rRegNode::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                          negL_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                          negL_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                            negL_rReg_2Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                            negL_rReg_2Node::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                        negL_rReg_2_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                        negL_rReg_2_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                               negL_memNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                               negL_memNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                              mulI_rRegNode::pipeline_class() { return (&pipeline_class_010); }
 const Pipeline *                                              mulI_rRegNode::pipeline() const { return (&pipeline_class_010); }
+
+const Pipeline *                                          mulI_rReg_nddNode::pipeline_class() { return (&pipeline_class_010); }
+const Pipeline *                                          mulI_rReg_nddNode::pipeline() const { return (&pipeline_class_010); }
 
 const Pipeline *                                          mulI_rReg_immNode::pipeline_class() { return (&pipeline_class_010); }
 const Pipeline *                                          mulI_rReg_immNode::pipeline() const { return (&pipeline_class_010); }
@@ -2229,11 +2405,20 @@ const Pipeline *                                               mulI_memNode::pip
 const Pipeline *                                             mulI_mem_0Node::pipeline_class() { return (&pipeline_class_011); }
 const Pipeline *                                             mulI_mem_0Node::pipeline() const { return (&pipeline_class_011); }
 
+const Pipeline *                                 mulI_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_011); }
+const Pipeline *                                 mulI_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_011); }
+
+const Pipeline *                               mulI_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_011); }
+const Pipeline *                               mulI_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_011); }
+
 const Pipeline *                                           mulI_mem_immNode::pipeline_class() { return (&pipeline_class_011); }
 const Pipeline *                                           mulI_mem_immNode::pipeline() const { return (&pipeline_class_011); }
 
 const Pipeline *                                              mulL_rRegNode::pipeline_class() { return (&pipeline_class_010); }
 const Pipeline *                                              mulL_rRegNode::pipeline() const { return (&pipeline_class_010); }
+
+const Pipeline *                                          mulL_rReg_nddNode::pipeline_class() { return (&pipeline_class_010); }
+const Pipeline *                                          mulL_rReg_nddNode::pipeline() const { return (&pipeline_class_010); }
 
 const Pipeline *                                          mulL_rReg_immNode::pipeline_class() { return (&pipeline_class_010); }
 const Pipeline *                                          mulL_rReg_immNode::pipeline() const { return (&pipeline_class_010); }
@@ -2243,6 +2428,12 @@ const Pipeline *                                               mulL_memNode::pip
 
 const Pipeline *                                             mulL_mem_0Node::pipeline_class() { return (&pipeline_class_011); }
 const Pipeline *                                             mulL_mem_0Node::pipeline() const { return (&pipeline_class_011); }
+
+const Pipeline *                                 mulL_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_011); }
+const Pipeline *                                 mulL_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_011); }
+
+const Pipeline *                               mulL_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_011); }
+const Pipeline *                               mulL_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_011); }
 
 const Pipeline *                                           mulL_mem_immNode::pipeline_class() { return (&pipeline_class_011); }
 const Pipeline *                                           mulL_mem_immNode::pipeline() const { return (&pipeline_class_011); }
@@ -2292,8 +2483,17 @@ const Pipeline *                                             umodL_rRegNode::pip
 const Pipeline *                                        salI_rReg_immI2Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                        salI_rReg_immI2Node::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                    salI_rReg_immI2_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                    salI_rReg_immI2_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                          salI_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          salI_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      salI_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      salI_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  salI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  salI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                           salI_mem_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                           salI_mem_immNode::pipeline() const { return (&pipeline_class_009); }
@@ -2313,6 +2513,12 @@ const Pipeline *                                          salI_mem_rRegNode::pip
 const Pipeline *                                          sarI_rReg_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                          sarI_rReg_immNode::pipeline() const { return (&pipeline_class_009); }
 
+const Pipeline *                                      sarI_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_009); }
+const Pipeline *                                      sarI_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_009); }
+
+const Pipeline *                                  sarI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_009); }
+const Pipeline *                                  sarI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_009); }
+
 const Pipeline *                                           sarI_mem_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                           sarI_mem_immNode::pipeline() const { return (&pipeline_class_009); }
 
@@ -2330,6 +2536,12 @@ const Pipeline *                                          sarI_mem_rRegNode::pip
 
 const Pipeline *                                          shrI_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          shrI_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      shrI_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      shrI_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  shrI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  shrI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                           shrI_mem_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                           shrI_mem_immNode::pipeline() const { return (&pipeline_class_009); }
@@ -2349,8 +2561,17 @@ const Pipeline *                                          shrI_mem_rRegNode::pip
 const Pipeline *                                        salL_rReg_immI2Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                        salL_rReg_immI2Node::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                    salL_rReg_immI2_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                    salL_rReg_immI2_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                          salL_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          salL_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      salL_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      salL_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  salL_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  salL_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                           salL_mem_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                           salL_mem_immNode::pipeline() const { return (&pipeline_class_009); }
@@ -2370,6 +2591,12 @@ const Pipeline *                                          salL_mem_rRegNode::pip
 const Pipeline *                                          sarL_rReg_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                          sarL_rReg_immNode::pipeline() const { return (&pipeline_class_009); }
 
+const Pipeline *                                      sarL_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_009); }
+const Pipeline *                                      sarL_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_009); }
+
+const Pipeline *                                  sarL_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_009); }
+const Pipeline *                                  sarL_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_009); }
+
 const Pipeline *                                           sarL_mem_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                           sarL_mem_immNode::pipeline() const { return (&pipeline_class_009); }
 
@@ -2387,6 +2614,12 @@ const Pipeline *                                          sarL_mem_rRegNode::pip
 
 const Pipeline *                                          shrL_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          shrL_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      shrL_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      shrL_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  shrL_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  shrL_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                           shrL_mem_immNode::pipeline_class() { return (&pipeline_class_009); }
 const Pipeline *                                           shrL_mem_immNode::pipeline() const { return (&pipeline_class_009); }
@@ -2421,6 +2654,9 @@ const Pipeline *                                         rolI_mem_immI8Node::pip
 const Pipeline *                                          rolI_rReg_VarNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                          rolI_rReg_VarNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                      rolI_rReg_Var_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                      rolI_rReg_Var_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                      rorI_immI8_legacyNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                      rorI_immI8_legacyNode::pipeline() const { return (&pipeline_class_001); }
 
@@ -2432,6 +2668,9 @@ const Pipeline *                                         rorI_mem_immI8Node::pip
 
 const Pipeline *                                          rorI_rReg_VarNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                          rorI_rReg_VarNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                      rorI_rReg_Var_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                      rorI_rReg_Var_nddNode::pipeline() const { return (&pipeline_class_004); }
 
 const Pipeline *                                      rolL_immI8_legacyNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                      rolL_immI8_legacyNode::pipeline() const { return (&pipeline_class_001); }
@@ -2445,6 +2684,9 @@ const Pipeline *                                         rolL_mem_immI8Node::pip
 const Pipeline *                                          rolL_rReg_VarNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                          rolL_rReg_VarNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                      rolL_rReg_Var_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                      rolL_rReg_Var_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                      rorL_immI8_legacyNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                      rorL_immI8_legacyNode::pipeline() const { return (&pipeline_class_001); }
 
@@ -2456,6 +2698,9 @@ const Pipeline *                                         rorL_mem_immI8Node::pip
 
 const Pipeline *                                          rorL_rReg_VarNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                          rorL_rReg_VarNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                      rorL_rReg_Var_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                      rorL_rReg_Var_nddNode::pipeline() const { return (&pipeline_class_004); }
 
 const Pipeline *                                      compressBitsL_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                      compressBitsL_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -2471,6 +2716,9 @@ const Pipeline *                                        expandBitsL_memNode::pip
 
 const Pipeline *                                              andI_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              andI_rRegNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                          andI_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          andI_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
 
 const Pipeline *                                       andI_rReg_imm255Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                       andI_rReg_imm255Node::pipeline() const { return (&pipeline_class_001); }
@@ -2490,11 +2738,23 @@ const Pipeline *                            convI2LAndI_reg_immIbitmaskNode::pip
 const Pipeline *                                          andI_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          andI_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                 andI_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                 andI_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  andI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  andI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                          andI_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          andI_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                        andI_rReg_mem_0Node::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                        andI_rReg_mem_0Node::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 andI_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 andI_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                               andI_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                               andI_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          andB_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          andB_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2562,14 +2822,32 @@ const Pipeline *                                       blsrI_rReg_mem_0Node::pip
 const Pipeline *                                               orI_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                               orI_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                           orI_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                           orI_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                           orI_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                           orI_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  orI_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  orI_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  orI_rReg_imm_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  orI_rReg_imm_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                   orI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                   orI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                           orI_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                           orI_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                         orI_rReg_mem_0Node::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                         orI_rReg_mem_0Node::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                  orI_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                  orI_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                orI_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                orI_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                           orB_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                           orB_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2589,17 +2867,35 @@ const Pipeline *                                            orI_mem_immNode::pip
 const Pipeline *                                              xorI_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              xorI_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                          xorI_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          xorI_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                          xorI_rReg_im1Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          xorI_rReg_im1Node::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                      xorI_rReg_im1_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      xorI_rReg_im1_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                          xorI_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          xorI_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                 xorI_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                 xorI_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  xorI_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  xorI_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                          xorI_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          xorI_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                        xorI_rReg_mem_0Node::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                        xorI_rReg_mem_0Node::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 xorI_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 xorI_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                               xorI_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                               xorI_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          xorB_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          xorB_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2619,6 +2915,9 @@ const Pipeline *                                           xorI_mem_immNode::pip
 const Pipeline *                                              andL_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              andL_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                          andL_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          andL_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                       andL_rReg_imm255Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                       andL_rReg_imm255Node::pipeline() const { return (&pipeline_class_001); }
 
@@ -2628,11 +2927,23 @@ const Pipeline *                                     andL_rReg_imm65535Node::pip
 const Pipeline *                                          andL_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          andL_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                 andL_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                 andL_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  andL_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  andL_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                          andL_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          andL_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                        andL_rReg_mem_0Node::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                        andL_rReg_mem_0Node::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 andL_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 andL_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                               andL_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                               andL_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          andL_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          andL_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2691,20 +3002,44 @@ const Pipeline *                                       blsrL_rReg_mem_0Node::pip
 const Pipeline *                                               orL_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                               orL_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                           orL_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                           orL_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                       orL_rReg_castP2XNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                       orL_rReg_castP2XNode::pipeline() const { return (&pipeline_class_004); }
 
 const Pipeline *                                     orL_rReg_castP2X_0Node::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                     orL_rReg_castP2X_0Node::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                   orL_rReg_castP2X_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                   orL_rReg_castP2X_nddNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                 orL_rReg_castP2X_ndd_0Node::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                 orL_rReg_castP2X_ndd_0Node::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                           orL_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                           orL_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  orL_rReg_rReg_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  orL_rReg_rReg_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                  orL_rReg_imm_rReg_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                  orL_rReg_imm_rReg_nddNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                   orL_rReg_mem_imm_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                   orL_rReg_mem_imm_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                           orL_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                           orL_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                         orL_rReg_mem_0Node::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                         orL_rReg_mem_0Node::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                  orL_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                  orL_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                orL_rReg_rReg_mem_ndd_0Node::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                orL_rReg_rReg_mem_ndd_0Node::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                           orL_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                           orL_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2721,14 +3056,29 @@ const Pipeline *                                           btsL_mem_immNode::pip
 const Pipeline *                                              xorL_rRegNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                              xorL_rRegNode::pipeline() const { return (&pipeline_class_004); }
 
+const Pipeline *                                          xorL_rReg_nddNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                          xorL_rReg_nddNode::pipeline() const { return (&pipeline_class_004); }
+
 const Pipeline *                                          xorL_rReg_im1Node::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          xorL_rReg_im1Node::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      xorL_rReg_im1_nddNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      xorL_rReg_im1_nddNode::pipeline() const { return (&pipeline_class_001); }
 
 const Pipeline *                                          xorL_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
 const Pipeline *                                          xorL_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
 
+const Pipeline *                                     xorL_rReg_rReg_immNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                     xorL_rReg_rReg_immNode::pipeline() const { return (&pipeline_class_001); }
+
+const Pipeline *                                      xorL_rReg_mem_immNode::pipeline_class() { return (&pipeline_class_001); }
+const Pipeline *                                      xorL_rReg_mem_immNode::pipeline() const { return (&pipeline_class_001); }
+
 const Pipeline *                                          xorL_rReg_memNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                          xorL_rReg_memNode::pipeline() const { return (&pipeline_class_006); }
+
+const Pipeline *                                 xorL_rReg_rReg_mem_nddNode::pipeline_class() { return (&pipeline_class_006); }
+const Pipeline *                                 xorL_rReg_rReg_mem_nddNode::pipeline() const { return (&pipeline_class_006); }
 
 const Pipeline *                                          xorL_mem_rRegNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                          xorL_mem_rRegNode::pipeline() const { return (&pipeline_class_008); }
@@ -2763,26 +3113,44 @@ const Pipeline *                                        and_cmpLTMask_0Node::pip
 const Pipeline *                                            cmpF_cc_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                            cmpF_cc_regNode::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                                         cmpF_cc_reg_CFNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                         cmpF_cc_reg_CFNode::pipeline() const { return (&pipeline_class_037); }
+const Pipeline *                                          cmpF_cc_regCFNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                          cmpF_cc_regCFNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                         cmpF_cc_regCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         cmpF_cc_regCFENode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                          cmpF_cc_memCFNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                          cmpF_cc_memCFNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                         cmpF_cc_memCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         cmpF_cc_memCFENode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                          cmpF_cc_immCFNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                          cmpF_cc_immCFNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                         cmpF_cc_immCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         cmpF_cc_immCFENode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                            cmpD_cc_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                            cmpD_cc_regNode::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                                         cmpD_cc_reg_CFNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                         cmpD_cc_reg_CFNode::pipeline() const { return (&pipeline_class_037); }
+const Pipeline *                                          cmpD_cc_regCFNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                          cmpD_cc_regCFNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                         cmpD_cc_regCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         cmpD_cc_regCFENode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                          cmpD_cc_memCFNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                          cmpD_cc_memCFNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                         cmpD_cc_memCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         cmpD_cc_memCFENode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                          cmpD_cc_immCFNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                          cmpD_cc_immCFNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                         cmpD_cc_immCFENode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                         cmpD_cc_immCFENode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                               cmpF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                               cmpF_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -2817,14 +3185,38 @@ const Pipeline *                                        convD2F_reg_memNode::pip
 const Pipeline *                                        convF2I_reg_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                        convF2I_reg_regNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                convF2I_reg_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convF2I_reg_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                convF2I_reg_mem_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convF2I_reg_mem_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                        convF2L_reg_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                        convF2L_reg_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                convF2L_reg_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convF2L_reg_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                convF2L_reg_mem_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convF2L_reg_mem_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                        convD2I_reg_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                        convD2I_reg_regNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                convD2I_reg_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convD2I_reg_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                convD2I_reg_mem_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convD2I_reg_mem_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                        convD2L_reg_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                        convD2L_reg_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                convD2L_reg_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convD2L_reg_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                convD2L_reg_mem_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                convD2L_reg_mem_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                       round_double_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                       round_double_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -2919,14 +3311,26 @@ const Pipeline *                                        MoveL2D_reg_regNode::pip
 const Pipeline *                                               rep_stosNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                               rep_stosNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                     rep_stos_word_copyNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                     rep_stos_word_copyNode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                          rep_stos_evexNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                          rep_stos_evexNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                rep_stos_evex_word_copyNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                rep_stos_evex_word_copyNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                         rep_stos_largeNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                         rep_stos_largeNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                               rep_stos_large_word_copyNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                               rep_stos_large_word_copyNode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                    rep_stos_large_evexNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                    rep_stos_large_evexNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                          rep_stos_large_evex_word_copyNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                          rep_stos_large_evex_word_copyNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                            rep_stos_imNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                            rep_stos_imNode::pipeline() const { return (&pipeline_class_037); }
@@ -3210,8 +3614,14 @@ const Pipeline *                                          testB_mem_immNode::pip
 const Pipeline *                                            cmovI_reg_gNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                            cmovI_reg_gNode::pipeline() const { return (&pipeline_class_016); }
 
+const Pipeline *                                        cmovI_reg_g_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                        cmovI_reg_g_nddNode::pipeline() const { return (&pipeline_class_016); }
+
 const Pipeline *                                            cmovI_reg_lNode::pipeline_class() { return (&pipeline_class_016); }
 const Pipeline *                                            cmovI_reg_lNode::pipeline() const { return (&pipeline_class_016); }
+
+const Pipeline *                                        cmovI_reg_l_nddNode::pipeline_class() { return (&pipeline_class_016); }
+const Pipeline *                                        cmovI_reg_l_nddNode::pipeline() const { return (&pipeline_class_016); }
 
 const Pipeline *                                                 jmpDirNode::pipeline_class() { return (&pipeline_class_034); }
 const Pipeline *                                                 jmpDirNode::pipeline() const { return (&pipeline_class_034); }
@@ -3230,6 +3640,9 @@ const Pipeline *                                              jmpConUCFNode::pip
 
 const Pipeline *                                             jmpConUCF2Node::pipeline_class() { return (&pipeline_class_035); }
 const Pipeline *                                             jmpConUCF2Node::pipeline() const { return (&pipeline_class_035); }
+
+const Pipeline *                                             jmpConUCFENode::pipeline_class() { return (&pipeline_class_035); }
+const Pipeline *                                             jmpConUCFENode::pipeline() const { return (&pipeline_class_035); }
 
 const Pipeline *                                    partialSubtypeCheckNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                    partialSubtypeCheckNode::pipeline() const { return (&pipeline_class_037); }
@@ -3258,17 +3671,14 @@ const Pipeline *                                        jmpConUCF_shortNode::pip
 const Pipeline *                                       jmpConUCF2_shortNode::pipeline_class() { return (&pipeline_class_035); }
 const Pipeline *                                       jmpConUCF2_shortNode::pipeline() const { return (&pipeline_class_035); }
 
+const Pipeline *                                       jmpConUCFE_shortNode::pipeline_class() { return (&pipeline_class_035); }
+const Pipeline *                                       jmpConUCFE_shortNode::pipeline() const { return (&pipeline_class_035); }
+
 const Pipeline *                                            cmpFastLockNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                            cmpFastLockNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                          cmpFastUnlockNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                          cmpFastUnlockNode::pipeline() const { return (&pipeline_class_037); }
-
-const Pipeline *                                 cmpFastLockLightweightNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                 cmpFastLockLightweightNode::pipeline() const { return (&pipeline_class_037); }
-
-const Pipeline *                               cmpFastUnlockLightweightNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                               cmpFastUnlockLightweightNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                     safePoint_poll_tlsNode::pipeline_class() { return (&pipeline_class_006); }
 const Pipeline *                                     safePoint_poll_tlsNode::pipeline() const { return (&pipeline_class_006); }
@@ -3294,6 +3704,9 @@ const Pipeline *                                         CallLeafDirectNode::pip
 const Pipeline *                                   CallLeafDirectVectorNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                   CallLeafDirectVectorNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                   CallLeafNoFPInDirectNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   CallLeafNoFPInDirectNode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                     CallLeafNoFPDirectNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                     CallLeafNoFPDirectNode::pipeline() const { return (&pipeline_class_037); }
 
@@ -3317,27 +3730,6 @@ const Pipeline *                                       RethrowExceptionNode::pip
 
 const Pipeline *                                               tlsLoadPNode::pipeline_class() { return (&pipeline_class_004); }
 const Pipeline *                                               tlsLoadPNode::pipeline() const { return (&pipeline_class_004); }
-
-const Pipeline *                                    leaI_rReg_rReg_peepNode::pipeline_class() { return (&pipeline_class_004); }
-const Pipeline *                                    leaI_rReg_rReg_peepNode::pipeline() const { return (&pipeline_class_004); }
-
-const Pipeline *                                    leaI_rReg_immI_peepNode::pipeline_class() { return (&pipeline_class_004); }
-const Pipeline *                                    leaI_rReg_immI_peepNode::pipeline() const { return (&pipeline_class_004); }
-
-const Pipeline *                                   leaI_rReg_immI2_peepNode::pipeline_class() { return (&pipeline_class_004); }
-const Pipeline *                                   leaI_rReg_immI2_peepNode::pipeline() const { return (&pipeline_class_004); }
-
-const Pipeline *                                    leaL_rReg_rReg_peepNode::pipeline_class() { return (&pipeline_class_004); }
-const Pipeline *                                    leaL_rReg_rReg_peepNode::pipeline() const { return (&pipeline_class_004); }
-
-const Pipeline *                                  leaL_rReg_immL32_peepNode::pipeline_class() { return (&pipeline_class_004); }
-const Pipeline *                                  leaL_rReg_immL32_peepNode::pipeline() const { return (&pipeline_class_004); }
-
-const Pipeline *                                   leaL_rReg_immI2_peepNode::pipeline_class() { return (&pipeline_class_004); }
-const Pipeline *                                   leaL_rReg_immI2_peepNode::pipeline() const { return (&pipeline_class_004); }
-
-const Pipeline *                                     ShouldNotReachHereNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                     ShouldNotReachHereNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                               addF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                               addF_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -3639,35 +4031,17 @@ const Pipeline *                                    vgather_subwordLE8BNode::pip
 const Pipeline *                                    vgather_subwordGT8BNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                    vgather_subwordGT8BNode::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                                vgather_subwordLE8B_offNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                vgather_subwordLE8B_offNode::pipeline() const { return (&pipeline_class_037); }
-
-const Pipeline *                                vgather_subwordGT8B_offNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                vgather_subwordGT8B_offNode::pipeline() const { return (&pipeline_class_037); }
-
 const Pipeline *                        vgather_masked_subwordLE8B_avx3Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                        vgather_masked_subwordLE8B_avx3Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                        vgather_masked_subwordGT8B_avx3Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                        vgather_masked_subwordGT8B_avx3Node::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                    vgather_masked_subwordLE8B_off_avx3Node::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                    vgather_masked_subwordLE8B_off_avx3Node::pipeline() const { return (&pipeline_class_037); }
-
-const Pipeline *                    vgather_masked_subwordGT8B_off_avx3Node::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                    vgather_masked_subwordGT8B_off_avx3Node::pipeline() const { return (&pipeline_class_037); }
-
 const Pipeline *                        vgather_masked_subwordLE8B_avx2Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                        vgather_masked_subwordLE8B_avx2Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                        vgather_masked_subwordGT8B_avx2Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                        vgather_masked_subwordGT8B_avx2Node::pipeline() const { return (&pipeline_class_037); }
-
-const Pipeline *                    vgather_masked_subwordLE8B_off_avx2Node::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                    vgather_masked_subwordLE8B_off_avx2Node::pipeline() const { return (&pipeline_class_037); }
-
-const Pipeline *                    vgather_masked_subwordGT8B_off_avx2Node::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                    vgather_masked_subwordGT8B_off_avx2Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                                scatterNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                                scatterNode::pipeline() const { return (&pipeline_class_037); }
@@ -4014,6 +4388,30 @@ const Pipeline *                                   minmax_reductionF_avNode::pip
 const Pipeline *                                 minmax_reductionF_av_0Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                 minmax_reductionF_av_0Node::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                             minmax_reduction2F_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                             minmax_reduction2F_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                           minmax_reduction2F_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                           minmax_reduction2F_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                              minmax_reductionF_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                              minmax_reductionF_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                            minmax_reductionF_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                            minmax_reductionF_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                          minmax_reduction2F_av_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                          minmax_reduction2F_av_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                        minmax_reduction2F_av_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                        minmax_reduction2F_av_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                           minmax_reductionF_av_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                           minmax_reductionF_av_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                         minmax_reductionF_av_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                         minmax_reductionF_av_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                     minmax_reduction2DNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                     minmax_reduction2DNode::pipeline() const { return (&pipeline_class_037); }
 
@@ -4037,6 +4435,30 @@ const Pipeline *                                   minmax_reductionD_avNode::pip
 
 const Pipeline *                                 minmax_reductionD_av_0Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                 minmax_reductionD_av_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                             minmax_reduction2D_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                             minmax_reduction2D_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                           minmax_reduction2D_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                           minmax_reduction2D_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                              minmax_reductionD_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                              minmax_reductionD_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                            minmax_reductionD_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                            minmax_reductionD_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                          minmax_reduction2D_av_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                          minmax_reduction2D_av_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                        minmax_reduction2D_av_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                        minmax_reduction2D_av_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                           minmax_reductionD_av_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                           minmax_reductionD_av_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                         minmax_reductionD_av_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                         minmax_reductionD_av_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                                  vaddBNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                                  vaddBNode::pipeline() const { return (&pipeline_class_037); }
@@ -4290,17 +4712,23 @@ const Pipeline *                                      vminmaxL_reg_evexNode::pip
 const Pipeline *                                    vminmaxL_reg_evex_0Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                    vminmaxL_reg_evex_0Node::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                   minmaxFP_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   minmaxFP_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 minmaxFP_reg_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 minmaxFP_reg_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                           minmaxFP_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                           minmaxFP_regNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                         minmaxFP_reg_0Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                         minmaxFP_reg_0Node::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                                    evminmaxFP_reg_eavxNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                    evminmaxFP_reg_eavxNode::pipeline() const { return (&pipeline_class_037); }
+const Pipeline *                                    evminmaxFP_reg_evexNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                    evminmaxFP_reg_evexNode::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                                  evminmaxFP_reg_eavx_0Node::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                  evminmaxFP_reg_eavx_0Node::pipeline() const { return (&pipeline_class_037); }
+const Pipeline *                                  evminmaxFP_reg_evex_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                  evminmaxFP_reg_evex_0Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                     vector_uminmax_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                     vector_uminmax_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -4644,6 +5072,12 @@ const Pipeline *                                       castFtoX_reg_avxNode::pip
 const Pipeline *                                      castFtoX_reg_evexNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                      castFtoX_reg_evexNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                   castFtoX_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   castFtoX_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                   castFtoX_mem_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   castFtoX_mem_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                          vcastDtoF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                          vcastDtoF_regNode::pipeline() const { return (&pipeline_class_037); }
 
@@ -4652,6 +5086,12 @@ const Pipeline *                                       castDtoX_reg_avxNode::pip
 
 const Pipeline *                                      castDtoX_reg_evexNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                      castDtoX_reg_evexNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                   castDtoX_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   castDtoX_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                   castDtoX_mem_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   castDtoX_mem_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                                 vucastNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                                 vucastNode::pipeline() const { return (&pipeline_class_037); }
@@ -5466,14 +5906,14 @@ const Pipeline *                  vector_selectfrom_twovectors_reg_evexNode::pip
 const Pipeline *                                        reinterpretS2HFNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                        reinterpretS2HFNode::pipeline() const { return (&pipeline_class_037); }
 
+const Pipeline *                                        reinterpretHF2SNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                        reinterpretHF2SNode::pipeline() const { return (&pipeline_class_037); }
+
 const Pipeline *                                        convF2HFAndS2HFNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                        convF2HFAndS2HFNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                        convHF2SAndHF2FNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                        convHF2SAndHF2FNode::pipeline() const { return (&pipeline_class_037); }
-
-const Pipeline *                                        reinterpretHF2SNode::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                        reinterpretHF2SNode::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                     scalar_sqrt_HF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                     scalar_sqrt_HF_regNode::pipeline() const { return (&pipeline_class_037); }
@@ -5490,14 +5930,104 @@ const Pipeline *                                 scalar_binOps_HF_reg_1Node::pip
 const Pipeline *                                 scalar_binOps_HF_reg_2Node::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                 scalar_binOps_HF_reg_2Node::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                                 scalar_binOps_HF_reg_3Node::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                 scalar_binOps_HF_reg_3Node::pipeline() const { return (&pipeline_class_037); }
+const Pipeline *                           scalar_minmax_HF_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                           scalar_minmax_HF_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
 
-const Pipeline *                                 scalar_binOps_HF_reg_4Node::pipeline_class() { return (&pipeline_class_037); }
-const Pipeline *                                 scalar_binOps_HF_reg_4Node::pipeline() const { return (&pipeline_class_037); }
+const Pipeline *                         scalar_minmax_HF_reg_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                         scalar_minmax_HF_reg_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                   scalar_minmax_HF_regNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   scalar_minmax_HF_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 scalar_minmax_HF_reg_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 scalar_minmax_HF_reg_0Node::pipeline() const { return (&pipeline_class_037); }
 
 const Pipeline *                                      scalar_fma_HF_regNode::pipeline_class() { return (&pipeline_class_037); }
 const Pipeline *                                      scalar_fma_HF_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                     vector_sqrt_HF_regNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                     vector_sqrt_HF_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                     vector_sqrt_HF_memNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                     vector_sqrt_HF_memNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                   vector_binOps_HF_regNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   vector_binOps_HF_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_reg_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_reg_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_reg_1Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_reg_1Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_reg_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_reg_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                   vector_binOps_HF_memNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   vector_binOps_HF_memNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_mem_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_mem_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_mem_1Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_mem_1Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_mem_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_mem_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_mem_3Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_mem_3Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_binOps_HF_mem_4Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_binOps_HF_mem_4Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                      vector_fma_HF_regNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                      vector_fma_HF_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                      vector_fma_HF_memNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                      vector_fma_HF_memNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                           vector_minmax_HF_mem_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                           vector_minmax_HF_mem_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                         vector_minmax_HF_mem_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                         vector_minmax_HF_mem_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                         vector_minmax_HF_mem_avx10_2_1Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                         vector_minmax_HF_mem_avx10_2_1Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                         vector_minmax_HF_mem_avx10_2_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                         vector_minmax_HF_mem_avx10_2_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                           vector_minmax_HF_reg_avx10_2Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                           vector_minmax_HF_reg_avx10_2Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                         vector_minmax_HF_reg_avx10_2_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                         vector_minmax_HF_reg_avx10_2_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                   vector_minmax_HF_regNode::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                   vector_minmax_HF_regNode::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                 vector_minmax_HF_reg_0Node::pipeline_class() { return (&pipeline_class_037); }
+const Pipeline *                                 vector_minmax_HF_reg_0Node::pipeline() const { return (&pipeline_class_037); }
+
+const Pipeline *                                    leaI_rReg_rReg_peepNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                    leaI_rReg_rReg_peepNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                    leaI_rReg_immI_peepNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                    leaI_rReg_immI_peepNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                   leaI_rReg_immI2_peepNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                   leaI_rReg_immI2_peepNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                    leaL_rReg_rReg_peepNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                    leaL_rReg_rReg_peepNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                  leaL_rReg_immL32_peepNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                  leaL_rReg_immL32_peepNode::pipeline() const { return (&pipeline_class_004); }
+
+const Pipeline *                                   leaL_rReg_immI2_peepNode::pipeline_class() { return (&pipeline_class_004); }
+const Pipeline *                                   leaL_rReg_immI2_peepNode::pipeline() const { return (&pipeline_class_004); }
 
 const Pipeline *                             compareAndSwapP_shenandoahNode::pipeline_class() { return (&pipeline_class_036); }
 const Pipeline *                             compareAndSwapP_shenandoahNode::pipeline() const { return (&pipeline_class_036); }
@@ -5543,6 +6073,15 @@ const Pipeline *                                                 zXChgPNode::pip
 
 const Pipeline *                                               g1StorePNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                               g1StorePNode::pipeline() const { return (&pipeline_class_008); }
+
+const Pipeline *                              g1StoreLSpecialOneOopOff0Node::pipeline_class() { return (&pipeline_class_008); }
+const Pipeline *                              g1StoreLSpecialOneOopOff0Node::pipeline() const { return (&pipeline_class_008); }
+
+const Pipeline *                              g1StoreLSpecialOneOopOff4Node::pipeline_class() { return (&pipeline_class_008); }
+const Pipeline *                              g1StoreLSpecialOneOopOff4Node::pipeline() const { return (&pipeline_class_008); }
+
+const Pipeline *                                 g1StoreLSpecialTwoOopsNode::pipeline_class() { return (&pipeline_class_008); }
+const Pipeline *                                 g1StoreLSpecialTwoOopsNode::pipeline() const { return (&pipeline_class_008); }
 
 const Pipeline *                                               g1StoreNNode::pipeline_class() { return (&pipeline_class_008); }
 const Pipeline *                                               g1StoreNNode::pipeline() const { return (&pipeline_class_008); }

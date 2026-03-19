@@ -46,7 +46,7 @@ enum {
     JVMTI_VERSION_19  = 0x30130000,
     JVMTI_VERSION_21  = 0x30150000,
 
-    JVMTI_VERSION = 0x30000000 + (25 * 0x10000) + ( 0 * 0x100) + 0  /* version: 25.0.0 */
+    JVMTI_VERSION = 0x30000000 + (27 * 0x10000) + ( 0 * 0x100) + 0  /* version: 27.0.0 */
 };
 
 JNIEXPORT jint JNICALL

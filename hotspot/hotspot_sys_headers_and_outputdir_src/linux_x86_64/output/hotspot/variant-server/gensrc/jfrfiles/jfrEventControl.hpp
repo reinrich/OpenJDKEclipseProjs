@@ -39,6 +39,7 @@ union JfrNativeSettings {
     jfrNativeEventSetting ThreadPark;
     jfrNativeEventSetting JavaMonitorEnter;
     jfrNativeEventSetting JavaMonitorWait;
+    jfrNativeEventSetting JavaMonitorNotify;
     jfrNativeEventSetting JavaMonitorInflate;
     jfrNativeEventSetting JavaMonitorDeflate;
     jfrNativeEventSetting JavaMonitorStatistics;
@@ -116,6 +117,7 @@ union JfrNativeSettings {
     jfrNativeEventSetting SafepointBegin;
     jfrNativeEventSetting SafepointStateSynchronization;
     jfrNativeEventSetting SafepointEnd;
+    jfrNativeEventSetting SafepointLatency;
     jfrNativeEventSetting ExecuteVMOperation;
     jfrNativeEventSetting Shutdown;
     jfrNativeEventSetting ObjectAllocationInNewTLAB;
@@ -149,6 +151,8 @@ union JfrNativeSettings {
     jfrNativeEventSetting SwapSpace;
     jfrNativeEventSetting ExecutionSample;
     jfrNativeEventSetting NativeMethodSample;
+    jfrNativeEventSetting CPUTimeSample;
+    jfrNativeEventSetting CPUTimeSamplesLost;
     jfrNativeEventSetting ThreadDump;
     jfrNativeEventSetting NativeLibrary;
     jfrNativeEventSetting NativeLibraryLoad;
@@ -183,16 +187,18 @@ union JfrNativeSettings {
     jfrNativeEventSetting ZStatisticsSampler;
     jfrNativeEventSetting ZThreadPhase;
     jfrNativeEventSetting ZUncommit;
-    jfrNativeEventSetting ZUnmap;
     jfrNativeEventSetting ShenandoahHeapRegionStateChange;
     jfrNativeEventSetting ShenandoahHeapRegionInformation;
     jfrNativeEventSetting ShenandoahEvacuationInformation;
+    jfrNativeEventSetting StringDeduplication;
     jfrNativeEventSetting Flush;
     jfrNativeEventSetting HeapDump;
     jfrNativeEventSetting FinalizerStatistics;
     jfrNativeEventSetting JavaAgent;
     jfrNativeEventSetting NativeAgent;
     jfrNativeEventSetting DeprecatedInvocation;
+    jfrNativeEventSetting MethodTrace;
+    jfrNativeEventSetting MethodTiming;
   } ev;
 };
 

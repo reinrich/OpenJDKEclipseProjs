@@ -346,7 +346,7 @@ jvmti_Allocate(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_Allocate , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     if (mem_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
@@ -386,7 +386,7 @@ jvmti_Deallocate(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_Deallocate , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     err = jvmti_env->Deallocate(mem);
   } else {
@@ -418,7 +418,7 @@ jvmti_GetThreadState(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadState , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -452,7 +452,7 @@ jvmti_GetCurrentThread(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetCurrentThread , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -487,7 +487,7 @@ jvmti_GetAllThreads(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllThreads , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -524,7 +524,7 @@ jvmti_SuspendThread(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendThread , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -561,7 +561,7 @@ jvmti_SuspendThreadList(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendThreadList , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -606,7 +606,7 @@ jvmti_SuspendAllVirtualThreads(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SuspendAllVirtualThreads , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -648,7 +648,7 @@ jvmti_ResumeThread(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeThread , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -685,7 +685,7 @@ jvmti_ResumeThreadList(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeThreadList , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -730,7 +730,7 @@ jvmti_ResumeAllVirtualThreads(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ResumeAllVirtualThreads , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -773,7 +773,7 @@ jvmti_StopThread(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_StopThread , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -808,7 +808,7 @@ jvmti_InterruptThread(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_InterruptThread , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -844,7 +844,7 @@ jvmti_GetThreadInfo(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadInfo , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -880,7 +880,7 @@ jvmti_GetOwnedMonitorInfo(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetOwnedMonitorInfo , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -923,7 +923,7 @@ jvmti_GetOwnedMonitorStackDepthInfo(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetOwnedMonitorStackDepthInfo , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -965,7 +965,7 @@ jvmti_GetCurrentContendedMonitor(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetCurrentContendedMonitor , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1006,7 +1006,7 @@ jvmti_RunAgentThread(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_RunAgentThread , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1037,7 +1037,7 @@ jvmti_SetThreadLocalStorage(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetThreadLocalStorage , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1096,7 +1096,7 @@ jvmti_GetTopThreadGroups(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetTopThreadGroups , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1134,7 +1134,7 @@ jvmti_GetThreadGroupInfo(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadGroupInfo , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1172,7 +1172,7 @@ jvmti_GetThreadGroupChildren(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadGroupChildren , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1223,7 +1223,7 @@ jvmti_GetStackTrace(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetStackTrace , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1265,7 +1265,7 @@ jvmti_GetAllStackTraces(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllStackTraces , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1308,7 +1308,7 @@ jvmti_GetThreadListStackTraces(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadListStackTraces , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1352,7 +1352,7 @@ jvmti_GetFrameCount(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFrameCount , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1386,7 +1386,7 @@ jvmti_PopFrame(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_PopFrame , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1424,7 +1424,7 @@ jvmti_GetFrameLocation(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFrameLocation , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1466,7 +1466,7 @@ jvmti_NotifyFramePop(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_NotifyFramePop , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1505,7 +1505,7 @@ jvmti_ClearAllFramePops(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearAllFramePops , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1545,7 +1545,7 @@ jvmti_ForceEarlyReturnObject(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnObject , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1581,7 +1581,7 @@ jvmti_ForceEarlyReturnInt(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnInt , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1617,7 +1617,7 @@ jvmti_ForceEarlyReturnLong(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnLong , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1653,7 +1653,7 @@ jvmti_ForceEarlyReturnFloat(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnFloat , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1689,7 +1689,7 @@ jvmti_ForceEarlyReturnDouble(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnDouble , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1724,7 +1724,7 @@ jvmti_ForceEarlyReturnVoid(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceEarlyReturnVoid , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1767,7 +1767,7 @@ jvmti_FollowReferences(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_FollowReferences , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1808,7 +1808,7 @@ jvmti_IterateThroughHeap(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateThroughHeap , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1847,7 +1847,7 @@ jvmti_GetTag(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetTag , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1886,7 +1886,7 @@ jvmti_SetTag(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetTag , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1925,7 +1925,7 @@ jvmti_GetObjectsWithTags(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectsWithTags , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -1968,7 +1968,7 @@ jvmti_ForceGarbageCollection(jvmtiEnv* env) {
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ForceGarbageCollection , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2005,7 +2005,7 @@ jvmti_IterateOverObjectsReachableFromObject(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverObjectsReachableFromObject , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2046,7 +2046,7 @@ jvmti_IterateOverReachableObjects(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverReachableObjects , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2083,7 +2083,7 @@ jvmti_IterateOverHeap(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverHeap , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2124,7 +2124,7 @@ jvmti_IterateOverInstancesOfClass(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IterateOverInstancesOfClass , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2176,7 +2176,7 @@ jvmti_GetLocalObject(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalObject , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2220,7 +2220,7 @@ jvmti_GetLocalInstance(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalInstance , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2265,7 +2265,7 @@ jvmti_GetLocalInt(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalInt , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2310,7 +2310,7 @@ jvmti_GetLocalLong(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalLong , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2355,7 +2355,7 @@ jvmti_GetLocalFloat(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalFloat , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2400,7 +2400,7 @@ jvmti_GetLocalDouble(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalDouble , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2445,7 +2445,7 @@ jvmti_SetLocalObject(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalObject , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2487,7 +2487,7 @@ jvmti_SetLocalInt(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalInt , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2529,7 +2529,7 @@ jvmti_SetLocalLong(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalLong , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2571,7 +2571,7 @@ jvmti_SetLocalFloat(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalFloat , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2613,7 +2613,7 @@ jvmti_SetLocalDouble(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetLocalDouble , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2657,7 +2657,7 @@ jvmti_SetBreakpoint(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetBreakpoint , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2697,7 +2697,7 @@ jvmti_ClearBreakpoint(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearBreakpoint , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2741,7 +2741,7 @@ jvmti_SetFieldAccessWatch(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetFieldAccessWatch , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2797,7 +2797,7 @@ jvmti_ClearFieldAccessWatch(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearFieldAccessWatch , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2853,7 +2853,7 @@ jvmti_SetFieldModificationWatch(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetFieldModificationWatch , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2909,7 +2909,7 @@ jvmti_ClearFieldModificationWatch(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_ClearFieldModificationWatch , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -2969,7 +2969,7 @@ jvmti_GetAllModules(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetAllModules , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3008,7 +3008,7 @@ jvmti_GetNamedModule(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetNamedModule , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3046,7 +3046,7 @@ jvmti_AddModuleReads(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleReads , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3085,7 +3085,7 @@ jvmti_AddModuleExports(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleExports , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3127,7 +3127,7 @@ jvmti_AddModuleOpens(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleOpens , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3168,7 +3168,7 @@ jvmti_AddModuleUses(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleUses , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3207,7 +3207,7 @@ jvmti_AddModuleProvides(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_AddModuleProvides , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3248,7 +3248,7 @@ jvmti_IsModifiableModule(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsModifiableModule , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3286,7 +3286,7 @@ jvmti_GetLoadedClasses(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLoadedClasses , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3320,7 +3320,7 @@ jvmti_GetClassLoaderClasses(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassLoaderClasses , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3358,7 +3358,7 @@ jvmti_GetClassSignature(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassSignature , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3397,7 +3397,7 @@ jvmti_GetClassStatus(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassStatus , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3439,7 +3439,7 @@ jvmti_GetSourceFileName(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetSourceFileName , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3485,7 +3485,7 @@ jvmti_GetClassModifiers(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassModifiers , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3528,7 +3528,7 @@ jvmti_GetClassMethods(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassMethods , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3574,7 +3574,7 @@ jvmti_GetClassFields(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassFields , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3620,7 +3620,7 @@ jvmti_GetImplementedInterfaces(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetImplementedInterfaces , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3666,7 +3666,7 @@ jvmti_GetClassVersionNumbers(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassVersionNumbers , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3713,7 +3713,7 @@ jvmti_GetConstantPool(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetConstantPool , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3765,7 +3765,7 @@ jvmti_IsInterface(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsInterface , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3807,7 +3807,7 @@ jvmti_IsArrayClass(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsArrayClass , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3845,7 +3845,7 @@ jvmti_IsModifiableClass(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsModifiableClass , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3886,7 +3886,7 @@ jvmti_GetClassLoader(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetClassLoader , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3928,7 +3928,7 @@ jvmti_GetSourceDebugExtension(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetSourceDebugExtension , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -3970,7 +3970,7 @@ jvmti_RetransformClasses(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_RetransformClasses , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4007,7 +4007,7 @@ jvmti_RedefineClasses(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_RedefineClasses , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4048,7 +4048,7 @@ jvmti_GetObjectSize(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectSize , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4082,7 +4082,7 @@ jvmti_GetObjectHashCode(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectHashCode , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4117,7 +4117,7 @@ jvmti_GetObjectMonitorUsage(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetObjectMonitorUsage , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4163,7 +4163,7 @@ jvmti_GetFieldName(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldName , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4216,7 +4216,7 @@ jvmti_GetFieldDeclaringClass(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldDeclaringClass , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4272,7 +4272,7 @@ jvmti_GetFieldModifiers(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetFieldModifiers , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4328,7 +4328,7 @@ jvmti_IsFieldSynthetic(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsFieldSynthetic , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4393,7 +4393,7 @@ jvmti_GetMethodName(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodName , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4429,7 +4429,7 @@ jvmti_GetMethodDeclaringClass(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodDeclaringClass , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4468,7 +4468,7 @@ jvmti_GetMethodModifiers(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodModifiers , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4507,7 +4507,7 @@ jvmti_GetMaxLocals(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMaxLocals , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4549,7 +4549,7 @@ jvmti_GetArgumentsSize(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetArgumentsSize , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4592,7 +4592,7 @@ jvmti_GetLineNumberTable(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLineNumberTable , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4642,7 +4642,7 @@ jvmti_GetMethodLocation(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetMethodLocation , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4688,7 +4688,7 @@ jvmti_GetLocalVariableTable(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetLocalVariableTable , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4738,7 +4738,7 @@ jvmti_GetBytecodes(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetBytecodes , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4787,7 +4787,7 @@ jvmti_IsMethodNative(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodNative , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4826,7 +4826,7 @@ jvmti_IsMethodSynthetic(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodSynthetic , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4869,7 +4869,7 @@ jvmti_IsMethodObsolete(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_IsMethodObsolete , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -4911,7 +4911,7 @@ jvmti_SetNativeMethodPrefix(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetNativeMethodPrefix , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     err = jvmti_env->SetNativeMethodPrefix(prefix);
@@ -4944,7 +4944,7 @@ jvmti_SetNativeMethodPrefixes(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetNativeMethodPrefixes , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (prefix_count < 0) {
@@ -5002,7 +5002,7 @@ jvmti_CreateRawMonitor(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_CreateRawMonitor , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     if (name == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
@@ -5055,7 +5055,7 @@ jvmti_DestroyRawMonitor(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_DestroyRawMonitor , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
   if (rmonitor == nullptr) {
@@ -5253,7 +5253,7 @@ jvmti_RawMonitorNotify(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RawMonitorNotify , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
   if (rmonitor == nullptr) {
@@ -5306,7 +5306,7 @@ jvmti_RawMonitorNotifyAll(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RawMonitorNotifyAll , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     JvmtiRawMonitor *rmonitor = (JvmtiRawMonitor *)monitor;
   if (rmonitor == nullptr) {
@@ -5352,7 +5352,7 @@ jvmti_SetJNIFunctionTable(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_SetJNIFunctionTable , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -5386,7 +5386,7 @@ jvmti_GetJNIFunctionTable(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetJNIFunctionTable , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -5427,7 +5427,7 @@ jvmti_SetEventCallbacks(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetEventCallbacks , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (size_of_callbacks < 0) {
@@ -5466,7 +5466,7 @@ jvmti_SetEventNotificationMode(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetEventNotificationMode , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     err = jvmti_env->SetEventNotificationMode(mode, event_type, event_thread, nullptr);
@@ -5494,7 +5494,7 @@ jvmti_GenerateEvents(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GenerateEvents , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -5536,7 +5536,7 @@ jvmti_GetExtensionFunctions(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetExtensionFunctions , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (extension_count_ptr == nullptr) {
@@ -5584,7 +5584,7 @@ jvmti_GetExtensionEvents(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetExtensionEvents , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (extension_count_ptr == nullptr) {
@@ -5632,7 +5632,7 @@ jvmti_SetExtensionEventCallback(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetExtensionEventCallback , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     err = jvmti_env->SetExtensionEventCallback(extension_event_index, callback);
@@ -5667,7 +5667,7 @@ jvmti_GetPotentialCapabilities(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetPotentialCapabilities , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (capabilities_ptr == nullptr) {
@@ -5703,7 +5703,7 @@ jvmti_AddCapabilities(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_AddCapabilities , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (capabilities_ptr == nullptr) {
@@ -5743,7 +5743,7 @@ jvmti_RelinquishCapabilities(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_RelinquishCapabilities , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (capabilities_ptr == nullptr) {
@@ -5778,7 +5778,7 @@ jvmti_GetCapabilities(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetCapabilities , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (capabilities_ptr == nullptr) {
@@ -5880,7 +5880,7 @@ jvmti_GetThreadCpuTimerInfo(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadCpuTimerInfo , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -5919,7 +5919,7 @@ jvmti_GetThreadCpuTime(jvmtiEnv* env,
   MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
   ThreadInVMfromNative __tiv(current_thread);
   VM_ENTRY_BASE(jvmtiError, jvmti_GetThreadCpuTime , current_thread)
-  debug_only(VMNativeEntryWrapper __vew;)
+  DEBUG_ONLY(VMNativeEntryWrapper __vew;)
   PreserveExceptionMark __em(this_thread);
   
   JvmtiEnv* jvmti_env = JvmtiEnv::JvmtiEnv_from_jvmti_env(env);
@@ -5965,7 +5965,7 @@ jvmti_GetTimerInfo(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetTimerInfo , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     if (info_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
@@ -6010,7 +6010,7 @@ jvmti_GetTime(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetTime , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     
     if (nanos_ptr == nullptr) {
       return JVMTI_ERROR_NULL_POINTER;
@@ -6048,7 +6048,7 @@ jvmti_GetAvailableProcessors(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetAvailableProcessors , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (processor_count_ptr == nullptr) {
@@ -6089,7 +6089,7 @@ jvmti_AddToBootstrapClassLoaderSearch(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_AddToBootstrapClassLoaderSearch , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (segment == nullptr) {
@@ -6125,7 +6125,7 @@ jvmti_AddToSystemClassLoaderSearch(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_AddToSystemClassLoaderSearch , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (segment == nullptr) {
@@ -6170,7 +6170,7 @@ jvmti_GetSystemProperties(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetSystemProperties , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (count_ptr == nullptr) {
@@ -6218,7 +6218,7 @@ jvmti_GetSystemProperty(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetSystemProperty , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (property == nullptr) {
@@ -6266,7 +6266,7 @@ jvmti_SetSystemProperty(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetSystemProperty , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (property == nullptr) {
@@ -6305,7 +6305,7 @@ jvmti_GetPhase(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetPhase , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (phase_ptr == nullptr) {
@@ -6338,7 +6338,7 @@ jvmti_DisposeEnvironment(jvmtiEnv* env) {
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_DisposeEnvironment , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     err = jvmti_env->DisposeEnvironment();
@@ -6430,7 +6430,7 @@ jvmti_GetVersionNumber(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetVersionNumber , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (version_ptr == nullptr) {
@@ -6469,7 +6469,7 @@ jvmti_GetErrorName(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetErrorName , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (name_ptr == nullptr) {
@@ -6509,7 +6509,7 @@ jvmti_SetVerboseFlag(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetVerboseFlag , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     err = jvmti_env->SetVerboseFlag(flag, value);
@@ -6542,7 +6542,7 @@ jvmti_GetJLocationFormat(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_GetJLocationFormat , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     if (format_ptr == nullptr) {
@@ -6591,7 +6591,7 @@ jvmti_SetHeapSamplingInterval(jvmtiEnv* env,
     MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, current_thread));
     ThreadInVMfromNative __tiv(current_thread);
     VM_ENTRY_BASE(jvmtiError, jvmti_SetHeapSamplingInterval , current_thread)
-    debug_only(VMNativeEntryWrapper __vew;)
+    DEBUG_ONLY(VMNativeEntryWrapper __vew;)
     PreserveExceptionMark __em(this_thread);
     
     err = jvmti_env->SetHeapSamplingInterval(sampling_interval);

@@ -237,6 +237,10 @@ class JfrPeriodicEventSet : public AllStatic {
         requestNativeAgent();
         break;
   
+      case JfrMethodTimingEvent:
+        requestMethodTiming();
+        break;
+  
       default:
         break;
       }
@@ -353,6 +357,8 @@ class JfrPeriodicEventSet : public AllStatic {
   static void requestJavaAgent(void);
 
   static void requestNativeAgent(void);
+
+  static void requestMethodTiming(void);
 
  static Ticks timestamp(void);
  static Ticks _timestamp;

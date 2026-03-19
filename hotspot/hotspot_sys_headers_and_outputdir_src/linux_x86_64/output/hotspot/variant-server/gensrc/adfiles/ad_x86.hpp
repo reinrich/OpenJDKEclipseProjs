@@ -1,6 +1,6 @@
 #line 1 "ad_x86.hpp"
 //
-// Copyright (c) 2003, 2025, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2011, 2026, Oracle and/or its affiliates. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -120,245 +120,248 @@ enum MachOperands {
   /*   76 */  RFLAGSREG,
   /*   77 */  RFLAGSREGU,
   /*   78 */  RFLAGSREGUCF,
-  /*   79 */  REGF,
-  /*   80 */  LEGREGF,
-  /*   81 */  VLREGF,
-  /*   82 */  REGD,
-  /*   83 */  LEGREGD,
-  /*   84 */  VLREGD,
-  /*   85 */  INDIRECT,
-  /*   86 */  INDOFFSET8,
-  /*   87 */  INDOFFSET32,
-  /*   88 */  INDINDEXOFFSET,
-  /*   89 */  INDINDEX,
-  /*   90 */  INDINDEXSCALE,
-  /*   91 */  INDPOSINDEXSCALE,
-  /*   92 */  INDINDEXSCALEOFFSET,
-  /*   93 */  INDPOSINDEXOFFSET,
-  /*   94 */  INDPOSINDEXSCALEOFFSET,
-  /*   95 */  INDCOMPRESSEDOOPOFFSET,
-  /*   96 */  INDIRECTNARROW,
-  /*   97 */  INDOFFSET8NARROW,
-  /*   98 */  INDOFFSET32NARROW,
-  /*   99 */  INDINDEXOFFSETNARROW,
-  /*  100 */  INDINDEXNARROW,
-  /*  101 */  INDINDEXSCALENARROW,
-  /*  102 */  INDINDEXSCALEOFFSETNARROW,
-  /*  103 */  INDPOSINDEXOFFSETNARROW,
-  /*  104 */  INDPOSINDEXSCALEOFFSETNARROW,
-  /*  105 */  STACKSLOTP,
-  /*  106 */  STACKSLOTI,
-  /*  107 */  STACKSLOTF,
-  /*  108 */  STACKSLOTD,
-  /*  109 */  STACKSLOTL,
-  /*  110 */  CMPOP,
-  /*  111 */  CMPOPU,
-  /*  112 */  CMPOPUCF,
-  /*  113 */  CMPOPUCF2,
-  /*  114 */  RXMM0,
-  /*  115 */  VEC,
-  /*  116 */  LEGVEC,
-  /*  117 */  VECS,
-  /*  118 */  LEGVECS,
-  /*  119 */  VECD,
-  /*  120 */  LEGVECD,
-  /*  121 */  VECX,
-  /*  122 */  LEGVECX,
-  /*  123 */  VECY,
-  /*  124 */  LEGVECY,
-  /*  125 */  VECZ,
-  /*  126 */  LEGVECZ,
-  /*  127 */  NO_RAX_REGP,
+  /*   79 */  RFLAGSREGUCFE,
+  /*   80 */  REGF,
+  /*   81 */  LEGREGF,
+  /*   82 */  VLREGF,
+  /*   83 */  REGD,
+  /*   84 */  LEGREGD,
+  /*   85 */  VLREGD,
+  /*   86 */  INDIRECT,
+  /*   87 */  INDOFFSET8,
+  /*   88 */  INDOFFSET32,
+  /*   89 */  INDINDEXOFFSET,
+  /*   90 */  INDINDEX,
+  /*   91 */  INDINDEXSCALE,
+  /*   92 */  INDPOSINDEXSCALE,
+  /*   93 */  INDINDEXSCALEOFFSET,
+  /*   94 */  INDPOSINDEXOFFSET,
+  /*   95 */  INDPOSINDEXSCALEOFFSET,
+  /*   96 */  INDCOMPRESSEDOOP,
+  /*   97 */  INDCOMPRESSEDOOPOFFSET,
+  /*   98 */  INDIRECTNARROW,
+  /*   99 */  INDOFFSET8NARROW,
+  /*  100 */  INDOFFSET32NARROW,
+  /*  101 */  INDINDEXOFFSETNARROW,
+  /*  102 */  INDINDEXNARROW,
+  /*  103 */  INDINDEXSCALENARROW,
+  /*  104 */  INDINDEXSCALEOFFSETNARROW,
+  /*  105 */  INDPOSINDEXOFFSETNARROW,
+  /*  106 */  INDPOSINDEXSCALEOFFSETNARROW,
+  /*  107 */  STACKSLOTP,
+  /*  108 */  STACKSLOTI,
+  /*  109 */  STACKSLOTF,
+  /*  110 */  STACKSLOTD,
+  /*  111 */  STACKSLOTL,
+  /*  112 */  CMPOP,
+  /*  113 */  CMPOPU,
+  /*  114 */  CMPOPUCF,
+  /*  115 */  CMPOPUCF2,
+  /*  116 */  CMPOPUCFE,
+  /*  117 */  RXMM0,
+  /*  118 */  VEC,
+  /*  119 */  LEGVEC,
+  /*  120 */  VECS,
+  /*  121 */  LEGVECS,
+  /*  122 */  VECD,
+  /*  123 */  LEGVECD,
+  /*  124 */  VECX,
+  /*  125 */  LEGVECX,
+  /*  126 */  VECY,
+  /*  127 */  LEGVECY,
+  /*  128 */  VECZ,
+  /*  129 */  LEGVECZ,
+  /*  130 */  NO_RAX_REGP,
   // last operand
-  /*  128 */  MEMORY,
+  /*  131 */  MEMORY,
   // last operand class
-  /*  129 */  _ADDP_ANY_REGP_RREGL,
-  /*  130 */  _LSHIFTL_RREGL_IMMI2,
-  /*  131 */  _CONVI2L_RREGI_,
-  /*  132 */  _LSHIFTL__CONVI2L_RREGI__IMMI2,
-  /*  133 */  _ADDP_ANY_REGP__LSHIFTL_RREGL_IMMI2,
-  /*  134 */  _ADDP_ANY_REGP__CONVI2L_RREGI_,
-  /*  135 */  _ADDP_ANY_REGP__LSHIFTL__CONVI2L_RREGI__IMMI2,
-  /*  136 */  _DECODEN_RREGN_,
-  /*  137 */  _ADDP__DECODEN_RREGN__RREGL,
-  /*  138 */  _ADDP__DECODEN_RREGN___LSHIFTL_RREGL_IMMI2,
-  /*  139 */  _ADDP__DECODEN_RREGN___CONVI2L_RREGI_,
-  /*  140 */  _ADDP__DECODEN_RREGN___LSHIFTL__CONVI2L_RREGI__IMMI2,
-  /*  141 */  _LOADB_MEMORY_,
-  /*  142 */  _LOADUB_MEMORY_,
-  /*  143 */  _ANDI__LOADUB_MEMORY__IMMI,
-  /*  144 */  _LOADS_MEMORY_,
-  /*  145 */  _LSHIFTI__LOADS_MEMORY__IMMI_24,
-  /*  146 */  _LOADUS_MEMORY_,
-  /*  147 */  _LSHIFTI__LOADUS_MEMORY__IMMI_24,
-  /*  148 */  _ANDI__LOADUS_MEMORY__IMMI_255,
-  /*  149 */  _ANDI__LOADUS_MEMORY__IMMI,
-  /*  150 */  _LOADI_MEMORY_,
-  /*  151 */  _LSHIFTI__LOADI_MEMORY__IMMI_24,
-  /*  152 */  _LSHIFTI__LOADI_MEMORY__IMMI_16,
-  /*  153 */  _ANDI__LOADI_MEMORY__IMMI_255,
-  /*  154 */  _ANDI__LOADI_MEMORY__IMMI_65535,
-  /*  155 */  _ANDI__LOADI_MEMORY__IMMU31,
-  /*  156 */  _CONVI2L__LOADI_MEMORY__,
-  /*  157 */  _LOADL_MEMORY_,
-  /*  158 */  _CASTP2X_RREGP_,
-  /*  159 */  _CASTP2X__DECODEN_RREGN__,
-  /*  160 */  _ADDL__LSHIFTL_RREGL_IMMI2_IMML32,
-  /*  161 */  _BINARY_CMPOP_RFLAGSREG,
-  /*  162 */  _BINARY_IMMI_1_RREGI,
-  /*  163 */  _BINARY_RREGI_RREGI,
-  /*  164 */  _BINARY_CMPOPU_RFLAGSREGU,
-  /*  165 */  _BINARY_CMPOPUCF_RFLAGSREGUCF,
-  /*  166 */  _BINARY_CMPOPUCF2_RFLAGSREGUCF,
-  /*  167 */  _BINARY_RREGI__LOADI_MEMORY_,
-  /*  168 */  _BINARY_RREGN_RREGN,
-  /*  169 */  _BINARY_RREGP_RREGP,
-  /*  170 */  _BINARY_IMML1_RREGL,
-  /*  171 */  _BINARY_RREGL_RREGL,
-  /*  172 */  _BINARY_RREGL__LOADL_MEMORY_,
-  /*  173 */  _BINARY_REGF_REGF,
-  /*  174 */  _BINARY_REGD_REGD,
-  /*  175 */  _ADDI__LOADI_MEMORY__RREGI,
-  /*  176 */  _ADDI_RREGI__LOADI_MEMORY_,
-  /*  177 */  _ADDI__LOADI_MEMORY__IMMI,
-  /*  178 */  _ADDI__LOADI_MEMORY__IMMI_1,
-  /*  179 */  _ADDI__LOADI_MEMORY__IMMI_M1,
-  /*  180 */  _LSHIFTI_RREGI_IMMI2,
-  /*  181 */  _ADDI_RREGI_RREGI,
-  /*  182 */  _ADDI_RREGI__LSHIFTI_RREGI_IMMI2,
-  /*  183 */  _ADDI__LSHIFTI_RREGI_IMMI2_RREGI,
-  /*  184 */  _ADDL__LOADL_MEMORY__RREGL,
-  /*  185 */  _ADDL_RREGL__LOADL_MEMORY_,
-  /*  186 */  _ADDL__LOADL_MEMORY__IMML32,
-  /*  187 */  _ADDL__LOADL_MEMORY__IMML1,
-  /*  188 */  _ADDL__LOADL_MEMORY__IMML_M1,
-  /*  189 */  _ADDL_RREGL_RREGL,
-  /*  190 */  _ADDL_RREGL__LSHIFTL_RREGL_IMMI2,
-  /*  191 */  _ADDL__LSHIFTL_RREGL_IMMI2_RREGL,
-  /*  192 */  _BINARY_RAX_REGP_RREGP,
-  /*  193 */  _BINARY_RAX_REGL_RREGL,
-  /*  194 */  _BINARY_RAX_REGI_RREGI,
-  /*  195 */  _BINARY_RAX_REGN_RREGN,
-  /*  196 */  _SUBI__LOADI_MEMORY__RREGI,
-  /*  197 */  _SUBL__LOADL_MEMORY__RREGL,
-  /*  198 */  _SUBI_IMMI_0_RREGI,
-  /*  199 */  _SUBI_IMMI_0__LOADI_MEMORY_,
-  /*  200 */  _SUBL_IMML0__LOADL_MEMORY_,
-  /*  201 */  _LSHIFTI__LOADI_MEMORY__IMMI8,
-  /*  202 */  _LSHIFTI__LOADI_MEMORY__RCX_REGI,
-  /*  203 */  _RSHIFTI__LOADI_MEMORY__IMMI8,
-  /*  204 */  _RSHIFTI__LOADI_MEMORY__RCX_REGI,
-  /*  205 */  _URSHIFTI__LOADI_MEMORY__IMMI8,
-  /*  206 */  _URSHIFTI__LOADI_MEMORY__RCX_REGI,
-  /*  207 */  _LSHIFTL__LOADL_MEMORY__IMMI8,
-  /*  208 */  _LSHIFTL__LOADL_MEMORY__RCX_REGI,
-  /*  209 */  _RSHIFTL__LOADL_MEMORY__IMMI,
-  /*  210 */  _RSHIFTL__LOADL_MEMORY__RCX_REGI,
-  /*  211 */  _URSHIFTL__LOADL_MEMORY__IMMI8,
-  /*  212 */  _URSHIFTL__LOADL_MEMORY__RCX_REGI,
-  /*  213 */  _LSHIFTI_RREGI_IMMI_24,
-  /*  214 */  _LSHIFTI_RREGI_IMMI_16,
-  /*  215 */  _ANDI_RREGI_IMMI_255,
-  /*  216 */  _ANDI_RREGI_IMMI_65535,
-  /*  217 */  _ANDI_RREGI_IMMI_POW2M1,
-  /*  218 */  _ANDI__LOADB_MEMORY__RREGI,
-  /*  219 */  _ANDI_RREGI__LOADB_MEMORY_,
-  /*  220 */  _ANDI__LOADI_MEMORY__RREGI,
-  /*  221 */  _ANDI_RREGI__LOADI_MEMORY_,
-  /*  222 */  _ANDI__LOADI_MEMORY__IMMI,
-  /*  223 */  _XORI_RREGI_IMMI_M1,
-  /*  224 */  _ADDI_RREGI_IMMI_M1,
-  /*  225 */  _ORI__LOADB_MEMORY__RREGI,
-  /*  226 */  _ORI_RREGI__LOADB_MEMORY_,
-  /*  227 */  _ORI__LOADI_MEMORY__RREGI,
-  /*  228 */  _ORI_RREGI__LOADI_MEMORY_,
-  /*  229 */  _ORI__LOADI_MEMORY__IMMI,
-  /*  230 */  _XORI__LOADB_MEMORY__RREGI,
-  /*  231 */  _XORI_RREGI__LOADB_MEMORY_,
-  /*  232 */  _XORI__LOADI_MEMORY__RREGI,
-  /*  233 */  _XORI_RREGI__LOADI_MEMORY_,
-  /*  234 */  _XORI__LOADI_MEMORY__IMMI,
-  /*  235 */  _ANDL__LOADL_MEMORY__RREGL,
-  /*  236 */  _ANDL_RREGL__LOADL_MEMORY_,
-  /*  237 */  _ANDL__LOADL_MEMORY__IMML32,
-  /*  238 */  _ANDL__LOADL_MEMORY__IMML_NOTPOW2,
-  /*  239 */  _XORL_RREGL_IMML_M1,
-  /*  240 */  _SUBL_IMML0_RREGL,
-  /*  241 */  _ADDL_RREGL_IMML_M1,
-  /*  242 */  _CASTP2X_ANY_REGP_,
-  /*  243 */  _ORL__LOADL_MEMORY__RREGL,
-  /*  244 */  _ORL_RREGL__LOADL_MEMORY_,
-  /*  245 */  _ORL__LOADL_MEMORY__IMML32,
-  /*  246 */  _ORL__LOADL_MEMORY__IMML_POW2,
-  /*  247 */  _XORL__LOADL_MEMORY__RREGL,
-  /*  248 */  _XORL__LOADL_MEMORY__IMML32,
-  /*  249 */  _CMPLTMASK_RREGI_RREGI,
-  /*  250 */  _ANDI__CMPLTMASK_RREGI_RREGI_RREGI,
-  /*  251 */  _SUBI_RREGI_RREGI,
-  /*  252 */  _ANDI_RREGI__CMPLTMASK_RREGI_RREGI,
-  /*  253 */  _LOADF_MEMORY_,
-  /*  254 */  _LOADD_MEMORY_,
-  /*  255 */  _BINARY_RDI_REGP_RCX_REGI,
-  /*  256 */  _BINARY_RSI_REGP_RDX_REGI,
-  /*  257 */  _BINARY_RDI_REGP_RDX_REGI,
-  /*  258 */  _BINARY_RSI_REGP_IMMI,
-  /*  259 */  _BINARY_RSI_REGP_RAX_REGI,
-  /*  260 */  _BINARY_RDI_REGP_RSI_REGP,
-  /*  261 */  _BINARY_RBX_REGI_IMMU8,
-  /*  262 */  _ANDI_RREGI_IMMI,
-  /*  263 */  _ANDI_RREGI_RREGI,
-  /*  264 */  _LOADP_MEMORY_,
-  /*  265 */  _LOADN_MEMORY_,
-  /*  266 */  _LOADNKLASS_MEMORY_,
-  /*  267 */  _ANDL_RREGL_IMML32,
-  /*  268 */  _ANDL_RREGL_RREGL,
-  /*  269 */  _ANDL__CASTP2X_RREGP___LOADL_MEMORY_,
-  /*  270 */  _ANDL__LOADL_MEMORY___CASTP2X_RREGP_,
-  /*  271 */  _ANDI__LOADUB_MEMORY__IMMU7,
-  /*  272 */  _ANDI__LOADB_MEMORY__IMMI8,
-  /*  273 */  _BINARY_RAX_REGP_IMMP,
-  /*  274 */  _CONVF2HF_REGF_,
-  /*  275 */  _VECTORCASTF2HF_VEC_,
-  /*  276 */  _LOADVECTOR_MEMORY_,
-  /*  277 */  _BINARY_VEC_KREG,
-  /*  278 */  _BINARY_RREGP_IMMI_0,
-  /*  279 */  _BINARY_RREGP_RREGI,
-  /*  280 */  _BINARY_KREG_IMMI_0,
-  /*  281 */  _BINARY_RREGP__BINARY_KREG_IMMI_0,
-  /*  282 */  _BINARY_KREG_RREGI,
-  /*  283 */  _BINARY_RREGP__BINARY_KREG_RREGI,
-  /*  284 */  _BINARY_VEC_IMMI_0,
-  /*  285 */  _BINARY_RREGP__BINARY_VEC_IMMI_0,
-  /*  286 */  _BINARY_VEC_RREGI,
-  /*  287 */  _BINARY_RREGP__BINARY_VEC_RREGI,
-  /*  288 */  _BINARY_VEC_VEC,
-  /*  289 */  _BINARY_VEC__BINARY_VEC_KREG,
-  /*  290 */  _BINARY_VEC_RREGL,
-  /*  291 */  _BINARY_VEC_REGF,
-  /*  292 */  _BINARY_VEC_REGD,
-  /*  293 */  _BINARY_VEC__LOADVECTOR_MEMORY_,
-  /*  294 */  _BINARY_REGD_IMMD,
-  /*  295 */  _LSHIFTCNTV_IMMI8_,
-  /*  296 */  _RSHIFTCNTV_IMMI8_,
-  /*  297 */  _BINARY_LEGVEC_LEGVEC,
-  /*  298 */  _MULADDVS2VI_VEC_VEC,
-  /*  299 */  _BINARY_VEC_IMMU8,
-  /*  300 */  _BINARY__LOADVECTOR_MEMORY__IMMU8,
-  /*  301 */  _VECTORSTOREMASK_VEC_IMMI,
-  /*  302 */  _BINARY_VEC_IMMI8,
-  /*  303 */  _BINARY_VEC__LSHIFTCNTV_IMMI8_,
-  /*  304 */  _BINARY_VEC__RSHIFTCNTV_IMMI8_,
-  /*  305 */  _BINARY__LOADVECTOR_MEMORY__KREG,
-  /*  306 */  _BINARY_IMMI8_KREG,
-  /*  307 */  _MASKALL_IMMI_M1_,
-  /*  308 */  _BINARY_IMMU8_KREG,
-  /*  309 */  _BINARY_VEC__BINARY_IMMU8_KREG,
-  /*  310 */  _BINARY_VEC__BINARY_VEC__BINARY_IMMU8_KREG,
-  /*  311 */  _BINARY_MEMORY__BINARY_IMMU8_KREG,
-  /*  312 */  _BINARY_VEC__BINARY_MEMORY__BINARY_IMMU8_KREG,
-  /*  313 */  _REINTERPRETHF2S_REGF_,
-  /*  314 */  _BINARY_RAX_REGP_NO_RAX_REGP,
-  /*  315 */  _ENCODEP_ANY_REGP_,
+  /*  132 */  _ADDP_ANY_REGP_RREGL,
+  /*  133 */  _LSHIFTL_RREGL_IMMI2,
+  /*  134 */  _CONVI2L_RREGI_,
+  /*  135 */  _LSHIFTL__CONVI2L_RREGI__IMMI2,
+  /*  136 */  _ADDP_ANY_REGP__LSHIFTL_RREGL_IMMI2,
+  /*  137 */  _ADDP_ANY_REGP__CONVI2L_RREGI_,
+  /*  138 */  _ADDP_ANY_REGP__LSHIFTL__CONVI2L_RREGI__IMMI2,
+  /*  139 */  _DECODEN_RREGN_,
+  /*  140 */  _ADDP__DECODEN_RREGN__RREGL,
+  /*  141 */  _ADDP__DECODEN_RREGN___LSHIFTL_RREGL_IMMI2,
+  /*  142 */  _ADDP__DECODEN_RREGN___CONVI2L_RREGI_,
+  /*  143 */  _ADDP__DECODEN_RREGN___LSHIFTL__CONVI2L_RREGI__IMMI2,
+  /*  144 */  _LOADB_MEMORY_,
+  /*  145 */  _LOADUB_MEMORY_,
+  /*  146 */  _ANDI__LOADUB_MEMORY__IMMI,
+  /*  147 */  _LOADS_MEMORY_,
+  /*  148 */  _LSHIFTI__LOADS_MEMORY__IMMI_24,
+  /*  149 */  _LOADUS_MEMORY_,
+  /*  150 */  _LSHIFTI__LOADUS_MEMORY__IMMI_24,
+  /*  151 */  _ANDI__LOADUS_MEMORY__IMMI_255,
+  /*  152 */  _ANDI__LOADUS_MEMORY__IMMI,
+  /*  153 */  _LOADI_MEMORY_,
+  /*  154 */  _LSHIFTI__LOADI_MEMORY__IMMI_24,
+  /*  155 */  _LSHIFTI__LOADI_MEMORY__IMMI_16,
+  /*  156 */  _ANDI__LOADI_MEMORY__IMMI_255,
+  /*  157 */  _ANDI__LOADI_MEMORY__IMMI_65535,
+  /*  158 */  _ANDI__LOADI_MEMORY__IMMU31,
+  /*  159 */  _CONVI2L__LOADI_MEMORY__,
+  /*  160 */  _LOADL_MEMORY_,
+  /*  161 */  _CASTP2X_RREGP_,
+  /*  162 */  _CASTP2X__DECODEN_RREGN__,
+  /*  163 */  _ADDL__LSHIFTL_RREGL_IMMI2_IMML32,
+  /*  164 */  _BINARY_CMPOP_RFLAGSREG,
+  /*  165 */  _BINARY_IMMI_1_RREGI,
+  /*  166 */  _BINARY_RREGI_RREGI,
+  /*  167 */  _BINARY_CMPOPU_RFLAGSREGU,
+  /*  168 */  _BINARY_CMPOPUCF_RFLAGSREGUCF,
+  /*  169 */  _BINARY_CMPOPUCFE_RFLAGSREGUCFE,
+  /*  170 */  _BINARY_CMPOPUCF2_RFLAGSREGUCF,
+  /*  171 */  _BINARY_RREGI__LOADI_MEMORY_,
+  /*  172 */  _BINARY_RREGN_RREGN,
+  /*  173 */  _BINARY_RREGP_RREGP,
+  /*  174 */  _BINARY_IMML1_RREGL,
+  /*  175 */  _BINARY_RREGL_RREGL,
+  /*  176 */  _BINARY_RREGL__LOADL_MEMORY_,
+  /*  177 */  _BINARY_REGF_REGF,
+  /*  178 */  _BINARY_REGD_REGD,
+  /*  179 */  _ADDI__LOADI_MEMORY__RREGI,
+  /*  180 */  _ADDI_RREGI__LOADI_MEMORY_,
+  /*  181 */  _ADDI__LOADI_MEMORY__IMMI,
+  /*  182 */  _ADDI__LOADI_MEMORY__IMMI_1,
+  /*  183 */  _ADDI__LOADI_MEMORY__IMMI_M1,
+  /*  184 */  _LSHIFTI_RREGI_IMMI2,
+  /*  185 */  _ADDI_RREGI_RREGI,
+  /*  186 */  _ADDI_RREGI__LSHIFTI_RREGI_IMMI2,
+  /*  187 */  _ADDI__LSHIFTI_RREGI_IMMI2_RREGI,
+  /*  188 */  _ADDL__LOADL_MEMORY__RREGL,
+  /*  189 */  _ADDL_RREGL__LOADL_MEMORY_,
+  /*  190 */  _ADDL__LOADL_MEMORY__IMML32,
+  /*  191 */  _ADDL__LOADL_MEMORY__IMML1,
+  /*  192 */  _ADDL__LOADL_MEMORY__IMML_M1,
+  /*  193 */  _ADDL_RREGL_RREGL,
+  /*  194 */  _ADDL_RREGL__LSHIFTL_RREGL_IMMI2,
+  /*  195 */  _ADDL__LSHIFTL_RREGL_IMMI2_RREGL,
+  /*  196 */  _BINARY_RAX_REGP_RREGP,
+  /*  197 */  _BINARY_RAX_REGL_RREGL,
+  /*  198 */  _BINARY_RAX_REGI_RREGI,
+  /*  199 */  _BINARY_RAX_REGN_RREGN,
+  /*  200 */  _SUBI__LOADI_MEMORY__RREGI,
+  /*  201 */  _SUBL__LOADL_MEMORY__RREGL,
+  /*  202 */  _SUBI_IMMI_0_RREGI,
+  /*  203 */  _SUBI_IMMI_0__LOADI_MEMORY_,
+  /*  204 */  _SUBL_IMML0__LOADL_MEMORY_,
+  /*  205 */  _LSHIFTI__LOADI_MEMORY__IMMI8,
+  /*  206 */  _LSHIFTI__LOADI_MEMORY__RCX_REGI,
+  /*  207 */  _RSHIFTI__LOADI_MEMORY__IMMI8,
+  /*  208 */  _RSHIFTI__LOADI_MEMORY__RCX_REGI,
+  /*  209 */  _URSHIFTI__LOADI_MEMORY__IMMI8,
+  /*  210 */  _URSHIFTI__LOADI_MEMORY__RCX_REGI,
+  /*  211 */  _LSHIFTL__LOADL_MEMORY__IMMI8,
+  /*  212 */  _LSHIFTL__LOADL_MEMORY__RCX_REGI,
+  /*  213 */  _RSHIFTL__LOADL_MEMORY__IMMI,
+  /*  214 */  _RSHIFTL__LOADL_MEMORY__RCX_REGI,
+  /*  215 */  _URSHIFTL__LOADL_MEMORY__IMMI8,
+  /*  216 */  _URSHIFTL__LOADL_MEMORY__RCX_REGI,
+  /*  217 */  _LSHIFTI_RREGI_IMMI_24,
+  /*  218 */  _LSHIFTI_RREGI_IMMI_16,
+  /*  219 */  _ANDI_RREGI_IMMI_255,
+  /*  220 */  _ANDI_RREGI_IMMI_65535,
+  /*  221 */  _ANDI_RREGI_IMMI_POW2M1,
+  /*  222 */  _ANDI__LOADB_MEMORY__RREGI,
+  /*  223 */  _ANDI_RREGI__LOADB_MEMORY_,
+  /*  224 */  _ANDI__LOADI_MEMORY__RREGI,
+  /*  225 */  _ANDI_RREGI__LOADI_MEMORY_,
+  /*  226 */  _ANDI__LOADI_MEMORY__IMMI,
+  /*  227 */  _XORI_RREGI_IMMI_M1,
+  /*  228 */  _ADDI_RREGI_IMMI_M1,
+  /*  229 */  _ORI__LOADB_MEMORY__RREGI,
+  /*  230 */  _ORI_RREGI__LOADB_MEMORY_,
+  /*  231 */  _ORI__LOADI_MEMORY__RREGI,
+  /*  232 */  _ORI_RREGI__LOADI_MEMORY_,
+  /*  233 */  _ORI__LOADI_MEMORY__IMMI,
+  /*  234 */  _XORI__LOADB_MEMORY__RREGI,
+  /*  235 */  _XORI_RREGI__LOADB_MEMORY_,
+  /*  236 */  _XORI__LOADI_MEMORY__RREGI,
+  /*  237 */  _XORI_RREGI__LOADI_MEMORY_,
+  /*  238 */  _XORI__LOADI_MEMORY__IMMI,
+  /*  239 */  _ANDL__LOADL_MEMORY__RREGL,
+  /*  240 */  _ANDL_RREGL__LOADL_MEMORY_,
+  /*  241 */  _ANDL__LOADL_MEMORY__IMML32,
+  /*  242 */  _ANDL__LOADL_MEMORY__IMML_NOTPOW2,
+  /*  243 */  _XORL_RREGL_IMML_M1,
+  /*  244 */  _SUBL_IMML0_RREGL,
+  /*  245 */  _ADDL_RREGL_IMML_M1,
+  /*  246 */  _CASTP2X_ANY_REGP_,
+  /*  247 */  _ORL__LOADL_MEMORY__RREGL,
+  /*  248 */  _ORL_RREGL__LOADL_MEMORY_,
+  /*  249 */  _ORL__LOADL_MEMORY__IMML32,
+  /*  250 */  _ORL__LOADL_MEMORY__IMML_POW2,
+  /*  251 */  _XORL__LOADL_MEMORY__RREGL,
+  /*  252 */  _XORL__LOADL_MEMORY__IMML32,
+  /*  253 */  _CMPLTMASK_RREGI_RREGI,
+  /*  254 */  _ANDI__CMPLTMASK_RREGI_RREGI_RREGI,
+  /*  255 */  _SUBI_RREGI_RREGI,
+  /*  256 */  _ANDI_RREGI__CMPLTMASK_RREGI_RREGI,
+  /*  257 */  _LOADF_MEMORY_,
+  /*  258 */  _LOADD_MEMORY_,
+  /*  259 */  _BINARY_RCX_REGL_RDI_REGP,
+  /*  260 */  _BINARY_IMML_RREGP,
+  /*  261 */  _BINARY_RDI_REGP_RCX_REGI,
+  /*  262 */  _BINARY_RSI_REGP_RDX_REGI,
+  /*  263 */  _BINARY_RDI_REGP_RDX_REGI,
+  /*  264 */  _BINARY_RSI_REGP_IMMI,
+  /*  265 */  _BINARY_RSI_REGP_RAX_REGI,
+  /*  266 */  _BINARY_RDI_REGP_RSI_REGP,
+  /*  267 */  _BINARY_RBX_REGI_IMMU8,
+  /*  268 */  _ANDI_RREGI_IMMI,
+  /*  269 */  _ANDI_RREGI_RREGI,
+  /*  270 */  _LOADP_MEMORY_,
+  /*  271 */  _LOADN_MEMORY_,
+  /*  272 */  _LOADNKLASS_MEMORY_,
+  /*  273 */  _ANDL_RREGL_IMML32,
+  /*  274 */  _ANDL_RREGL_RREGL,
+  /*  275 */  _ANDL__CASTP2X_RREGP___LOADL_MEMORY_,
+  /*  276 */  _ANDL__LOADL_MEMORY___CASTP2X_RREGP_,
+  /*  277 */  _ANDI__LOADUB_MEMORY__IMMU7,
+  /*  278 */  _ANDI__LOADB_MEMORY__IMMI8,
+  /*  279 */  _BINARY_RAX_REGP_IMMP,
+  /*  280 */  _CONVF2HF_REGF_,
+  /*  281 */  _VECTORCASTF2HF_VEC_,
+  /*  282 */  _LOADVECTOR_MEMORY_,
+  /*  283 */  _BINARY_VEC_KREG,
+  /*  284 */  _BINARY_RREGP_KREG,
+  /*  285 */  _BINARY_RREGP_VEC,
+  /*  286 */  _BINARY_VEC_VEC,
+  /*  287 */  _BINARY_VEC__BINARY_VEC_KREG,
+  /*  288 */  _BINARY_VEC_RREGI,
+  /*  289 */  _BINARY_VEC_RREGL,
+  /*  290 */  _BINARY_VEC_REGF,
+  /*  291 */  _BINARY_VEC_REGD,
+  /*  292 */  _BINARY_VEC__LOADVECTOR_MEMORY_,
+  /*  293 */  _BINARY_REGD_IMMD,
+  /*  294 */  _LSHIFTCNTV_IMMI8_,
+  /*  295 */  _RSHIFTCNTV_IMMI8_,
+  /*  296 */  _BINARY_LEGVEC_LEGVEC,
+  /*  297 */  _MULADDVS2VI_VEC_VEC,
+  /*  298 */  _BINARY_VEC_IMMU8,
+  /*  299 */  _BINARY__LOADVECTOR_MEMORY__IMMU8,
+  /*  300 */  _VECTORSTOREMASK_VEC_IMMI,
+  /*  301 */  _BINARY_VEC_IMMI8,
+  /*  302 */  _BINARY_VEC__LSHIFTCNTV_IMMI8_,
+  /*  303 */  _BINARY_VEC__RSHIFTCNTV_IMMI8_,
+  /*  304 */  _BINARY__LOADVECTOR_MEMORY__KREG,
+  /*  305 */  _BINARY_IMMI8_KREG,
+  /*  306 */  _MASKALL_IMMI_M1_,
+  /*  307 */  _BINARY_IMMU8_KREG,
+  /*  308 */  _BINARY_VEC__BINARY_IMMU8_KREG,
+  /*  309 */  _BINARY_VEC__BINARY_VEC__BINARY_IMMU8_KREG,
+  /*  310 */  _BINARY_MEMORY__BINARY_IMMU8_KREG,
+  /*  311 */  _BINARY_VEC__BINARY_MEMORY__BINARY_IMMU8_KREG,
+  /*  312 */  _REINTERPRETHF2S_REGF_,
+  /*  313 */  _VECTORREINTERPRET__LOADVECTOR_MEMORY__,
+  /*  314 */  _BINARY_VEC__VECTORREINTERPRET__LOADVECTOR_MEMORY__,
+  /*  315 */  _BINARY_RAX_REGP_NO_RAX_REGP,
+  /*  316 */  _BINARY_RREGL_IMMI_0,
+  /*  317 */  _BINARY_RREGL_IMMI_4,
+  /*  318 */  _ENCODEP_ANY_REGP_,
   // last internally defined operand
   _LAST_MACH_OPER
 };
@@ -443,1680 +446,1871 @@ enum MachOpcodes {
   /*   76 */  rFlagsReg_rule,
   /*   77 */  rFlagsRegU_rule,
   /*   78 */  rFlagsRegUCF_rule,
-  /*   79 */  regF_rule,
-  /*   80 */  legRegF_rule,
-  /*   81 */  vlRegF_rule,
-  /*   82 */  regD_rule,
-  /*   83 */  legRegD_rule,
-  /*   84 */  vlRegD_rule,
-  /*   85 */  indirect_rule,
-  /*   86 */  indOffset8_rule,
-  /*   87 */  indOffset32_rule,
-  /*   88 */  indIndexOffset_rule,
-  /*   89 */  indIndex_rule,
-  /*   90 */  indIndexScale_rule,
-  /*   91 */  indPosIndexScale_rule,
-  /*   92 */  indIndexScaleOffset_rule,
-  /*   93 */  indPosIndexOffset_rule,
-  /*   94 */  indPosIndexScaleOffset_rule,
-  /*   95 */  indCompressedOopOffset_rule,
-  /*   96 */  indirectNarrow_rule,
-  /*   97 */  indOffset8Narrow_rule,
-  /*   98 */  indOffset32Narrow_rule,
-  /*   99 */  indIndexOffsetNarrow_rule,
-  /*  100 */  indIndexNarrow_rule,
-  /*  101 */  indIndexScaleNarrow_rule,
-  /*  102 */  indIndexScaleOffsetNarrow_rule,
-  /*  103 */  indPosIndexOffsetNarrow_rule,
-  /*  104 */  indPosIndexScaleOffsetNarrow_rule,
-  /*  105 */  stackSlotP_rule,
-  /*  106 */  stackSlotI_rule,
-  /*  107 */  stackSlotF_rule,
-  /*  108 */  stackSlotD_rule,
-  /*  109 */  stackSlotL_rule,
-  /*  110 */  cmpOp_rule,
-  /*  111 */  cmpOpU_rule,
-  /*  112 */  cmpOpUCF_rule,
-  /*  113 */  cmpOpUCF2_rule,
-  /*  114 */  rxmm0_rule,
-  /*  115 */  vec_rule,
-  /*  116 */  legVec_rule,
-  /*  117 */  vecS_rule,
-  /*  118 */  legVecS_rule,
-  /*  119 */  vecD_rule,
-  /*  120 */  legVecD_rule,
-  /*  121 */  vecX_rule,
-  /*  122 */  legVecX_rule,
-  /*  123 */  vecY_rule,
-  /*  124 */  legVecY_rule,
-  /*  125 */  vecZ_rule,
-  /*  126 */  legVecZ_rule,
-  /*  127 */  no_rax_RegP_rule,
+  /*   79 */  rFlagsRegUCFE_rule,
+  /*   80 */  regF_rule,
+  /*   81 */  legRegF_rule,
+  /*   82 */  vlRegF_rule,
+  /*   83 */  regD_rule,
+  /*   84 */  legRegD_rule,
+  /*   85 */  vlRegD_rule,
+  /*   86 */  indirect_rule,
+  /*   87 */  indOffset8_rule,
+  /*   88 */  indOffset32_rule,
+  /*   89 */  indIndexOffset_rule,
+  /*   90 */  indIndex_rule,
+  /*   91 */  indIndexScale_rule,
+  /*   92 */  indPosIndexScale_rule,
+  /*   93 */  indIndexScaleOffset_rule,
+  /*   94 */  indPosIndexOffset_rule,
+  /*   95 */  indPosIndexScaleOffset_rule,
+  /*   96 */  indCompressedOop_rule,
+  /*   97 */  indCompressedOopOffset_rule,
+  /*   98 */  indirectNarrow_rule,
+  /*   99 */  indOffset8Narrow_rule,
+  /*  100 */  indOffset32Narrow_rule,
+  /*  101 */  indIndexOffsetNarrow_rule,
+  /*  102 */  indIndexNarrow_rule,
+  /*  103 */  indIndexScaleNarrow_rule,
+  /*  104 */  indIndexScaleOffsetNarrow_rule,
+  /*  105 */  indPosIndexOffsetNarrow_rule,
+  /*  106 */  indPosIndexScaleOffsetNarrow_rule,
+  /*  107 */  stackSlotP_rule,
+  /*  108 */  stackSlotI_rule,
+  /*  109 */  stackSlotF_rule,
+  /*  110 */  stackSlotD_rule,
+  /*  111 */  stackSlotL_rule,
+  /*  112 */  cmpOp_rule,
+  /*  113 */  cmpOpU_rule,
+  /*  114 */  cmpOpUCF_rule,
+  /*  115 */  cmpOpUCF2_rule,
+  /*  116 */  cmpOpUCFE_rule,
+  /*  117 */  rxmm0_rule,
+  /*  118 */  vec_rule,
+  /*  119 */  legVec_rule,
+  /*  120 */  vecS_rule,
+  /*  121 */  legVecS_rule,
+  /*  122 */  vecD_rule,
+  /*  123 */  legVecD_rule,
+  /*  124 */  vecX_rule,
+  /*  125 */  legVecX_rule,
+  /*  126 */  vecY_rule,
+  /*  127 */  legVecY_rule,
+  /*  128 */  vecZ_rule,
+  /*  129 */  legVecZ_rule,
+  /*  130 */  no_rax_RegP_rule,
   // last operand
-  /*  128 */  memory_rule,
+  /*  131 */  memory_rule,
   // last operand class
-  /*  129 */  _AddP_any_RegP_rRegL_rule,
-  /*  130 */  _LShiftL_rRegL_immI2_rule,
-  /*  131 */  _ConvI2L_rRegI__rule,
-  /*  132 */  _LShiftL__ConvI2L_rRegI__immI2_rule,
-  /*  133 */  _AddP_any_RegP__LShiftL_rRegL_immI2_rule,
-  /*  134 */  _AddP_any_RegP__ConvI2L_rRegI__rule,
-  /*  135 */  _AddP_any_RegP__LShiftL__ConvI2L_rRegI__immI2_rule,
-  /*  136 */  _DecodeN_rRegN__rule,
-  /*  137 */  _AddP__DecodeN_rRegN__rRegL_rule,
-  /*  138 */  _AddP__DecodeN_rRegN___LShiftL_rRegL_immI2_rule,
-  /*  139 */  _AddP__DecodeN_rRegN___ConvI2L_rRegI__rule,
-  /*  140 */  _AddP__DecodeN_rRegN___LShiftL__ConvI2L_rRegI__immI2_rule,
-  /*  141 */  _LoadB_memory__rule,
-  /*  142 */  _LoadUB_memory__rule,
-  /*  143 */  _AndI__LoadUB_memory__immI_rule,
-  /*  144 */  _LoadS_memory__rule,
-  /*  145 */  _LShiftI__LoadS_memory__immI_24_rule,
-  /*  146 */  _LoadUS_memory__rule,
-  /*  147 */  _LShiftI__LoadUS_memory__immI_24_rule,
-  /*  148 */  _AndI__LoadUS_memory__immI_255_rule,
-  /*  149 */  _AndI__LoadUS_memory__immI_rule,
-  /*  150 */  _LoadI_memory__rule,
-  /*  151 */  _LShiftI__LoadI_memory__immI_24_rule,
-  /*  152 */  _LShiftI__LoadI_memory__immI_16_rule,
-  /*  153 */  _AndI__LoadI_memory__immI_255_rule,
-  /*  154 */  _AndI__LoadI_memory__immI_65535_rule,
-  /*  155 */  _AndI__LoadI_memory__immU31_rule,
-  /*  156 */  _ConvI2L__LoadI_memory___rule,
-  /*  157 */  _LoadL_memory__rule,
-  /*  158 */  _CastP2X_rRegP__rule,
-  /*  159 */  _CastP2X__DecodeN_rRegN___rule,
-  /*  160 */  _AddL__LShiftL_rRegL_immI2_immL32_rule,
-  /*  161 */  _Binary_cmpOp_rFlagsReg_rule,
-  /*  162 */  _Binary_immI_1_rRegI_rule,
-  /*  163 */  _Binary_rRegI_rRegI_rule,
-  /*  164 */  _Binary_cmpOpU_rFlagsRegU_rule,
-  /*  165 */  _Binary_cmpOpUCF_rFlagsRegUCF_rule,
-  /*  166 */  _Binary_cmpOpUCF2_rFlagsRegUCF_rule,
-  /*  167 */  _Binary_rRegI__LoadI_memory__rule,
-  /*  168 */  _Binary_rRegN_rRegN_rule,
-  /*  169 */  _Binary_rRegP_rRegP_rule,
-  /*  170 */  _Binary_immL1_rRegL_rule,
-  /*  171 */  _Binary_rRegL_rRegL_rule,
-  /*  172 */  _Binary_rRegL__LoadL_memory__rule,
-  /*  173 */  _Binary_regF_regF_rule,
-  /*  174 */  _Binary_regD_regD_rule,
-  /*  175 */  _AddI__LoadI_memory__rRegI_rule,
-  /*  176 */  _AddI_rRegI__LoadI_memory__rule,
-  /*  177 */  _AddI__LoadI_memory__immI_rule,
-  /*  178 */  _AddI__LoadI_memory__immI_1_rule,
-  /*  179 */  _AddI__LoadI_memory__immI_M1_rule,
-  /*  180 */  _LShiftI_rRegI_immI2_rule,
-  /*  181 */  _AddI_rRegI_rRegI_rule,
-  /*  182 */  _AddI_rRegI__LShiftI_rRegI_immI2_rule,
-  /*  183 */  _AddI__LShiftI_rRegI_immI2_rRegI_rule,
-  /*  184 */  _AddL__LoadL_memory__rRegL_rule,
-  /*  185 */  _AddL_rRegL__LoadL_memory__rule,
-  /*  186 */  _AddL__LoadL_memory__immL32_rule,
-  /*  187 */  _AddL__LoadL_memory__immL1_rule,
-  /*  188 */  _AddL__LoadL_memory__immL_M1_rule,
-  /*  189 */  _AddL_rRegL_rRegL_rule,
-  /*  190 */  _AddL_rRegL__LShiftL_rRegL_immI2_rule,
-  /*  191 */  _AddL__LShiftL_rRegL_immI2_rRegL_rule,
-  /*  192 */  _Binary_rax_RegP_rRegP_rule,
-  /*  193 */  _Binary_rax_RegL_rRegL_rule,
-  /*  194 */  _Binary_rax_RegI_rRegI_rule,
-  /*  195 */  _Binary_rax_RegN_rRegN_rule,
-  /*  196 */  _SubI__LoadI_memory__rRegI_rule,
-  /*  197 */  _SubL__LoadL_memory__rRegL_rule,
-  /*  198 */  _SubI_immI_0_rRegI_rule,
-  /*  199 */  _SubI_immI_0__LoadI_memory__rule,
-  /*  200 */  _SubL_immL0__LoadL_memory__rule,
-  /*  201 */  _LShiftI__LoadI_memory__immI8_rule,
-  /*  202 */  _LShiftI__LoadI_memory__rcx_RegI_rule,
-  /*  203 */  _RShiftI__LoadI_memory__immI8_rule,
-  /*  204 */  _RShiftI__LoadI_memory__rcx_RegI_rule,
-  /*  205 */  _URShiftI__LoadI_memory__immI8_rule,
-  /*  206 */  _URShiftI__LoadI_memory__rcx_RegI_rule,
-  /*  207 */  _LShiftL__LoadL_memory__immI8_rule,
-  /*  208 */  _LShiftL__LoadL_memory__rcx_RegI_rule,
-  /*  209 */  _RShiftL__LoadL_memory__immI_rule,
-  /*  210 */  _RShiftL__LoadL_memory__rcx_RegI_rule,
-  /*  211 */  _URShiftL__LoadL_memory__immI8_rule,
-  /*  212 */  _URShiftL__LoadL_memory__rcx_RegI_rule,
-  /*  213 */  _LShiftI_rRegI_immI_24_rule,
-  /*  214 */  _LShiftI_rRegI_immI_16_rule,
-  /*  215 */  _AndI_rRegI_immI_255_rule,
-  /*  216 */  _AndI_rRegI_immI_65535_rule,
-  /*  217 */  _AndI_rRegI_immI_Pow2M1_rule,
-  /*  218 */  _AndI__LoadB_memory__rRegI_rule,
-  /*  219 */  _AndI_rRegI__LoadB_memory__rule,
-  /*  220 */  _AndI__LoadI_memory__rRegI_rule,
-  /*  221 */  _AndI_rRegI__LoadI_memory__rule,
-  /*  222 */  _AndI__LoadI_memory__immI_rule,
-  /*  223 */  _XorI_rRegI_immI_M1_rule,
-  /*  224 */  _AddI_rRegI_immI_M1_rule,
-  /*  225 */  _OrI__LoadB_memory__rRegI_rule,
-  /*  226 */  _OrI_rRegI__LoadB_memory__rule,
-  /*  227 */  _OrI__LoadI_memory__rRegI_rule,
-  /*  228 */  _OrI_rRegI__LoadI_memory__rule,
-  /*  229 */  _OrI__LoadI_memory__immI_rule,
-  /*  230 */  _XorI__LoadB_memory__rRegI_rule,
-  /*  231 */  _XorI_rRegI__LoadB_memory__rule,
-  /*  232 */  _XorI__LoadI_memory__rRegI_rule,
-  /*  233 */  _XorI_rRegI__LoadI_memory__rule,
-  /*  234 */  _XorI__LoadI_memory__immI_rule,
-  /*  235 */  _AndL__LoadL_memory__rRegL_rule,
-  /*  236 */  _AndL_rRegL__LoadL_memory__rule,
-  /*  237 */  _AndL__LoadL_memory__immL32_rule,
-  /*  238 */  _AndL__LoadL_memory__immL_NotPow2_rule,
-  /*  239 */  _XorL_rRegL_immL_M1_rule,
-  /*  240 */  _SubL_immL0_rRegL_rule,
-  /*  241 */  _AddL_rRegL_immL_M1_rule,
-  /*  242 */  _CastP2X_any_RegP__rule,
-  /*  243 */  _OrL__LoadL_memory__rRegL_rule,
-  /*  244 */  _OrL_rRegL__LoadL_memory__rule,
-  /*  245 */  _OrL__LoadL_memory__immL32_rule,
-  /*  246 */  _OrL__LoadL_memory__immL_Pow2_rule,
-  /*  247 */  _XorL__LoadL_memory__rRegL_rule,
-  /*  248 */  _XorL__LoadL_memory__immL32_rule,
-  /*  249 */  _CmpLTMask_rRegI_rRegI_rule,
-  /*  250 */  _AndI__CmpLTMask_rRegI_rRegI_rRegI_rule,
-  /*  251 */  _SubI_rRegI_rRegI_rule,
-  /*  252 */  _AndI_rRegI__CmpLTMask_rRegI_rRegI_rule,
-  /*  253 */  _LoadF_memory__rule,
-  /*  254 */  _LoadD_memory__rule,
-  /*  255 */  _Binary_rdi_RegP_rcx_RegI_rule,
-  /*  256 */  _Binary_rsi_RegP_rdx_RegI_rule,
-  /*  257 */  _Binary_rdi_RegP_rdx_RegI_rule,
-  /*  258 */  _Binary_rsi_RegP_immI_rule,
-  /*  259 */  _Binary_rsi_RegP_rax_RegI_rule,
-  /*  260 */  _Binary_rdi_RegP_rsi_RegP_rule,
-  /*  261 */  _Binary_rbx_RegI_immU8_rule,
-  /*  262 */  _AndI_rRegI_immI_rule,
-  /*  263 */  _AndI_rRegI_rRegI_rule,
-  /*  264 */  _LoadP_memory__rule,
-  /*  265 */  _LoadN_memory__rule,
-  /*  266 */  _LoadNKlass_memory__rule,
-  /*  267 */  _AndL_rRegL_immL32_rule,
-  /*  268 */  _AndL_rRegL_rRegL_rule,
-  /*  269 */  _AndL__CastP2X_rRegP___LoadL_memory__rule,
-  /*  270 */  _AndL__LoadL_memory___CastP2X_rRegP__rule,
-  /*  271 */  _AndI__LoadUB_memory__immU7_rule,
-  /*  272 */  _AndI__LoadB_memory__immI8_rule,
-  /*  273 */  _Binary_rax_RegP_immP_rule,
-  /*  274 */  _ConvF2HF_regF__rule,
-  /*  275 */  _VectorCastF2HF_vec__rule,
-  /*  276 */  _LoadVector_memory__rule,
-  /*  277 */  _Binary_vec_kReg_rule,
-  /*  278 */  _Binary_rRegP_immI_0_rule,
-  /*  279 */  _Binary_rRegP_rRegI_rule,
-  /*  280 */  _Binary_kReg_immI_0_rule,
-  /*  281 */  _Binary_rRegP__Binary_kReg_immI_0_rule,
-  /*  282 */  _Binary_kReg_rRegI_rule,
-  /*  283 */  _Binary_rRegP__Binary_kReg_rRegI_rule,
-  /*  284 */  _Binary_vec_immI_0_rule,
-  /*  285 */  _Binary_rRegP__Binary_vec_immI_0_rule,
-  /*  286 */  _Binary_vec_rRegI_rule,
-  /*  287 */  _Binary_rRegP__Binary_vec_rRegI_rule,
-  /*  288 */  _Binary_vec_vec_rule,
-  /*  289 */  _Binary_vec__Binary_vec_kReg_rule,
-  /*  290 */  _Binary_vec_rRegL_rule,
-  /*  291 */  _Binary_vec_regF_rule,
-  /*  292 */  _Binary_vec_regD_rule,
-  /*  293 */  _Binary_vec__LoadVector_memory__rule,
-  /*  294 */  _Binary_regD_immD_rule,
-  /*  295 */  _LShiftCntV_immI8__rule,
-  /*  296 */  _RShiftCntV_immI8__rule,
-  /*  297 */  _Binary_legVec_legVec_rule,
-  /*  298 */  _MulAddVS2VI_vec_vec_rule,
-  /*  299 */  _Binary_vec_immU8_rule,
-  /*  300 */  _Binary__LoadVector_memory__immU8_rule,
-  /*  301 */  _VectorStoreMask_vec_immI_rule,
-  /*  302 */  _Binary_vec_immI8_rule,
-  /*  303 */  _Binary_vec__LShiftCntV_immI8__rule,
-  /*  304 */  _Binary_vec__RShiftCntV_immI8__rule,
-  /*  305 */  _Binary__LoadVector_memory__kReg_rule,
-  /*  306 */  _Binary_immI8_kReg_rule,
-  /*  307 */  _MaskAll_immI_M1__rule,
-  /*  308 */  _Binary_immU8_kReg_rule,
-  /*  309 */  _Binary_vec__Binary_immU8_kReg_rule,
-  /*  310 */  _Binary_vec__Binary_vec__Binary_immU8_kReg_rule,
-  /*  311 */  _Binary_memory__Binary_immU8_kReg_rule,
-  /*  312 */  _Binary_vec__Binary_memory__Binary_immU8_kReg_rule,
-  /*  313 */  _ReinterpretHF2S_regF__rule,
-  /*  314 */  _Binary_rax_RegP_no_rax_RegP_rule,
-  /*  315 */  _EncodeP_any_RegP__rule,
+  /*  132 */  _AddP_any_RegP_rRegL_rule,
+  /*  133 */  _LShiftL_rRegL_immI2_rule,
+  /*  134 */  _ConvI2L_rRegI__rule,
+  /*  135 */  _LShiftL__ConvI2L_rRegI__immI2_rule,
+  /*  136 */  _AddP_any_RegP__LShiftL_rRegL_immI2_rule,
+  /*  137 */  _AddP_any_RegP__ConvI2L_rRegI__rule,
+  /*  138 */  _AddP_any_RegP__LShiftL__ConvI2L_rRegI__immI2_rule,
+  /*  139 */  _DecodeN_rRegN__rule,
+  /*  140 */  _AddP__DecodeN_rRegN__rRegL_rule,
+  /*  141 */  _AddP__DecodeN_rRegN___LShiftL_rRegL_immI2_rule,
+  /*  142 */  _AddP__DecodeN_rRegN___ConvI2L_rRegI__rule,
+  /*  143 */  _AddP__DecodeN_rRegN___LShiftL__ConvI2L_rRegI__immI2_rule,
+  /*  144 */  _LoadB_memory__rule,
+  /*  145 */  _LoadUB_memory__rule,
+  /*  146 */  _AndI__LoadUB_memory__immI_rule,
+  /*  147 */  _LoadS_memory__rule,
+  /*  148 */  _LShiftI__LoadS_memory__immI_24_rule,
+  /*  149 */  _LoadUS_memory__rule,
+  /*  150 */  _LShiftI__LoadUS_memory__immI_24_rule,
+  /*  151 */  _AndI__LoadUS_memory__immI_255_rule,
+  /*  152 */  _AndI__LoadUS_memory__immI_rule,
+  /*  153 */  _LoadI_memory__rule,
+  /*  154 */  _LShiftI__LoadI_memory__immI_24_rule,
+  /*  155 */  _LShiftI__LoadI_memory__immI_16_rule,
+  /*  156 */  _AndI__LoadI_memory__immI_255_rule,
+  /*  157 */  _AndI__LoadI_memory__immI_65535_rule,
+  /*  158 */  _AndI__LoadI_memory__immU31_rule,
+  /*  159 */  _ConvI2L__LoadI_memory___rule,
+  /*  160 */  _LoadL_memory__rule,
+  /*  161 */  _CastP2X_rRegP__rule,
+  /*  162 */  _CastP2X__DecodeN_rRegN___rule,
+  /*  163 */  _AddL__LShiftL_rRegL_immI2_immL32_rule,
+  /*  164 */  _Binary_cmpOp_rFlagsReg_rule,
+  /*  165 */  _Binary_immI_1_rRegI_rule,
+  /*  166 */  _Binary_rRegI_rRegI_rule,
+  /*  167 */  _Binary_cmpOpU_rFlagsRegU_rule,
+  /*  168 */  _Binary_cmpOpUCF_rFlagsRegUCF_rule,
+  /*  169 */  _Binary_cmpOpUCFE_rFlagsRegUCFE_rule,
+  /*  170 */  _Binary_cmpOpUCF2_rFlagsRegUCF_rule,
+  /*  171 */  _Binary_rRegI__LoadI_memory__rule,
+  /*  172 */  _Binary_rRegN_rRegN_rule,
+  /*  173 */  _Binary_rRegP_rRegP_rule,
+  /*  174 */  _Binary_immL1_rRegL_rule,
+  /*  175 */  _Binary_rRegL_rRegL_rule,
+  /*  176 */  _Binary_rRegL__LoadL_memory__rule,
+  /*  177 */  _Binary_regF_regF_rule,
+  /*  178 */  _Binary_regD_regD_rule,
+  /*  179 */  _AddI__LoadI_memory__rRegI_rule,
+  /*  180 */  _AddI_rRegI__LoadI_memory__rule,
+  /*  181 */  _AddI__LoadI_memory__immI_rule,
+  /*  182 */  _AddI__LoadI_memory__immI_1_rule,
+  /*  183 */  _AddI__LoadI_memory__immI_M1_rule,
+  /*  184 */  _LShiftI_rRegI_immI2_rule,
+  /*  185 */  _AddI_rRegI_rRegI_rule,
+  /*  186 */  _AddI_rRegI__LShiftI_rRegI_immI2_rule,
+  /*  187 */  _AddI__LShiftI_rRegI_immI2_rRegI_rule,
+  /*  188 */  _AddL__LoadL_memory__rRegL_rule,
+  /*  189 */  _AddL_rRegL__LoadL_memory__rule,
+  /*  190 */  _AddL__LoadL_memory__immL32_rule,
+  /*  191 */  _AddL__LoadL_memory__immL1_rule,
+  /*  192 */  _AddL__LoadL_memory__immL_M1_rule,
+  /*  193 */  _AddL_rRegL_rRegL_rule,
+  /*  194 */  _AddL_rRegL__LShiftL_rRegL_immI2_rule,
+  /*  195 */  _AddL__LShiftL_rRegL_immI2_rRegL_rule,
+  /*  196 */  _Binary_rax_RegP_rRegP_rule,
+  /*  197 */  _Binary_rax_RegL_rRegL_rule,
+  /*  198 */  _Binary_rax_RegI_rRegI_rule,
+  /*  199 */  _Binary_rax_RegN_rRegN_rule,
+  /*  200 */  _SubI__LoadI_memory__rRegI_rule,
+  /*  201 */  _SubL__LoadL_memory__rRegL_rule,
+  /*  202 */  _SubI_immI_0_rRegI_rule,
+  /*  203 */  _SubI_immI_0__LoadI_memory__rule,
+  /*  204 */  _SubL_immL0__LoadL_memory__rule,
+  /*  205 */  _LShiftI__LoadI_memory__immI8_rule,
+  /*  206 */  _LShiftI__LoadI_memory__rcx_RegI_rule,
+  /*  207 */  _RShiftI__LoadI_memory__immI8_rule,
+  /*  208 */  _RShiftI__LoadI_memory__rcx_RegI_rule,
+  /*  209 */  _URShiftI__LoadI_memory__immI8_rule,
+  /*  210 */  _URShiftI__LoadI_memory__rcx_RegI_rule,
+  /*  211 */  _LShiftL__LoadL_memory__immI8_rule,
+  /*  212 */  _LShiftL__LoadL_memory__rcx_RegI_rule,
+  /*  213 */  _RShiftL__LoadL_memory__immI_rule,
+  /*  214 */  _RShiftL__LoadL_memory__rcx_RegI_rule,
+  /*  215 */  _URShiftL__LoadL_memory__immI8_rule,
+  /*  216 */  _URShiftL__LoadL_memory__rcx_RegI_rule,
+  /*  217 */  _LShiftI_rRegI_immI_24_rule,
+  /*  218 */  _LShiftI_rRegI_immI_16_rule,
+  /*  219 */  _AndI_rRegI_immI_255_rule,
+  /*  220 */  _AndI_rRegI_immI_65535_rule,
+  /*  221 */  _AndI_rRegI_immI_Pow2M1_rule,
+  /*  222 */  _AndI__LoadB_memory__rRegI_rule,
+  /*  223 */  _AndI_rRegI__LoadB_memory__rule,
+  /*  224 */  _AndI__LoadI_memory__rRegI_rule,
+  /*  225 */  _AndI_rRegI__LoadI_memory__rule,
+  /*  226 */  _AndI__LoadI_memory__immI_rule,
+  /*  227 */  _XorI_rRegI_immI_M1_rule,
+  /*  228 */  _AddI_rRegI_immI_M1_rule,
+  /*  229 */  _OrI__LoadB_memory__rRegI_rule,
+  /*  230 */  _OrI_rRegI__LoadB_memory__rule,
+  /*  231 */  _OrI__LoadI_memory__rRegI_rule,
+  /*  232 */  _OrI_rRegI__LoadI_memory__rule,
+  /*  233 */  _OrI__LoadI_memory__immI_rule,
+  /*  234 */  _XorI__LoadB_memory__rRegI_rule,
+  /*  235 */  _XorI_rRegI__LoadB_memory__rule,
+  /*  236 */  _XorI__LoadI_memory__rRegI_rule,
+  /*  237 */  _XorI_rRegI__LoadI_memory__rule,
+  /*  238 */  _XorI__LoadI_memory__immI_rule,
+  /*  239 */  _AndL__LoadL_memory__rRegL_rule,
+  /*  240 */  _AndL_rRegL__LoadL_memory__rule,
+  /*  241 */  _AndL__LoadL_memory__immL32_rule,
+  /*  242 */  _AndL__LoadL_memory__immL_NotPow2_rule,
+  /*  243 */  _XorL_rRegL_immL_M1_rule,
+  /*  244 */  _SubL_immL0_rRegL_rule,
+  /*  245 */  _AddL_rRegL_immL_M1_rule,
+  /*  246 */  _CastP2X_any_RegP__rule,
+  /*  247 */  _OrL__LoadL_memory__rRegL_rule,
+  /*  248 */  _OrL_rRegL__LoadL_memory__rule,
+  /*  249 */  _OrL__LoadL_memory__immL32_rule,
+  /*  250 */  _OrL__LoadL_memory__immL_Pow2_rule,
+  /*  251 */  _XorL__LoadL_memory__rRegL_rule,
+  /*  252 */  _XorL__LoadL_memory__immL32_rule,
+  /*  253 */  _CmpLTMask_rRegI_rRegI_rule,
+  /*  254 */  _AndI__CmpLTMask_rRegI_rRegI_rRegI_rule,
+  /*  255 */  _SubI_rRegI_rRegI_rule,
+  /*  256 */  _AndI_rRegI__CmpLTMask_rRegI_rRegI_rule,
+  /*  257 */  _LoadF_memory__rule,
+  /*  258 */  _LoadD_memory__rule,
+  /*  259 */  _Binary_rcx_RegL_rdi_RegP_rule,
+  /*  260 */  _Binary_immL_rRegP_rule,
+  /*  261 */  _Binary_rdi_RegP_rcx_RegI_rule,
+  /*  262 */  _Binary_rsi_RegP_rdx_RegI_rule,
+  /*  263 */  _Binary_rdi_RegP_rdx_RegI_rule,
+  /*  264 */  _Binary_rsi_RegP_immI_rule,
+  /*  265 */  _Binary_rsi_RegP_rax_RegI_rule,
+  /*  266 */  _Binary_rdi_RegP_rsi_RegP_rule,
+  /*  267 */  _Binary_rbx_RegI_immU8_rule,
+  /*  268 */  _AndI_rRegI_immI_rule,
+  /*  269 */  _AndI_rRegI_rRegI_rule,
+  /*  270 */  _LoadP_memory__rule,
+  /*  271 */  _LoadN_memory__rule,
+  /*  272 */  _LoadNKlass_memory__rule,
+  /*  273 */  _AndL_rRegL_immL32_rule,
+  /*  274 */  _AndL_rRegL_rRegL_rule,
+  /*  275 */  _AndL__CastP2X_rRegP___LoadL_memory__rule,
+  /*  276 */  _AndL__LoadL_memory___CastP2X_rRegP__rule,
+  /*  277 */  _AndI__LoadUB_memory__immU7_rule,
+  /*  278 */  _AndI__LoadB_memory__immI8_rule,
+  /*  279 */  _Binary_rax_RegP_immP_rule,
+  /*  280 */  _ConvF2HF_regF__rule,
+  /*  281 */  _VectorCastF2HF_vec__rule,
+  /*  282 */  _LoadVector_memory__rule,
+  /*  283 */  _Binary_vec_kReg_rule,
+  /*  284 */  _Binary_rRegP_kReg_rule,
+  /*  285 */  _Binary_rRegP_vec_rule,
+  /*  286 */  _Binary_vec_vec_rule,
+  /*  287 */  _Binary_vec__Binary_vec_kReg_rule,
+  /*  288 */  _Binary_vec_rRegI_rule,
+  /*  289 */  _Binary_vec_rRegL_rule,
+  /*  290 */  _Binary_vec_regF_rule,
+  /*  291 */  _Binary_vec_regD_rule,
+  /*  292 */  _Binary_vec__LoadVector_memory__rule,
+  /*  293 */  _Binary_regD_immD_rule,
+  /*  294 */  _LShiftCntV_immI8__rule,
+  /*  295 */  _RShiftCntV_immI8__rule,
+  /*  296 */  _Binary_legVec_legVec_rule,
+  /*  297 */  _MulAddVS2VI_vec_vec_rule,
+  /*  298 */  _Binary_vec_immU8_rule,
+  /*  299 */  _Binary__LoadVector_memory__immU8_rule,
+  /*  300 */  _VectorStoreMask_vec_immI_rule,
+  /*  301 */  _Binary_vec_immI8_rule,
+  /*  302 */  _Binary_vec__LShiftCntV_immI8__rule,
+  /*  303 */  _Binary_vec__RShiftCntV_immI8__rule,
+  /*  304 */  _Binary__LoadVector_memory__kReg_rule,
+  /*  305 */  _Binary_immI8_kReg_rule,
+  /*  306 */  _MaskAll_immI_M1__rule,
+  /*  307 */  _Binary_immU8_kReg_rule,
+  /*  308 */  _Binary_vec__Binary_immU8_kReg_rule,
+  /*  309 */  _Binary_vec__Binary_vec__Binary_immU8_kReg_rule,
+  /*  310 */  _Binary_memory__Binary_immU8_kReg_rule,
+  /*  311 */  _Binary_vec__Binary_memory__Binary_immU8_kReg_rule,
+  /*  312 */  _ReinterpretHF2S_regF__rule,
+  /*  313 */  _VectorReinterpret__LoadVector_memory___rule,
+  /*  314 */  _Binary_vec__VectorReinterpret__LoadVector_memory___rule,
+  /*  315 */  _Binary_rax_RegP_no_rax_RegP_rule,
+  /*  316 */  _Binary_rRegL_immI_0_rule,
+  /*  317 */  _Binary_rRegL_immI_4_rule,
+  /*  318 */  _EncodeP_any_RegP__rule,
   // last internally defined operand
-  /*  316 */  storeSSI_rule,
-  /*  317 */  storeSSL_rule,
-  /*  318 */  storeSSP_rule,
-  /*  319 */  storeSSF_rule,
-  /*  320 */  storeSSD_rule,
-  /*  321 */  MoveF2VL_rule,
-  /*  322 */  MoveF2LEG_rule,
-  /*  323 */  MoveVL2F_rule,
-  /*  324 */  MoveLEG2F_rule,
-  /*  325 */  MoveD2VL_rule,
-  /*  326 */  MoveD2LEG_rule,
-  /*  327 */  MoveVL2D_rule,
-  /*  328 */  MoveLEG2D_rule,
-  /*  329 */  leaP8_rule,
-  /*  330 */  leaP32_rule,
-  /*  331 */  leaPIdxOff_rule,
-  /*  332 */  leaPIdxScale_rule,
-  /*  333 */  leaPPosIdxScale_rule,
-  /*  334 */  leaPIdxScaleOff_rule,
-  /*  335 */  leaPPosIdxOff_rule,
-  /*  336 */  leaPPosIdxScaleOff_rule,
-  /*  337 */  leaPCompressedOopOffset_rule,
-  /*  338 */  leaP8Narrow_rule,
-  /*  339 */  leaP32Narrow_rule,
-  /*  340 */  leaPIdxOffNarrow_rule,
-  /*  341 */  leaPIdxScaleNarrow_rule,
-  /*  342 */  leaPIdxScaleOffNarrow_rule,
-  /*  343 */  leaPPosIdxOffNarrow_rule,
-  /*  344 */  leaPPosIdxScaleOffNarrow_rule,
-  /*  345 */  loadConI_rule,
-  /*  346 */  loadConI0_rule,
-  /*  347 */  loadConL_rule,
-  /*  348 */  loadConL0_rule,
-  /*  349 */  loadConUL32_rule,
-  /*  350 */  loadConL32_rule,
-  /*  351 */  loadConP_rule,
-  /*  352 */  loadConP0_rule,
-  /*  353 */  loadConP31_rule,
-  /*  354 */  loadConF_rule,
-  /*  355 */  loadConH_rule,
-  /*  356 */  loadConN0_rule,
-  /*  357 */  loadConN_rule,
-  /*  358 */  loadConNKlass_rule,
-  /*  359 */  loadConF0_rule,
-  /*  360 */  loadConD_rule,
-  /*  361 */  loadConD0_rule,
-  /*  362 */  loadSSI_rule,
-  /*  363 */  loadSSL_rule,
-  /*  364 */  loadSSP_rule,
-  /*  365 */  loadSSF_rule,
-  /*  366 */  loadSSD_rule,
-  /*  367 */  MoveVec2Leg_rule,
-  /*  368 */  MoveLeg2Vec_rule,
-  /*  369 */  membar_volatile_rule,
-  /*  370 */  castX2P_rule,
-  /*  371 */  castP2X_rule,
-  /*  372 */  checkCastPP_rule,
-  /*  373 */  castPP_rule,
-  /*  374 */  castII_rule,
-  /*  375 */  castLL_rule,
-  /*  376 */  castFF_rule,
-  /*  377 */  castHH_rule,
-  /*  378 */  castDD_rule,
-  /*  379 */  cmpF_cc_reg_rule,
-  /*  380 */  cmpF_cc_reg_CF_rule,
-  /*  381 */  cmpF_cc_memCF_rule,
-  /*  382 */  cmpF_cc_immCF_rule,
-  /*  383 */  cmpD_cc_reg_rule,
-  /*  384 */  cmpD_cc_reg_CF_rule,
-  /*  385 */  cmpD_cc_memCF_rule,
-  /*  386 */  cmpD_cc_immCF_rule,
-  /*  387 */  MoveF2I_stack_reg_rule,
-  /*  388 */  MoveI2F_stack_reg_rule,
-  /*  389 */  MoveD2L_stack_reg_rule,
-  /*  390 */  MoveL2D_stack_reg_partial_rule,
-  /*  391 */  MoveL2D_stack_reg_rule,
-  /*  392 */  MoveF2I_reg_reg_rule,
-  /*  393 */  MoveD2L_reg_reg_rule,
-  /*  394 */  MoveI2F_reg_reg_rule,
-  /*  395 */  MoveL2D_reg_reg_rule,
-  /*  396 */  overflowAddI_rReg_rule,
-  /*  397 */  overflowAddI_rReg_imm_rule,
-  /*  398 */  overflowAddL_rReg_rule,
-  /*  399 */  overflowAddL_rReg_imm_rule,
-  /*  400 */  overflowSubI_rReg_rule,
-  /*  401 */  overflowSubI_rReg_imm_rule,
-  /*  402 */  overflowSubL_rReg_rule,
-  /*  403 */  overflowSubL_rReg_imm_rule,
-  /*  404 */  overflowNegI_rReg_rule,
-  /*  405 */  overflowNegL_rReg_rule,
-  /*  406 */  overflowMulI_rReg_rule,
-  /*  407 */  overflowMulI_rReg_imm_rule,
-  /*  408 */  overflowMulL_rReg_rule,
-  /*  409 */  overflowMulL_rReg_imm_rule,
-  /*  410 */  compI_rReg_rule,
-  /*  411 */  compI_rReg_imm_rule,
-  /*  412 */  compI_rReg_mem_rule,
-  /*  413 */  testI_reg_rule,
-  /*  414 */  testI_reg_imm_rule,
-  /*  415 */  testI_reg_reg_rule,
-  /*  416 */  testI_reg_mem_rule,
-  /*  417 */  testI_reg_mem_0_rule,
-  /*  418 */  compU_rReg_rule,
-  /*  419 */  compU_rReg_imm_rule,
-  /*  420 */  compU_rReg_mem_rule,
-  /*  421 */  testU_reg_rule,
-  /*  422 */  compP_rReg_rule,
-  /*  423 */  compP_rReg_mem_rule,
-  /*  424 */  compP_mem_rReg_rule,
-  /*  425 */  testP_reg_rule,
-  /*  426 */  testP_mem_rule,
-  /*  427 */  testP_mem_reg0_rule,
-  /*  428 */  compN_rReg_rule,
-  /*  429 */  compN_rReg_mem_rule,
-  /*  430 */  compN_rReg_imm_rule,
-  /*  431 */  compN_mem_imm_rule,
-  /*  432 */  compN_rReg_imm_klass_rule,
-  /*  433 */  compN_mem_imm_klass_rule,
-  /*  434 */  testN_reg_rule,
-  /*  435 */  testN_mem_rule,
-  /*  436 */  testN_mem_reg0_rule,
-  /*  437 */  compL_rReg_rule,
-  /*  438 */  compL_rReg_imm_rule,
-  /*  439 */  compL_rReg_mem_rule,
-  /*  440 */  testL_reg_rule,
-  /*  441 */  testL_reg_imm_rule,
-  /*  442 */  testL_reg_reg_rule,
-  /*  443 */  testL_reg_mem_rule,
-  /*  444 */  testL_reg_mem_0_rule,
-  /*  445 */  testL_reg_mem2_rule,
-  /*  446 */  testL_reg_mem2_0_rule,
-  /*  447 */  compUL_rReg_rule,
-  /*  448 */  compUL_rReg_imm_rule,
-  /*  449 */  compUL_rReg_mem_rule,
-  /*  450 */  testUL_reg_rule,
-  /*  451 */  compB_mem_imm_rule,
-  /*  452 */  testUB_mem_imm_rule,
-  /*  453 */  testB_mem_imm_rule,
-  /*  454 */  cmpFastLock_rule,
-  /*  455 */  cmpFastUnlock_rule,
-  /*  456 */  cmpFastLockLightweight_rule,
-  /*  457 */  cmpFastUnlockLightweight_rule,
-  /*  458 */  tlsLoadP_rule,
-  /*  459 */  absF_reg_rule,
-  /*  460 */  absF_reg_reg_rule,
-  /*  461 */  absD_reg_rule,
-  /*  462 */  absD_reg_reg_rule,
-  /*  463 */  negF_reg_rule,
-  /*  464 */  negF_reg_reg_rule,
-  /*  465 */  negD_reg_rule,
-  /*  466 */  negD_reg_reg_rule,
-  /*  467 */  vconvF2HF_rule,
-  /*  468 */  convHF2F_reg_reg_rule,
-  /*  469 */  vconvHF2F_reg_mem_rule,
-  /*  470 */  vconvHF2F_rule,
-  /*  471 */  reinterpret_mask_rule,
-  /*  472 */  reinterpret_rule,
-  /*  473 */  vreinterpret_expand4_rule,
-  /*  474 */  vreinterpret_expand_rule,
-  /*  475 */  reinterpret_shrink_rule,
-  /*  476 */  vReplB_reg_rule,
-  /*  477 */  ReplB_mem_rule,
-  /*  478 */  vReplS_reg_rule,
-  /*  479 */  ReplS_mem_rule,
-  /*  480 */  ReplI_reg_rule,
-  /*  481 */  ReplI_mem_rule,
-  /*  482 */  ReplI_imm_rule,
-  /*  483 */  ReplI_zero_rule,
-  /*  484 */  ReplI_M1_rule,
-  /*  485 */  ReplL_reg_rule,
-  /*  486 */  ReplL_mem_rule,
-  /*  487 */  ReplL_imm_rule,
-  /*  488 */  ReplL_zero_rule,
-  /*  489 */  ReplL_M1_rule,
-  /*  490 */  vReplF_reg_rule,
-  /*  491 */  ReplF_reg_rule,
-  /*  492 */  ReplF_mem_rule,
-  /*  493 */  ReplF_imm_rule,
-  /*  494 */  ReplF_zero_rule,
-  /*  495 */  vReplD_reg_rule,
-  /*  496 */  ReplD_reg_rule,
-  /*  497 */  ReplD_mem_rule,
-  /*  498 */  ReplD_imm_rule,
-  /*  499 */  ReplD_zero_rule,
-  /*  500 */  vsqrtF_reg_rule,
-  /*  501 */  vsqrtF_mem_rule,
-  /*  502 */  vsqrtD_reg_rule,
-  /*  503 */  vsqrtD_mem_rule,
-  /*  504 */  vshiftcnt_rule,
-  /*  505 */  vshiftcnt_0_rule,
-  /*  506 */  vcastBtoX_rule,
-  /*  507 */  vcastBtoD_rule,
-  /*  508 */  castStoX_rule,
-  /*  509 */  vcastStoX_evex_rule,
-  /*  510 */  castItoX_rule,
-  /*  511 */  vcastItoX_evex_rule,
-  /*  512 */  vcastLtoBS_rule,
-  /*  513 */  vcastLtoX_evex_rule,
-  /*  514 */  vcastFtoD_reg_rule,
-  /*  515 */  vcastDtoF_reg_rule,
-  /*  516 */  vucast_rule,
-  /*  517 */  vucast_0_rule,
-  /*  518 */  vucast_1_rule,
-  /*  519 */  vabsB_reg_rule,
-  /*  520 */  vabsS_reg_rule,
-  /*  521 */  vabsI_reg_rule,
-  /*  522 */  vabsL_reg_rule,
-  /*  523 */  vabsnegF_rule,
-  /*  524 */  vabsnegF_0_rule,
-  /*  525 */  vabsneg4F_rule,
-  /*  526 */  vabsneg4F_0_rule,
-  /*  527 */  vabsnegD_rule,
-  /*  528 */  vabsnegD_0_rule,
-  /*  529 */  vptest_lt16_rule,
-  /*  530 */  vptest_ge16_rule,
-  /*  531 */  ktest_alltrue_le8_rule,
-  /*  532 */  ktest_anytrue_le8_rule,
-  /*  533 */  ktest_ge8_rule,
-  /*  534 */  vmaskcast_evex_rule,
-  /*  535 */  vmaskcast_rule,
-  /*  536 */  vmaskcast_avx_rule,
-  /*  537 */  loadIotaIndices_rule,
-  /*  538 */  vpopcount_integral_reg_evex_rule,
-  /*  539 */  vpopcount_integral_reg_evex_0_rule,
-  /*  540 */  vcount_leading_zeros_IL_reg_evex_rule,
-  /*  541 */  long_to_mask_evex_rule,
-  /*  542 */  castMM_rule,
-  /*  543 */  castVV_rule,
-  /*  544 */  castVVLeg_rule,
-  /*  545 */  reinterpretS2HF_rule,
-  /*  546 */  convF2HFAndS2HF_rule,
-  /*  547 */  convHF2SAndHF2F_rule,
-  /*  548 */  reinterpretHF2S_rule,
-  /*  549 */  zLoadPNullCheck_rule,
-  /*  550 */  loadB_rule,
-  /*  551 */  loadB2L_rule,
-  /*  552 */  loadUB_rule,
-  /*  553 */  loadUB2L_rule,
-  /*  554 */  loadUB2L_immI_rule,
-  /*  555 */  loadS_rule,
-  /*  556 */  loadS2B_rule,
-  /*  557 */  loadS2L_rule,
-  /*  558 */  loadUS_rule,
-  /*  559 */  loadUS2B_rule,
-  /*  560 */  loadUS2L_rule,
-  /*  561 */  loadUS2L_immI_255_rule,
-  /*  562 */  loadUS2L_immI_rule,
-  /*  563 */  loadI_rule,
-  /*  564 */  loadI2B_rule,
-  /*  565 */  loadI2UB_rule,
-  /*  566 */  loadI2S_rule,
-  /*  567 */  loadI2US_rule,
-  /*  568 */  loadI2L_rule,
-  /*  569 */  loadI2L_immI_255_rule,
-  /*  570 */  loadI2L_immI_65535_rule,
-  /*  571 */  loadI2L_immU31_rule,
-  /*  572 */  loadUI2L_rule,
-  /*  573 */  loadL_rule,
-  /*  574 */  loadRange_rule,
-  /*  575 */  loadP_rule,
-  /*  576 */  loadN_rule,
-  /*  577 */  loadKlass_rule,
-  /*  578 */  loadNKlass_rule,
-  /*  579 */  loadNKlassCompactHeaders_rule,
-  /*  580 */  loadF_rule,
-  /*  581 */  loadD_partial_rule,
-  /*  582 */  loadD_rule,
-  /*  583 */  maxF_reg_rule,
-  /*  584 */  maxF_reduction_reg_rule,
-  /*  585 */  maxD_reg_rule,
-  /*  586 */  maxD_reduction_reg_rule,
-  /*  587 */  minF_reg_rule,
-  /*  588 */  minF_reduction_reg_rule,
-  /*  589 */  minD_reg_rule,
-  /*  590 */  minD_reduction_reg_rule,
-  /*  591 */  prefetchAlloc_rule,
-  /*  592 */  prefetchAllocNTA_rule,
-  /*  593 */  prefetchAllocT0_rule,
-  /*  594 */  prefetchAllocT2_rule,
-  /*  595 */  storeB_rule,
-  /*  596 */  storeC_rule,
-  /*  597 */  storeI_rule,
-  /*  598 */  storeL_rule,
-  /*  599 */  storeP_rule,
-  /*  600 */  storeImmP0_rule,
-  /*  601 */  storeImmP_rule,
-  /*  602 */  storeN_rule,
-  /*  603 */  storeNKlass_rule,
-  /*  604 */  storeImmN0_rule,
-  /*  605 */  storeImmN_rule,
-  /*  606 */  storeImmNKlass_rule,
-  /*  607 */  storeImmI0_rule,
-  /*  608 */  storeImmI_rule,
-  /*  609 */  storeImmL0_rule,
-  /*  610 */  storeImmL_rule,
-  /*  611 */  storeImmC0_rule,
-  /*  612 */  storeImmI16_rule,
-  /*  613 */  storeImmB0_rule,
-  /*  614 */  storeImmB_rule,
-  /*  615 */  storeF_rule,
-  /*  616 */  storeF0_rule,
-  /*  617 */  storeF_imm_rule,
-  /*  618 */  storeD_rule,
-  /*  619 */  storeD0_imm_rule,
-  /*  620 */  storeD0_rule,
-  /*  621 */  cacheWB_rule,
-  /*  622 */  cacheWBPreSync_rule,
-  /*  623 */  cacheWBPostSync_rule,
-  /*  624 */  bytes_reverse_int_rule,
-  /*  625 */  bytes_reverse_long_rule,
-  /*  626 */  bytes_reverse_unsigned_short_rule,
-  /*  627 */  bytes_reverse_short_rule,
-  /*  628 */  countLeadingZerosI_rule,
-  /*  629 */  countLeadingZerosI_mem_rule,
-  /*  630 */  countLeadingZerosI_bsr_rule,
-  /*  631 */  countLeadingZerosL_rule,
-  /*  632 */  countLeadingZerosL_mem_rule,
-  /*  633 */  countLeadingZerosL_bsr_rule,
-  /*  634 */  countTrailingZerosI_rule,
-  /*  635 */  countTrailingZerosI_mem_rule,
-  /*  636 */  countTrailingZerosI_bsf_rule,
-  /*  637 */  countTrailingZerosL_rule,
-  /*  638 */  countTrailingZerosL_mem_rule,
-  /*  639 */  countTrailingZerosL_bsf_rule,
-  /*  640 */  bytes_reversebit_int_rule,
-  /*  641 */  bytes_reversebit_int_gfni_rule,
-  /*  642 */  bytes_reversebit_long_rule,
-  /*  643 */  bytes_reversebit_long_gfni_rule,
-  /*  644 */  popCountI_rule,
-  /*  645 */  popCountI_mem_rule,
-  /*  646 */  popCountL_rule,
-  /*  647 */  popCountL_mem_rule,
-  /*  648 */  membar_acquire_rule,
-  /*  649 */  membar_acquire_0_rule,
-  /*  650 */  membar_acquire_lock_rule,
-  /*  651 */  membar_release_rule,
-  /*  652 */  membar_release_0_rule,
-  /*  653 */  membar_release_lock_rule,
-  /*  654 */  unnecessary_membar_volatile_rule,
-  /*  655 */  membar_storestore_rule,
-  /*  656 */  membar_storestore_0_rule,
-  /*  657 */  convP2I_rule,
-  /*  658 */  convN2I_rule,
-  /*  659 */  encodeHeapOop_rule,
-  /*  660 */  encodeHeapOop_not_null_rule,
-  /*  661 */  decodeHeapOop_rule,
-  /*  662 */  decodeHeapOop_not_null_rule,
-  /*  663 */  encodeKlass_not_null_rule,
-  /*  664 */  decodeKlass_not_null_rule,
-  /*  665 */  jumpXtnd_offset_rule,
-  /*  666 */  jumpXtnd_addr_rule,
-  /*  667 */  jumpXtnd_rule,
-  /*  668 */  cmovI_imm_01_rule,
-  /*  669 */  cmovI_reg_rule,
-  /*  670 */  cmovI_imm_01U_rule,
-  /*  671 */  cmovI_regU_rule,
-  /*  672 */  cmovI_imm_01UCF_rule,
-  /*  673 */  cmovI_regUCF_rule,
-  /*  674 */  cmovI_regUCF2_ne_rule,
-  /*  675 */  cmovI_regUCF2_eq_rule,
-  /*  676 */  cmovI_mem_rule,
-  /*  677 */  cmovI_memU_rule,
-  /*  678 */  cmovI_memUCF_rule,
-  /*  679 */  cmovN_reg_rule,
-  /*  680 */  cmovN_regU_rule,
-  /*  681 */  cmovN_regUCF_rule,
-  /*  682 */  cmovN_regUCF2_ne_rule,
-  /*  683 */  cmovN_regUCF2_eq_rule,
-  /*  684 */  cmovP_reg_rule,
-  /*  685 */  cmovP_regU_rule,
-  /*  686 */  cmovP_regUCF_rule,
-  /*  687 */  cmovP_regUCF2_ne_rule,
-  /*  688 */  cmovP_regUCF2_eq_rule,
-  /*  689 */  cmovL_imm_01_rule,
-  /*  690 */  cmovL_reg_rule,
-  /*  691 */  cmovL_mem_rule,
-  /*  692 */  cmovL_imm_01U_rule,
-  /*  693 */  cmovL_regU_rule,
-  /*  694 */  cmovL_imm_01UCF_rule,
-  /*  695 */  cmovL_regUCF_rule,
-  /*  696 */  cmovL_regUCF2_ne_rule,
-  /*  697 */  cmovL_regUCF2_eq_rule,
-  /*  698 */  cmovL_memU_rule,
-  /*  699 */  cmovL_memUCF_rule,
-  /*  700 */  cmovF_reg_rule,
-  /*  701 */  cmovF_regU_rule,
-  /*  702 */  cmovF_regUCF_rule,
-  /*  703 */  cmovD_reg_rule,
-  /*  704 */  cmovD_regU_rule,
-  /*  705 */  cmovD_regUCF_rule,
-  /*  706 */  addI_rReg_rule,
-  /*  707 */  addI_rReg_imm_rule,
-  /*  708 */  addI_rReg_mem_rule,
-  /*  709 */  addI_rReg_mem_0_rule,
-  /*  710 */  addI_mem_rReg_rule,
-  /*  711 */  addI_mem_rReg_0_rule,
-  /*  712 */  addI_mem_imm_rule,
-  /*  713 */  incI_rReg_rule,
-  /*  714 */  incI_mem_rule,
-  /*  715 */  decI_rReg_rule,
-  /*  716 */  decI_mem_rule,
-  /*  717 */  leaI_rReg_immI2_immI_rule,
-  /*  718 */  leaI_rReg_rReg_immI_rule,
-  /*  719 */  leaI_rReg_rReg_immI2_rule,
-  /*  720 */  leaI_rReg_rReg_immI2_0_rule,
-  /*  721 */  leaI_rReg_rReg_immI2_immI_rule,
-  /*  722 */  leaI_rReg_rReg_immI2_immI_0_rule,
-  /*  723 */  addL_rReg_rule,
-  /*  724 */  addL_rReg_imm_rule,
-  /*  725 */  addL_rReg_mem_rule,
-  /*  726 */  addL_rReg_mem_0_rule,
-  /*  727 */  addL_mem_rReg_rule,
-  /*  728 */  addL_mem_rReg_0_rule,
-  /*  729 */  addL_mem_imm_rule,
-  /*  730 */  incL_rReg_rule,
-  /*  731 */  incL_mem_rule,
-  /*  732 */  decL_rReg_rule,
-  /*  733 */  decL_mem_rule,
-  /*  734 */  leaL_rReg_immI2_immL32_rule,
-  /*  735 */  leaL_rReg_rReg_immL32_rule,
-  /*  736 */  leaL_rReg_rReg_immI2_rule,
-  /*  737 */  leaL_rReg_rReg_immI2_0_rule,
-  /*  738 */  leaL_rReg_rReg_immI2_immL32_rule,
-  /*  739 */  leaL_rReg_rReg_immI2_immL32_0_rule,
-  /*  740 */  addP_rReg_rule,
-  /*  741 */  addP_rReg_imm_rule,
-  /*  742 */  compareAndSwapP_rule,
-  /*  743 */  compareAndSwapP_0_rule,
-  /*  744 */  compareAndSwapL_rule,
-  /*  745 */  compareAndSwapL_0_rule,
-  /*  746 */  compareAndSwapI_rule,
-  /*  747 */  compareAndSwapI_0_rule,
-  /*  748 */  compareAndSwapB_rule,
-  /*  749 */  compareAndSwapB_0_rule,
-  /*  750 */  compareAndSwapS_rule,
-  /*  751 */  compareAndSwapS_0_rule,
-  /*  752 */  compareAndSwapN_rule,
-  /*  753 */  compareAndSwapN_0_rule,
-  /*  754 */  compareAndExchangeB_rule,
-  /*  755 */  compareAndExchangeS_rule,
-  /*  756 */  compareAndExchangeI_rule,
-  /*  757 */  compareAndExchangeL_rule,
-  /*  758 */  compareAndExchangeN_rule,
-  /*  759 */  compareAndExchangeP_rule,
-  /*  760 */  xaddB_reg_no_res_rule,
-  /*  761 */  xaddB_imm_no_res_rule,
-  /*  762 */  xaddB_rule,
-  /*  763 */  xaddS_reg_no_res_rule,
-  /*  764 */  xaddS_imm_no_res_rule,
-  /*  765 */  xaddS_rule,
-  /*  766 */  xaddI_reg_no_res_rule,
-  /*  767 */  xaddI_imm_no_res_rule,
-  /*  768 */  xaddI_rule,
-  /*  769 */  xaddL_reg_no_res_rule,
-  /*  770 */  xaddL_imm_no_res_rule,
-  /*  771 */  xaddL_rule,
-  /*  772 */  xchgB_rule,
-  /*  773 */  xchgS_rule,
-  /*  774 */  xchgI_rule,
-  /*  775 */  xchgL_rule,
-  /*  776 */  xchgP_rule,
-  /*  777 */  xchgN_rule,
-  /*  778 */  absI_rReg_rule,
-  /*  779 */  absL_rReg_rule,
-  /*  780 */  subI_rReg_rule,
-  /*  781 */  subI_rReg_mem_rule,
-  /*  782 */  subI_mem_rReg_rule,
-  /*  783 */  subL_rReg_rule,
-  /*  784 */  subL_rReg_mem_rule,
-  /*  785 */  subL_mem_rReg_rule,
-  /*  786 */  subP_rReg_rule,
-  /*  787 */  negI_rReg_rule,
-  /*  788 */  negI_rReg_2_rule,
-  /*  789 */  negI_mem_rule,
-  /*  790 */  negL_rReg_rule,
-  /*  791 */  negL_rReg_2_rule,
-  /*  792 */  negL_mem_rule,
-  /*  793 */  mulI_rReg_rule,
-  /*  794 */  mulI_rReg_imm_rule,
-  /*  795 */  mulI_mem_rule,
-  /*  796 */  mulI_mem_0_rule,
-  /*  797 */  mulI_mem_imm_rule,
-  /*  798 */  mulAddS2I_rReg_rule,
-  /*  799 */  mulL_rReg_rule,
-  /*  800 */  mulL_rReg_imm_rule,
-  /*  801 */  mulL_mem_rule,
-  /*  802 */  mulL_mem_0_rule,
-  /*  803 */  mulL_mem_imm_rule,
-  /*  804 */  mulHiL_rReg_rule,
-  /*  805 */  umulHiL_rReg_rule,
-  /*  806 */  divI_rReg_rule,
-  /*  807 */  divL_rReg_rule,
-  /*  808 */  udivI_rReg_rule,
-  /*  809 */  udivL_rReg_rule,
-  /*  810 */  divModI_rReg_divmod_rule,
-  /*  811 */  divModL_rReg_divmod_rule,
-  /*  812 */  udivModI_rReg_divmod_rule,
-  /*  813 */  udivModL_rReg_divmod_rule,
-  /*  814 */  modI_rReg_rule,
-  /*  815 */  modL_rReg_rule,
-  /*  816 */  umodI_rReg_rule,
-  /*  817 */  umodL_rReg_rule,
-  /*  818 */  salI_rReg_immI2_rule,
-  /*  819 */  salI_rReg_imm_rule,
-  /*  820 */  salI_mem_imm_rule,
-  /*  821 */  salI_rReg_CL_rule,
-  /*  822 */  salI_mem_CL_rule,
-  /*  823 */  salI_rReg_rReg_rule,
-  /*  824 */  salI_mem_rReg_rule,
-  /*  825 */  sarI_rReg_imm_rule,
-  /*  826 */  sarI_mem_imm_rule,
-  /*  827 */  sarI_rReg_CL_rule,
-  /*  828 */  sarI_mem_CL_rule,
-  /*  829 */  sarI_rReg_rReg_rule,
-  /*  830 */  sarI_mem_rReg_rule,
-  /*  831 */  shrI_rReg_imm_rule,
-  /*  832 */  shrI_mem_imm_rule,
-  /*  833 */  shrI_rReg_CL_rule,
-  /*  834 */  shrI_mem_CL_rule,
-  /*  835 */  shrI_rReg_rReg_rule,
-  /*  836 */  shrI_mem_rReg_rule,
-  /*  837 */  salL_rReg_immI2_rule,
-  /*  838 */  salL_rReg_imm_rule,
-  /*  839 */  salL_mem_imm_rule,
-  /*  840 */  salL_rReg_CL_rule,
-  /*  841 */  salL_mem_CL_rule,
-  /*  842 */  salL_rReg_rReg_rule,
-  /*  843 */  salL_mem_rReg_rule,
-  /*  844 */  sarL_rReg_imm_rule,
-  /*  845 */  sarL_mem_imm_rule,
-  /*  846 */  sarL_rReg_CL_rule,
-  /*  847 */  sarL_mem_CL_rule,
-  /*  848 */  sarL_rReg_rReg_rule,
-  /*  849 */  sarL_mem_rReg_rule,
-  /*  850 */  shrL_rReg_imm_rule,
-  /*  851 */  shrL_mem_imm_rule,
-  /*  852 */  shrL_rReg_CL_rule,
-  /*  853 */  shrL_mem_CL_rule,
-  /*  854 */  shrL_rReg_rReg_rule,
-  /*  855 */  shrL_mem_rReg_rule,
-  /*  856 */  i2b_rule,
-  /*  857 */  i2s_rule,
-  /*  858 */  rolI_immI8_legacy_rule,
-  /*  859 */  rolI_immI8_rule,
-  /*  860 */  rolI_mem_immI8_rule,
-  /*  861 */  rolI_rReg_Var_rule,
-  /*  862 */  rorI_immI8_legacy_rule,
-  /*  863 */  rorI_immI8_rule,
-  /*  864 */  rorI_mem_immI8_rule,
-  /*  865 */  rorI_rReg_Var_rule,
-  /*  866 */  rolL_immI8_legacy_rule,
-  /*  867 */  rolL_immI8_rule,
-  /*  868 */  rolL_mem_immI8_rule,
-  /*  869 */  rolL_rReg_Var_rule,
-  /*  870 */  rorL_immI8_legacy_rule,
-  /*  871 */  rorL_immI8_rule,
-  /*  872 */  rorL_mem_immI8_rule,
-  /*  873 */  rorL_rReg_Var_rule,
-  /*  874 */  compressBitsL_reg_rule,
-  /*  875 */  expandBitsL_reg_rule,
-  /*  876 */  compressBitsL_mem_rule,
-  /*  877 */  expandBitsL_mem_rule,
-  /*  878 */  andI_rReg_rule,
-  /*  879 */  andI_rReg_imm255_rule,
-  /*  880 */  andI2L_rReg_imm255_rule,
-  /*  881 */  andI_rReg_imm65535_rule,
-  /*  882 */  andI2L_rReg_imm65535_rule,
-  /*  883 */  convI2LAndI_reg_immIbitmask_rule,
-  /*  884 */  andI_rReg_imm_rule,
-  /*  885 */  andI_rReg_mem_rule,
-  /*  886 */  andI_rReg_mem_0_rule,
-  /*  887 */  andB_mem_rReg_rule,
-  /*  888 */  andB_mem_rReg_0_rule,
-  /*  889 */  andI_mem_rReg_rule,
-  /*  890 */  andI_mem_rReg_0_rule,
-  /*  891 */  andI_mem_imm_rule,
-  /*  892 */  andnI_rReg_rReg_mem_rule,
-  /*  893 */  andnI_rReg_rReg_mem_0_rule,
-  /*  894 */  andnI_rReg_rReg_rReg_rule,
-  /*  895 */  andnI_rReg_rReg_rReg_0_rule,
-  /*  896 */  blsiI_rReg_rReg_rule,
-  /*  897 */  blsiI_rReg_rReg_0_rule,
-  /*  898 */  blsiI_rReg_mem_rule,
-  /*  899 */  blsiI_rReg_mem_0_rule,
-  /*  900 */  blsmskI_rReg_mem_rule,
-  /*  901 */  blsmskI_rReg_mem_0_rule,
-  /*  902 */  blsmskI_rReg_rReg_rule,
-  /*  903 */  blsmskI_rReg_rReg_0_rule,
-  /*  904 */  blsrI_rReg_rReg_rule,
-  /*  905 */  blsrI_rReg_rReg_0_rule,
-  /*  906 */  blsrI_rReg_mem_rule,
-  /*  907 */  blsrI_rReg_mem_0_rule,
-  /*  908 */  orI_rReg_rule,
-  /*  909 */  orI_rReg_imm_rule,
-  /*  910 */  orI_rReg_mem_rule,
-  /*  911 */  orI_rReg_mem_0_rule,
-  /*  912 */  orB_mem_rReg_rule,
-  /*  913 */  orB_mem_rReg_0_rule,
-  /*  914 */  orI_mem_rReg_rule,
-  /*  915 */  orI_mem_rReg_0_rule,
-  /*  916 */  orI_mem_imm_rule,
-  /*  917 */  xorI_rReg_rule,
-  /*  918 */  xorI_rReg_im1_rule,
-  /*  919 */  xorI_rReg_imm_rule,
-  /*  920 */  xorI_rReg_mem_rule,
-  /*  921 */  xorI_rReg_mem_0_rule,
-  /*  922 */  xorB_mem_rReg_rule,
-  /*  923 */  xorB_mem_rReg_0_rule,
-  /*  924 */  xorI_mem_rReg_rule,
-  /*  925 */  xorI_mem_rReg_0_rule,
-  /*  926 */  xorI_mem_imm_rule,
-  /*  927 */  andL_rReg_rule,
-  /*  928 */  andL_rReg_imm255_rule,
-  /*  929 */  andL_rReg_imm65535_rule,
-  /*  930 */  andL_rReg_imm_rule,
-  /*  931 */  andL_rReg_mem_rule,
-  /*  932 */  andL_rReg_mem_0_rule,
-  /*  933 */  andL_mem_rReg_rule,
-  /*  934 */  andL_mem_rReg_0_rule,
-  /*  935 */  andL_mem_imm_rule,
-  /*  936 */  btrL_mem_imm_rule,
-  /*  937 */  andnL_rReg_rReg_mem_rule,
-  /*  938 */  andnL_rReg_rReg_mem_0_rule,
-  /*  939 */  andnL_rReg_rReg_rReg_rule,
-  /*  940 */  andnL_rReg_rReg_rReg_0_rule,
-  /*  941 */  blsiL_rReg_rReg_rule,
-  /*  942 */  blsiL_rReg_rReg_0_rule,
-  /*  943 */  blsiL_rReg_mem_rule,
-  /*  944 */  blsiL_rReg_mem_0_rule,
-  /*  945 */  blsmskL_rReg_mem_rule,
-  /*  946 */  blsmskL_rReg_rReg_rule,
-  /*  947 */  blsrL_rReg_rReg_rule,
-  /*  948 */  blsrL_rReg_rReg_0_rule,
-  /*  949 */  blsrL_rReg_mem_rule,
-  /*  950 */  blsrL_rReg_mem_0_rule,
-  /*  951 */  orL_rReg_rule,
-  /*  952 */  orL_rReg_castP2X_rule,
-  /*  953 */  orL_rReg_castP2X_0_rule,
-  /*  954 */  orL_rReg_imm_rule,
-  /*  955 */  orL_rReg_mem_rule,
-  /*  956 */  orL_rReg_mem_0_rule,
-  /*  957 */  orL_mem_rReg_rule,
-  /*  958 */  orL_mem_rReg_0_rule,
-  /*  959 */  orL_mem_imm_rule,
-  /*  960 */  btsL_mem_imm_rule,
-  /*  961 */  xorL_rReg_rule,
-  /*  962 */  xorL_rReg_im1_rule,
-  /*  963 */  xorL_rReg_imm_rule,
-  /*  964 */  xorL_rReg_mem_rule,
-  /*  965 */  xorL_mem_rReg_rule,
-  /*  966 */  xorL_mem_imm_rule,
-  /*  967 */  cmpLTMask_rule,
-  /*  968 */  cmpLTMask0_rule,
-  /*  969 */  cadd_cmpLTMask_rule,
-  /*  970 */  cadd_cmpLTMask_1_rule,
-  /*  971 */  cadd_cmpLTMask_0_rule,
-  /*  972 */  cadd_cmpLTMask_2_rule,
-  /*  973 */  and_cmpLTMask_rule,
-  /*  974 */  and_cmpLTMask_0_rule,
-  /*  975 */  cmpF_reg_rule,
-  /*  976 */  cmpF_mem_rule,
-  /*  977 */  cmpF_imm_rule,
-  /*  978 */  cmpD_reg_rule,
-  /*  979 */  cmpD_mem_rule,
-  /*  980 */  cmpD_imm_rule,
-  /*  981 */  convF2D_reg_reg_rule,
-  /*  982 */  convF2D_reg_mem_rule,
-  /*  983 */  convD2F_reg_reg_rule,
-  /*  984 */  convD2F_reg_mem_rule,
-  /*  985 */  convF2I_reg_reg_rule,
-  /*  986 */  convF2L_reg_reg_rule,
-  /*  987 */  convD2I_reg_reg_rule,
-  /*  988 */  convD2L_reg_reg_rule,
-  /*  989 */  round_double_reg_rule,
-  /*  990 */  round_float_reg_rule,
-  /*  991 */  convI2F_reg_reg_rule,
-  /*  992 */  convI2F_reg_mem_rule,
-  /*  993 */  convI2D_reg_reg_rule,
-  /*  994 */  convI2D_reg_mem_rule,
-  /*  995 */  convXI2F_reg_rule,
-  /*  996 */  convXI2D_reg_rule,
-  /*  997 */  convL2F_reg_reg_rule,
-  /*  998 */  convL2F_reg_mem_rule,
-  /*  999 */  convL2D_reg_reg_rule,
-  /* 1000 */  convL2D_reg_mem_rule,
-  /* 1001 */  convI2L_reg_reg_rule,
-  /* 1002 */  convI2L_reg_reg_zex_rule,
-  /* 1003 */  convI2L_reg_mem_zex_rule,
-  /* 1004 */  zerox_long_reg_reg_rule,
-  /* 1005 */  convL2I_reg_reg_rule,
-  /* 1006 */  MoveF2I_reg_stack_rule,
-  /* 1007 */  MoveI2F_reg_stack_rule,
-  /* 1008 */  MoveD2L_reg_stack_rule,
-  /* 1009 */  MoveL2D_reg_stack_rule,
-  /* 1010 */  rep_stos_rule,
-  /* 1011 */  rep_stos_evex_rule,
-  /* 1012 */  rep_stos_large_rule,
-  /* 1013 */  rep_stos_large_evex_rule,
-  /* 1014 */  rep_stos_im_rule,
-  /* 1015 */  string_compareL_rule,
-  /* 1016 */  string_compareL_evex_rule,
-  /* 1017 */  string_compareU_rule,
-  /* 1018 */  string_compareU_evex_rule,
-  /* 1019 */  string_compareLU_rule,
-  /* 1020 */  string_compareLU_evex_rule,
-  /* 1021 */  string_compareUL_rule,
-  /* 1022 */  string_compareUL_evex_rule,
-  /* 1023 */  string_indexof_conL_rule,
-  /* 1024 */  string_indexof_conU_rule,
-  /* 1025 */  string_indexof_conUL_rule,
-  /* 1026 */  string_indexofL_rule,
-  /* 1027 */  string_indexofU_rule,
-  /* 1028 */  string_indexofUL_rule,
-  /* 1029 */  string_indexof_char_rule,
-  /* 1030 */  stringL_indexof_char_rule,
-  /* 1031 */  string_equals_rule,
-  /* 1032 */  string_equals_evex_rule,
-  /* 1033 */  array_equalsB_rule,
-  /* 1034 */  array_equalsB_evex_rule,
-  /* 1035 */  array_equalsC_rule,
-  /* 1036 */  array_equalsC_evex_rule,
-  /* 1037 */  arrays_hashcode_rule,
-  /* 1038 */  count_positives_rule,
-  /* 1039 */  count_positives_evex_rule,
-  /* 1040 */  string_compress_rule,
-  /* 1041 */  string_compress_evex_rule,
-  /* 1042 */  string_inflate_rule,
-  /* 1043 */  string_inflate_evex_rule,
-  /* 1044 */  encode_iso_array_rule,
-  /* 1045 */  encode_ascii_array_rule,
-  /* 1046 */  cmpU3_reg_reg_rule,
-  /* 1047 */  cmpL3_reg_reg_rule,
-  /* 1048 */  cmpUL3_reg_reg_rule,
-  /* 1049 */  cmovI_reg_g_rule,
-  /* 1050 */  minI_rReg_rule,
-  /* 1051 */  cmovI_reg_l_rule,
-  /* 1052 */  maxI_rReg_rule,
-  /* 1053 */  jmpDir_rule,
-  /* 1054 */  jmpCon_rule,
-  /* 1055 */  jmpLoopEnd_rule,
-  /* 1056 */  jmpConU_rule,
-  /* 1057 */  jmpConUCF_rule,
-  /* 1058 */  jmpConUCF2_rule,
-  /* 1059 */  partialSubtypeCheck_rule,
-  /* 1060 */  partialSubtypeCheckVarSuper_rule,
-  /* 1061 */  partialSubtypeCheckConstSuper_rule,
-  /* 1062 */  jmpDir_short_rule,
-  /* 1063 */  jmpCon_short_rule,
-  /* 1064 */  jmpLoopEnd_short_rule,
-  /* 1065 */  jmpConU_short_rule,
-  /* 1066 */  jmpConUCF_short_rule,
-  /* 1067 */  jmpConUCF2_short_rule,
-  /* 1068 */  safePoint_poll_tls_rule,
-  /* 1069 */  mask_all_evexL_rule,
-  /* 1070 */  mask_all_evexI_GT32_rule,
-  /* 1071 */  CallStaticJavaDirect_rule,
-  /* 1072 */  CallDynamicJavaDirect_rule,
-  /* 1073 */  CallRuntimeDirect_rule,
-  /* 1074 */  CallLeafDirect_rule,
-  /* 1075 */  CallLeafDirectVector_rule,
-  /* 1076 */  CallLeafNoFPDirect_rule,
-  /* 1077 */  Ret_rule,
-  /* 1078 */  TailCalljmpInd_rule,
-  /* 1079 */  tailjmpInd_rule,
-  /* 1080 */  ForwardExceptionjmp_rule,
-  /* 1081 */  CreateException_rule,
-  /* 1082 */  RethrowException_rule,
-  /* 1083 */  leaI_rReg_rReg_peep_rule,
-  /* 1084 */  leaI_rReg_immI_peep_rule,
-  /* 1085 */  leaI_rReg_immI2_peep_rule,
-  /* 1086 */  leaL_rReg_rReg_peep_rule,
-  /* 1087 */  leaL_rReg_immL32_peep_rule,
-  /* 1088 */  leaL_rReg_immI2_peep_rule,
-  /* 1089 */  ShouldNotReachHere_rule,
-  /* 1090 */  addF_reg_rule,
-  /* 1091 */  addF_mem_rule,
-  /* 1092 */  addF_mem_0_rule,
-  /* 1093 */  addF_imm_rule,
-  /* 1094 */  addF_reg_reg_rule,
-  /* 1095 */  addF_reg_mem_rule,
-  /* 1096 */  addF_reg_mem_0_rule,
-  /* 1097 */  addF_reg_imm_rule,
-  /* 1098 */  addD_reg_rule,
-  /* 1099 */  addD_mem_rule,
-  /* 1100 */  addD_mem_0_rule,
-  /* 1101 */  addD_imm_rule,
-  /* 1102 */  addD_reg_reg_rule,
-  /* 1103 */  addD_reg_mem_rule,
-  /* 1104 */  addD_reg_mem_0_rule,
-  /* 1105 */  addD_reg_imm_rule,
-  /* 1106 */  subF_reg_rule,
-  /* 1107 */  subF_mem_rule,
-  /* 1108 */  subF_imm_rule,
-  /* 1109 */  subF_reg_reg_rule,
-  /* 1110 */  subF_reg_mem_rule,
-  /* 1111 */  subF_reg_imm_rule,
-  /* 1112 */  subD_reg_rule,
-  /* 1113 */  subD_mem_rule,
-  /* 1114 */  subD_imm_rule,
-  /* 1115 */  subD_reg_reg_rule,
-  /* 1116 */  subD_reg_mem_rule,
-  /* 1117 */  subD_reg_imm_rule,
-  /* 1118 */  mulF_reg_rule,
-  /* 1119 */  mulF_mem_rule,
-  /* 1120 */  mulF_mem_0_rule,
-  /* 1121 */  mulF_imm_rule,
-  /* 1122 */  mulF_reg_reg_rule,
-  /* 1123 */  mulF_reg_mem_rule,
-  /* 1124 */  mulF_reg_mem_0_rule,
-  /* 1125 */  mulF_reg_imm_rule,
-  /* 1126 */  mulD_reg_rule,
-  /* 1127 */  mulD_mem_rule,
-  /* 1128 */  mulD_mem_0_rule,
-  /* 1129 */  mulD_imm_rule,
-  /* 1130 */  mulD_reg_reg_rule,
-  /* 1131 */  mulD_reg_mem_rule,
-  /* 1132 */  mulD_reg_mem_0_rule,
-  /* 1133 */  mulD_reg_imm_rule,
-  /* 1134 */  divF_reg_rule,
-  /* 1135 */  divF_mem_rule,
-  /* 1136 */  divF_imm_rule,
-  /* 1137 */  divF_reg_reg_rule,
-  /* 1138 */  divF_reg_mem_rule,
-  /* 1139 */  divF_reg_imm_rule,
-  /* 1140 */  divD_reg_rule,
-  /* 1141 */  divD_mem_rule,
-  /* 1142 */  divD_imm_rule,
-  /* 1143 */  divD_reg_reg_rule,
-  /* 1144 */  divD_reg_mem_rule,
-  /* 1145 */  divD_reg_imm_rule,
-  /* 1146 */  sqrtF_reg_rule,
-  /* 1147 */  sqrtD_reg_rule,
-  /* 1148 */  convF2HF_reg_reg_rule,
-  /* 1149 */  convF2HF_mem_reg_rule,
-  /* 1150 */  vconvF2HF_mem_reg_rule,
-  /* 1151 */  reinterpret_mask_W2B_rule,
-  /* 1152 */  reinterpret_mask_D2B_rule,
-  /* 1153 */  reinterpret_mask_Q2B_rule,
-  /* 1154 */  reinterpret_expand_rule,
-  /* 1155 */  roundD_reg_rule,
-  /* 1156 */  roundD_imm_rule,
-  /* 1157 */  vroundD_reg_rule,
-  /* 1158 */  vround8D_reg_rule,
-  /* 1159 */  vroundD_mem_rule,
-  /* 1160 */  vround8D_mem_rule,
-  /* 1161 */  onspinwait_rule,
-  /* 1162 */  fmaD_reg_rule,
-  /* 1163 */  fmaF_reg_rule,
-  /* 1164 */  loadV_rule,
-  /* 1165 */  storeV_rule,
-  /* 1166 */  gather_rule,
-  /* 1167 */  evgather_rule,
-  /* 1168 */  evgather_masked_rule,
-  /* 1169 */  vgather_subwordLE8B_rule,
-  /* 1170 */  vgather_subwordGT8B_rule,
-  /* 1171 */  vgather_subwordLE8B_off_rule,
-  /* 1172 */  vgather_subwordGT8B_off_rule,
-  /* 1173 */  vgather_masked_subwordLE8B_avx3_rule,
-  /* 1174 */  vgather_masked_subwordGT8B_avx3_rule,
-  /* 1175 */  vgather_masked_subwordLE8B_off_avx3_rule,
-  /* 1176 */  vgather_masked_subwordGT8B_off_avx3_rule,
-  /* 1177 */  vgather_masked_subwordLE8B_avx2_rule,
-  /* 1178 */  vgather_masked_subwordGT8B_avx2_rule,
-  /* 1179 */  vgather_masked_subwordLE8B_off_avx2_rule,
-  /* 1180 */  vgather_masked_subwordGT8B_off_avx2_rule,
-  /* 1181 */  scatter_rule,
-  /* 1182 */  scatter_masked_rule,
-  /* 1183 */  ReplHF_imm_rule,
-  /* 1184 */  ReplHF_reg_rule,
-  /* 1185 */  insert_rule,
-  /* 1186 */  insert32_rule,
-  /* 1187 */  insert64_rule,
-  /* 1188 */  insert2L_rule,
-  /* 1189 */  insert4L_rule,
-  /* 1190 */  insert8L_rule,
-  /* 1191 */  insertF_rule,
-  /* 1192 */  vinsertF_rule,
-  /* 1193 */  insert2D_rule,
-  /* 1194 */  insert4D_rule,
-  /* 1195 */  insert8D_rule,
-  /* 1196 */  reductionI_rule,
-  /* 1197 */  reductionI_0_rule,
-  /* 1198 */  reductionI_1_rule,
-  /* 1199 */  reductionI_2_rule,
-  /* 1200 */  reductionI_3_rule,
-  /* 1201 */  reductionI_4_rule,
-  /* 1202 */  reductionI_5_rule,
-  /* 1203 */  reductionL_rule,
-  /* 1204 */  reductionL_0_rule,
-  /* 1205 */  reductionL_1_rule,
-  /* 1206 */  reductionL_2_rule,
-  /* 1207 */  reductionL_3_rule,
-  /* 1208 */  reductionL_4_rule,
-  /* 1209 */  reductionL_5_rule,
-  /* 1210 */  reductionL_avx512dq_rule,
-  /* 1211 */  reductionL_avx512dq_0_rule,
-  /* 1212 */  reductionL_avx512dq_1_rule,
-  /* 1213 */  reductionL_avx512dq_2_rule,
-  /* 1214 */  reductionL_avx512dq_3_rule,
-  /* 1215 */  reductionL_avx512dq_4_rule,
-  /* 1216 */  reductionL_avx512dq_5_rule,
-  /* 1217 */  reductionF128_rule,
-  /* 1218 */  reductionF128_0_rule,
-  /* 1219 */  reduction8F_rule,
-  /* 1220 */  reduction8F_0_rule,
-  /* 1221 */  reduction16F_rule,
-  /* 1222 */  reduction16F_0_rule,
-  /* 1223 */  unordered_reduction2F_rule,
-  /* 1224 */  unordered_reduction2F_0_rule,
-  /* 1225 */  unordered_reduction4F_rule,
-  /* 1226 */  unordered_reduction4F_0_rule,
-  /* 1227 */  unordered_reduction8F_rule,
-  /* 1228 */  unordered_reduction8F_0_rule,
-  /* 1229 */  unordered_reduction16F_rule,
-  /* 1230 */  unordered_reduction16F_0_rule,
-  /* 1231 */  reduction2D_rule,
-  /* 1232 */  reduction2D_0_rule,
-  /* 1233 */  reduction4D_rule,
-  /* 1234 */  reduction4D_0_rule,
-  /* 1235 */  reduction8D_rule,
-  /* 1236 */  reduction8D_0_rule,
-  /* 1237 */  unordered_reduction2D_rule,
-  /* 1238 */  unordered_reduction2D_0_rule,
-  /* 1239 */  unordered_reduction4D_rule,
-  /* 1240 */  unordered_reduction4D_0_rule,
-  /* 1241 */  unordered_reduction8D_rule,
-  /* 1242 */  unordered_reduction8D_0_rule,
-  /* 1243 */  reductionB_rule,
-  /* 1244 */  reductionB_0_rule,
-  /* 1245 */  reductionB_1_rule,
-  /* 1246 */  reductionB_2_rule,
-  /* 1247 */  reductionB_3_rule,
-  /* 1248 */  reductionB_4_rule,
-  /* 1249 */  reductionB_avx512bw_rule,
-  /* 1250 */  reductionB_avx512bw_0_rule,
-  /* 1251 */  reductionB_avx512bw_1_rule,
-  /* 1252 */  reductionB_avx512bw_2_rule,
-  /* 1253 */  reductionB_avx512bw_3_rule,
-  /* 1254 */  reductionB_avx512bw_4_rule,
-  /* 1255 */  reductionS_rule,
-  /* 1256 */  reductionS_0_rule,
-  /* 1257 */  reductionS_1_rule,
-  /* 1258 */  reductionS_2_rule,
-  /* 1259 */  reductionS_3_rule,
-  /* 1260 */  reductionS_4_rule,
-  /* 1261 */  reductionS_5_rule,
-  /* 1262 */  mul_reductionB_rule,
-  /* 1263 */  mul_reduction64B_rule,
-  /* 1264 */  minmax_reduction2F_rule,
-  /* 1265 */  minmax_reduction2F_0_rule,
-  /* 1266 */  minmax_reductionF_rule,
-  /* 1267 */  minmax_reductionF_0_rule,
-  /* 1268 */  minmax_reduction2F_av_rule,
-  /* 1269 */  minmax_reduction2F_av_0_rule,
-  /* 1270 */  minmax_reductionF_av_rule,
-  /* 1271 */  minmax_reductionF_av_0_rule,
-  /* 1272 */  minmax_reduction2D_rule,
-  /* 1273 */  minmax_reduction2D_0_rule,
-  /* 1274 */  minmax_reductionD_rule,
-  /* 1275 */  minmax_reductionD_0_rule,
-  /* 1276 */  minmax_reduction2D_av_rule,
-  /* 1277 */  minmax_reduction2D_av_0_rule,
-  /* 1278 */  minmax_reductionD_av_rule,
-  /* 1279 */  minmax_reductionD_av_0_rule,
-  /* 1280 */  vaddB_rule,
-  /* 1281 */  vaddB_reg_rule,
-  /* 1282 */  vaddB_mem_rule,
-  /* 1283 */  vaddB_mem_0_rule,
-  /* 1284 */  vaddS_rule,
-  /* 1285 */  vaddS_reg_rule,
-  /* 1286 */  vaddS_mem_rule,
-  /* 1287 */  vaddS_mem_0_rule,
-  /* 1288 */  vaddI_rule,
-  /* 1289 */  vaddI_reg_rule,
-  /* 1290 */  vaddI_mem_rule,
-  /* 1291 */  vaddI_mem_0_rule,
-  /* 1292 */  vaddL_rule,
-  /* 1293 */  vaddL_reg_rule,
-  /* 1294 */  vaddL_mem_rule,
-  /* 1295 */  vaddL_mem_0_rule,
-  /* 1296 */  vaddF_rule,
-  /* 1297 */  vaddF_reg_rule,
-  /* 1298 */  vaddF_mem_rule,
-  /* 1299 */  vaddF_mem_0_rule,
-  /* 1300 */  vaddD_rule,
-  /* 1301 */  vaddD_reg_rule,
-  /* 1302 */  vaddD_mem_rule,
-  /* 1303 */  vaddD_mem_0_rule,
-  /* 1304 */  vsubB_rule,
-  /* 1305 */  vsubB_reg_rule,
-  /* 1306 */  vsubB_mem_rule,
-  /* 1307 */  vsubS_rule,
-  /* 1308 */  vsubS_reg_rule,
-  /* 1309 */  vsubS_mem_rule,
-  /* 1310 */  vsubI_rule,
-  /* 1311 */  vsubI_reg_rule,
-  /* 1312 */  vsubI_mem_rule,
-  /* 1313 */  vsubL_rule,
-  /* 1314 */  vsubL_reg_rule,
-  /* 1315 */  vsubL_mem_rule,
-  /* 1316 */  vsubF_rule,
-  /* 1317 */  vsubF_reg_rule,
-  /* 1318 */  vsubF_mem_rule,
-  /* 1319 */  vsubD_rule,
-  /* 1320 */  vsubD_reg_rule,
-  /* 1321 */  vsubD_mem_rule,
-  /* 1322 */  vmul8B_rule,
-  /* 1323 */  vmulB_rule,
-  /* 1324 */  vmulB_reg_rule,
-  /* 1325 */  vmulS_rule,
-  /* 1326 */  vmulS_reg_rule,
-  /* 1327 */  vmulS_mem_rule,
-  /* 1328 */  vmulS_mem_0_rule,
-  /* 1329 */  vmulI_rule,
-  /* 1330 */  vmulI_reg_rule,
-  /* 1331 */  vmulI_mem_rule,
-  /* 1332 */  vmulI_mem_0_rule,
-  /* 1333 */  evmulL_reg_rule,
-  /* 1334 */  evmulL_mem_rule,
-  /* 1335 */  evmulL_mem_0_rule,
-  /* 1336 */  vmulL_rule,
-  /* 1337 */  vmulL_reg_rule,
-  /* 1338 */  vmuludq_reg_rule,
-  /* 1339 */  vmuldq_reg_rule,
-  /* 1340 */  vmulF_rule,
-  /* 1341 */  vmulF_reg_rule,
-  /* 1342 */  vmulF_mem_rule,
-  /* 1343 */  vmulF_mem_0_rule,
-  /* 1344 */  vmulD_rule,
-  /* 1345 */  vmulD_reg_rule,
-  /* 1346 */  vmulD_mem_rule,
-  /* 1347 */  vmulD_mem_0_rule,
-  /* 1348 */  vdivF_rule,
-  /* 1349 */  vdivF_reg_rule,
-  /* 1350 */  vdivF_mem_rule,
-  /* 1351 */  vdivD_rule,
-  /* 1352 */  vdivD_reg_rule,
-  /* 1353 */  vdivD_mem_rule,
-  /* 1354 */  minmax_reg_sse_rule,
-  /* 1355 */  minmax_reg_sse_0_rule,
-  /* 1356 */  vminmax_reg_rule,
-  /* 1357 */  vminmax_reg_0_rule,
-  /* 1358 */  minmaxL_reg_sse_rule,
-  /* 1359 */  minmaxL_reg_sse_0_rule,
-  /* 1360 */  vminmaxL_reg_avx_rule,
-  /* 1361 */  vminmaxL_reg_avx_0_rule,
-  /* 1362 */  vminmaxL_reg_evex_rule,
-  /* 1363 */  vminmaxL_reg_evex_0_rule,
-  /* 1364 */  minmaxFP_reg_rule,
-  /* 1365 */  minmaxFP_reg_0_rule,
-  /* 1366 */  evminmaxFP_reg_eavx_rule,
-  /* 1367 */  evminmaxFP_reg_eavx_0_rule,
-  /* 1368 */  vector_uminmax_reg_rule,
-  /* 1369 */  vector_uminmax_reg_0_rule,
-  /* 1370 */  vector_uminmax_mem_rule,
-  /* 1371 */  vector_uminmax_mem_0_rule,
-  /* 1372 */  vector_uminmaxq_reg_rule,
-  /* 1373 */  vector_uminmaxq_reg_0_rule,
-  /* 1374 */  vector_uminmax_reg_masked_rule,
-  /* 1375 */  vector_uminmax_reg_masked_0_rule,
-  /* 1376 */  vector_uminmax_mem_masked_rule,
-  /* 1377 */  vector_uminmax_mem_masked_0_rule,
-  /* 1378 */  signumF_reg_rule,
-  /* 1379 */  signumD_reg_rule,
-  /* 1380 */  signumV_reg_avx_rule,
-  /* 1381 */  signumV_reg_avx_0_rule,
-  /* 1382 */  signumV_reg_evex_rule,
-  /* 1383 */  signumV_reg_evex_0_rule,
-  /* 1384 */  copySignF_reg_rule,
-  /* 1385 */  copySignD_imm_rule,
-  /* 1386 */  compressBitsI_reg_rule,
-  /* 1387 */  expandBitsI_reg_rule,
-  /* 1388 */  compressBitsI_mem_rule,
-  /* 1389 */  expandBitsI_mem_rule,
-  /* 1390 */  vshiftB_rule,
-  /* 1391 */  vshiftB_0_rule,
-  /* 1392 */  vshiftB_1_rule,
-  /* 1393 */  vshift16B_rule,
-  /* 1394 */  vshift16B_0_rule,
-  /* 1395 */  vshift16B_1_rule,
-  /* 1396 */  vshift16B_avx_rule,
-  /* 1397 */  vshift16B_avx_0_rule,
-  /* 1398 */  vshift16B_avx_1_rule,
-  /* 1399 */  vshift32B_avx_rule,
-  /* 1400 */  vshift32B_avx_0_rule,
-  /* 1401 */  vshift32B_avx_1_rule,
-  /* 1402 */  vshift64B_avx_rule,
-  /* 1403 */  vshift64B_avx_0_rule,
-  /* 1404 */  vshift64B_avx_1_rule,
-  /* 1405 */  vshiftS_rule,
-  /* 1406 */  vshiftS_0_rule,
-  /* 1407 */  vshiftS_1_rule,
-  /* 1408 */  vshiftI_rule,
-  /* 1409 */  vshiftI_0_rule,
-  /* 1410 */  vshiftI_1_rule,
-  /* 1411 */  vshiftI_imm_rule,
-  /* 1412 */  vshiftI_imm_0_rule,
-  /* 1413 */  vshiftI_imm_1_rule,
-  /* 1414 */  vshiftL_rule,
-  /* 1415 */  vshiftL_0_rule,
-  /* 1416 */  vshiftL_imm_rule,
-  /* 1417 */  vshiftL_imm_0_rule,
-  /* 1418 */  vshiftL_arith_reg_rule,
-  /* 1419 */  vshiftL_arith_reg_evex_rule,
-  /* 1420 */  vshift8B_var_nobw_rule,
-  /* 1421 */  vshift8B_var_nobw_0_rule,
-  /* 1422 */  vshift8B_var_nobw_1_rule,
-  /* 1423 */  vshift16B_var_nobw_rule,
-  /* 1424 */  vshift16B_var_nobw_0_rule,
-  /* 1425 */  vshift16B_var_nobw_1_rule,
-  /* 1426 */  vshift32B_var_nobw_rule,
-  /* 1427 */  vshift32B_var_nobw_0_rule,
-  /* 1428 */  vshift32B_var_nobw_1_rule,
-  /* 1429 */  vshiftB_var_evex_bw_rule,
-  /* 1430 */  vshiftB_var_evex_bw_0_rule,
-  /* 1431 */  vshiftB_var_evex_bw_1_rule,
-  /* 1432 */  vshift64B_var_evex_bw_rule,
-  /* 1433 */  vshift64B_var_evex_bw_0_rule,
-  /* 1434 */  vshift64B_var_evex_bw_1_rule,
-  /* 1435 */  vshift8S_var_nobw_rule,
-  /* 1436 */  vshift8S_var_nobw_0_rule,
-  /* 1437 */  vshift8S_var_nobw_1_rule,
-  /* 1438 */  vshift16S_var_nobw_rule,
-  /* 1439 */  vshift16S_var_nobw_0_rule,
-  /* 1440 */  vshift16S_var_nobw_1_rule,
-  /* 1441 */  vshift16S_var_evex_bw_rule,
-  /* 1442 */  vshift16S_var_evex_bw_0_rule,
-  /* 1443 */  vshift16S_var_evex_bw_1_rule,
-  /* 1444 */  vshiftI_var_rule,
-  /* 1445 */  vshiftI_var_0_rule,
-  /* 1446 */  vshiftI_var_1_rule,
-  /* 1447 */  vshiftL_var_rule,
-  /* 1448 */  vshiftL_var_0_rule,
-  /* 1449 */  vshiftL_arith_var_rule,
-  /* 1450 */  vshiftL_arith_var_evex_rule,
-  /* 1451 */  vand_rule,
-  /* 1452 */  vand_reg_rule,
-  /* 1453 */  vand_mem_rule,
-  /* 1454 */  vand_mem_0_rule,
-  /* 1455 */  vor_rule,
-  /* 1456 */  vor_reg_rule,
-  /* 1457 */  vor_mem_rule,
-  /* 1458 */  vor_mem_0_rule,
-  /* 1459 */  vxor_rule,
-  /* 1460 */  vxor_reg_rule,
-  /* 1461 */  vxor_mem_rule,
-  /* 1462 */  vxor_mem_0_rule,
-  /* 1463 */  vcastStoX_rule,
-  /* 1464 */  vcastItoX_rule,
-  /* 1465 */  castFtoX_reg_avx_rule,
-  /* 1466 */  castFtoX_reg_evex_rule,
-  /* 1467 */  castDtoX_reg_avx_rule,
-  /* 1468 */  castDtoX_reg_evex_rule,
-  /* 1469 */  vround_float_avx_rule,
-  /* 1470 */  vround_float_evex_rule,
-  /* 1471 */  vround_reg_evex_rule,
-  /* 1472 */  vcmpFD_rule,
-  /* 1473 */  evcmpFD64_rule,
-  /* 1474 */  evcmpFD_rule,
-  /* 1475 */  vcmp_direct_rule,
-  /* 1476 */  vcmp_negate_rule,
-  /* 1477 */  vcmpu_rule,
-  /* 1478 */  vcmp64_rule,
-  /* 1479 */  evcmp_rule,
-  /* 1480 */  extractI_rule,
-  /* 1481 */  extractI_0_rule,
-  /* 1482 */  extractI_1_rule,
-  /* 1483 */  vextractI_rule,
-  /* 1484 */  vextractI_0_rule,
-  /* 1485 */  vextractI_1_rule,
-  /* 1486 */  extractL_rule,
-  /* 1487 */  vextractL_rule,
-  /* 1488 */  extractF_rule,
-  /* 1489 */  vextractF_rule,
-  /* 1490 */  extractD_rule,
-  /* 1491 */  vextractD_rule,
-  /* 1492 */  blendvp_rule,
-  /* 1493 */  vblendvpI_rule,
-  /* 1494 */  vblendvpFD_rule,
-  /* 1495 */  vblendvp_rule,
-  /* 1496 */  evblendvp64_rule,
-  /* 1497 */  evblendvp64_masked_rule,
-  /* 1498 */  loadMask_rule,
-  /* 1499 */  loadMask64_rule,
-  /* 1500 */  loadMask_evex_rule,
-  /* 1501 */  vstoreMask1B_rule,
-  /* 1502 */  vstoreMask2B_rule,
-  /* 1503 */  vstoreMask4B_rule,
-  /* 1504 */  storeMask8B_rule,
-  /* 1505 */  storeMask8B_avx_rule,
-  /* 1506 */  vstoreMask4B_evex_novectmask_rule,
-  /* 1507 */  vstoreMask8B_evex_novectmask_rule,
-  /* 1508 */  vstoreMask_evex_vectmask_rule,
-  /* 1509 */  vstoreMask_evex_rule,
-  /* 1510 */  VectorPopulateIndex_rule,
-  /* 1511 */  VectorPopulateLIndex_rule,
-  /* 1512 */  rearrangeB_rule,
-  /* 1513 */  rearrangeB_avx_rule,
-  /* 1514 */  rearrangeB_evex_rule,
-  /* 1515 */  rearrangeB_evex_vbmi_rule,
-  /* 1516 */  loadShuffleS_rule,
-  /* 1517 */  rearrangeS_rule,
-  /* 1518 */  rearrangeS_avx_rule,
-  /* 1519 */  rearrangeS_evex_rule,
-  /* 1520 */  loadShuffleI_rule,
-  /* 1521 */  rearrangeI_rule,
-  /* 1522 */  rearrangeI_avx_rule,
-  /* 1523 */  loadShuffleL_rule,
-  /* 1524 */  rearrangeL_rule,
-  /* 1525 */  rearrangeL_evex_rule,
-  /* 1526 */  vfmaF_reg_rule,
-  /* 1527 */  vfmaF_mem_rule,
-  /* 1528 */  vfmaD_reg_rule,
-  /* 1529 */  vfmaD_mem_rule,
-  /* 1530 */  vmuladdS2I_reg_sse_rule,
-  /* 1531 */  vmuladdS2I_reg_avx_rule,
-  /* 1532 */  vmuladdaddS2I_reg_rule,
-  /* 1533 */  vmuladdaddS2I_reg_0_rule,
-  /* 1534 */  vpopcount_integral_reg_evex_masked_rule,
-  /* 1535 */  vpopcount_integral_reg_evex_masked_0_rule,
-  /* 1536 */  vpopcount_avx_reg_rule,
-  /* 1537 */  vpopcount_avx_reg_0_rule,
-  /* 1538 */  vcount_trailing_zeros_reg_evex_rule,
-  /* 1539 */  vcount_trailing_zeros_short_reg_evex_rule,
-  /* 1540 */  vcount_trailing_zeros_byte_reg_evex_rule,
-  /* 1541 */  vcount_trailing_zeros_reg_avx_rule,
-  /* 1542 */  vpternlog_rule,
-  /* 1543 */  vpternlog_mem_rule,
-  /* 1544 */  vprotate_immI8_rule,
-  /* 1545 */  vprotate_immI8_0_rule,
-  /* 1546 */  vprorate_rule,
-  /* 1547 */  vprorate_0_rule,
-  /* 1548 */  vmasked_load_avx_non_subword_rule,
-  /* 1549 */  vmasked_load_evex_rule,
-  /* 1550 */  vmasked_store_avx_non_subword_rule,
-  /* 1551 */  vmasked_store_evex_rule,
-  /* 1552 */  verify_vector_alignment_rule,
-  /* 1553 */  vmask_cmp_node_rule,
-  /* 1554 */  vmask_gen_rule,
-  /* 1555 */  vmask_gen_imm_rule,
-  /* 1556 */  vmask_tolong_evex_rule,
-  /* 1557 */  vmask_tolong_bool_rule,
-  /* 1558 */  vmask_tolong_avx_rule,
-  /* 1559 */  vmask_truecount_evex_rule,
-  /* 1560 */  vmask_truecount_bool_rule,
-  /* 1561 */  vmask_truecount_avx_rule,
-  /* 1562 */  vmask_first_or_last_true_evex_rule,
-  /* 1563 */  vmask_first_or_last_true_evex_0_rule,
-  /* 1564 */  vmask_first_or_last_true_bool_rule,
-  /* 1565 */  vmask_first_or_last_true_bool_0_rule,
-  /* 1566 */  vmask_first_or_last_true_avx_rule,
-  /* 1567 */  vmask_first_or_last_true_avx_0_rule,
-  /* 1568 */  vcompress_reg_avx_rule,
-  /* 1569 */  vcompress_reg_avx_0_rule,
-  /* 1570 */  vcompress_expand_reg_evex_rule,
-  /* 1571 */  vcompress_expand_reg_evex_0_rule,
-  /* 1572 */  vcompress_mask_reg_evex_rule,
-  /* 1573 */  vreverse_reg_rule,
-  /* 1574 */  vreverse_reg_gfni_rule,
-  /* 1575 */  vreverse_byte_reg_rule,
-  /* 1576 */  vreverse_byte64_reg_rule,
-  /* 1577 */  vcount_leading_zeros_IL_reg_evex_masked_rule,
-  /* 1578 */  vcount_leading_zeros_short_reg_evex_rule,
-  /* 1579 */  vcount_leading_zeros_byte_reg_evex_rule,
-  /* 1580 */  vcount_leading_zeros_int_reg_avx_rule,
-  /* 1581 */  vcount_leading_zeros_reg_avx_rule,
-  /* 1582 */  vadd_reg_masked_rule,
-  /* 1583 */  vadd_reg_masked_0_rule,
-  /* 1584 */  vadd_reg_masked_1_rule,
-  /* 1585 */  vadd_reg_masked_2_rule,
-  /* 1586 */  vadd_reg_masked_3_rule,
-  /* 1587 */  vadd_reg_masked_4_rule,
-  /* 1588 */  vadd_mem_masked_rule,
-  /* 1589 */  vadd_mem_masked_0_rule,
-  /* 1590 */  vadd_mem_masked_1_rule,
-  /* 1591 */  vadd_mem_masked_2_rule,
-  /* 1592 */  vadd_mem_masked_3_rule,
-  /* 1593 */  vadd_mem_masked_4_rule,
-  /* 1594 */  vxor_reg_masked_rule,
-  /* 1595 */  vxor_mem_masked_rule,
-  /* 1596 */  vor_reg_masked_rule,
-  /* 1597 */  vor_mem_masked_rule,
-  /* 1598 */  vand_reg_masked_rule,
-  /* 1599 */  vand_mem_masked_rule,
-  /* 1600 */  vsub_reg_masked_rule,
-  /* 1601 */  vsub_reg_masked_0_rule,
-  /* 1602 */  vsub_reg_masked_1_rule,
-  /* 1603 */  vsub_reg_masked_2_rule,
-  /* 1604 */  vsub_reg_masked_3_rule,
-  /* 1605 */  vsub_reg_masked_4_rule,
-  /* 1606 */  vsub_mem_masked_rule,
-  /* 1607 */  vsub_mem_masked_0_rule,
-  /* 1608 */  vsub_mem_masked_1_rule,
-  /* 1609 */  vsub_mem_masked_2_rule,
-  /* 1610 */  vsub_mem_masked_3_rule,
-  /* 1611 */  vsub_mem_masked_4_rule,
-  /* 1612 */  vmul_reg_masked_rule,
-  /* 1613 */  vmul_reg_masked_0_rule,
-  /* 1614 */  vmul_reg_masked_1_rule,
-  /* 1615 */  vmul_reg_masked_2_rule,
-  /* 1616 */  vmul_reg_masked_3_rule,
-  /* 1617 */  vmul_mem_masked_rule,
-  /* 1618 */  vmul_mem_masked_0_rule,
-  /* 1619 */  vmul_mem_masked_1_rule,
-  /* 1620 */  vmul_mem_masked_2_rule,
-  /* 1621 */  vmul_mem_masked_3_rule,
-  /* 1622 */  vsqrt_reg_masked_rule,
-  /* 1623 */  vsqrt_reg_masked_0_rule,
-  /* 1624 */  vdiv_reg_masked_rule,
-  /* 1625 */  vdiv_reg_masked_0_rule,
-  /* 1626 */  vdiv_mem_masked_rule,
-  /* 1627 */  vdiv_mem_masked_0_rule,
-  /* 1628 */  vrol_imm_masked_rule,
-  /* 1629 */  vrol_imm_masked_0_rule,
-  /* 1630 */  vrol_reg_masked_rule,
-  /* 1631 */  vrol_reg_masked_0_rule,
-  /* 1632 */  vlshift_imm_masked_rule,
-  /* 1633 */  vlshift_imm_masked_0_rule,
-  /* 1634 */  vlshift_imm_masked_1_rule,
-  /* 1635 */  vlshift_reg_masked_rule,
-  /* 1636 */  vlshift_reg_masked_0_rule,
-  /* 1637 */  vlshift_reg_masked_1_rule,
-  /* 1638 */  vlshiftv_reg_masked_rule,
-  /* 1639 */  vlshiftv_reg_masked_0_rule,
-  /* 1640 */  vlshiftv_reg_masked_1_rule,
-  /* 1641 */  vrshift_imm_masked_rule,
-  /* 1642 */  vrshift_imm_masked_0_rule,
-  /* 1643 */  vrshift_imm_masked_1_rule,
-  /* 1644 */  vrshift_reg_masked_rule,
-  /* 1645 */  vrshift_reg_masked_0_rule,
-  /* 1646 */  vrshift_reg_masked_1_rule,
-  /* 1647 */  vrshiftv_reg_masked_rule,
-  /* 1648 */  vrshiftv_reg_masked_0_rule,
-  /* 1649 */  vrshiftv_reg_masked_1_rule,
-  /* 1650 */  vurshift_imm_masked_rule,
-  /* 1651 */  vurshift_imm_masked_0_rule,
-  /* 1652 */  vurshift_imm_masked_1_rule,
-  /* 1653 */  vurshift_reg_masked_rule,
-  /* 1654 */  vurshift_reg_masked_0_rule,
-  /* 1655 */  vurshift_reg_masked_1_rule,
-  /* 1656 */  vurshiftv_reg_masked_rule,
-  /* 1657 */  vurshiftv_reg_masked_0_rule,
-  /* 1658 */  vurshiftv_reg_masked_1_rule,
-  /* 1659 */  vmaxv_reg_masked_rule,
-  /* 1660 */  vmaxv_mem_masked_rule,
-  /* 1661 */  vminv_reg_masked_rule,
-  /* 1662 */  vminv_mem_masked_rule,
-  /* 1663 */  vrearrangev_reg_masked_rule,
-  /* 1664 */  vabs_masked_rule,
-  /* 1665 */  vabs_masked_0_rule,
-  /* 1666 */  vabs_masked_1_rule,
-  /* 1667 */  vabs_masked_2_rule,
-  /* 1668 */  vfma_reg_masked_rule,
-  /* 1669 */  vfma_reg_masked_0_rule,
-  /* 1670 */  vfma_mem_masked_rule,
-  /* 1671 */  vfma_mem_masked_0_rule,
-  /* 1672 */  evcmp_masked_rule,
-  /* 1673 */  mask_all_evexI_LE32_rule,
-  /* 1674 */  mask_not_immLT8_rule,
-  /* 1675 */  mask_not_imm_rule,
-  /* 1676 */  long_to_maskLE8_avx_rule,
-  /* 1677 */  long_to_maskGT8_avx_rule,
-  /* 1678 */  mask_opers_evex_rule,
-  /* 1679 */  mask_opers_evex_0_rule,
-  /* 1680 */  mask_opers_evex_1_rule,
-  /* 1681 */  vternlog_reg_masked_rule,
-  /* 1682 */  vternlogd_mem_masked_rule,
-  /* 1683 */  FloatClassCheck_reg_reg_vfpclass_rule,
-  /* 1684 */  DoubleClassCheck_reg_reg_vfpclass_rule,
-  /* 1685 */  vector_addsub_saturating_subword_reg_rule,
-  /* 1686 */  vector_addsub_saturating_subword_reg_0_rule,
-  /* 1687 */  vector_addsub_saturating_unsigned_subword_reg_rule,
-  /* 1688 */  vector_addsub_saturating_unsigned_subword_reg_0_rule,
-  /* 1689 */  vector_addsub_saturating_reg_evex_rule,
-  /* 1690 */  vector_addsub_saturating_reg_evex_0_rule,
-  /* 1691 */  vector_addsub_saturating_reg_avx_rule,
-  /* 1692 */  vector_addsub_saturating_reg_avx_0_rule,
-  /* 1693 */  vector_add_saturating_unsigned_reg_evex_rule,
-  /* 1694 */  vector_add_saturating_unsigned_reg_avx_rule,
-  /* 1695 */  vector_sub_saturating_unsigned_reg_evex_rule,
-  /* 1696 */  vector_sub_saturating_unsigned_reg_avx_rule,
-  /* 1697 */  vector_addsub_saturating_subword_mem_rule,
-  /* 1698 */  vector_addsub_saturating_subword_mem_0_rule,
-  /* 1699 */  vector_addsub_saturating_unsigned_subword_mem_rule,
-  /* 1700 */  vector_addsub_saturating_unsigned_subword_mem_0_rule,
-  /* 1701 */  vector_addsub_saturating_subword_masked_reg_rule,
-  /* 1702 */  vector_addsub_saturating_subword_masked_reg_0_rule,
-  /* 1703 */  vector_addsub_saturating_unsigned_subword_masked_reg_rule,
-  /* 1704 */  vector_addsub_saturating_unsigned_subword_masked_reg_0_rule,
-  /* 1705 */  vector_addsub_saturating_subword_masked_mem_rule,
-  /* 1706 */  vector_addsub_saturating_subword_masked_mem_0_rule,
-  /* 1707 */  vector_addsub_saturating_unsigned_subword_masked_mem_rule,
-  /* 1708 */  vector_addsub_saturating_unsigned_subword_masked_mem_0_rule,
-  /* 1709 */  vector_selectfrom_twovectors_reg_evex_rule,
-  /* 1710 */  scalar_sqrt_HF_reg_rule,
-  /* 1711 */  scalar_binOps_HF_reg_rule,
-  /* 1712 */  scalar_binOps_HF_reg_0_rule,
-  /* 1713 */  scalar_binOps_HF_reg_1_rule,
-  /* 1714 */  scalar_binOps_HF_reg_2_rule,
-  /* 1715 */  scalar_binOps_HF_reg_3_rule,
-  /* 1716 */  scalar_binOps_HF_reg_4_rule,
-  /* 1717 */  scalar_fma_HF_reg_rule,
-  /* 1718 */  compareAndSwapP_shenandoah_rule,
-  /* 1719 */  compareAndSwapP_shenandoah_0_rule,
-  /* 1720 */  compareAndSwapN_shenandoah_rule,
-  /* 1721 */  compareAndSwapN_shenandoah_0_rule,
-  /* 1722 */  compareAndExchangeN_shenandoah_rule,
-  /* 1723 */  compareAndExchangeP_shenandoah_rule,
-  /* 1724 */  zLoadP_rule,
-  /* 1725 */  zStoreP_rule,
-  /* 1726 */  zStorePNull_rule,
-  /* 1727 */  zCompareAndExchangeP_rule,
-  /* 1728 */  zCompareAndSwapP_rule,
-  /* 1729 */  zCompareAndSwapP_0_rule,
-  /* 1730 */  zXChgP_rule,
-  /* 1731 */  g1StoreP_rule,
-  /* 1732 */  g1StoreN_rule,
-  /* 1733 */  g1EncodePAndStoreN_rule,
-  /* 1734 */  g1CompareAndExchangeP_rule,
-  /* 1735 */  g1CompareAndExchangeN_rule,
-  /* 1736 */  g1CompareAndSwapP_rule,
-  /* 1737 */  g1CompareAndSwapP_0_rule,
-  /* 1738 */  g1CompareAndSwapN_rule,
-  /* 1739 */  g1CompareAndSwapN_0_rule,
-  /* 1740 */  g1GetAndSetP_rule,
-  /* 1741 */  g1GetAndSetN_rule,
-  /* 1742 */  g1LoadP_rule,
-  /* 1743 */  g1LoadN_rule,
+  /*  319 */  storeSSI_rule,
+  /*  320 */  storeSSL_rule,
+  /*  321 */  storeSSP_rule,
+  /*  322 */  storeSSF_rule,
+  /*  323 */  storeSSD_rule,
+  /*  324 */  MoveF2VL_rule,
+  /*  325 */  MoveF2LEG_rule,
+  /*  326 */  MoveVL2F_rule,
+  /*  327 */  MoveLEG2F_rule,
+  /*  328 */  MoveD2VL_rule,
+  /*  329 */  MoveD2LEG_rule,
+  /*  330 */  MoveVL2D_rule,
+  /*  331 */  MoveLEG2D_rule,
+  /*  332 */  leaP8_rule,
+  /*  333 */  leaP32_rule,
+  /*  334 */  leaPIdxOff_rule,
+  /*  335 */  leaPIdxScale_rule,
+  /*  336 */  leaPPosIdxScale_rule,
+  /*  337 */  leaPIdxScaleOff_rule,
+  /*  338 */  leaPPosIdxOff_rule,
+  /*  339 */  leaPPosIdxScaleOff_rule,
+  /*  340 */  leaPCompressedOopOffset_rule,
+  /*  341 */  leaP8Narrow_rule,
+  /*  342 */  leaP32Narrow_rule,
+  /*  343 */  leaPIdxOffNarrow_rule,
+  /*  344 */  leaPIdxScaleNarrow_rule,
+  /*  345 */  leaPIdxScaleOffNarrow_rule,
+  /*  346 */  leaPPosIdxOffNarrow_rule,
+  /*  347 */  leaPPosIdxScaleOffNarrow_rule,
+  /*  348 */  loadConI_rule,
+  /*  349 */  loadConI0_rule,
+  /*  350 */  loadConL_rule,
+  /*  351 */  loadConL0_rule,
+  /*  352 */  loadConUL32_rule,
+  /*  353 */  loadConL32_rule,
+  /*  354 */  loadConP_rule,
+  /*  355 */  loadConP0_rule,
+  /*  356 */  loadConP31_rule,
+  /*  357 */  loadConF_rule,
+  /*  358 */  loadConH_rule,
+  /*  359 */  loadConN0_rule,
+  /*  360 */  loadConN_rule,
+  /*  361 */  loadConNKlass_rule,
+  /*  362 */  loadConF0_rule,
+  /*  363 */  loadConD_rule,
+  /*  364 */  loadConD0_rule,
+  /*  365 */  loadSSI_rule,
+  /*  366 */  loadSSL_rule,
+  /*  367 */  loadSSP_rule,
+  /*  368 */  loadSSF_rule,
+  /*  369 */  loadSSD_rule,
+  /*  370 */  MoveVec2Leg_rule,
+  /*  371 */  MoveLeg2Vec_rule,
+  /*  372 */  membar_volatile_rule,
+  /*  373 */  castX2P_rule,
+  /*  374 */  castI2N_rule,
+  /*  375 */  castN2X_rule,
+  /*  376 */  castP2X_rule,
+  /*  377 */  checkCastPP_rule,
+  /*  378 */  castPP_rule,
+  /*  379 */  castII_rule,
+  /*  380 */  castLL_rule,
+  /*  381 */  castFF_rule,
+  /*  382 */  castHH_rule,
+  /*  383 */  castDD_rule,
+  /*  384 */  cmpF_cc_reg_rule,
+  /*  385 */  cmpF_cc_regCF_rule,
+  /*  386 */  cmpF_cc_regCFE_rule,
+  /*  387 */  cmpF_cc_memCF_rule,
+  /*  388 */  cmpF_cc_memCFE_rule,
+  /*  389 */  cmpF_cc_immCF_rule,
+  /*  390 */  cmpF_cc_immCFE_rule,
+  /*  391 */  cmpD_cc_reg_rule,
+  /*  392 */  cmpD_cc_regCF_rule,
+  /*  393 */  cmpD_cc_regCFE_rule,
+  /*  394 */  cmpD_cc_memCF_rule,
+  /*  395 */  cmpD_cc_memCFE_rule,
+  /*  396 */  cmpD_cc_immCF_rule,
+  /*  397 */  cmpD_cc_immCFE_rule,
+  /*  398 */  MoveF2I_stack_reg_rule,
+  /*  399 */  MoveI2F_stack_reg_rule,
+  /*  400 */  MoveD2L_stack_reg_rule,
+  /*  401 */  MoveL2D_stack_reg_partial_rule,
+  /*  402 */  MoveL2D_stack_reg_rule,
+  /*  403 */  MoveF2I_reg_reg_rule,
+  /*  404 */  MoveD2L_reg_reg_rule,
+  /*  405 */  MoveI2F_reg_reg_rule,
+  /*  406 */  MoveL2D_reg_reg_rule,
+  /*  407 */  overflowAddI_rReg_rule,
+  /*  408 */  overflowAddI_rReg_imm_rule,
+  /*  409 */  overflowAddL_rReg_rule,
+  /*  410 */  overflowAddL_rReg_imm_rule,
+  /*  411 */  overflowSubI_rReg_rule,
+  /*  412 */  overflowSubI_rReg_imm_rule,
+  /*  413 */  overflowSubL_rReg_rule,
+  /*  414 */  overflowSubL_rReg_imm_rule,
+  /*  415 */  overflowNegI_rReg_rule,
+  /*  416 */  overflowNegL_rReg_rule,
+  /*  417 */  overflowMulI_rReg_rule,
+  /*  418 */  overflowMulI_rReg_imm_rule,
+  /*  419 */  overflowMulL_rReg_rule,
+  /*  420 */  overflowMulL_rReg_imm_rule,
+  /*  421 */  compI_rReg_rule,
+  /*  422 */  compI_rReg_imm_rule,
+  /*  423 */  compI_rReg_mem_rule,
+  /*  424 */  testI_reg_rule,
+  /*  425 */  testI_reg_imm_rule,
+  /*  426 */  testI_reg_reg_rule,
+  /*  427 */  testI_reg_mem_rule,
+  /*  428 */  testI_reg_mem_0_rule,
+  /*  429 */  compU_rReg_rule,
+  /*  430 */  compU_rReg_imm_rule,
+  /*  431 */  compU_rReg_mem_rule,
+  /*  432 */  testU_reg_rule,
+  /*  433 */  compP_rReg_rule,
+  /*  434 */  compP_rReg_mem_rule,
+  /*  435 */  compP_mem_rReg_rule,
+  /*  436 */  testP_reg_rule,
+  /*  437 */  testP_mem_rule,
+  /*  438 */  testP_mem_reg0_rule,
+  /*  439 */  compN_rReg_rule,
+  /*  440 */  compN_rReg_mem_rule,
+  /*  441 */  compN_rReg_imm_rule,
+  /*  442 */  compN_mem_imm_rule,
+  /*  443 */  compN_rReg_imm_klass_rule,
+  /*  444 */  compN_mem_imm_klass_rule,
+  /*  445 */  testN_reg_rule,
+  /*  446 */  testN_mem_rule,
+  /*  447 */  testN_mem_reg0_rule,
+  /*  448 */  compL_rReg_rule,
+  /*  449 */  compL_rReg_imm_rule,
+  /*  450 */  compL_rReg_mem_rule,
+  /*  451 */  testL_reg_rule,
+  /*  452 */  testL_reg_imm_rule,
+  /*  453 */  testL_reg_reg_rule,
+  /*  454 */  testL_reg_mem_rule,
+  /*  455 */  testL_reg_mem_0_rule,
+  /*  456 */  testL_reg_mem2_rule,
+  /*  457 */  testL_reg_mem2_0_rule,
+  /*  458 */  compUL_rReg_rule,
+  /*  459 */  compUL_rReg_imm_rule,
+  /*  460 */  compUL_rReg_mem_rule,
+  /*  461 */  testUL_reg_rule,
+  /*  462 */  compB_mem_imm_rule,
+  /*  463 */  testUB_mem_imm_rule,
+  /*  464 */  testB_mem_imm_rule,
+  /*  465 */  cmpFastLock_rule,
+  /*  466 */  cmpFastUnlock_rule,
+  /*  467 */  tlsLoadP_rule,
+  /*  468 */  absF_reg_rule,
+  /*  469 */  absF_reg_reg_rule,
+  /*  470 */  absD_reg_rule,
+  /*  471 */  absD_reg_reg_rule,
+  /*  472 */  negF_reg_rule,
+  /*  473 */  negF_reg_reg_rule,
+  /*  474 */  negD_reg_rule,
+  /*  475 */  negD_reg_reg_rule,
+  /*  476 */  vconvF2HF_rule,
+  /*  477 */  convHF2F_reg_reg_rule,
+  /*  478 */  vconvHF2F_reg_mem_rule,
+  /*  479 */  vconvHF2F_rule,
+  /*  480 */  reinterpret_mask_rule,
+  /*  481 */  reinterpret_rule,
+  /*  482 */  vreinterpret_expand4_rule,
+  /*  483 */  vreinterpret_expand_rule,
+  /*  484 */  reinterpret_shrink_rule,
+  /*  485 */  vReplB_reg_rule,
+  /*  486 */  ReplB_mem_rule,
+  /*  487 */  vReplS_reg_rule,
+  /*  488 */  ReplS_mem_rule,
+  /*  489 */  ReplI_reg_rule,
+  /*  490 */  ReplI_mem_rule,
+  /*  491 */  ReplI_imm_rule,
+  /*  492 */  ReplI_zero_rule,
+  /*  493 */  ReplI_M1_rule,
+  /*  494 */  ReplL_reg_rule,
+  /*  495 */  ReplL_mem_rule,
+  /*  496 */  ReplL_imm_rule,
+  /*  497 */  ReplL_zero_rule,
+  /*  498 */  ReplL_M1_rule,
+  /*  499 */  vReplF_reg_rule,
+  /*  500 */  ReplF_reg_rule,
+  /*  501 */  ReplF_mem_rule,
+  /*  502 */  ReplF_imm_rule,
+  /*  503 */  ReplF_zero_rule,
+  /*  504 */  vReplD_reg_rule,
+  /*  505 */  ReplD_reg_rule,
+  /*  506 */  ReplD_mem_rule,
+  /*  507 */  ReplD_imm_rule,
+  /*  508 */  ReplD_zero_rule,
+  /*  509 */  vsqrtF_reg_rule,
+  /*  510 */  vsqrtF_mem_rule,
+  /*  511 */  vsqrtD_reg_rule,
+  /*  512 */  vsqrtD_mem_rule,
+  /*  513 */  vshiftcnt_rule,
+  /*  514 */  vshiftcnt_0_rule,
+  /*  515 */  vcastBtoX_rule,
+  /*  516 */  vcastBtoD_rule,
+  /*  517 */  castStoX_rule,
+  /*  518 */  vcastStoX_evex_rule,
+  /*  519 */  castItoX_rule,
+  /*  520 */  vcastItoX_evex_rule,
+  /*  521 */  vcastLtoBS_rule,
+  /*  522 */  vcastLtoX_evex_rule,
+  /*  523 */  vcastFtoD_reg_rule,
+  /*  524 */  castFtoX_reg_avx10_2_rule,
+  /*  525 */  castFtoX_mem_avx10_2_rule,
+  /*  526 */  vcastDtoF_reg_rule,
+  /*  527 */  castDtoX_reg_avx10_2_rule,
+  /*  528 */  castDtoX_mem_avx10_2_rule,
+  /*  529 */  vucast_rule,
+  /*  530 */  vucast_0_rule,
+  /*  531 */  vucast_1_rule,
+  /*  532 */  vabsB_reg_rule,
+  /*  533 */  vabsS_reg_rule,
+  /*  534 */  vabsI_reg_rule,
+  /*  535 */  vabsL_reg_rule,
+  /*  536 */  vabsnegF_rule,
+  /*  537 */  vabsnegF_0_rule,
+  /*  538 */  vabsneg4F_rule,
+  /*  539 */  vabsneg4F_0_rule,
+  /*  540 */  vabsnegD_rule,
+  /*  541 */  vabsnegD_0_rule,
+  /*  542 */  vptest_lt16_rule,
+  /*  543 */  vptest_ge16_rule,
+  /*  544 */  ktest_alltrue_le8_rule,
+  /*  545 */  ktest_anytrue_le8_rule,
+  /*  546 */  ktest_ge8_rule,
+  /*  547 */  vmaskcast_evex_rule,
+  /*  548 */  vmaskcast_rule,
+  /*  549 */  vmaskcast_avx_rule,
+  /*  550 */  loadIotaIndices_rule,
+  /*  551 */  vpopcount_integral_reg_evex_rule,
+  /*  552 */  vpopcount_integral_reg_evex_0_rule,
+  /*  553 */  vcount_leading_zeros_IL_reg_evex_rule,
+  /*  554 */  long_to_mask_evex_rule,
+  /*  555 */  castMM_rule,
+  /*  556 */  castVV_rule,
+  /*  557 */  castVVLeg_rule,
+  /*  558 */  reinterpretS2HF_rule,
+  /*  559 */  reinterpretHF2S_rule,
+  /*  560 */  convF2HFAndS2HF_rule,
+  /*  561 */  convHF2SAndHF2F_rule,
+  /*  562 */  vector_sqrt_HF_reg_rule,
+  /*  563 */  vector_sqrt_HF_mem_rule,
+  /*  564 */  zLoadPNullCheck_rule,
+  /*  565 */  ShouldNotReachHere_rule,
+  /*  566 */  loadB_rule,
+  /*  567 */  loadB2L_rule,
+  /*  568 */  loadUB_rule,
+  /*  569 */  loadUB2L_rule,
+  /*  570 */  loadUB2L_immI_rule,
+  /*  571 */  loadS_rule,
+  /*  572 */  loadS2B_rule,
+  /*  573 */  loadS2L_rule,
+  /*  574 */  loadUS_rule,
+  /*  575 */  loadUS2B_rule,
+  /*  576 */  loadUS2L_rule,
+  /*  577 */  loadUS2L_immI_255_rule,
+  /*  578 */  loadUS2L_immI_rule,
+  /*  579 */  loadI_rule,
+  /*  580 */  loadI2B_rule,
+  /*  581 */  loadI2UB_rule,
+  /*  582 */  loadI2S_rule,
+  /*  583 */  loadI2US_rule,
+  /*  584 */  loadI2L_rule,
+  /*  585 */  loadI2L_immI_255_rule,
+  /*  586 */  loadI2L_immI_65535_rule,
+  /*  587 */  loadI2L_immU31_rule,
+  /*  588 */  loadUI2L_rule,
+  /*  589 */  loadL_rule,
+  /*  590 */  loadRange_rule,
+  /*  591 */  loadP_rule,
+  /*  592 */  loadN_rule,
+  /*  593 */  loadKlass_rule,
+  /*  594 */  loadNKlass_rule,
+  /*  595 */  loadNKlassCompactHeaders_rule,
+  /*  596 */  loadF_rule,
+  /*  597 */  loadD_partial_rule,
+  /*  598 */  loadD_rule,
+  /*  599 */  maxF_reg_avx10_2_rule,
+  /*  600 */  maxF_reg_rule,
+  /*  601 */  maxF_reduction_reg_rule,
+  /*  602 */  maxD_reg_avx10_2_rule,
+  /*  603 */  maxD_reg_rule,
+  /*  604 */  maxD_reduction_reg_rule,
+  /*  605 */  minF_reg_avx10_2_rule,
+  /*  606 */  minF_reg_rule,
+  /*  607 */  minF_reduction_reg_rule,
+  /*  608 */  minD_reg_avx10_2_rule,
+  /*  609 */  minD_reg_rule,
+  /*  610 */  minD_reduction_reg_rule,
+  /*  611 */  prefetchAlloc_rule,
+  /*  612 */  prefetchAllocNTA_rule,
+  /*  613 */  prefetchAllocT0_rule,
+  /*  614 */  prefetchAllocT2_rule,
+  /*  615 */  storeB_rule,
+  /*  616 */  storeC_rule,
+  /*  617 */  storeI_rule,
+  /*  618 */  storeL_rule,
+  /*  619 */  storeP_rule,
+  /*  620 */  storeImmP0_rule,
+  /*  621 */  storeImmP_rule,
+  /*  622 */  storeN_rule,
+  /*  623 */  storeNKlass_rule,
+  /*  624 */  storeImmN0_rule,
+  /*  625 */  storeImmN_rule,
+  /*  626 */  storeImmNKlass_rule,
+  /*  627 */  storeImmI0_rule,
+  /*  628 */  storeImmI_rule,
+  /*  629 */  storeImmL0_rule,
+  /*  630 */  storeImmL_rule,
+  /*  631 */  storeImmC0_rule,
+  /*  632 */  storeImmI16_rule,
+  /*  633 */  storeImmB0_rule,
+  /*  634 */  storeImmB_rule,
+  /*  635 */  storeF_rule,
+  /*  636 */  storeF0_rule,
+  /*  637 */  storeF_imm_rule,
+  /*  638 */  storeD_rule,
+  /*  639 */  storeD0_imm_rule,
+  /*  640 */  storeD0_rule,
+  /*  641 */  cacheWB_rule,
+  /*  642 */  cacheWBPreSync_rule,
+  /*  643 */  cacheWBPostSync_rule,
+  /*  644 */  bytes_reverse_int_rule,
+  /*  645 */  bytes_reverse_long_rule,
+  /*  646 */  bytes_reverse_unsigned_short_rule,
+  /*  647 */  bytes_reverse_short_rule,
+  /*  648 */  countLeadingZerosI_rule,
+  /*  649 */  countLeadingZerosI_mem_rule,
+  /*  650 */  countLeadingZerosI_bsr_rule,
+  /*  651 */  countLeadingZerosL_rule,
+  /*  652 */  countLeadingZerosL_mem_rule,
+  /*  653 */  countLeadingZerosL_bsr_rule,
+  /*  654 */  countTrailingZerosI_rule,
+  /*  655 */  countTrailingZerosI_mem_rule,
+  /*  656 */  countTrailingZerosI_bsf_rule,
+  /*  657 */  countTrailingZerosL_rule,
+  /*  658 */  countTrailingZerosL_mem_rule,
+  /*  659 */  countTrailingZerosL_bsf_rule,
+  /*  660 */  bytes_reversebit_int_rule,
+  /*  661 */  bytes_reversebit_int_gfni_rule,
+  /*  662 */  bytes_reversebit_long_rule,
+  /*  663 */  bytes_reversebit_long_gfni_rule,
+  /*  664 */  popCountI_rule,
+  /*  665 */  popCountI_mem_rule,
+  /*  666 */  popCountL_rule,
+  /*  667 */  popCountL_mem_rule,
+  /*  668 */  membar_acquire_rule,
+  /*  669 */  membar_acquire_0_rule,
+  /*  670 */  membar_acquire_lock_rule,
+  /*  671 */  membar_release_rule,
+  /*  672 */  membar_release_0_rule,
+  /*  673 */  membar_release_lock_rule,
+  /*  674 */  unnecessary_membar_volatile_rule,
+  /*  675 */  membar_storestore_rule,
+  /*  676 */  membar_storestore_0_rule,
+  /*  677 */  convP2I_rule,
+  /*  678 */  convN2I_rule,
+  /*  679 */  encodeHeapOop_rule,
+  /*  680 */  encodeHeapOop_not_null_rule,
+  /*  681 */  decodeHeapOop_rule,
+  /*  682 */  decodeHeapOop_not_null_rule,
+  /*  683 */  encodeKlass_not_null_rule,
+  /*  684 */  decodeKlass_not_null_rule,
+  /*  685 */  jumpXtnd_offset_rule,
+  /*  686 */  jumpXtnd_addr_rule,
+  /*  687 */  jumpXtnd_rule,
+  /*  688 */  cmovI_imm_01_rule,
+  /*  689 */  cmovI_reg_rule,
+  /*  690 */  cmovI_reg_ndd_rule,
+  /*  691 */  cmovI_imm_01U_rule,
+  /*  692 */  cmovI_regU_rule,
+  /*  693 */  cmovI_regU_ndd_rule,
+  /*  694 */  cmovI_imm_01UCF_rule,
+  /*  695 */  cmovI_imm_01UCFE_rule,
+  /*  696 */  cmovI_regUCF_rule,
+  /*  697 */  cmovI_regUCFE_ndd_rule,
+  /*  698 */  cmovI_regUCF2_ne_rule,
+  /*  699 */  cmovI_regUCF2_eq_rule,
+  /*  700 */  cmovI_mem_rule,
+  /*  701 */  cmovI_rReg_rReg_mem_ndd_rule,
+  /*  702 */  cmovI_memU_rule,
+  /*  703 */  cmovI_memUCF_rule,
+  /*  704 */  cmovI_rReg_rReg_memU_ndd_rule,
+  /*  705 */  cmovI_rReg_rReg_memUCFE_ndd_rule,
+  /*  706 */  cmovN_reg_rule,
+  /*  707 */  cmovN_reg_ndd_rule,
+  /*  708 */  cmovN_regU_rule,
+  /*  709 */  cmovN_regUCF_rule,
+  /*  710 */  cmovN_regU_ndd_rule,
+  /*  711 */  cmovN_regUCFE_ndd_rule,
+  /*  712 */  cmovN_regUCF2_ne_rule,
+  /*  713 */  cmovN_regUCF2_eq_rule,
+  /*  714 */  cmovP_reg_rule,
+  /*  715 */  cmovP_reg_ndd_rule,
+  /*  716 */  cmovP_regU_rule,
+  /*  717 */  cmovP_regU_ndd_rule,
+  /*  718 */  cmovP_regUCF_rule,
+  /*  719 */  cmovP_regUCFE_ndd_rule,
+  /*  720 */  cmovP_regUCF2_ne_rule,
+  /*  721 */  cmovP_regUCF2_eq_rule,
+  /*  722 */  cmovL_imm_01_rule,
+  /*  723 */  cmovL_reg_rule,
+  /*  724 */  cmovL_reg_ndd_rule,
+  /*  725 */  cmovL_mem_rule,
+  /*  726 */  cmovL_rReg_rReg_mem_ndd_rule,
+  /*  727 */  cmovL_imm_01U_rule,
+  /*  728 */  cmovL_regU_rule,
+  /*  729 */  cmovL_regU_ndd_rule,
+  /*  730 */  cmovL_imm_01UCF_rule,
+  /*  731 */  cmovL_imm_01UCFE_rule,
+  /*  732 */  cmovL_regUCF_rule,
+  /*  733 */  cmovL_regUCFE_ndd_rule,
+  /*  734 */  cmovL_regUCF2_ne_rule,
+  /*  735 */  cmovL_regUCF2_eq_rule,
+  /*  736 */  cmovL_memU_rule,
+  /*  737 */  cmovL_memUCF_rule,
+  /*  738 */  cmovL_rReg_rReg_memU_ndd_rule,
+  /*  739 */  cmovL_rReg_rReg_memUCFE_ndd_rule,
+  /*  740 */  cmovF_reg_rule,
+  /*  741 */  cmovF_regU_rule,
+  /*  742 */  cmovF_regUCF_rule,
+  /*  743 */  cmovF_regUCFE_rule,
+  /*  744 */  cmovD_reg_rule,
+  /*  745 */  cmovD_regU_rule,
+  /*  746 */  cmovD_regUCF_rule,
+  /*  747 */  cmovD_regUCFE_rule,
+  /*  748 */  addI_rReg_rule,
+  /*  749 */  addI_rReg_ndd_rule,
+  /*  750 */  addI_rReg_imm_rule,
+  /*  751 */  addI_rReg_rReg_imm_ndd_rule,
+  /*  752 */  addI_rReg_mem_imm_ndd_rule,
+  /*  753 */  addI_rReg_mem_rule,
+  /*  754 */  addI_rReg_mem_0_rule,
+  /*  755 */  addI_rReg_rReg_mem_ndd_rule,
+  /*  756 */  addI_rReg_rReg_mem_ndd_0_rule,
+  /*  757 */  addI_mem_rReg_rule,
+  /*  758 */  addI_mem_rReg_0_rule,
+  /*  759 */  addI_mem_imm_rule,
+  /*  760 */  incI_rReg_rule,
+  /*  761 */  incI_rReg_ndd_rule,
+  /*  762 */  incI_rReg_mem_ndd_rule,
+  /*  763 */  incI_mem_rule,
+  /*  764 */  decI_rReg_rule,
+  /*  765 */  decI_rReg_ndd_rule,
+  /*  766 */  decI_rReg_mem_ndd_rule,
+  /*  767 */  decI_mem_rule,
+  /*  768 */  leaI_rReg_immI2_immI_rule,
+  /*  769 */  leaI_rReg_rReg_immI_rule,
+  /*  770 */  leaI_rReg_rReg_immI2_rule,
+  /*  771 */  leaI_rReg_rReg_immI2_0_rule,
+  /*  772 */  leaI_rReg_rReg_immI2_immI_rule,
+  /*  773 */  leaI_rReg_rReg_immI2_immI_0_rule,
+  /*  774 */  addL_rReg_rule,
+  /*  775 */  addL_rReg_ndd_rule,
+  /*  776 */  addL_rReg_imm_rule,
+  /*  777 */  addL_rReg_rReg_imm_ndd_rule,
+  /*  778 */  addL_rReg_mem_imm_ndd_rule,
+  /*  779 */  addL_rReg_mem_rule,
+  /*  780 */  addL_rReg_mem_0_rule,
+  /*  781 */  addL_rReg_rReg_mem_ndd_rule,
+  /*  782 */  addL_rReg_rReg_mem_ndd_0_rule,
+  /*  783 */  addL_mem_rReg_rule,
+  /*  784 */  addL_mem_rReg_0_rule,
+  /*  785 */  addL_mem_imm_rule,
+  /*  786 */  incL_rReg_rule,
+  /*  787 */  incL_rReg_ndd_rule,
+  /*  788 */  incL_rReg_mem_ndd_rule,
+  /*  789 */  incL_mem_rule,
+  /*  790 */  decL_rReg_rule,
+  /*  791 */  decL_rReg_ndd_rule,
+  /*  792 */  decL_rReg_mem_ndd_rule,
+  /*  793 */  decL_mem_rule,
+  /*  794 */  leaL_rReg_immI2_immL32_rule,
+  /*  795 */  leaL_rReg_rReg_immL32_rule,
+  /*  796 */  leaL_rReg_rReg_immI2_rule,
+  /*  797 */  leaL_rReg_rReg_immI2_0_rule,
+  /*  798 */  leaL_rReg_rReg_immI2_immL32_rule,
+  /*  799 */  leaL_rReg_rReg_immI2_immL32_0_rule,
+  /*  800 */  addP_rReg_rule,
+  /*  801 */  addP_rReg_imm_rule,
+  /*  802 */  castII_checked_rule,
+  /*  803 */  castLL_checked_L32_rule,
+  /*  804 */  castLL_checked_rule,
+  /*  805 */  compareAndSwapP_rule,
+  /*  806 */  compareAndSwapP_0_rule,
+  /*  807 */  compareAndSwapL_rule,
+  /*  808 */  compareAndSwapL_0_rule,
+  /*  809 */  compareAndSwapI_rule,
+  /*  810 */  compareAndSwapI_0_rule,
+  /*  811 */  compareAndSwapB_rule,
+  /*  812 */  compareAndSwapB_0_rule,
+  /*  813 */  compareAndSwapS_rule,
+  /*  814 */  compareAndSwapS_0_rule,
+  /*  815 */  compareAndSwapN_rule,
+  /*  816 */  compareAndSwapN_0_rule,
+  /*  817 */  compareAndExchangeB_rule,
+  /*  818 */  compareAndExchangeS_rule,
+  /*  819 */  compareAndExchangeI_rule,
+  /*  820 */  compareAndExchangeL_rule,
+  /*  821 */  compareAndExchangeN_rule,
+  /*  822 */  compareAndExchangeP_rule,
+  /*  823 */  xaddB_reg_no_res_rule,
+  /*  824 */  xaddB_imm_no_res_rule,
+  /*  825 */  xaddB_rule,
+  /*  826 */  xaddS_reg_no_res_rule,
+  /*  827 */  xaddS_imm_no_res_rule,
+  /*  828 */  xaddS_rule,
+  /*  829 */  xaddI_reg_no_res_rule,
+  /*  830 */  xaddI_imm_no_res_rule,
+  /*  831 */  xaddI_rule,
+  /*  832 */  xaddL_reg_no_res_rule,
+  /*  833 */  xaddL_imm_no_res_rule,
+  /*  834 */  xaddL_rule,
+  /*  835 */  xchgB_rule,
+  /*  836 */  xchgS_rule,
+  /*  837 */  xchgI_rule,
+  /*  838 */  xchgL_rule,
+  /*  839 */  xchgP_rule,
+  /*  840 */  xchgN_rule,
+  /*  841 */  absI_rReg_rule,
+  /*  842 */  absL_rReg_rule,
+  /*  843 */  subI_rReg_rule,
+  /*  844 */  subI_rReg_ndd_rule,
+  /*  845 */  subI_rReg_rReg_imm_ndd_rule,
+  /*  846 */  subI_rReg_mem_imm_ndd_rule,
+  /*  847 */  subI_rReg_mem_rule,
+  /*  848 */  subI_rReg_rReg_mem_ndd_rule,
+  /*  849 */  subI_rReg_mem_rReg_ndd_rule,
+  /*  850 */  subI_mem_rReg_rule,
+  /*  851 */  subL_rReg_rule,
+  /*  852 */  subL_rReg_ndd_rule,
+  /*  853 */  subL_rReg_rReg_imm_ndd_rule,
+  /*  854 */  subL_rReg_mem_imm_ndd_rule,
+  /*  855 */  subL_rReg_mem_rule,
+  /*  856 */  subL_rReg_rReg_mem_ndd_rule,
+  /*  857 */  subL_rReg_mem_rReg_ndd_rule,
+  /*  858 */  subL_mem_rReg_rule,
+  /*  859 */  subP_rReg_rule,
+  /*  860 */  negI_rReg_rule,
+  /*  861 */  negI_rReg_ndd_rule,
+  /*  862 */  negI_rReg_2_rule,
+  /*  863 */  negI_rReg_2_ndd_rule,
+  /*  864 */  negI_mem_rule,
+  /*  865 */  negL_rReg_rule,
+  /*  866 */  negL_rReg_ndd_rule,
+  /*  867 */  negL_rReg_2_rule,
+  /*  868 */  negL_rReg_2_ndd_rule,
+  /*  869 */  negL_mem_rule,
+  /*  870 */  mulI_rReg_rule,
+  /*  871 */  mulI_rReg_ndd_rule,
+  /*  872 */  mulI_rReg_imm_rule,
+  /*  873 */  mulI_mem_rule,
+  /*  874 */  mulI_mem_0_rule,
+  /*  875 */  mulI_rReg_rReg_mem_ndd_rule,
+  /*  876 */  mulI_rReg_rReg_mem_ndd_0_rule,
+  /*  877 */  mulI_mem_imm_rule,
+  /*  878 */  mulAddS2I_rReg_rule,
+  /*  879 */  mulL_rReg_rule,
+  /*  880 */  mulL_rReg_ndd_rule,
+  /*  881 */  mulL_rReg_imm_rule,
+  /*  882 */  mulL_mem_rule,
+  /*  883 */  mulL_mem_0_rule,
+  /*  884 */  mulL_rReg_rReg_mem_ndd_rule,
+  /*  885 */  mulL_rReg_rReg_mem_ndd_0_rule,
+  /*  886 */  mulL_mem_imm_rule,
+  /*  887 */  mulHiL_rReg_rule,
+  /*  888 */  umulHiL_rReg_rule,
+  /*  889 */  divI_rReg_rule,
+  /*  890 */  divL_rReg_rule,
+  /*  891 */  udivI_rReg_rule,
+  /*  892 */  udivL_rReg_rule,
+  /*  893 */  divModI_rReg_divmod_rule,
+  /*  894 */  divModL_rReg_divmod_rule,
+  /*  895 */  udivModI_rReg_divmod_rule,
+  /*  896 */  udivModL_rReg_divmod_rule,
+  /*  897 */  modI_rReg_rule,
+  /*  898 */  modL_rReg_rule,
+  /*  899 */  umodI_rReg_rule,
+  /*  900 */  umodL_rReg_rule,
+  /*  901 */  salI_rReg_immI2_rule,
+  /*  902 */  salI_rReg_immI2_ndd_rule,
+  /*  903 */  salI_rReg_imm_rule,
+  /*  904 */  salI_rReg_imm_ndd_rule,
+  /*  905 */  salI_rReg_mem_imm_ndd_rule,
+  /*  906 */  salI_mem_imm_rule,
+  /*  907 */  salI_rReg_CL_rule,
+  /*  908 */  salI_mem_CL_rule,
+  /*  909 */  salI_rReg_rReg_rule,
+  /*  910 */  salI_mem_rReg_rule,
+  /*  911 */  sarI_rReg_imm_rule,
+  /*  912 */  sarI_rReg_imm_ndd_rule,
+  /*  913 */  sarI_rReg_mem_imm_ndd_rule,
+  /*  914 */  sarI_mem_imm_rule,
+  /*  915 */  sarI_rReg_CL_rule,
+  /*  916 */  sarI_mem_CL_rule,
+  /*  917 */  sarI_rReg_rReg_rule,
+  /*  918 */  sarI_mem_rReg_rule,
+  /*  919 */  shrI_rReg_imm_rule,
+  /*  920 */  shrI_rReg_imm_ndd_rule,
+  /*  921 */  shrI_rReg_mem_imm_ndd_rule,
+  /*  922 */  shrI_mem_imm_rule,
+  /*  923 */  shrI_rReg_CL_rule,
+  /*  924 */  shrI_mem_CL_rule,
+  /*  925 */  shrI_rReg_rReg_rule,
+  /*  926 */  shrI_mem_rReg_rule,
+  /*  927 */  salL_rReg_immI2_rule,
+  /*  928 */  salL_rReg_immI2_ndd_rule,
+  /*  929 */  salL_rReg_imm_rule,
+  /*  930 */  salL_rReg_imm_ndd_rule,
+  /*  931 */  salL_rReg_mem_imm_ndd_rule,
+  /*  932 */  salL_mem_imm_rule,
+  /*  933 */  salL_rReg_CL_rule,
+  /*  934 */  salL_mem_CL_rule,
+  /*  935 */  salL_rReg_rReg_rule,
+  /*  936 */  salL_mem_rReg_rule,
+  /*  937 */  sarL_rReg_imm_rule,
+  /*  938 */  sarL_rReg_imm_ndd_rule,
+  /*  939 */  sarL_rReg_mem_imm_ndd_rule,
+  /*  940 */  sarL_mem_imm_rule,
+  /*  941 */  sarL_rReg_CL_rule,
+  /*  942 */  sarL_mem_CL_rule,
+  /*  943 */  sarL_rReg_rReg_rule,
+  /*  944 */  sarL_mem_rReg_rule,
+  /*  945 */  shrL_rReg_imm_rule,
+  /*  946 */  shrL_rReg_imm_ndd_rule,
+  /*  947 */  shrL_rReg_mem_imm_ndd_rule,
+  /*  948 */  shrL_mem_imm_rule,
+  /*  949 */  shrL_rReg_CL_rule,
+  /*  950 */  shrL_mem_CL_rule,
+  /*  951 */  shrL_rReg_rReg_rule,
+  /*  952 */  shrL_mem_rReg_rule,
+  /*  953 */  i2b_rule,
+  /*  954 */  i2s_rule,
+  /*  955 */  rolI_immI8_legacy_rule,
+  /*  956 */  rolI_immI8_rule,
+  /*  957 */  rolI_mem_immI8_rule,
+  /*  958 */  rolI_rReg_Var_rule,
+  /*  959 */  rolI_rReg_Var_ndd_rule,
+  /*  960 */  rorI_immI8_legacy_rule,
+  /*  961 */  rorI_immI8_rule,
+  /*  962 */  rorI_mem_immI8_rule,
+  /*  963 */  rorI_rReg_Var_rule,
+  /*  964 */  rorI_rReg_Var_ndd_rule,
+  /*  965 */  rolL_immI8_legacy_rule,
+  /*  966 */  rolL_immI8_rule,
+  /*  967 */  rolL_mem_immI8_rule,
+  /*  968 */  rolL_rReg_Var_rule,
+  /*  969 */  rolL_rReg_Var_ndd_rule,
+  /*  970 */  rorL_immI8_legacy_rule,
+  /*  971 */  rorL_immI8_rule,
+  /*  972 */  rorL_mem_immI8_rule,
+  /*  973 */  rorL_rReg_Var_rule,
+  /*  974 */  rorL_rReg_Var_ndd_rule,
+  /*  975 */  compressBitsL_reg_rule,
+  /*  976 */  expandBitsL_reg_rule,
+  /*  977 */  compressBitsL_mem_rule,
+  /*  978 */  expandBitsL_mem_rule,
+  /*  979 */  andI_rReg_rule,
+  /*  980 */  andI_rReg_ndd_rule,
+  /*  981 */  andI_rReg_imm255_rule,
+  /*  982 */  andI2L_rReg_imm255_rule,
+  /*  983 */  andI_rReg_imm65535_rule,
+  /*  984 */  andI2L_rReg_imm65535_rule,
+  /*  985 */  convI2LAndI_reg_immIbitmask_rule,
+  /*  986 */  andI_rReg_imm_rule,
+  /*  987 */  andI_rReg_rReg_imm_ndd_rule,
+  /*  988 */  andI_rReg_mem_imm_ndd_rule,
+  /*  989 */  andI_rReg_mem_rule,
+  /*  990 */  andI_rReg_mem_0_rule,
+  /*  991 */  andI_rReg_rReg_mem_ndd_rule,
+  /*  992 */  andI_rReg_rReg_mem_ndd_0_rule,
+  /*  993 */  andB_mem_rReg_rule,
+  /*  994 */  andB_mem_rReg_0_rule,
+  /*  995 */  andI_mem_rReg_rule,
+  /*  996 */  andI_mem_rReg_0_rule,
+  /*  997 */  andI_mem_imm_rule,
+  /*  998 */  andnI_rReg_rReg_mem_rule,
+  /*  999 */  andnI_rReg_rReg_mem_0_rule,
+  /* 1000 */  andnI_rReg_rReg_rReg_rule,
+  /* 1001 */  andnI_rReg_rReg_rReg_0_rule,
+  /* 1002 */  blsiI_rReg_rReg_rule,
+  /* 1003 */  blsiI_rReg_rReg_0_rule,
+  /* 1004 */  blsiI_rReg_mem_rule,
+  /* 1005 */  blsiI_rReg_mem_0_rule,
+  /* 1006 */  blsmskI_rReg_mem_rule,
+  /* 1007 */  blsmskI_rReg_mem_0_rule,
+  /* 1008 */  blsmskI_rReg_rReg_rule,
+  /* 1009 */  blsmskI_rReg_rReg_0_rule,
+  /* 1010 */  blsrI_rReg_rReg_rule,
+  /* 1011 */  blsrI_rReg_rReg_0_rule,
+  /* 1012 */  blsrI_rReg_mem_rule,
+  /* 1013 */  blsrI_rReg_mem_0_rule,
+  /* 1014 */  orI_rReg_rule,
+  /* 1015 */  orI_rReg_ndd_rule,
+  /* 1016 */  orI_rReg_imm_rule,
+  /* 1017 */  orI_rReg_rReg_imm_ndd_rule,
+  /* 1018 */  orI_rReg_imm_rReg_ndd_rule,
+  /* 1019 */  orI_rReg_mem_imm_ndd_rule,
+  /* 1020 */  orI_rReg_mem_rule,
+  /* 1021 */  orI_rReg_mem_0_rule,
+  /* 1022 */  orI_rReg_rReg_mem_ndd_rule,
+  /* 1023 */  orI_rReg_rReg_mem_ndd_0_rule,
+  /* 1024 */  orB_mem_rReg_rule,
+  /* 1025 */  orB_mem_rReg_0_rule,
+  /* 1026 */  orI_mem_rReg_rule,
+  /* 1027 */  orI_mem_rReg_0_rule,
+  /* 1028 */  orI_mem_imm_rule,
+  /* 1029 */  xorI_rReg_rule,
+  /* 1030 */  xorI_rReg_ndd_rule,
+  /* 1031 */  xorI_rReg_im1_rule,
+  /* 1032 */  xorI_rReg_im1_ndd_rule,
+  /* 1033 */  xorI_rReg_imm_rule,
+  /* 1034 */  xorI_rReg_rReg_imm_ndd_rule,
+  /* 1035 */  xorI_rReg_mem_imm_ndd_rule,
+  /* 1036 */  xorI_rReg_mem_rule,
+  /* 1037 */  xorI_rReg_mem_0_rule,
+  /* 1038 */  xorI_rReg_rReg_mem_ndd_rule,
+  /* 1039 */  xorI_rReg_rReg_mem_ndd_0_rule,
+  /* 1040 */  xorB_mem_rReg_rule,
+  /* 1041 */  xorB_mem_rReg_0_rule,
+  /* 1042 */  xorI_mem_rReg_rule,
+  /* 1043 */  xorI_mem_rReg_0_rule,
+  /* 1044 */  xorI_mem_imm_rule,
+  /* 1045 */  andL_rReg_rule,
+  /* 1046 */  andL_rReg_ndd_rule,
+  /* 1047 */  andL_rReg_imm255_rule,
+  /* 1048 */  andL_rReg_imm65535_rule,
+  /* 1049 */  andL_rReg_imm_rule,
+  /* 1050 */  andL_rReg_rReg_imm_ndd_rule,
+  /* 1051 */  andL_rReg_mem_imm_ndd_rule,
+  /* 1052 */  andL_rReg_mem_rule,
+  /* 1053 */  andL_rReg_mem_0_rule,
+  /* 1054 */  andL_rReg_rReg_mem_ndd_rule,
+  /* 1055 */  andL_rReg_rReg_mem_ndd_0_rule,
+  /* 1056 */  andL_mem_rReg_rule,
+  /* 1057 */  andL_mem_rReg_0_rule,
+  /* 1058 */  andL_mem_imm_rule,
+  /* 1059 */  btrL_mem_imm_rule,
+  /* 1060 */  andnL_rReg_rReg_mem_rule,
+  /* 1061 */  andnL_rReg_rReg_mem_0_rule,
+  /* 1062 */  andnL_rReg_rReg_rReg_rule,
+  /* 1063 */  andnL_rReg_rReg_rReg_0_rule,
+  /* 1064 */  blsiL_rReg_rReg_rule,
+  /* 1065 */  blsiL_rReg_rReg_0_rule,
+  /* 1066 */  blsiL_rReg_mem_rule,
+  /* 1067 */  blsiL_rReg_mem_0_rule,
+  /* 1068 */  blsmskL_rReg_mem_rule,
+  /* 1069 */  blsmskL_rReg_rReg_rule,
+  /* 1070 */  blsrL_rReg_rReg_rule,
+  /* 1071 */  blsrL_rReg_rReg_0_rule,
+  /* 1072 */  blsrL_rReg_mem_rule,
+  /* 1073 */  blsrL_rReg_mem_0_rule,
+  /* 1074 */  orL_rReg_rule,
+  /* 1075 */  orL_rReg_ndd_rule,
+  /* 1076 */  orL_rReg_castP2X_rule,
+  /* 1077 */  orL_rReg_castP2X_0_rule,
+  /* 1078 */  orL_rReg_castP2X_ndd_rule,
+  /* 1079 */  orL_rReg_castP2X_ndd_0_rule,
+  /* 1080 */  orL_rReg_imm_rule,
+  /* 1081 */  orL_rReg_rReg_imm_ndd_rule,
+  /* 1082 */  orL_rReg_imm_rReg_ndd_rule,
+  /* 1083 */  orL_rReg_mem_imm_ndd_rule,
+  /* 1084 */  orL_rReg_mem_rule,
+  /* 1085 */  orL_rReg_mem_0_rule,
+  /* 1086 */  orL_rReg_rReg_mem_ndd_rule,
+  /* 1087 */  orL_rReg_rReg_mem_ndd_0_rule,
+  /* 1088 */  orL_mem_rReg_rule,
+  /* 1089 */  orL_mem_rReg_0_rule,
+  /* 1090 */  orL_mem_imm_rule,
+  /* 1091 */  btsL_mem_imm_rule,
+  /* 1092 */  xorL_rReg_rule,
+  /* 1093 */  xorL_rReg_ndd_rule,
+  /* 1094 */  xorL_rReg_im1_rule,
+  /* 1095 */  xorL_rReg_im1_ndd_rule,
+  /* 1096 */  xorL_rReg_imm_rule,
+  /* 1097 */  xorL_rReg_rReg_imm_rule,
+  /* 1098 */  xorL_rReg_mem_imm_rule,
+  /* 1099 */  xorL_rReg_mem_rule,
+  /* 1100 */  xorL_rReg_rReg_mem_ndd_rule,
+  /* 1101 */  xorL_mem_rReg_rule,
+  /* 1102 */  xorL_mem_imm_rule,
+  /* 1103 */  cmpLTMask_rule,
+  /* 1104 */  cmpLTMask0_rule,
+  /* 1105 */  cadd_cmpLTMask_rule,
+  /* 1106 */  cadd_cmpLTMask_1_rule,
+  /* 1107 */  cadd_cmpLTMask_0_rule,
+  /* 1108 */  cadd_cmpLTMask_2_rule,
+  /* 1109 */  and_cmpLTMask_rule,
+  /* 1110 */  and_cmpLTMask_0_rule,
+  /* 1111 */  cmpF_reg_rule,
+  /* 1112 */  cmpF_mem_rule,
+  /* 1113 */  cmpF_imm_rule,
+  /* 1114 */  cmpD_reg_rule,
+  /* 1115 */  cmpD_mem_rule,
+  /* 1116 */  cmpD_imm_rule,
+  /* 1117 */  convF2D_reg_reg_rule,
+  /* 1118 */  convF2D_reg_mem_rule,
+  /* 1119 */  convD2F_reg_reg_rule,
+  /* 1120 */  convD2F_reg_mem_rule,
+  /* 1121 */  convF2I_reg_reg_rule,
+  /* 1122 */  convF2I_reg_reg_avx10_2_rule,
+  /* 1123 */  convF2I_reg_mem_avx10_2_rule,
+  /* 1124 */  convF2L_reg_reg_rule,
+  /* 1125 */  convF2L_reg_reg_avx10_2_rule,
+  /* 1126 */  convF2L_reg_mem_avx10_2_rule,
+  /* 1127 */  convD2I_reg_reg_rule,
+  /* 1128 */  convD2I_reg_reg_avx10_2_rule,
+  /* 1129 */  convD2I_reg_mem_avx10_2_rule,
+  /* 1130 */  convD2L_reg_reg_rule,
+  /* 1131 */  convD2L_reg_reg_avx10_2_rule,
+  /* 1132 */  convD2L_reg_mem_avx10_2_rule,
+  /* 1133 */  round_double_reg_rule,
+  /* 1134 */  round_float_reg_rule,
+  /* 1135 */  convI2F_reg_reg_rule,
+  /* 1136 */  convI2F_reg_mem_rule,
+  /* 1137 */  convI2D_reg_reg_rule,
+  /* 1138 */  convI2D_reg_mem_rule,
+  /* 1139 */  convXI2F_reg_rule,
+  /* 1140 */  convXI2D_reg_rule,
+  /* 1141 */  convL2F_reg_reg_rule,
+  /* 1142 */  convL2F_reg_mem_rule,
+  /* 1143 */  convL2D_reg_reg_rule,
+  /* 1144 */  convL2D_reg_mem_rule,
+  /* 1145 */  convI2L_reg_reg_rule,
+  /* 1146 */  convI2L_reg_reg_zex_rule,
+  /* 1147 */  convI2L_reg_mem_zex_rule,
+  /* 1148 */  zerox_long_reg_reg_rule,
+  /* 1149 */  convL2I_reg_reg_rule,
+  /* 1150 */  MoveF2I_reg_stack_rule,
+  /* 1151 */  MoveI2F_reg_stack_rule,
+  /* 1152 */  MoveD2L_reg_stack_rule,
+  /* 1153 */  MoveL2D_reg_stack_rule,
+  /* 1154 */  rep_stos_rule,
+  /* 1155 */  rep_stos_word_copy_rule,
+  /* 1156 */  rep_stos_evex_rule,
+  /* 1157 */  rep_stos_evex_word_copy_rule,
+  /* 1158 */  rep_stos_large_rule,
+  /* 1159 */  rep_stos_large_word_copy_rule,
+  /* 1160 */  rep_stos_large_evex_rule,
+  /* 1161 */  rep_stos_large_evex_word_copy_rule,
+  /* 1162 */  rep_stos_im_rule,
+  /* 1163 */  string_compareL_rule,
+  /* 1164 */  string_compareL_evex_rule,
+  /* 1165 */  string_compareU_rule,
+  /* 1166 */  string_compareU_evex_rule,
+  /* 1167 */  string_compareLU_rule,
+  /* 1168 */  string_compareLU_evex_rule,
+  /* 1169 */  string_compareUL_rule,
+  /* 1170 */  string_compareUL_evex_rule,
+  /* 1171 */  string_indexof_conL_rule,
+  /* 1172 */  string_indexof_conU_rule,
+  /* 1173 */  string_indexof_conUL_rule,
+  /* 1174 */  string_indexofL_rule,
+  /* 1175 */  string_indexofU_rule,
+  /* 1176 */  string_indexofUL_rule,
+  /* 1177 */  string_indexof_char_rule,
+  /* 1178 */  stringL_indexof_char_rule,
+  /* 1179 */  string_equals_rule,
+  /* 1180 */  string_equals_evex_rule,
+  /* 1181 */  array_equalsB_rule,
+  /* 1182 */  array_equalsB_evex_rule,
+  /* 1183 */  array_equalsC_rule,
+  /* 1184 */  array_equalsC_evex_rule,
+  /* 1185 */  arrays_hashcode_rule,
+  /* 1186 */  count_positives_rule,
+  /* 1187 */  count_positives_evex_rule,
+  /* 1188 */  string_compress_rule,
+  /* 1189 */  string_compress_evex_rule,
+  /* 1190 */  string_inflate_rule,
+  /* 1191 */  string_inflate_evex_rule,
+  /* 1192 */  encode_iso_array_rule,
+  /* 1193 */  encode_ascii_array_rule,
+  /* 1194 */  cmpU3_reg_reg_rule,
+  /* 1195 */  cmpL3_reg_reg_rule,
+  /* 1196 */  cmpUL3_reg_reg_rule,
+  /* 1197 */  cmovI_reg_g_rule,
+  /* 1198 */  cmovI_reg_g_ndd_rule,
+  /* 1199 */  minI_rReg_rule,
+  /* 1200 */  minI_rReg_ndd_rule,
+  /* 1201 */  cmovI_reg_l_rule,
+  /* 1202 */  cmovI_reg_l_ndd_rule,
+  /* 1203 */  maxI_rReg_rule,
+  /* 1204 */  maxI_rReg_ndd_rule,
+  /* 1205 */  jmpDir_rule,
+  /* 1206 */  jmpCon_rule,
+  /* 1207 */  jmpLoopEnd_rule,
+  /* 1208 */  jmpConU_rule,
+  /* 1209 */  jmpConUCF_rule,
+  /* 1210 */  jmpConUCF2_rule,
+  /* 1211 */  jmpConUCFE_rule,
+  /* 1212 */  partialSubtypeCheck_rule,
+  /* 1213 */  partialSubtypeCheckVarSuper_rule,
+  /* 1214 */  partialSubtypeCheckConstSuper_rule,
+  /* 1215 */  jmpDir_short_rule,
+  /* 1216 */  jmpCon_short_rule,
+  /* 1217 */  jmpLoopEnd_short_rule,
+  /* 1218 */  jmpConU_short_rule,
+  /* 1219 */  jmpConUCF_short_rule,
+  /* 1220 */  jmpConUCF2_short_rule,
+  /* 1221 */  jmpConUCFE_short_rule,
+  /* 1222 */  safePoint_poll_tls_rule,
+  /* 1223 */  mask_all_evexL_rule,
+  /* 1224 */  mask_all_evexI_GT32_rule,
+  /* 1225 */  CallStaticJavaDirect_rule,
+  /* 1226 */  CallDynamicJavaDirect_rule,
+  /* 1227 */  CallRuntimeDirect_rule,
+  /* 1228 */  CallLeafDirect_rule,
+  /* 1229 */  CallLeafDirectVector_rule,
+  /* 1230 */  CallLeafNoFPInDirect_rule,
+  /* 1231 */  CallLeafNoFPDirect_rule,
+  /* 1232 */  Ret_rule,
+  /* 1233 */  TailCalljmpInd_rule,
+  /* 1234 */  tailjmpInd_rule,
+  /* 1235 */  ForwardExceptionjmp_rule,
+  /* 1236 */  CreateException_rule,
+  /* 1237 */  RethrowException_rule,
+  /* 1238 */  addF_reg_rule,
+  /* 1239 */  addF_mem_rule,
+  /* 1240 */  addF_mem_0_rule,
+  /* 1241 */  addF_imm_rule,
+  /* 1242 */  addF_reg_reg_rule,
+  /* 1243 */  addF_reg_mem_rule,
+  /* 1244 */  addF_reg_mem_0_rule,
+  /* 1245 */  addF_reg_imm_rule,
+  /* 1246 */  addD_reg_rule,
+  /* 1247 */  addD_mem_rule,
+  /* 1248 */  addD_mem_0_rule,
+  /* 1249 */  addD_imm_rule,
+  /* 1250 */  addD_reg_reg_rule,
+  /* 1251 */  addD_reg_mem_rule,
+  /* 1252 */  addD_reg_mem_0_rule,
+  /* 1253 */  addD_reg_imm_rule,
+  /* 1254 */  subF_reg_rule,
+  /* 1255 */  subF_mem_rule,
+  /* 1256 */  subF_imm_rule,
+  /* 1257 */  subF_reg_reg_rule,
+  /* 1258 */  subF_reg_mem_rule,
+  /* 1259 */  subF_reg_imm_rule,
+  /* 1260 */  subD_reg_rule,
+  /* 1261 */  subD_mem_rule,
+  /* 1262 */  subD_imm_rule,
+  /* 1263 */  subD_reg_reg_rule,
+  /* 1264 */  subD_reg_mem_rule,
+  /* 1265 */  subD_reg_imm_rule,
+  /* 1266 */  mulF_reg_rule,
+  /* 1267 */  mulF_mem_rule,
+  /* 1268 */  mulF_mem_0_rule,
+  /* 1269 */  mulF_imm_rule,
+  /* 1270 */  mulF_reg_reg_rule,
+  /* 1271 */  mulF_reg_mem_rule,
+  /* 1272 */  mulF_reg_mem_0_rule,
+  /* 1273 */  mulF_reg_imm_rule,
+  /* 1274 */  mulD_reg_rule,
+  /* 1275 */  mulD_mem_rule,
+  /* 1276 */  mulD_mem_0_rule,
+  /* 1277 */  mulD_imm_rule,
+  /* 1278 */  mulD_reg_reg_rule,
+  /* 1279 */  mulD_reg_mem_rule,
+  /* 1280 */  mulD_reg_mem_0_rule,
+  /* 1281 */  mulD_reg_imm_rule,
+  /* 1282 */  divF_reg_rule,
+  /* 1283 */  divF_mem_rule,
+  /* 1284 */  divF_imm_rule,
+  /* 1285 */  divF_reg_reg_rule,
+  /* 1286 */  divF_reg_mem_rule,
+  /* 1287 */  divF_reg_imm_rule,
+  /* 1288 */  divD_reg_rule,
+  /* 1289 */  divD_mem_rule,
+  /* 1290 */  divD_imm_rule,
+  /* 1291 */  divD_reg_reg_rule,
+  /* 1292 */  divD_reg_mem_rule,
+  /* 1293 */  divD_reg_imm_rule,
+  /* 1294 */  sqrtF_reg_rule,
+  /* 1295 */  sqrtD_reg_rule,
+  /* 1296 */  convF2HF_reg_reg_rule,
+  /* 1297 */  convF2HF_mem_reg_rule,
+  /* 1298 */  vconvF2HF_mem_reg_rule,
+  /* 1299 */  reinterpret_mask_W2B_rule,
+  /* 1300 */  reinterpret_mask_D2B_rule,
+  /* 1301 */  reinterpret_mask_Q2B_rule,
+  /* 1302 */  reinterpret_expand_rule,
+  /* 1303 */  roundD_reg_rule,
+  /* 1304 */  roundD_imm_rule,
+  /* 1305 */  vroundD_reg_rule,
+  /* 1306 */  vround8D_reg_rule,
+  /* 1307 */  vroundD_mem_rule,
+  /* 1308 */  vround8D_mem_rule,
+  /* 1309 */  onspinwait_rule,
+  /* 1310 */  fmaD_reg_rule,
+  /* 1311 */  fmaF_reg_rule,
+  /* 1312 */  loadV_rule,
+  /* 1313 */  storeV_rule,
+  /* 1314 */  gather_rule,
+  /* 1315 */  evgather_rule,
+  /* 1316 */  evgather_masked_rule,
+  /* 1317 */  vgather_subwordLE8B_rule,
+  /* 1318 */  vgather_subwordGT8B_rule,
+  /* 1319 */  vgather_masked_subwordLE8B_avx3_rule,
+  /* 1320 */  vgather_masked_subwordGT8B_avx3_rule,
+  /* 1321 */  vgather_masked_subwordLE8B_avx2_rule,
+  /* 1322 */  vgather_masked_subwordGT8B_avx2_rule,
+  /* 1323 */  scatter_rule,
+  /* 1324 */  scatter_masked_rule,
+  /* 1325 */  ReplHF_imm_rule,
+  /* 1326 */  ReplHF_reg_rule,
+  /* 1327 */  insert_rule,
+  /* 1328 */  insert32_rule,
+  /* 1329 */  insert64_rule,
+  /* 1330 */  insert2L_rule,
+  /* 1331 */  insert4L_rule,
+  /* 1332 */  insert8L_rule,
+  /* 1333 */  insertF_rule,
+  /* 1334 */  vinsertF_rule,
+  /* 1335 */  insert2D_rule,
+  /* 1336 */  insert4D_rule,
+  /* 1337 */  insert8D_rule,
+  /* 1338 */  reductionI_rule,
+  /* 1339 */  reductionI_0_rule,
+  /* 1340 */  reductionI_1_rule,
+  /* 1341 */  reductionI_2_rule,
+  /* 1342 */  reductionI_3_rule,
+  /* 1343 */  reductionI_4_rule,
+  /* 1344 */  reductionI_5_rule,
+  /* 1345 */  reductionL_rule,
+  /* 1346 */  reductionL_0_rule,
+  /* 1347 */  reductionL_1_rule,
+  /* 1348 */  reductionL_2_rule,
+  /* 1349 */  reductionL_3_rule,
+  /* 1350 */  reductionL_4_rule,
+  /* 1351 */  reductionL_5_rule,
+  /* 1352 */  reductionL_avx512dq_rule,
+  /* 1353 */  reductionL_avx512dq_0_rule,
+  /* 1354 */  reductionL_avx512dq_1_rule,
+  /* 1355 */  reductionL_avx512dq_2_rule,
+  /* 1356 */  reductionL_avx512dq_3_rule,
+  /* 1357 */  reductionL_avx512dq_4_rule,
+  /* 1358 */  reductionL_avx512dq_5_rule,
+  /* 1359 */  reductionF128_rule,
+  /* 1360 */  reductionF128_0_rule,
+  /* 1361 */  reduction8F_rule,
+  /* 1362 */  reduction8F_0_rule,
+  /* 1363 */  reduction16F_rule,
+  /* 1364 */  reduction16F_0_rule,
+  /* 1365 */  unordered_reduction2F_rule,
+  /* 1366 */  unordered_reduction2F_0_rule,
+  /* 1367 */  unordered_reduction4F_rule,
+  /* 1368 */  unordered_reduction4F_0_rule,
+  /* 1369 */  unordered_reduction8F_rule,
+  /* 1370 */  unordered_reduction8F_0_rule,
+  /* 1371 */  unordered_reduction16F_rule,
+  /* 1372 */  unordered_reduction16F_0_rule,
+  /* 1373 */  reduction2D_rule,
+  /* 1374 */  reduction2D_0_rule,
+  /* 1375 */  reduction4D_rule,
+  /* 1376 */  reduction4D_0_rule,
+  /* 1377 */  reduction8D_rule,
+  /* 1378 */  reduction8D_0_rule,
+  /* 1379 */  unordered_reduction2D_rule,
+  /* 1380 */  unordered_reduction2D_0_rule,
+  /* 1381 */  unordered_reduction4D_rule,
+  /* 1382 */  unordered_reduction4D_0_rule,
+  /* 1383 */  unordered_reduction8D_rule,
+  /* 1384 */  unordered_reduction8D_0_rule,
+  /* 1385 */  reductionB_rule,
+  /* 1386 */  reductionB_0_rule,
+  /* 1387 */  reductionB_1_rule,
+  /* 1388 */  reductionB_2_rule,
+  /* 1389 */  reductionB_3_rule,
+  /* 1390 */  reductionB_4_rule,
+  /* 1391 */  reductionB_avx512bw_rule,
+  /* 1392 */  reductionB_avx512bw_0_rule,
+  /* 1393 */  reductionB_avx512bw_1_rule,
+  /* 1394 */  reductionB_avx512bw_2_rule,
+  /* 1395 */  reductionB_avx512bw_3_rule,
+  /* 1396 */  reductionB_avx512bw_4_rule,
+  /* 1397 */  reductionS_rule,
+  /* 1398 */  reductionS_0_rule,
+  /* 1399 */  reductionS_1_rule,
+  /* 1400 */  reductionS_2_rule,
+  /* 1401 */  reductionS_3_rule,
+  /* 1402 */  reductionS_4_rule,
+  /* 1403 */  reductionS_5_rule,
+  /* 1404 */  mul_reductionB_rule,
+  /* 1405 */  mul_reduction64B_rule,
+  /* 1406 */  minmax_reduction2F_rule,
+  /* 1407 */  minmax_reduction2F_0_rule,
+  /* 1408 */  minmax_reductionF_rule,
+  /* 1409 */  minmax_reductionF_0_rule,
+  /* 1410 */  minmax_reduction2F_av_rule,
+  /* 1411 */  minmax_reduction2F_av_0_rule,
+  /* 1412 */  minmax_reductionF_av_rule,
+  /* 1413 */  minmax_reductionF_av_0_rule,
+  /* 1414 */  minmax_reduction2F_avx10_2_rule,
+  /* 1415 */  minmax_reduction2F_avx10_2_0_rule,
+  /* 1416 */  minmax_reductionF_avx10_2_rule,
+  /* 1417 */  minmax_reductionF_avx10_2_0_rule,
+  /* 1418 */  minmax_reduction2F_av_avx10_2_rule,
+  /* 1419 */  minmax_reduction2F_av_avx10_2_0_rule,
+  /* 1420 */  minmax_reductionF_av_avx10_2_rule,
+  /* 1421 */  minmax_reductionF_av_avx10_2_0_rule,
+  /* 1422 */  minmax_reduction2D_rule,
+  /* 1423 */  minmax_reduction2D_0_rule,
+  /* 1424 */  minmax_reductionD_rule,
+  /* 1425 */  minmax_reductionD_0_rule,
+  /* 1426 */  minmax_reduction2D_av_rule,
+  /* 1427 */  minmax_reduction2D_av_0_rule,
+  /* 1428 */  minmax_reductionD_av_rule,
+  /* 1429 */  minmax_reductionD_av_0_rule,
+  /* 1430 */  minmax_reduction2D_avx10_2_rule,
+  /* 1431 */  minmax_reduction2D_avx10_2_0_rule,
+  /* 1432 */  minmax_reductionD_avx10_2_rule,
+  /* 1433 */  minmax_reductionD_avx10_2_0_rule,
+  /* 1434 */  minmax_reduction2D_av_avx10_2_rule,
+  /* 1435 */  minmax_reduction2D_av_avx10_2_0_rule,
+  /* 1436 */  minmax_reductionD_av_avx10_2_rule,
+  /* 1437 */  minmax_reductionD_av_avx10_2_0_rule,
+  /* 1438 */  vaddB_rule,
+  /* 1439 */  vaddB_reg_rule,
+  /* 1440 */  vaddB_mem_rule,
+  /* 1441 */  vaddB_mem_0_rule,
+  /* 1442 */  vaddS_rule,
+  /* 1443 */  vaddS_reg_rule,
+  /* 1444 */  vaddS_mem_rule,
+  /* 1445 */  vaddS_mem_0_rule,
+  /* 1446 */  vaddI_rule,
+  /* 1447 */  vaddI_reg_rule,
+  /* 1448 */  vaddI_mem_rule,
+  /* 1449 */  vaddI_mem_0_rule,
+  /* 1450 */  vaddL_rule,
+  /* 1451 */  vaddL_reg_rule,
+  /* 1452 */  vaddL_mem_rule,
+  /* 1453 */  vaddL_mem_0_rule,
+  /* 1454 */  vaddF_rule,
+  /* 1455 */  vaddF_reg_rule,
+  /* 1456 */  vaddF_mem_rule,
+  /* 1457 */  vaddF_mem_0_rule,
+  /* 1458 */  vaddD_rule,
+  /* 1459 */  vaddD_reg_rule,
+  /* 1460 */  vaddD_mem_rule,
+  /* 1461 */  vaddD_mem_0_rule,
+  /* 1462 */  vsubB_rule,
+  /* 1463 */  vsubB_reg_rule,
+  /* 1464 */  vsubB_mem_rule,
+  /* 1465 */  vsubS_rule,
+  /* 1466 */  vsubS_reg_rule,
+  /* 1467 */  vsubS_mem_rule,
+  /* 1468 */  vsubI_rule,
+  /* 1469 */  vsubI_reg_rule,
+  /* 1470 */  vsubI_mem_rule,
+  /* 1471 */  vsubL_rule,
+  /* 1472 */  vsubL_reg_rule,
+  /* 1473 */  vsubL_mem_rule,
+  /* 1474 */  vsubF_rule,
+  /* 1475 */  vsubF_reg_rule,
+  /* 1476 */  vsubF_mem_rule,
+  /* 1477 */  vsubD_rule,
+  /* 1478 */  vsubD_reg_rule,
+  /* 1479 */  vsubD_mem_rule,
+  /* 1480 */  vmul8B_rule,
+  /* 1481 */  vmulB_rule,
+  /* 1482 */  vmulB_reg_rule,
+  /* 1483 */  vmulS_rule,
+  /* 1484 */  vmulS_reg_rule,
+  /* 1485 */  vmulS_mem_rule,
+  /* 1486 */  vmulS_mem_0_rule,
+  /* 1487 */  vmulI_rule,
+  /* 1488 */  vmulI_reg_rule,
+  /* 1489 */  vmulI_mem_rule,
+  /* 1490 */  vmulI_mem_0_rule,
+  /* 1491 */  evmulL_reg_rule,
+  /* 1492 */  evmulL_mem_rule,
+  /* 1493 */  evmulL_mem_0_rule,
+  /* 1494 */  vmulL_rule,
+  /* 1495 */  vmulL_reg_rule,
+  /* 1496 */  vmuludq_reg_rule,
+  /* 1497 */  vmuldq_reg_rule,
+  /* 1498 */  vmulF_rule,
+  /* 1499 */  vmulF_reg_rule,
+  /* 1500 */  vmulF_mem_rule,
+  /* 1501 */  vmulF_mem_0_rule,
+  /* 1502 */  vmulD_rule,
+  /* 1503 */  vmulD_reg_rule,
+  /* 1504 */  vmulD_mem_rule,
+  /* 1505 */  vmulD_mem_0_rule,
+  /* 1506 */  vdivF_rule,
+  /* 1507 */  vdivF_reg_rule,
+  /* 1508 */  vdivF_mem_rule,
+  /* 1509 */  vdivD_rule,
+  /* 1510 */  vdivD_reg_rule,
+  /* 1511 */  vdivD_mem_rule,
+  /* 1512 */  minmax_reg_sse_rule,
+  /* 1513 */  minmax_reg_sse_0_rule,
+  /* 1514 */  vminmax_reg_rule,
+  /* 1515 */  vminmax_reg_0_rule,
+  /* 1516 */  minmaxL_reg_sse_rule,
+  /* 1517 */  minmaxL_reg_sse_0_rule,
+  /* 1518 */  vminmaxL_reg_avx_rule,
+  /* 1519 */  vminmaxL_reg_avx_0_rule,
+  /* 1520 */  vminmaxL_reg_evex_rule,
+  /* 1521 */  vminmaxL_reg_evex_0_rule,
+  /* 1522 */  minmaxFP_reg_avx10_2_rule,
+  /* 1523 */  minmaxFP_reg_avx10_2_0_rule,
+  /* 1524 */  minmaxFP_reg_rule,
+  /* 1525 */  minmaxFP_reg_0_rule,
+  /* 1526 */  evminmaxFP_reg_evex_rule,
+  /* 1527 */  evminmaxFP_reg_evex_0_rule,
+  /* 1528 */  vector_uminmax_reg_rule,
+  /* 1529 */  vector_uminmax_reg_0_rule,
+  /* 1530 */  vector_uminmax_mem_rule,
+  /* 1531 */  vector_uminmax_mem_0_rule,
+  /* 1532 */  vector_uminmaxq_reg_rule,
+  /* 1533 */  vector_uminmaxq_reg_0_rule,
+  /* 1534 */  vector_uminmax_reg_masked_rule,
+  /* 1535 */  vector_uminmax_reg_masked_0_rule,
+  /* 1536 */  vector_uminmax_mem_masked_rule,
+  /* 1537 */  vector_uminmax_mem_masked_0_rule,
+  /* 1538 */  signumF_reg_rule,
+  /* 1539 */  signumD_reg_rule,
+  /* 1540 */  signumV_reg_avx_rule,
+  /* 1541 */  signumV_reg_avx_0_rule,
+  /* 1542 */  signumV_reg_evex_rule,
+  /* 1543 */  signumV_reg_evex_0_rule,
+  /* 1544 */  copySignF_reg_rule,
+  /* 1545 */  copySignD_imm_rule,
+  /* 1546 */  compressBitsI_reg_rule,
+  /* 1547 */  expandBitsI_reg_rule,
+  /* 1548 */  compressBitsI_mem_rule,
+  /* 1549 */  expandBitsI_mem_rule,
+  /* 1550 */  vshiftB_rule,
+  /* 1551 */  vshiftB_0_rule,
+  /* 1552 */  vshiftB_1_rule,
+  /* 1553 */  vshift16B_rule,
+  /* 1554 */  vshift16B_0_rule,
+  /* 1555 */  vshift16B_1_rule,
+  /* 1556 */  vshift16B_avx_rule,
+  /* 1557 */  vshift16B_avx_0_rule,
+  /* 1558 */  vshift16B_avx_1_rule,
+  /* 1559 */  vshift32B_avx_rule,
+  /* 1560 */  vshift32B_avx_0_rule,
+  /* 1561 */  vshift32B_avx_1_rule,
+  /* 1562 */  vshift64B_avx_rule,
+  /* 1563 */  vshift64B_avx_0_rule,
+  /* 1564 */  vshift64B_avx_1_rule,
+  /* 1565 */  vshiftS_rule,
+  /* 1566 */  vshiftS_0_rule,
+  /* 1567 */  vshiftS_1_rule,
+  /* 1568 */  vshiftI_rule,
+  /* 1569 */  vshiftI_0_rule,
+  /* 1570 */  vshiftI_1_rule,
+  /* 1571 */  vshiftI_imm_rule,
+  /* 1572 */  vshiftI_imm_0_rule,
+  /* 1573 */  vshiftI_imm_1_rule,
+  /* 1574 */  vshiftL_rule,
+  /* 1575 */  vshiftL_0_rule,
+  /* 1576 */  vshiftL_imm_rule,
+  /* 1577 */  vshiftL_imm_0_rule,
+  /* 1578 */  vshiftL_arith_reg_rule,
+  /* 1579 */  vshiftL_arith_reg_evex_rule,
+  /* 1580 */  vshift8B_var_nobw_rule,
+  /* 1581 */  vshift8B_var_nobw_0_rule,
+  /* 1582 */  vshift8B_var_nobw_1_rule,
+  /* 1583 */  vshift16B_var_nobw_rule,
+  /* 1584 */  vshift16B_var_nobw_0_rule,
+  /* 1585 */  vshift16B_var_nobw_1_rule,
+  /* 1586 */  vshift32B_var_nobw_rule,
+  /* 1587 */  vshift32B_var_nobw_0_rule,
+  /* 1588 */  vshift32B_var_nobw_1_rule,
+  /* 1589 */  vshiftB_var_evex_bw_rule,
+  /* 1590 */  vshiftB_var_evex_bw_0_rule,
+  /* 1591 */  vshiftB_var_evex_bw_1_rule,
+  /* 1592 */  vshift64B_var_evex_bw_rule,
+  /* 1593 */  vshift64B_var_evex_bw_0_rule,
+  /* 1594 */  vshift64B_var_evex_bw_1_rule,
+  /* 1595 */  vshift8S_var_nobw_rule,
+  /* 1596 */  vshift8S_var_nobw_0_rule,
+  /* 1597 */  vshift8S_var_nobw_1_rule,
+  /* 1598 */  vshift16S_var_nobw_rule,
+  /* 1599 */  vshift16S_var_nobw_0_rule,
+  /* 1600 */  vshift16S_var_nobw_1_rule,
+  /* 1601 */  vshift16S_var_evex_bw_rule,
+  /* 1602 */  vshift16S_var_evex_bw_0_rule,
+  /* 1603 */  vshift16S_var_evex_bw_1_rule,
+  /* 1604 */  vshiftI_var_rule,
+  /* 1605 */  vshiftI_var_0_rule,
+  /* 1606 */  vshiftI_var_1_rule,
+  /* 1607 */  vshiftL_var_rule,
+  /* 1608 */  vshiftL_var_0_rule,
+  /* 1609 */  vshiftL_arith_var_rule,
+  /* 1610 */  vshiftL_arith_var_evex_rule,
+  /* 1611 */  vand_rule,
+  /* 1612 */  vand_reg_rule,
+  /* 1613 */  vand_mem_rule,
+  /* 1614 */  vand_mem_0_rule,
+  /* 1615 */  vor_rule,
+  /* 1616 */  vor_reg_rule,
+  /* 1617 */  vor_mem_rule,
+  /* 1618 */  vor_mem_0_rule,
+  /* 1619 */  vxor_rule,
+  /* 1620 */  vxor_reg_rule,
+  /* 1621 */  vxor_mem_rule,
+  /* 1622 */  vxor_mem_0_rule,
+  /* 1623 */  vcastStoX_rule,
+  /* 1624 */  vcastItoX_rule,
+  /* 1625 */  castFtoX_reg_avx_rule,
+  /* 1626 */  castFtoX_reg_evex_rule,
+  /* 1627 */  castDtoX_reg_avx_rule,
+  /* 1628 */  castDtoX_reg_evex_rule,
+  /* 1629 */  vround_float_avx_rule,
+  /* 1630 */  vround_float_evex_rule,
+  /* 1631 */  vround_reg_evex_rule,
+  /* 1632 */  vcmpFD_rule,
+  /* 1633 */  evcmpFD64_rule,
+  /* 1634 */  evcmpFD_rule,
+  /* 1635 */  vcmp_direct_rule,
+  /* 1636 */  vcmp_negate_rule,
+  /* 1637 */  vcmpu_rule,
+  /* 1638 */  vcmp64_rule,
+  /* 1639 */  evcmp_rule,
+  /* 1640 */  extractI_rule,
+  /* 1641 */  extractI_0_rule,
+  /* 1642 */  extractI_1_rule,
+  /* 1643 */  vextractI_rule,
+  /* 1644 */  vextractI_0_rule,
+  /* 1645 */  vextractI_1_rule,
+  /* 1646 */  extractL_rule,
+  /* 1647 */  vextractL_rule,
+  /* 1648 */  extractF_rule,
+  /* 1649 */  vextractF_rule,
+  /* 1650 */  extractD_rule,
+  /* 1651 */  vextractD_rule,
+  /* 1652 */  blendvp_rule,
+  /* 1653 */  vblendvpI_rule,
+  /* 1654 */  vblendvpFD_rule,
+  /* 1655 */  vblendvp_rule,
+  /* 1656 */  evblendvp64_rule,
+  /* 1657 */  evblendvp64_masked_rule,
+  /* 1658 */  loadMask_rule,
+  /* 1659 */  loadMask64_rule,
+  /* 1660 */  loadMask_evex_rule,
+  /* 1661 */  vstoreMask1B_rule,
+  /* 1662 */  vstoreMask2B_rule,
+  /* 1663 */  vstoreMask4B_rule,
+  /* 1664 */  storeMask8B_rule,
+  /* 1665 */  storeMask8B_avx_rule,
+  /* 1666 */  vstoreMask4B_evex_novectmask_rule,
+  /* 1667 */  vstoreMask8B_evex_novectmask_rule,
+  /* 1668 */  vstoreMask_evex_vectmask_rule,
+  /* 1669 */  vstoreMask_evex_rule,
+  /* 1670 */  VectorPopulateIndex_rule,
+  /* 1671 */  VectorPopulateLIndex_rule,
+  /* 1672 */  rearrangeB_rule,
+  /* 1673 */  rearrangeB_avx_rule,
+  /* 1674 */  rearrangeB_evex_rule,
+  /* 1675 */  rearrangeB_evex_vbmi_rule,
+  /* 1676 */  loadShuffleS_rule,
+  /* 1677 */  rearrangeS_rule,
+  /* 1678 */  rearrangeS_avx_rule,
+  /* 1679 */  rearrangeS_evex_rule,
+  /* 1680 */  loadShuffleI_rule,
+  /* 1681 */  rearrangeI_rule,
+  /* 1682 */  rearrangeI_avx_rule,
+  /* 1683 */  loadShuffleL_rule,
+  /* 1684 */  rearrangeL_rule,
+  /* 1685 */  rearrangeL_evex_rule,
+  /* 1686 */  vfmaF_reg_rule,
+  /* 1687 */  vfmaF_mem_rule,
+  /* 1688 */  vfmaD_reg_rule,
+  /* 1689 */  vfmaD_mem_rule,
+  /* 1690 */  vmuladdS2I_reg_sse_rule,
+  /* 1691 */  vmuladdS2I_reg_avx_rule,
+  /* 1692 */  vmuladdaddS2I_reg_rule,
+  /* 1693 */  vmuladdaddS2I_reg_0_rule,
+  /* 1694 */  vpopcount_integral_reg_evex_masked_rule,
+  /* 1695 */  vpopcount_integral_reg_evex_masked_0_rule,
+  /* 1696 */  vpopcount_avx_reg_rule,
+  /* 1697 */  vpopcount_avx_reg_0_rule,
+  /* 1698 */  vcount_trailing_zeros_reg_evex_rule,
+  /* 1699 */  vcount_trailing_zeros_short_reg_evex_rule,
+  /* 1700 */  vcount_trailing_zeros_byte_reg_evex_rule,
+  /* 1701 */  vcount_trailing_zeros_reg_avx_rule,
+  /* 1702 */  vpternlog_rule,
+  /* 1703 */  vpternlog_mem_rule,
+  /* 1704 */  vprotate_immI8_rule,
+  /* 1705 */  vprotate_immI8_0_rule,
+  /* 1706 */  vprorate_rule,
+  /* 1707 */  vprorate_0_rule,
+  /* 1708 */  vmasked_load_avx_non_subword_rule,
+  /* 1709 */  vmasked_load_evex_rule,
+  /* 1710 */  vmasked_store_avx_non_subword_rule,
+  /* 1711 */  vmasked_store_evex_rule,
+  /* 1712 */  verify_vector_alignment_rule,
+  /* 1713 */  vmask_cmp_node_rule,
+  /* 1714 */  vmask_gen_rule,
+  /* 1715 */  vmask_gen_imm_rule,
+  /* 1716 */  vmask_tolong_evex_rule,
+  /* 1717 */  vmask_tolong_bool_rule,
+  /* 1718 */  vmask_tolong_avx_rule,
+  /* 1719 */  vmask_truecount_evex_rule,
+  /* 1720 */  vmask_truecount_bool_rule,
+  /* 1721 */  vmask_truecount_avx_rule,
+  /* 1722 */  vmask_first_or_last_true_evex_rule,
+  /* 1723 */  vmask_first_or_last_true_evex_0_rule,
+  /* 1724 */  vmask_first_or_last_true_bool_rule,
+  /* 1725 */  vmask_first_or_last_true_bool_0_rule,
+  /* 1726 */  vmask_first_or_last_true_avx_rule,
+  /* 1727 */  vmask_first_or_last_true_avx_0_rule,
+  /* 1728 */  vcompress_reg_avx_rule,
+  /* 1729 */  vcompress_reg_avx_0_rule,
+  /* 1730 */  vcompress_expand_reg_evex_rule,
+  /* 1731 */  vcompress_expand_reg_evex_0_rule,
+  /* 1732 */  vcompress_mask_reg_evex_rule,
+  /* 1733 */  vreverse_reg_rule,
+  /* 1734 */  vreverse_reg_gfni_rule,
+  /* 1735 */  vreverse_byte_reg_rule,
+  /* 1736 */  vreverse_byte64_reg_rule,
+  /* 1737 */  vcount_leading_zeros_IL_reg_evex_masked_rule,
+  /* 1738 */  vcount_leading_zeros_short_reg_evex_rule,
+  /* 1739 */  vcount_leading_zeros_byte_reg_evex_rule,
+  /* 1740 */  vcount_leading_zeros_int_reg_avx_rule,
+  /* 1741 */  vcount_leading_zeros_reg_avx_rule,
+  /* 1742 */  vadd_reg_masked_rule,
+  /* 1743 */  vadd_reg_masked_0_rule,
+  /* 1744 */  vadd_reg_masked_1_rule,
+  /* 1745 */  vadd_reg_masked_2_rule,
+  /* 1746 */  vadd_reg_masked_3_rule,
+  /* 1747 */  vadd_reg_masked_4_rule,
+  /* 1748 */  vadd_mem_masked_rule,
+  /* 1749 */  vadd_mem_masked_0_rule,
+  /* 1750 */  vadd_mem_masked_1_rule,
+  /* 1751 */  vadd_mem_masked_2_rule,
+  /* 1752 */  vadd_mem_masked_3_rule,
+  /* 1753 */  vadd_mem_masked_4_rule,
+  /* 1754 */  vxor_reg_masked_rule,
+  /* 1755 */  vxor_mem_masked_rule,
+  /* 1756 */  vor_reg_masked_rule,
+  /* 1757 */  vor_mem_masked_rule,
+  /* 1758 */  vand_reg_masked_rule,
+  /* 1759 */  vand_mem_masked_rule,
+  /* 1760 */  vsub_reg_masked_rule,
+  /* 1761 */  vsub_reg_masked_0_rule,
+  /* 1762 */  vsub_reg_masked_1_rule,
+  /* 1763 */  vsub_reg_masked_2_rule,
+  /* 1764 */  vsub_reg_masked_3_rule,
+  /* 1765 */  vsub_reg_masked_4_rule,
+  /* 1766 */  vsub_mem_masked_rule,
+  /* 1767 */  vsub_mem_masked_0_rule,
+  /* 1768 */  vsub_mem_masked_1_rule,
+  /* 1769 */  vsub_mem_masked_2_rule,
+  /* 1770 */  vsub_mem_masked_3_rule,
+  /* 1771 */  vsub_mem_masked_4_rule,
+  /* 1772 */  vmul_reg_masked_rule,
+  /* 1773 */  vmul_reg_masked_0_rule,
+  /* 1774 */  vmul_reg_masked_1_rule,
+  /* 1775 */  vmul_reg_masked_2_rule,
+  /* 1776 */  vmul_reg_masked_3_rule,
+  /* 1777 */  vmul_mem_masked_rule,
+  /* 1778 */  vmul_mem_masked_0_rule,
+  /* 1779 */  vmul_mem_masked_1_rule,
+  /* 1780 */  vmul_mem_masked_2_rule,
+  /* 1781 */  vmul_mem_masked_3_rule,
+  /* 1782 */  vsqrt_reg_masked_rule,
+  /* 1783 */  vsqrt_reg_masked_0_rule,
+  /* 1784 */  vdiv_reg_masked_rule,
+  /* 1785 */  vdiv_reg_masked_0_rule,
+  /* 1786 */  vdiv_mem_masked_rule,
+  /* 1787 */  vdiv_mem_masked_0_rule,
+  /* 1788 */  vrol_imm_masked_rule,
+  /* 1789 */  vrol_imm_masked_0_rule,
+  /* 1790 */  vrol_reg_masked_rule,
+  /* 1791 */  vrol_reg_masked_0_rule,
+  /* 1792 */  vlshift_imm_masked_rule,
+  /* 1793 */  vlshift_imm_masked_0_rule,
+  /* 1794 */  vlshift_imm_masked_1_rule,
+  /* 1795 */  vlshift_reg_masked_rule,
+  /* 1796 */  vlshift_reg_masked_0_rule,
+  /* 1797 */  vlshift_reg_masked_1_rule,
+  /* 1798 */  vlshiftv_reg_masked_rule,
+  /* 1799 */  vlshiftv_reg_masked_0_rule,
+  /* 1800 */  vlshiftv_reg_masked_1_rule,
+  /* 1801 */  vrshift_imm_masked_rule,
+  /* 1802 */  vrshift_imm_masked_0_rule,
+  /* 1803 */  vrshift_imm_masked_1_rule,
+  /* 1804 */  vrshift_reg_masked_rule,
+  /* 1805 */  vrshift_reg_masked_0_rule,
+  /* 1806 */  vrshift_reg_masked_1_rule,
+  /* 1807 */  vrshiftv_reg_masked_rule,
+  /* 1808 */  vrshiftv_reg_masked_0_rule,
+  /* 1809 */  vrshiftv_reg_masked_1_rule,
+  /* 1810 */  vurshift_imm_masked_rule,
+  /* 1811 */  vurshift_imm_masked_0_rule,
+  /* 1812 */  vurshift_imm_masked_1_rule,
+  /* 1813 */  vurshift_reg_masked_rule,
+  /* 1814 */  vurshift_reg_masked_0_rule,
+  /* 1815 */  vurshift_reg_masked_1_rule,
+  /* 1816 */  vurshiftv_reg_masked_rule,
+  /* 1817 */  vurshiftv_reg_masked_0_rule,
+  /* 1818 */  vurshiftv_reg_masked_1_rule,
+  /* 1819 */  vmaxv_reg_masked_rule,
+  /* 1820 */  vmaxv_mem_masked_rule,
+  /* 1821 */  vminv_reg_masked_rule,
+  /* 1822 */  vminv_mem_masked_rule,
+  /* 1823 */  vrearrangev_reg_masked_rule,
+  /* 1824 */  vabs_masked_rule,
+  /* 1825 */  vabs_masked_0_rule,
+  /* 1826 */  vabs_masked_1_rule,
+  /* 1827 */  vabs_masked_2_rule,
+  /* 1828 */  vfma_reg_masked_rule,
+  /* 1829 */  vfma_reg_masked_0_rule,
+  /* 1830 */  vfma_mem_masked_rule,
+  /* 1831 */  vfma_mem_masked_0_rule,
+  /* 1832 */  evcmp_masked_rule,
+  /* 1833 */  mask_all_evexI_LE32_rule,
+  /* 1834 */  mask_not_immLT8_rule,
+  /* 1835 */  mask_not_imm_rule,
+  /* 1836 */  long_to_maskLE8_avx_rule,
+  /* 1837 */  long_to_maskGT8_avx_rule,
+  /* 1838 */  mask_opers_evex_rule,
+  /* 1839 */  mask_opers_evex_0_rule,
+  /* 1840 */  mask_opers_evex_1_rule,
+  /* 1841 */  vternlog_reg_masked_rule,
+  /* 1842 */  vternlogd_mem_masked_rule,
+  /* 1843 */  FloatClassCheck_reg_reg_vfpclass_rule,
+  /* 1844 */  DoubleClassCheck_reg_reg_vfpclass_rule,
+  /* 1845 */  vector_addsub_saturating_subword_reg_rule,
+  /* 1846 */  vector_addsub_saturating_subword_reg_0_rule,
+  /* 1847 */  vector_addsub_saturating_unsigned_subword_reg_rule,
+  /* 1848 */  vector_addsub_saturating_unsigned_subword_reg_0_rule,
+  /* 1849 */  vector_addsub_saturating_reg_evex_rule,
+  /* 1850 */  vector_addsub_saturating_reg_evex_0_rule,
+  /* 1851 */  vector_addsub_saturating_reg_avx_rule,
+  /* 1852 */  vector_addsub_saturating_reg_avx_0_rule,
+  /* 1853 */  vector_add_saturating_unsigned_reg_evex_rule,
+  /* 1854 */  vector_add_saturating_unsigned_reg_avx_rule,
+  /* 1855 */  vector_sub_saturating_unsigned_reg_evex_rule,
+  /* 1856 */  vector_sub_saturating_unsigned_reg_avx_rule,
+  /* 1857 */  vector_addsub_saturating_subword_mem_rule,
+  /* 1858 */  vector_addsub_saturating_subword_mem_0_rule,
+  /* 1859 */  vector_addsub_saturating_unsigned_subword_mem_rule,
+  /* 1860 */  vector_addsub_saturating_unsigned_subword_mem_0_rule,
+  /* 1861 */  vector_addsub_saturating_subword_masked_reg_rule,
+  /* 1862 */  vector_addsub_saturating_subword_masked_reg_0_rule,
+  /* 1863 */  vector_addsub_saturating_unsigned_subword_masked_reg_rule,
+  /* 1864 */  vector_addsub_saturating_unsigned_subword_masked_reg_0_rule,
+  /* 1865 */  vector_addsub_saturating_subword_masked_mem_rule,
+  /* 1866 */  vector_addsub_saturating_subword_masked_mem_0_rule,
+  /* 1867 */  vector_addsub_saturating_unsigned_subword_masked_mem_rule,
+  /* 1868 */  vector_addsub_saturating_unsigned_subword_masked_mem_0_rule,
+  /* 1869 */  vector_selectfrom_twovectors_reg_evex_rule,
+  /* 1870 */  scalar_sqrt_HF_reg_rule,
+  /* 1871 */  scalar_binOps_HF_reg_rule,
+  /* 1872 */  scalar_binOps_HF_reg_0_rule,
+  /* 1873 */  scalar_binOps_HF_reg_1_rule,
+  /* 1874 */  scalar_binOps_HF_reg_2_rule,
+  /* 1875 */  scalar_minmax_HF_reg_avx10_2_rule,
+  /* 1876 */  scalar_minmax_HF_reg_avx10_2_0_rule,
+  /* 1877 */  scalar_minmax_HF_reg_rule,
+  /* 1878 */  scalar_minmax_HF_reg_0_rule,
+  /* 1879 */  scalar_fma_HF_reg_rule,
+  /* 1880 */  vector_binOps_HF_reg_rule,
+  /* 1881 */  vector_binOps_HF_reg_0_rule,
+  /* 1882 */  vector_binOps_HF_reg_1_rule,
+  /* 1883 */  vector_binOps_HF_reg_2_rule,
+  /* 1884 */  vector_binOps_HF_mem_rule,
+  /* 1885 */  vector_binOps_HF_mem_0_rule,
+  /* 1886 */  vector_binOps_HF_mem_1_rule,
+  /* 1887 */  vector_binOps_HF_mem_2_rule,
+  /* 1888 */  vector_binOps_HF_mem_3_rule,
+  /* 1889 */  vector_binOps_HF_mem_4_rule,
+  /* 1890 */  vector_fma_HF_reg_rule,
+  /* 1891 */  vector_fma_HF_mem_rule,
+  /* 1892 */  vector_minmax_HF_mem_avx10_2_rule,
+  /* 1893 */  vector_minmax_HF_mem_avx10_2_0_rule,
+  /* 1894 */  vector_minmax_HF_mem_avx10_2_1_rule,
+  /* 1895 */  vector_minmax_HF_mem_avx10_2_2_rule,
+  /* 1896 */  vector_minmax_HF_reg_avx10_2_rule,
+  /* 1897 */  vector_minmax_HF_reg_avx10_2_0_rule,
+  /* 1898 */  vector_minmax_HF_reg_rule,
+  /* 1899 */  vector_minmax_HF_reg_0_rule,
+  /* 1900 */  leaI_rReg_rReg_peep_rule,
+  /* 1901 */  leaI_rReg_immI_peep_rule,
+  /* 1902 */  leaI_rReg_immI2_peep_rule,
+  /* 1903 */  leaL_rReg_rReg_peep_rule,
+  /* 1904 */  leaL_rReg_immL32_peep_rule,
+  /* 1905 */  leaL_rReg_immI2_peep_rule,
+  /* 1906 */  compareAndSwapP_shenandoah_rule,
+  /* 1907 */  compareAndSwapP_shenandoah_0_rule,
+  /* 1908 */  compareAndSwapN_shenandoah_rule,
+  /* 1909 */  compareAndSwapN_shenandoah_0_rule,
+  /* 1910 */  compareAndExchangeN_shenandoah_rule,
+  /* 1911 */  compareAndExchangeP_shenandoah_rule,
+  /* 1912 */  zLoadP_rule,
+  /* 1913 */  zStoreP_rule,
+  /* 1914 */  zStorePNull_rule,
+  /* 1915 */  zCompareAndExchangeP_rule,
+  /* 1916 */  zCompareAndSwapP_rule,
+  /* 1917 */  zCompareAndSwapP_0_rule,
+  /* 1918 */  zXChgP_rule,
+  /* 1919 */  g1StoreP_rule,
+  /* 1920 */  g1StoreLSpecialOneOopOff0_rule,
+  /* 1921 */  g1StoreLSpecialOneOopOff4_rule,
+  /* 1922 */  g1StoreLSpecialTwoOops_rule,
+  /* 1923 */  g1StoreN_rule,
+  /* 1924 */  g1EncodePAndStoreN_rule,
+  /* 1925 */  g1CompareAndExchangeP_rule,
+  /* 1926 */  g1CompareAndExchangeN_rule,
+  /* 1927 */  g1CompareAndSwapP_rule,
+  /* 1928 */  g1CompareAndSwapP_0_rule,
+  /* 1929 */  g1CompareAndSwapN_rule,
+  /* 1930 */  g1CompareAndSwapN_0_rule,
+  /* 1931 */  g1GetAndSetP_rule,
+  /* 1932 */  g1GetAndSetN_rule,
+  /* 1933 */  g1LoadP_rule,
+  /* 1934 */  g1LoadN_rule,
   // last instruction
-  _BEGIN_INST_CHAIN_RULE = 316,
-  _END_INST_CHAIN_RULE  = 369,
-  _BEGIN_REMATERIALIZE   = 321,
-  _END_REMATERIALIZE    = 550,
-  _last_Mach_Node  = 1744 
+  _BEGIN_INST_CHAIN_RULE = 319,
+  _END_INST_CHAIN_RULE  = 372,
+  _BEGIN_REMATERIALIZE   = 324,
+  _END_REMATERIALIZE    = 565,
+  _last_Mach_Node  = 1935 
 };
 
 // Enumerate machine registers starting after reserved regs.
@@ -2854,6 +3048,7 @@ public:
   void  _sub_Op_CastLL(const Node *n);
   void  _sub_Op_CastVV(const Node *n);
   void  _sub_Op_CastX2P(const Node *n);
+  void  _sub_Op_CastI2N(const Node *n);
   void  _sub_Op_CastP2X(const Node *n);
   void  _sub_Op_CastPP(const Node *n);
   void  _sub_Op_CheckCastPP(const Node *n);
@@ -3074,6 +3269,7 @@ public:
   void  _sub_Op_StoreF(const Node *n);
   void  _sub_Op_StoreI(const Node *n);
   void  _sub_Op_StoreL(const Node *n);
+  void  _sub_Op_StoreLSpecial(const Node *n);
   void  _sub_Op_StoreP(const Node *n);
   void  _sub_Op_StoreN(const Node *n);
   void  _sub_Op_StoreNKlass(const Node *n);
@@ -3103,6 +3299,7 @@ public:
   void  _sub_Op_AddVL(const Node *n);
   void  _sub_Op_AddReductionVL(const Node *n);
   void  _sub_Op_AddVF(const Node *n);
+  void  _sub_Op_AddVHF(const Node *n);
   void  _sub_Op_AddReductionVF(const Node *n);
   void  _sub_Op_AddVD(const Node *n);
   void  _sub_Op_AddReductionVD(const Node *n);
@@ -3111,6 +3308,7 @@ public:
   void  _sub_Op_SubVI(const Node *n);
   void  _sub_Op_SubVL(const Node *n);
   void  _sub_Op_SubVF(const Node *n);
+  void  _sub_Op_SubVHF(const Node *n);
   void  _sub_Op_SubVD(const Node *n);
   void  _sub_Op_MulVB(const Node *n);
   void  _sub_Op_MulVS(const Node *n);
@@ -3122,9 +3320,12 @@ public:
   void  _sub_Op_MulReductionVF(const Node *n);
   void  _sub_Op_MulVD(const Node *n);
   void  _sub_Op_MulReductionVD(const Node *n);
+  void  _sub_Op_MulVHF(const Node *n);
   void  _sub_Op_MulAddVS2VI(const Node *n);
   void  _sub_Op_FmaVD(const Node *n);
   void  _sub_Op_FmaVF(const Node *n);
+  void  _sub_Op_FmaVHF(const Node *n);
+  void  _sub_Op_DivVHF(const Node *n);
   void  _sub_Op_DivVF(const Node *n);
   void  _sub_Op_DivVD(const Node *n);
   void  _sub_Op_AbsVB(const Node *n);
@@ -3137,6 +3338,7 @@ public:
   void  _sub_Op_NegVD(const Node *n);
   void  _sub_Op_SqrtVD(const Node *n);
   void  _sub_Op_SqrtVF(const Node *n);
+  void  _sub_Op_SqrtVHF(const Node *n);
   void  _sub_Op_LShiftCntV(const Node *n);
   void  _sub_Op_RShiftCntV(const Node *n);
   void  _sub_Op_LShiftVB(const Node *n);
@@ -3159,6 +3361,8 @@ public:
   void  _sub_Op_XorReductionV(const Node *n);
   void  _sub_Op_MinV(const Node *n);
   void  _sub_Op_MaxV(const Node *n);
+  void  _sub_Op_MinVHF(const Node *n);
+  void  _sub_Op_MaxVHF(const Node *n);
   void  _sub_Op_UMinV(const Node *n);
   void  _sub_Op_UMaxV(const Node *n);
   void  _sub_Op_MinReductionV(const Node *n);
@@ -3226,11 +3430,11 @@ public:
 
 
 // Total number of operands defined in architecture definition
-#define FIRST_OPERAND_CLASS   128
-#define NUM_OPERANDS          129
+#define FIRST_OPERAND_CLASS   131
+#define NUM_OPERANDS          132
 
 // Total number of instructions defined in architecture definition
-#define NUM_INSTRUCTIONS   1426
+#define NUM_INSTRUCTIONS   1612
 
 //----------------------------Declare classes derived from MachOper----------
 
@@ -4858,6 +5062,23 @@ public:
 #endif
 };
 
+class rFlagsRegUCFEOper : public MachOper { 
+private:
+  virtual const RegMask *in_RegMask(int index) const;
+public:
+  rFlagsRegUCFEOper() {}
+  virtual MachOper      *clone() const;
+  virtual uint           opcode() const { return RFLAGSREGUCFE; }
+  virtual const Type    *type() const { return TypeInt::CC /*flags*/; }
+
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual const char    *Name() const { return "rFlagsRegUCFE";}
+#endif
+};
+
 class regFOper : public MachOper { 
 private:
   virtual const RegMask *in_RegMask(int index) const;
@@ -5379,6 +5600,39 @@ public:
     st->print("/" UINT64_FORMAT_X_0, (uint64_t)_c1);
   }
   virtual const char    *Name() const { return "indPosIndexScaleOffset";}
+#endif
+};
+
+class indCompressedOopOper : public MachOper { 
+private:
+  virtual const RegMask *in_RegMask(int index) const;
+public:
+  indCompressedOopOper() {}
+  virtual MachOper      *clone() const;
+  virtual uint           opcode() const { return INDCOMPRESSEDOOP; }
+
+  virtual int            base(PhaseRegAlloc *ra_, const Node *node, int idx) const { 
+    return 0xc;
+  }
+  virtual int            index(PhaseRegAlloc *ra_, const Node *node, int idx) const { 
+    // Replacement variable: reg
+    return (int)ra_->get_encode(node->in(idx));
+  }
+  virtual int            index_position() const { return 0; }
+  virtual int            scale() const {
+    return 0x3;
+  }
+  virtual int            disp(PhaseRegAlloc *ra_, const Node *node, int idx) const { 
+    return 0x0;
+  }
+  virtual int            constant_disp() const {
+    return 0x0;
+  }
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual const char    *Name() const { return "indCompressedOop";}
 #endif
 };
 
@@ -6011,16 +6265,16 @@ public:
     return 0x5;
   }
   virtual int            less() const {
-    return 0xC;
+    return 0xc;
   }
   virtual int            greater_equal() const {
-    return 0xD;
+    return 0xd;
   }
   virtual int            less_equal() const {
-    return 0xE;
+    return 0xe;
   }
   virtual int            greater() const {
-    return 0xF;
+    return 0xf;
   }
   virtual int            overflow() const {
     return 0x0;
@@ -6253,6 +6507,76 @@ public:
   else if( _c0 == BoolTest::no_overflow ) st->print_raw("no");
   }
   virtual const char    *Name() const { return "cmpOpUCF2";}
+#endif
+};
+
+class cmpOpUCFEOper : public MachOper { 
+private:
+  virtual uint           num_edges() const { return 0; }
+private:
+  BoolTest::mask _c0;
+public:
+  virtual int ccode() const { 
+    switch (_c0) {
+    case  BoolTest::eq : return equal();
+    case  BoolTest::gt : return greater();
+    case  BoolTest::lt : return less();
+    case  BoolTest::ne : return not_equal();
+    case  BoolTest::le : return less_equal();
+    case  BoolTest::ge : return greater_equal();
+    case  BoolTest::overflow : return overflow();
+    case  BoolTest::no_overflow: return no_overflow();
+    default : ShouldNotReachHere(); return 0;
+    }
+  };
+  virtual void negate() { 
+    _c0 = (BoolTest::mask)((int)_c0^0x4); 
+  };
+public:
+  cmpOpUCFEOper(BoolTest::mask c0)  : _c0(c0) {}
+  virtual MachOper      *clone() const;
+  virtual uint           opcode() const { return CMPOPUCFE; }
+  virtual const Type    *type() const { ShouldNotCallThis(); return Type::BOTTOM; }
+
+  virtual int            equal() const {
+    return 0x4;
+  }
+  virtual int            not_equal() const {
+    return 0x5;
+  }
+  virtual int            less() const {
+    return 0x2;
+  }
+  virtual int            greater_equal() const {
+    return 0x3;
+  }
+  virtual int            less_equal() const {
+    return 0x6;
+  }
+  virtual int            greater() const {
+    return 0x7;
+  }
+  virtual int            overflow() const {
+    return 0x0;
+  }
+  virtual int            no_overflow() const {
+    return 0x1;
+  }
+
+#ifndef PRODUCT
+  virtual void           int_format(PhaseRegAlloc *ra, const MachNode *node, outputStream *st) const;
+  virtual void           ext_format(PhaseRegAlloc *ra, const MachNode *node, int idx, outputStream *st) const;
+  virtual void           dump_spec(outputStream *st) const {
+       if( _c0 == BoolTest::eq ) st->print_raw("e");
+  else if( _c0 == BoolTest::ne ) st->print_raw("ne");
+  else if( _c0 == BoolTest::le ) st->print_raw("be");
+  else if( _c0 == BoolTest::ge ) st->print_raw("ae");
+  else if( _c0 == BoolTest::lt ) st->print_raw("b");
+  else if( _c0 == BoolTest::gt ) st->print_raw("a");
+  else if( _c0 == BoolTest::overflow ) st->print_raw("o");
+  else if( _c0 == BoolTest::no_overflow ) st->print_raw("no");
+  }
+  virtual const char    *Name() const { return "cmpOpUCFE";}
 #endif
 };
 
@@ -6499,19 +6823,19 @@ public:
 // Pipeline_Use_Cycle_Mask Class
 class Pipeline_Use_Cycle_Mask {
 protected:
-  uint _mask;
+  uint32_t _mask;
 
 public:
   Pipeline_Use_Cycle_Mask() : _mask(0) {}
 
-  Pipeline_Use_Cycle_Mask(uint mask) : _mask(mask) {}
+  Pipeline_Use_Cycle_Mask(uint32_t mask) : _mask(mask) {}
 
   bool overlaps(const Pipeline_Use_Cycle_Mask &in2) const {
     return ((_mask & in2._mask) != 0);
   }
 
   Pipeline_Use_Cycle_Mask& operator<<=(int n) {
-    _mask <<= n;
+    _mask <<= (n < 32) ? n : 31;
     return *this;
   }
 
@@ -6630,7 +6954,6 @@ public:
   enum {
     _variable_size_instructions = 1,
     _fixed_size_instructions = 0,
-    _branch_has_delay_slot = 0,
     _max_instrs_per_bundle = 3,
     _max_bundles_per_cycle = 1,
     _max_instrs_per_cycle = 3
@@ -6656,7 +6979,6 @@ private:
   const unsigned char                   _fixed_latency;
   const unsigned char                   _instruction_count;
   const bool                            _has_fixed_latency;
-  const bool                            _has_branch_delay;
   const bool                            _has_multiple_bundles;
   const bool                            _force_serialization;
   const bool                            _may_have_no_code;
@@ -6671,7 +6993,6 @@ public:
            bool                            has_fixed_latency,
            uint                            fixed_latency,
            uint                            instruction_count,
-           bool                            has_branch_delay,
            bool                            has_multiple_bundles,
            bool                            force_serialization,
            bool                            may_have_no_code,
@@ -6684,7 +7005,6 @@ public:
   , _fixed_latency(fixed_latency)
   , _instruction_count(instruction_count)
   , _has_fixed_latency(has_fixed_latency)
-  , _has_branch_delay(has_branch_delay)
   , _has_multiple_bundles(has_multiple_bundles)
   , _force_serialization(force_serialization)
   , _may_have_no_code(may_have_no_code)
@@ -6733,9 +7053,6 @@ public:
   uint instructionCount() const {
     return (_instruction_count); }
 
-  bool hasBranchDelay() const {
-    return (_has_branch_delay); }
-
   bool hasMultipleBundles() const {
     return (_has_multiple_bundles); }
 
@@ -6757,55 +7074,18 @@ public:
 // Bundle class
 class Bundle {
 protected:
-  enum {
-    _unused_delay                   = 0x0,
-    _use_nop_delay                  = 0x1,
-    _use_unconditional_delay        = 0x2,
-    _use_conditional_delay          = 0x3,
-    _used_in_conditional_delay      = 0x4,
-    _used_in_unconditional_delay    = 0x5,
-    _used_in_all_conditional_delays = 0x6,
-
-    _use_delay                      = 0x3,
-    _used_in_delay                  = 0x4
-  };
-
-  uint _flags          : 3,
-       _starts_bundle  : 1,
+  uint _starts_bundle  : 1,
        _instr_count    : 2,
        _resources_used : 11;
 public:
-  Bundle() : _flags(_unused_delay), _starts_bundle(0), _instr_count(0), _resources_used(0) {}
+  Bundle() : _starts_bundle(0), _instr_count(0), _resources_used(0) {}
 
   void set_instr_count(uint i) { _instr_count  = i; }
   void set_resources_used(uint i) { _resources_used   = i; }
-  void clear_usage() { _flags = _unused_delay; }
   void set_starts_bundle() { _starts_bundle = true; }
-  uint flags() const { return (_flags); }
   uint instr_count() const { return (_instr_count); }
   uint resources_used() const { return (_resources_used); }
   bool starts_bundle() const { return (_starts_bundle != 0); }
-  void set_use_nop_delay() { _flags = _use_nop_delay; }
-  void set_use_unconditional_delay() { _flags = _use_unconditional_delay; }
-  void set_use_conditional_delay() { _flags = _use_conditional_delay; }
-  void set_used_in_unconditional_delay() { _flags = _used_in_unconditional_delay; }
-  void set_used_in_conditional_delay() { _flags = _used_in_conditional_delay; }
-  void set_used_in_all_conditional_delays() { _flags = _used_in_all_conditional_delays; }
-  bool use_nop_delay() { return (_flags == _use_nop_delay); }
-  bool use_unconditional_delay() { return (_flags == _use_unconditional_delay); }
-  bool use_conditional_delay() { return (_flags == _use_conditional_delay); }
-  bool used_in_unconditional_delay() { return (_flags == _used_in_unconditional_delay); }
-  bool used_in_conditional_delay() { return (_flags == _used_in_conditional_delay); }
-  bool used_in_all_conditional_delays() { return (_flags == _used_in_all_conditional_delays); }
-  bool use_delay() { return ((_flags & _use_delay) != 0); }
-  bool used_in_delay() { return ((_flags & _used_in_delay) != 0); }
-
-  enum {
-    _nop_count = 1
-  };
-
-  static void initialize_nops(MachNode *nop_list[1]);
-
 #ifndef PRODUCT
   void dump(outputStream *st = tty) const;
 #endif
@@ -6813,6 +7093,37 @@ public:
 
 
 //----------------------------Declare classes derived from MachNode----------
+
+class ShouldNotReachHereNode : public MachHaltNode { 
+private:
+  MachOper *_opnd_array[1];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return ShouldNotReachHere_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_Halt; }
+  virtual uint           oper_input_base() const { return 5; }
+public:
+  ShouldNotReachHereNode() {  _num_opnds = 1; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(ShouldNotReachHereNode); }
+  virtual bool           pinned() const { return true; }
+  virtual const Node *is_block_proj() const { return this; }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "ShouldNotReachHere";}
+#endif
+};
 
 class MoveF2VLNode : public MachNode { 
 private:
@@ -8101,6 +8412,34 @@ public:
 #endif
 };
 
+class maxF_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return maxF_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxF; }
+public:
+  maxF_reg_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(maxF_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "maxF_reg_avx10_2";}
+#endif
+};
+
 class maxF_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[6];
@@ -8158,6 +8497,34 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "maxF_reduction_reg";}
+#endif
+};
+
+class maxD_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return maxD_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxD; }
+public:
+  maxD_reg_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(maxD_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "maxD_reg_avx10_2";}
 #endif
 };
 
@@ -8221,6 +8588,34 @@ public:
 #endif
 };
 
+class minF_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minF_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinF; }
+public:
+  minF_reg_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minF_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minF_reg_avx10_2";}
+#endif
+};
+
 class minF_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[6];
@@ -8278,6 +8673,34 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "minF_reduction_reg";}
+#endif
+};
+
+class minD_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minD_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinD; }
+public:
+  minD_reg_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minD_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minD_reg_avx10_2";}
 #endif
 };
 
@@ -8598,6 +9021,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
+  virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
   virtual uint           oper_input_base() const { return 2; }
 public:
   leaPCompressedOopOffsetNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
@@ -8628,6 +9052,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
+  virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
   virtual uint           oper_input_base() const { return 2; }
 public:
   leaP8NarrowNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
@@ -8658,6 +9083,7 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_AddP; }
+  virtual int            peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_);
   virtual uint           oper_input_base() const { return 2; }
 public:
   leaP32NarrowNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
@@ -11817,6 +12243,65 @@ public:
 #endif
 };
 
+class castI2NNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castI2N_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastI2N; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castI2NNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castI2NNode); }
+  // Rematerialize castI2N
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castI2N";}
+#endif
+};
+
+class castN2XNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castN2X_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastP2X; }
+public:
+  castN2XNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castN2XNode); }
+  // Rematerialize castN2X
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castN2X";}
+#endif
+};
+
 class castP2XNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -12264,6 +12749,39 @@ public:
 #endif
 };
 
+class cmovI_reg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_reg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveI; }
+  virtual int            cisc_operand() const { return 4; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmovI_reg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovI_reg_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_reg_ndd";}
+#endif
+};
+
 class cmovI_imm_01UNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -12327,6 +12845,39 @@ public:
 #endif
 };
 
+class cmovI_regU_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_regU_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveI; }
+  virtual int            cisc_operand() const { return 4; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmovI_regU_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovI_regU_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_regU_ndd";}
+#endif
+};
+
 class cmovI_imm_01UCFNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -12353,6 +12904,35 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovI_imm_01UCF";}
+#endif
+};
+
+class cmovI_imm_01UCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_imm_01UCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveI; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+public:
+  cmovI_imm_01UCFENode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovI_imm_01UCFENode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_imm_01UCFE";}
 #endif
 };
 
@@ -12388,6 +12968,39 @@ public:
 #endif
 };
 
+class cmovI_regUCFE_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_regUCFE_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveI; }
+  virtual int            cisc_operand() const { return 4; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmovI_regUCFE_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovI_regUCFE_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_regUCFE_ndd";}
+#endif
+};
+
 class cmovI_regUCF2_neNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -12419,7 +13032,7 @@ public:
 
 class cmovI_regUCF2_eqNode : public MachNode { 
 private:
-  MachOper *_opnd_array[5];
+  MachOper *_opnd_array[6];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -12436,8 +13049,10 @@ private:
   virtual int            ideal_Opcode() const { return Op_CMoveI; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
 public:
-  cmovI_regUCF2_eqNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  cmovI_regUCF2_eqNode() {  _num_opnds = 6; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(cmovI_regUCF2_eqNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
@@ -12475,6 +13090,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovI_mem";}
+#endif
+};
+
+class cmovI_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmovI_rReg_rReg_mem_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmovI_rReg_rReg_mem_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_rReg_rReg_mem_ndd";}
 #endif
 };
 
@@ -12540,6 +13186,68 @@ public:
 #endif
 };
 
+class cmovI_rReg_rReg_memU_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_rReg_rReg_memU_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmovI_rReg_rReg_memU_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmovI_rReg_rReg_memU_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_rReg_rReg_memU_ndd";}
+#endif
+};
+
+class cmovI_rReg_rReg_memUCFE_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_rReg_rReg_memUCFE_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmovI_rReg_rReg_memUCFE_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmovI_rReg_rReg_memUCFE_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_rReg_rReg_memUCFE_ndd";}
+#endif
+};
+
 class cmovN_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -12567,6 +13275,35 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovN_reg";}
+#endif
+};
+
+class cmovN_reg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovN_reg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveN; }
+public:
+  cmovN_reg_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovN_reg_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { const Type *t = in(oper_input_base()+1)->bottom_type(); return (req() <= oper_input_base()+2) ? t : t->meet(in(oper_input_base()+2)->bottom_type()); } // CMoveN
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovN_reg_ndd";}
 #endif
 };
 
@@ -12625,6 +13362,64 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovN_regUCF";}
+#endif
+};
+
+class cmovN_regU_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovN_regU_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveN; }
+public:
+  cmovN_regU_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovN_regU_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { const Type *t = in(oper_input_base()+1)->bottom_type(); return (req() <= oper_input_base()+2) ? t : t->meet(in(oper_input_base()+2)->bottom_type()); } // CMoveN
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovN_regU_ndd";}
+#endif
+};
+
+class cmovN_regUCFE_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovN_regUCFE_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveN; }
+public:
+  cmovN_regUCFE_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovN_regUCFE_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { const Type *t = in(oper_input_base()+1)->bottom_type(); return (req() <= oper_input_base()+2) ? t : t->meet(in(oper_input_base()+2)->bottom_type()); } // CMoveN
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovN_regUCFE_ndd";}
 #endif
 };
 
@@ -12718,6 +13513,35 @@ public:
 #endif
 };
 
+class cmovP_reg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovP_reg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveP; }
+public:
+  cmovP_reg_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovP_reg_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { const Type *t = in(oper_input_base()+1)->bottom_type(); return (req() <= oper_input_base()+2) ? t : t->meet(in(oper_input_base()+2)->bottom_type()); } // CMoveP
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovP_reg_ndd";}
+#endif
+};
+
 class cmovP_regUNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -12748,6 +13572,35 @@ public:
 #endif
 };
 
+class cmovP_regU_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovP_regU_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveP; }
+public:
+  cmovP_regU_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovP_regU_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { const Type *t = in(oper_input_base()+1)->bottom_type(); return (req() <= oper_input_base()+2) ? t : t->meet(in(oper_input_base()+2)->bottom_type()); } // CMoveP
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovP_regU_ndd";}
+#endif
+};
+
 class cmovP_regUCFNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -12773,6 +13626,35 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovP_regUCF";}
+#endif
+};
+
+class cmovP_regUCFE_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovP_regUCFE_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveP; }
+public:
+  cmovP_regUCFE_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovP_regUCFE_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { const Type *t = in(oper_input_base()+1)->bottom_type(); return (req() <= oper_input_base()+2) ? t : t->meet(in(oper_input_base()+2)->bottom_type()); } // CMoveP
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovP_regUCFE_ndd";}
 #endif
 };
 
@@ -12899,6 +13781,39 @@ public:
 #endif
 };
 
+class cmovL_reg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovL_reg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveL; }
+  virtual int            cisc_operand() const { return 4; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmovL_reg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovL_reg_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovL_reg_ndd";}
+#endif
+};
+
 class cmovL_memNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -12928,6 +13843,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovL_mem";}
+#endif
+};
+
+class cmovL_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovL_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmovL_rReg_rReg_mem_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmovL_rReg_rReg_mem_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovL_rReg_rReg_mem_ndd";}
 #endif
 };
 
@@ -12994,6 +13940,39 @@ public:
 #endif
 };
 
+class cmovL_regU_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovL_regU_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveL; }
+  virtual int            cisc_operand() const { return 4; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmovL_regU_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovL_regU_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovL_regU_ndd";}
+#endif
+};
+
 class cmovL_imm_01UCFNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -13020,6 +13999,35 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovL_imm_01UCF";}
+#endif
+};
+
+class cmovL_imm_01UCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovL_imm_01UCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveL; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+public:
+  cmovL_imm_01UCFENode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovL_imm_01UCFENode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovL_imm_01UCFE";}
 #endif
 };
 
@@ -13052,6 +14060,39 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovL_regUCF";}
+#endif
+};
+
+class cmovL_regUCFE_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovL_regUCFE_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveL; }
+  virtual int            cisc_operand() const { return 4; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmovL_regUCFE_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovL_regUCFE_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovL_regUCFE_ndd";}
 #endif
 };
 
@@ -13175,6 +14216,68 @@ public:
 #endif
 };
 
+class cmovL_rReg_rReg_memU_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovL_rReg_rReg_memU_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmovL_rReg_rReg_memU_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmovL_rReg_rReg_memU_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovL_rReg_rReg_memU_ndd";}
+#endif
+};
+
+class cmovL_rReg_rReg_memUCFE_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovL_rReg_rReg_memUCFE_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmovL_rReg_rReg_memUCFE_nddNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmovL_rReg_rReg_memUCFE_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovL_rReg_rReg_memUCFE_ndd";}
+#endif
+};
+
 class cmovF_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
@@ -13257,6 +14360,35 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmovF_regUCF";}
+#endif
+};
+
+class cmovF_regUCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovF_regUCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+public:
+  cmovF_regUCFENode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovF_regUCFENode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovF_regUCFE";}
 #endif
 };
 
@@ -13345,6 +14477,35 @@ public:
 #endif
 };
 
+class cmovD_regUCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovD_regUCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CMoveD; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+public:
+  cmovD_regUCFENode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovD_regUCFENode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovD_regUCFE";}
+#endif
+};
+
 class addI_rRegNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -13382,6 +14543,41 @@ public:
 #endif
 };
 
+class addI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  addI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(addI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addI_rReg_ndd";}
+#endif
+};
+
 class addI_rReg_immNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -13411,6 +14607,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "addI_rReg_imm";}
+#endif
+};
+
+class addI_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addI_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  addI_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(addI_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addI_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class addI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  addI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(addI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addI_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -13479,6 +14743,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "addI_rReg_mem_0";}
+#endif
+};
+
+class addI_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addI_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  addI_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(addI_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addI_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class addI_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addI_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  addI_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(addI_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addI_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -13613,6 +14943,74 @@ public:
 #endif
 };
 
+class incI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return incI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  incI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(incI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "incI_rReg_ndd";}
+#endif
+};
+
+class incI_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return incI_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  incI_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(incI_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "incI_rReg_mem_ndd";}
+#endif
+};
+
 class incI_memNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[4];
@@ -13675,6 +15073,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "decI_rReg";}
+#endif
+};
+
+class decI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return decI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  decI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(decI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "decI_rReg_ndd";}
+#endif
+};
+
+class decI_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return decI_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  decI_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(decI_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "decI_rReg_mem_ndd";}
 #endif
 };
 
@@ -13916,6 +15382,41 @@ public:
 #endif
 };
 
+class addL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addL_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  addL_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(addL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addL_rReg_ndd";}
+#endif
+};
+
 class addL_rReg_immNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -13945,6 +15446,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "addL_rReg_imm";}
+#endif
+};
+
+class addL_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addL_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  addL_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(addL_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addL_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class addL_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addL_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  addL_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(addL_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addL_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -14013,6 +15582,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "addL_rReg_mem_0";}
+#endif
+};
+
+class addL_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addL_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  addL_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(addL_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addL_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class addL_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return addL_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  addL_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(addL_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "addL_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -14147,6 +15782,69 @@ public:
 #endif
 };
 
+class incL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return incL_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+public:
+  incL_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(incL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "incL_rReg_ndd";}
+#endif
+};
+
+class incL_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return incL_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  incL_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(incL_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "incL_rReg_mem_ndd";}
+#endif
+};
+
 class incL_memNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[4];
@@ -14209,6 +15907,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "decL_rReg";}
+#endif
+};
+
+class decL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return decL_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  decL_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(decL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "decL_rReg_ndd";}
+#endif
+};
+
+class decL_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return decL_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  decL_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(decL_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "decL_rReg_mem_ndd";}
 #endif
 };
 
@@ -14573,6 +16339,38 @@ public:
 #endif
 };
 
+class castII_checkedNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castII_checked_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastII; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castII_checkedNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castII_checkedNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castII_checked";}
+#endif
+};
+
 class castLLNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[2];
@@ -14602,6 +16400,70 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "castLL";}
+#endif
+};
+
+class castLL_checked_L32Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castLL_checked_L32_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastLL; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castLL_checked_L32Node() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castLL_checked_L32Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castLL_checked_L32";}
+#endif
+};
+
+class castLL_checkedNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castLL_checked_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CastLL; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castLL_checkedNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castLL_checkedNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castLL_checked";}
 #endif
 };
 
@@ -15990,6 +17852,109 @@ public:
 #endif
 };
 
+class subI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubI; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  subI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(subI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subI_rReg_ndd";}
+#endif
+};
+
+class subI_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subI_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  subI_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(subI_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subI_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class subI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  subI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(subI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subI_rReg_mem_imm_ndd";}
+#endif
+};
+
 class subI_rReg_memNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -16021,6 +17986,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "subI_rReg_mem";}
+#endif
+};
+
+class subI_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subI_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  subI_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(subI_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subI_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class subI_rReg_mem_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subI_rReg_mem_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  subI_rReg_mem_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(subI_rReg_mem_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subI_rReg_mem_rReg_ndd";}
 #endif
 };
 
@@ -16093,6 +18124,109 @@ public:
 #endif
 };
 
+class subL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subL_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubL; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  subL_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(subL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subL_rReg_ndd";}
+#endif
+};
+
+class subL_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subL_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  subL_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(subL_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subL_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class subL_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subL_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  subL_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(subL_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subL_rReg_mem_imm_ndd";}
+#endif
+};
+
 class subL_rReg_memNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -16124,6 +18258,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "subL_rReg_mem";}
+#endif
+};
+
+class subL_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subL_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  subL_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(subL_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subL_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class subL_rReg_mem_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return subL_rReg_mem_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  subL_rReg_mem_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(subL_rReg_mem_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "subL_rReg_mem_rReg_ndd";}
 #endif
 };
 
@@ -16223,6 +18423,36 @@ public:
 #endif
 };
 
+class negI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return negI_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubI; }
+public:
+  negI_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(negI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "negI_rReg_ndd";}
+#endif
+};
+
 class negI_rReg_2Node : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -16251,6 +18481,36 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "negI_rReg_2";}
+#endif
+};
+
+class negI_rReg_2_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return negI_rReg_2_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_NegI; }
+public:
+  negI_rReg_2_nddNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(negI_rReg_2_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "negI_rReg_2_ndd";}
 #endif
 };
 
@@ -16318,6 +18578,36 @@ public:
 #endif
 };
 
+class negL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return negL_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubL; }
+public:
+  negL_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(negL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "negL_rReg_ndd";}
+#endif
+};
+
 class negL_rReg_2Node : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -16346,6 +18636,36 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "negL_rReg_2";}
+#endif
+};
+
+class negL_rReg_2_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return negL_rReg_2_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_NegL; }
+public:
+  negL_rReg_2_nddNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(negL_rReg_2_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "negL_rReg_2_ndd";}
 #endif
 };
 
@@ -16415,6 +18735,41 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "mulI_rReg";}
+#endif
+};
+
+class mulI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return mulI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulI; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  mulI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(mulI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "mulI_rReg_ndd";}
 #endif
 };
 
@@ -16521,6 +18876,72 @@ public:
 #endif
 };
 
+class mulI_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return mulI_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  mulI_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(mulI_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "mulI_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class mulI_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return mulI_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  mulI_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(mulI_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "mulI_rReg_rReg_mem_ndd_0";}
+#endif
+};
+
 class mulI_mem_immNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -16615,6 +19036,41 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "mulL_rReg";}
+#endif
+};
+
+class mulL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return mulL_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulL; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  mulL_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(mulL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "mulL_rReg_ndd";}
 #endif
 };
 
@@ -16718,6 +19174,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "mulL_mem_0";}
+#endif
+};
+
+class mulL_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return mulL_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  mulL_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(mulL_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "mulL_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class mulL_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return mulL_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  mulL_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(mulL_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "mulL_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -17210,6 +19732,36 @@ public:
 #endif
 };
 
+class salI_rReg_immI2_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return salI_rReg_immI2_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftI; }
+public:
+  salI_rReg_immI2_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(salI_rReg_immI2_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "salI_rReg_immI2_ndd";}
+#endif
+};
+
 class salI_rReg_immNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -17238,6 +19790,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "salI_rReg_imm";}
+#endif
+};
+
+class salI_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return salI_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  salI_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(salI_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "salI_rReg_imm_ndd";}
+#endif
+};
+
+class salI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return salI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  salI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(salI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "salI_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -17433,6 +20053,74 @@ public:
 #endif
 };
 
+class sarI_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return sarI_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RShiftI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  sarI_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(sarI_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "sarI_rReg_imm_ndd";}
+#endif
+};
+
+class sarI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return sarI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RShiftI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  sarI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(sarI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "sarI_rReg_mem_imm_ndd";}
+#endif
+};
+
 class sarI_mem_immNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[4];
@@ -17622,6 +20310,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "shrI_rReg_imm";}
+#endif
+};
+
+class shrI_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return shrI_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_URShiftI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  shrI_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(shrI_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "shrI_rReg_imm_ndd";}
+#endif
+};
+
+class shrI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return shrI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_URShiftI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  shrI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(shrI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "shrI_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -17818,6 +20574,36 @@ public:
 #endif
 };
 
+class salL_rReg_immI2_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return salL_rReg_immI2_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftL; }
+public:
+  salL_rReg_immI2_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(salL_rReg_immI2_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "salL_rReg_immI2_ndd";}
+#endif
+};
+
 class salL_rReg_immNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -17846,6 +20632,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "salL_rReg_imm";}
+#endif
+};
+
+class salL_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return salL_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  salL_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(salL_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "salL_rReg_imm_ndd";}
+#endif
+};
+
+class salL_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return salL_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  salL_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(salL_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "salL_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -18041,6 +20895,74 @@ public:
 #endif
 };
 
+class sarL_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return sarL_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RShiftL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  sarL_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(sarL_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "sarL_rReg_imm_ndd";}
+#endif
+};
+
+class sarL_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return sarL_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RShiftL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  sarL_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(sarL_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "sarL_rReg_mem_imm_ndd";}
+#endif
+};
+
 class sarL_mem_immNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[4];
@@ -18230,6 +21152,74 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "shrL_rReg_imm";}
+#endif
+};
+
+class shrL_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return shrL_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_URShiftL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  shrL_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(shrL_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "shrL_rReg_imm_ndd";}
+#endif
+};
+
+class shrL_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return shrL_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_URShiftL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  shrL_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(shrL_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "shrL_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -18508,17 +21498,12 @@ public:
   }
   virtual uint           rule() const { return rolI_immI8_rule; }
 private:
-  const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
-  virtual int            cisc_operand() const { return 1; }
-  virtual MachNode      *cisc_version(int offset);
-  virtual void           use_cisc_RegMask();
-  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
-  rolI_immI8Node() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  rolI_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(rolI_immI8Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -18548,7 +21533,7 @@ private:
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  rolI_mem_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  rolI_mem_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(rolI_mem_immI8Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -18588,6 +21573,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rolI_rReg_Var";}
+#endif
+};
+
+class rolI_rReg_Var_nddNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rolI_rReg_Var_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RotateLeft; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  rolI_rReg_Var_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rolI_rReg_Var_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rolI_rReg_Var_ndd";}
 #endif
 };
 
@@ -18637,17 +21653,12 @@ public:
   }
   virtual uint           rule() const { return rorI_immI8_rule; }
 private:
-  const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateRight; }
-  virtual int            cisc_operand() const { return 1; }
-  virtual MachNode      *cisc_version(int offset);
-  virtual void           use_cisc_RegMask();
-  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
-  rorI_immI8Node() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  rorI_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(rorI_immI8Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -18677,7 +21688,7 @@ private:
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  rorI_mem_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  rorI_mem_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(rorI_mem_immI8Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -18717,6 +21728,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rorI_rReg_Var";}
+#endif
+};
+
+class rorI_rReg_Var_nddNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rorI_rReg_Var_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RotateRight; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  rorI_rReg_Var_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rorI_rReg_Var_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rorI_rReg_Var_ndd";}
 #endif
 };
 
@@ -18766,17 +21808,12 @@ public:
   }
   virtual uint           rule() const { return rolL_immI8_rule; }
 private:
-  const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_RotateLeft; }
-  virtual int            cisc_operand() const { return 1; }
-  virtual MachNode      *cisc_version(int offset);
-  virtual void           use_cisc_RegMask();
-  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
   virtual uint           oper_input_base() const { return 1; }
 public:
-  rolL_immI8Node() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  rolL_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(rolL_immI8Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -18806,7 +21843,7 @@ private:
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  rolL_mem_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  rolL_mem_immI8Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(rolL_mem_immI8Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
@@ -18846,6 +21883,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rolL_rReg_Var";}
+#endif
+};
+
+class rolL_rReg_Var_nddNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rolL_rReg_Var_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RotateLeft; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  rolL_rReg_Var_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rolL_rReg_Var_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rolL_rReg_Var_ndd";}
 #endif
 };
 
@@ -18975,6 +22043,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rorL_rReg_Var";}
+#endif
+};
+
+class rorL_rReg_Var_nddNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rorL_rReg_Var_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_RotateRight; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  rorL_rReg_Var_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rorL_rReg_Var_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rorL_rReg_Var_ndd";}
 #endif
 };
 
@@ -19139,6 +22238,41 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "andI_rReg";}
+#endif
+};
+
+class andI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndI; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  andI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(andI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andI_rReg_ndd";}
 #endif
 };
 
@@ -19335,6 +22469,74 @@ public:
 #endif
 };
 
+class andI_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andI_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  andI_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(andI_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andI_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class andI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  andI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(andI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andI_rReg_mem_imm_ndd";}
+#endif
+};
+
 class andI_rReg_memNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -19400,6 +22602,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "andI_rReg_mem_0";}
+#endif
+};
+
+class andI_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andI_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  andI_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(andI_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andI_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class andI_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andI_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  andI_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(andI_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andI_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -20118,6 +23386,41 @@ public:
 #endif
 };
 
+class orI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrI; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  orI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orI_rReg_ndd";}
+#endif
+};
+
 class orI_rReg_immNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -20146,6 +23449,104 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "orI_rReg_imm";}
+#endif
+};
+
+class orI_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orI_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrI; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  orI_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orI_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orI_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class orI_rReg_imm_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orI_rReg_imm_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrI; }
+public:
+  orI_rReg_imm_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orI_rReg_imm_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orI_rReg_imm_rReg_ndd";}
+#endif
+};
+
+class orI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  orI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(orI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orI_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -20214,6 +23615,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "orI_rReg_mem_0";}
+#endif
+};
+
+class orI_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orI_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  orI_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(orI_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orI_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class orI_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orI_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  orI_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(orI_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orI_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -20418,6 +23885,41 @@ public:
 #endif
 };
 
+class xorI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorI_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorI; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  xorI_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(xorI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorI_rReg_ndd";}
+#endif
+};
+
 class xorI_rReg_im1Node : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -20444,6 +23946,34 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "xorI_rReg_im1";}
+#endif
+};
+
+class xorI_rReg_im1_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorI_rReg_im1_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorI; }
+public:
+  xorI_rReg_im1_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(xorI_rReg_im1_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorI_rReg_im1_ndd";}
 #endif
 };
 
@@ -20475,6 +24005,69 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "xorI_rReg_imm";}
+#endif
+};
+
+class xorI_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorI_rReg_rReg_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorI; }
+public:
+  xorI_rReg_rReg_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(xorI_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorI_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class xorI_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorI_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  xorI_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(xorI_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorI_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -20543,6 +24136,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "xorI_rReg_mem_0";}
+#endif
+};
+
+class xorI_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorI_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  xorI_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(xorI_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorI_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class xorI_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorI_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorI; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  xorI_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(xorI_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorI_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -20747,6 +24406,41 @@ public:
 #endif
 };
 
+class andL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andL_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndL; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  andL_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(andL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andL_rReg_ndd";}
+#endif
+};
+
 class andL_rReg_imm255Node : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -20834,6 +24528,74 @@ public:
 #endif
 };
 
+class andL_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andL_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  andL_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(andL_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andL_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class andL_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andL_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  andL_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(andL_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andL_rReg_mem_imm_ndd";}
+#endif
+};
+
 class andL_rReg_memNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -20899,6 +24661,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "andL_rReg_mem_0";}
+#endif
+};
+
+class andL_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andL_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  andL_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(andL_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andL_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class andL_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return andL_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AndL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  andL_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(andL_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "andL_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -21521,6 +25349,41 @@ public:
 #endif
 };
 
+class orL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  orL_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_ndd";}
+#endif
+};
+
 class orL_rReg_castP2XNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -21583,6 +25446,66 @@ public:
 #endif
 };
 
+class orL_rReg_castP2X_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_castP2X_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+public:
+  orL_rReg_castP2X_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orL_rReg_castP2X_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_castP2X_ndd";}
+#endif
+};
+
+class orL_rReg_castP2X_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_castP2X_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+public:
+  orL_rReg_castP2X_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orL_rReg_castP2X_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_castP2X_ndd_0";}
+#endif
+};
+
 class orL_rReg_immNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -21611,6 +25534,104 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "orL_rReg_imm";}
+#endif
+};
+
+class orL_rReg_rReg_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_rReg_imm_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  orL_rReg_rReg_imm_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orL_rReg_rReg_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_rReg_imm_ndd";}
+#endif
+};
+
+class orL_rReg_imm_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_imm_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+public:
+  orL_rReg_imm_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(orL_rReg_imm_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_imm_rReg_ndd";}
+#endif
+};
+
+class orL_rReg_mem_imm_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_mem_imm_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  orL_rReg_mem_imm_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(orL_rReg_mem_imm_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_mem_imm_ndd";}
 #endif
 };
 
@@ -21679,6 +25700,72 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "orL_rReg_mem_0";}
+#endif
+};
+
+class orL_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  orL_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(orL_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_rReg_mem_ndd";}
+#endif
+};
+
+class orL_rReg_rReg_mem_ndd_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return orL_rReg_rReg_mem_ndd_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_OrL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  orL_rReg_rReg_mem_ndd_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(orL_rReg_rReg_mem_ndd_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "orL_rReg_rReg_mem_ndd_0";}
 #endif
 };
 
@@ -21850,6 +25937,41 @@ public:
 #endif
 };
 
+class xorL_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorL_rReg_ndd_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorL; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  xorL_rReg_nddNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(xorL_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorL_rReg_ndd";}
+#endif
+};
+
 class xorL_rReg_im1Node : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -21876,6 +25998,34 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "xorL_rReg_im1";}
+#endif
+};
+
+class xorL_rReg_im1_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorL_rReg_im1_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorL; }
+public:
+  xorL_rReg_im1_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(xorL_rReg_im1_nddNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorL_rReg_im1_ndd";}
 #endif
 };
 
@@ -21910,6 +26060,69 @@ public:
 #endif
 };
 
+class xorL_rReg_rReg_immNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorL_rReg_rReg_imm_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorL; }
+public:
+  xorL_rReg_rReg_immNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(xorL_rReg_rReg_immNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorL_rReg_rReg_imm";}
+#endif
+};
+
+class xorL_rReg_mem_immNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorL_rReg_mem_imm_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  xorL_rReg_mem_immNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(xorL_rReg_mem_immNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorL_rReg_mem_imm";}
+#endif
+};
+
 class xorL_rReg_memNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -21941,6 +26154,39 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "xorL_rReg_mem";}
+#endif
+};
+
+class xorL_rReg_rReg_mem_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return xorL_rReg_rReg_mem_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_XorL; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  xorL_rReg_rReg_mem_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(xorL_rReg_rReg_mem_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "xorL_rReg_rReg_mem_ndd";}
 #endif
 };
 
@@ -22286,7 +26532,7 @@ public:
 #endif
 };
 
-class cmpF_cc_reg_CFNode : public MachNode { 
+class cmpF_cc_regCFNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -22298,7 +26544,7 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
-  virtual uint           rule() const { return cmpF_cc_reg_CF_rule; }
+  virtual uint           rule() const { return cmpF_cc_regCF_rule; }
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
@@ -22309,14 +26555,48 @@ private:
   virtual void           use_cisc_RegMask();
   virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
 public:
-  cmpF_cc_reg_CFNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpF_cc_reg_CFNode); }
-  // Rematerialize cmpF_cc_reg_CF
+  cmpF_cc_regCFNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpF_cc_regCFNode); }
+  // Rematerialize cmpF_cc_regCF
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpF_cc_reg_CF";}
+  virtual const char    *Name() const { return "cmpF_cc_regCF";}
+#endif
+};
+
+class cmpF_cc_regCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmpF_cc_regCFE_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CmpF; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmpF_cc_regCFENode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpF_cc_regCFENode); }
+  // Rematerialize cmpF_cc_regCFE
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmpF_cc_regCFE";}
 #endif
 };
 
@@ -22349,6 +26629,38 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmpF_cc_memCF";}
+#endif
+};
+
+class cmpF_cc_memCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmpF_cc_memCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CmpF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmpF_cc_memCFENode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmpF_cc_memCFENode); }
+  // Rematerialize cmpF_cc_memCFE
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmpF_cc_memCFE";}
 #endif
 };
 
@@ -22385,6 +26697,39 @@ public:
 #endif
 };
 
+class cmpF_cc_immCFENode : public MachConstantNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmpF_cc_immCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           eval_constant(Compile* C);
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CmpF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  cmpF_cc_immCFENode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpF_cc_immCFENode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize cmpF_cc_immCFE
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmpF_cc_immCFE";}
+#endif
+};
+
 class cmpD_cc_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -22414,7 +26759,7 @@ public:
 #endif
 };
 
-class cmpD_cc_reg_CFNode : public MachNode { 
+class cmpD_cc_regCFNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -22426,7 +26771,7 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
-  virtual uint           rule() const { return cmpD_cc_reg_CF_rule; }
+  virtual uint           rule() const { return cmpD_cc_regCF_rule; }
 private:
   const RegMask  *_cisc_RegMask;
   virtual const RegMask &out_RegMask() const;
@@ -22437,14 +26782,48 @@ private:
   virtual void           use_cisc_RegMask();
   virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
 public:
-  cmpD_cc_reg_CFNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpD_cc_reg_CFNode); }
-  // Rematerialize cmpD_cc_reg_CF
+  cmpD_cc_regCFNode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpD_cc_regCFNode); }
+  // Rematerialize cmpD_cc_regCF
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpD_cc_reg_CF";}
+  virtual const char    *Name() const { return "cmpD_cc_regCF";}
+#endif
+};
+
+class cmpD_cc_regCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmpD_cc_regCFE_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CmpD; }
+  virtual int            cisc_operand() const { return 2; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  cmpD_cc_regCFENode() { _cisc_RegMask = nullptr;  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpD_cc_regCFENode); }
+  // Rematerialize cmpD_cc_regCFE
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmpD_cc_regCFE";}
 #endif
 };
 
@@ -22480,6 +26859,38 @@ public:
 #endif
 };
 
+class cmpD_cc_memCFENode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmpD_cc_memCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CmpD; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  cmpD_cc_memCFENode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(cmpD_cc_memCFENode); }
+  // Rematerialize cmpD_cc_memCFE
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmpD_cc_memCFE";}
+#endif
+};
+
 class cmpD_cc_immCFNode : public MachConstantNode { 
 private:
   MachOper *_opnd_array[3];
@@ -22510,6 +26921,39 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmpD_cc_immCF";}
+#endif
+};
+
+class cmpD_cc_immCFENode : public MachConstantNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmpD_cc_immCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           eval_constant(Compile* C);
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CmpD; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  cmpD_cc_immCFENode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmpD_cc_immCFENode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  // Rematerialize cmpD_cc_immCFE
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmpD_cc_immCFE";}
 #endif
 };
 
@@ -22863,6 +27307,70 @@ public:
 #endif
 };
 
+class convF2I_reg_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convF2I_reg_reg_avx10_2_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvF2I; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  convF2I_reg_reg_avx10_2Node() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(convF2I_reg_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convF2I_reg_reg_avx10_2";}
+#endif
+};
+
+class convF2I_reg_mem_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convF2I_reg_mem_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvF2I; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  convF2I_reg_mem_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(convF2I_reg_mem_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convF2I_reg_mem_avx10_2";}
+#endif
+};
+
 class convF2L_reg_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -22890,6 +27398,70 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "convF2L_reg_reg";}
+#endif
+};
+
+class convF2L_reg_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convF2L_reg_reg_avx10_2_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvF2L; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  convF2L_reg_reg_avx10_2Node() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(convF2L_reg_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convF2L_reg_reg_avx10_2";}
+#endif
+};
+
+class convF2L_reg_mem_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convF2L_reg_mem_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvF2L; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  convF2L_reg_mem_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(convF2L_reg_mem_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convF2L_reg_mem_avx10_2";}
 #endif
 };
 
@@ -22923,6 +27495,70 @@ public:
 #endif
 };
 
+class convD2I_reg_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convD2I_reg_reg_avx10_2_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvD2I; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  convD2I_reg_reg_avx10_2Node() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(convD2I_reg_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convD2I_reg_reg_avx10_2";}
+#endif
+};
+
+class convD2I_reg_mem_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convD2I_reg_mem_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvD2I; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  convD2I_reg_mem_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(convD2I_reg_mem_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convD2I_reg_mem_avx10_2";}
+#endif
+};
+
 class convD2L_reg_regNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -22950,6 +27586,70 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "convD2L_reg_reg";}
+#endif
+};
+
+class convD2L_reg_reg_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convD2L_reg_reg_avx10_2_rule; }
+private:
+  const RegMask  *_cisc_RegMask;
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvD2L; }
+  virtual int            cisc_operand() const { return 1; }
+  virtual MachNode      *cisc_version(int offset);
+  virtual void           use_cisc_RegMask();
+  virtual const RegMask *cisc_RegMask() const { return _cisc_RegMask; }
+public:
+  convD2L_reg_reg_avx10_2Node() { _cisc_RegMask = nullptr;  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(convD2L_reg_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convD2L_reg_reg_avx10_2";}
+#endif
+};
+
+class convD2L_reg_mem_avx10_2Node : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return convD2L_reg_mem_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ConvD2L; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  convD2L_reg_mem_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_is_cisc_alternate | Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(convD2L_reg_mem_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "convD2L_reg_mem_avx10_2";}
 #endif
 };
 
@@ -23850,7 +28550,7 @@ public:
 
 class rep_stosNode : public MachNode { 
 private:
-  MachOper *_opnd_array[4];
+  MachOper *_opnd_array[5];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -23867,7 +28567,7 @@ private:
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
-  rep_stosNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  rep_stosNode() {  _num_opnds = 5; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(rep_stosNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -23879,9 +28579,40 @@ public:
 #endif
 };
 
-class rep_stos_evexNode : public MachNode { 
+class rep_stos_word_copyNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rep_stos_word_copy_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ClearArray; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  rep_stos_word_copyNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rep_stos_word_copyNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rep_stos_word_copy";}
+#endif
+};
+
+class rep_stos_evexNode : public MachNode { 
+private:
+  MachOper *_opnd_array[6];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -23898,7 +28629,7 @@ private:
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
-  rep_stos_evexNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  rep_stos_evexNode() {  _num_opnds = 6; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(rep_stos_evexNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -23910,9 +28641,40 @@ public:
 #endif
 };
 
+class rep_stos_evex_word_copyNode : public MachNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rep_stos_evex_word_copy_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ClearArray; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  rep_stos_evex_word_copyNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rep_stos_evex_word_copyNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rep_stos_evex_word_copy";}
+#endif
+};
+
 class rep_stos_largeNode : public MachNode { 
 private:
-  MachOper *_opnd_array[4];
+  MachOper *_opnd_array[5];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -23929,7 +28691,7 @@ private:
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
-  rep_stos_largeNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  rep_stos_largeNode() {  _num_opnds = 5; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(rep_stos_largeNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -23941,9 +28703,40 @@ public:
 #endif
 };
 
-class rep_stos_large_evexNode : public MachNode { 
+class rep_stos_large_word_copyNode : public MachNode { 
 private:
   MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rep_stos_large_word_copy_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ClearArray; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  rep_stos_large_word_copyNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rep_stos_large_word_copyNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rep_stos_large_word_copy";}
+#endif
+};
+
+class rep_stos_large_evexNode : public MachNode { 
+private:
+  MachOper *_opnd_array[6];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -23960,7 +28753,7 @@ private:
   virtual int            ideal_Opcode() const { return Op_ClearArray; }
   virtual uint           oper_input_base() const { return 2; }
 public:
-  rep_stos_large_evexNode() {  _num_opnds = 5; _opnds = _opnd_array; }
+  rep_stos_large_evexNode() {  _num_opnds = 6; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(rep_stos_large_evexNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -23969,6 +28762,37 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "rep_stos_large_evex";}
+#endif
+};
+
+class rep_stos_large_evex_word_copyNode : public MachNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return rep_stos_large_evex_word_copy_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ClearArray; }
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  rep_stos_large_evex_word_copyNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(rep_stos_large_evex_word_copyNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "rep_stos_large_evex_word_copy";}
 #endif
 };
 
@@ -26877,6 +31701,34 @@ public:
 #endif
 };
 
+class cmovI_reg_g_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_reg_g_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+public:
+  cmovI_reg_g_nddNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovI_reg_g_nddNode); }
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_reg_g_ndd";}
+#endif
+};
+
 class minI_rRegNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -26901,6 +31753,32 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "minI_rReg";}
+#endif
+};
+
+class minI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minI_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ideal_Opcode() const { return Op_MinI; }
+public:
+  minI_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minI_rReg_ndd";}
 #endif
 };
 
@@ -26933,6 +31811,34 @@ public:
 #endif
 };
 
+class cmovI_reg_l_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return cmovI_reg_l_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+public:
+  cmovI_reg_l_nddNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(cmovI_reg_l_nddNode); }
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "cmovI_reg_l_ndd";}
+#endif
+};
+
 class maxI_rRegNode : public MachNode { 
 private:
   MachOper *_opnd_array[3];
@@ -26957,6 +31863,32 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "maxI_rReg";}
+#endif
+};
+
+class maxI_rReg_nddNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return maxI_rReg_ndd_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual int            ideal_Opcode() const { return Op_MaxI; }
+public:
+  maxI_rReg_nddNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(maxI_rReg_nddNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "maxI_rReg_ndd";}
 #endif
 };
 
@@ -27192,6 +32124,46 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "jmpConUCF2";}
+#endif
+};
+
+class jmpConUCFENode : public MachIfNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return jmpConUCFE_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           label_set( Label* label, uint block_num );
+  virtual void           save_label( Label** label, uint* block_num );
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_If; }
+  virtual void           negate() { 
+    opnd_array(1)->negate();
+    _prob = 1.0f - _prob;
+  };
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  jmpConUCFENode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_may_be_short_branch); }
+  virtual uint           size_of() const { return sizeof(jmpConUCFENode); }
+  virtual bool           pinned() const { return true; }
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  virtual MachNode      *short_branch_version();
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { return TypeTuple::IFBOTH; } // matched IfNode
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "jmpConUCFE";}
 #endif
 };
 
@@ -27516,6 +32488,45 @@ public:
 #endif
 };
 
+class jmpConUCFE_shortNode : public MachIfNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return jmpConUCFE_short_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           label_set( Label* label, uint block_num );
+  virtual void           save_label( Label** label, uint* block_num );
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual uint           size(PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_If; }
+  virtual void           negate() { 
+    opnd_array(1)->negate();
+    _prob = 1.0f - _prob;
+  };
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  jmpConUCFE_shortNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(jmpConUCFE_shortNode); }
+  virtual bool           pinned() const { return true; }
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  const Type            *bottom_type() const { return TypeTuple::IFBOTH; } // matched IfNode
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "jmpConUCFE_short";}
+#endif
+};
+
 class cmpFastLockNode : public MachFastLockNode { 
 private:
   MachOper *_opnd_array[5];
@@ -27576,69 +32587,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "cmpFastUnlock";}
-#endif
-};
-
-class cmpFastLockLightweightNode : public MachFastLockNode { 
-private:
-  MachOper *_opnd_array[5];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return cmpFastLockLightweight_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_FastLock; }
-  virtual uint           oper_input_base() const { return 1; }
-public:
-  cmpFastLockLightweightNode() {  _num_opnds = 5; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpFastLockLightweightNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  // Rematerialize cmpFastLockLightweight
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpFastLockLightweight";}
-#endif
-};
-
-class cmpFastUnlockLightweightNode : public MachNode { 
-private:
-  MachOper *_opnd_array[4];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return cmpFastUnlockLightweight_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_FastUnlock; }
-public:
-  cmpFastUnlockLightweightNode() {  _num_opnds = 4; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(cmpFastUnlockLightweightNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  // Rematerialize cmpFastUnlockLightweight
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "cmpFastUnlockLightweight";}
 #endif
 };
 
@@ -27900,6 +32848,36 @@ public:
 #endif
 };
 
+class CallLeafNoFPInDirectNode : public MachCallLeafNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return CallLeafNoFPInDirect_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_CallLeafNoFP; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 5; }
+public:
+  CallLeafNoFPInDirectNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(CallLeafNoFPInDirectNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "CallLeafNoFPInDirect";}
+#endif
+};
+
 class CallLeafNoFPDirectNode : public MachCallLeafNode { 
 private:
   MachOper *_opnd_array[2];
@@ -27919,7 +32897,7 @@ private:
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_CallLeafNoFP; }
   virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 1; }
+  virtual uint           oper_input_base() const { return 5; }
 public:
   CallLeafNoFPDirectNode() {  _num_opnds = 2; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(CallLeafNoFPDirectNode); }
@@ -28150,205 +33128,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "tlsLoadP";}
-#endif
-};
-
-class leaI_rReg_rReg_peepNode : public MachNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return leaI_rReg_rReg_peep_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_AddI; }
-public:
-  leaI_rReg_rReg_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(leaI_rReg_rReg_peepNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "leaI_rReg_rReg_peep";}
-#endif
-};
-
-class leaI_rReg_immI_peepNode : public MachNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return leaI_rReg_immI_peep_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_AddI; }
-public:
-  leaI_rReg_immI_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(leaI_rReg_immI_peepNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "leaI_rReg_immI_peep";}
-#endif
-};
-
-class leaI_rReg_immI2_peepNode : public MachNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return leaI_rReg_immI2_peep_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LShiftI; }
-public:
-  leaI_rReg_immI2_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(leaI_rReg_immI2_peepNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "leaI_rReg_immI2_peep";}
-#endif
-};
-
-class leaL_rReg_rReg_peepNode : public MachNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return leaL_rReg_rReg_peep_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_AddL; }
-public:
-  leaL_rReg_rReg_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(leaL_rReg_rReg_peepNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "leaL_rReg_rReg_peep";}
-#endif
-};
-
-class leaL_rReg_immL32_peepNode : public MachNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return leaL_rReg_immL32_peep_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_AddL; }
-public:
-  leaL_rReg_immL32_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(leaL_rReg_immL32_peepNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "leaL_rReg_immL32_peep";}
-#endif
-};
-
-class leaL_rReg_immI2_peepNode : public MachNode { 
-private:
-  MachOper *_opnd_array[3];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return leaL_rReg_immI2_peep_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LShiftL; }
-public:
-  leaL_rReg_immI2_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(leaL_rReg_immI2_peepNode); }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "leaL_rReg_immI2_peep";}
-#endif
-};
-
-class ShouldNotReachHereNode : public MachHaltNode { 
-private:
-  MachOper *_opnd_array[1];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return ShouldNotReachHere_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_Halt; }
-  virtual uint           oper_input_base() const { return 5; }
-public:
-  ShouldNotReachHereNode() {  _num_opnds = 1; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(ShouldNotReachHereNode); }
-  virtual bool           pinned() const { return true; }
-  virtual const Node *is_block_proj() const { return this; }
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "ShouldNotReachHere";}
 #endif
 };
 
@@ -31442,7 +36221,7 @@ public:
 
 class vgather_subwordLE8BNode : public MachTypeNode { 
 private:
-  MachOper *_opnd_array[6];
+  MachOper *_opnd_array[5];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -31460,7 +36239,7 @@ private:
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  vgather_subwordLE8BNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  vgather_subwordLE8BNode() {  _num_opnds = 5; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(vgather_subwordLE8BNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -31475,7 +36254,7 @@ public:
 
 class vgather_subwordGT8BNode : public MachTypeNode { 
 private:
-  MachOper *_opnd_array[12];
+  MachOper *_opnd_array[11];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -31490,11 +36269,11 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  vgather_subwordGT8BNode() {  _num_opnds = 12; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  vgather_subwordGT8BNode() {  _num_opnds = 11; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(vgather_subwordGT8BNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -31507,76 +36286,9 @@ public:
 #endif
 };
 
-class vgather_subwordLE8B_offNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[6];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return vgather_subwordLE8B_off_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  vgather_subwordLE8B_offNode() {  _num_opnds = 6; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(vgather_subwordLE8B_offNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "vgather_subwordLE8B_off";}
-#endif
-};
-
-class vgather_subwordGT8B_offNode : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[12];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return vgather_subwordGT8B_off_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadVectorGather; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  vgather_subwordGT8B_offNode() {  _num_opnds = 12; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(vgather_subwordGT8B_offNode); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "vgather_subwordGT8B_off";}
-#endif
-};
-
 class vgather_masked_subwordLE8B_avx3Node : public MachTypeNode { 
 private:
-  MachOper *_opnd_array[9];
+  MachOper *_opnd_array[8];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -31594,7 +36306,7 @@ private:
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  vgather_masked_subwordLE8B_avx3Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  vgather_masked_subwordLE8B_avx3Node() {  _num_opnds = 8; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_avx3Node); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -31609,7 +36321,7 @@ public:
 
 class vgather_masked_subwordGT8B_avx3Node : public MachTypeNode { 
 private:
-  MachOper *_opnd_array[15];
+  MachOper *_opnd_array[14];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -31624,11 +36336,11 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  vgather_masked_subwordGT8B_avx3Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  vgather_masked_subwordGT8B_avx3Node() {  _num_opnds = 14; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_avx3Node); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -31641,76 +36353,9 @@ public:
 #endif
 };
 
-class vgather_masked_subwordLE8B_off_avx3Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[9];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return vgather_masked_subwordLE8B_off_avx3_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  vgather_masked_subwordLE8B_off_avx3Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_off_avx3Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "vgather_masked_subwordLE8B_off_avx3";}
-#endif
-};
-
-class vgather_masked_subwordGT8B_off_avx3Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[15];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return vgather_masked_subwordGT8B_off_avx3_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  vgather_masked_subwordGT8B_off_avx3Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_off_avx3Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "vgather_masked_subwordGT8B_off_avx3";}
-#endif
-};
-
 class vgather_masked_subwordLE8B_avx2Node : public MachTypeNode { 
 private:
-  MachOper *_opnd_array[9];
+  MachOper *_opnd_array[8];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -31728,7 +36373,7 @@ private:
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  vgather_masked_subwordLE8B_avx2Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  vgather_masked_subwordLE8B_avx2Node() {  _num_opnds = 8; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_avx2Node); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -31743,7 +36388,7 @@ public:
 
 class vgather_masked_subwordGT8B_avx2Node : public MachTypeNode { 
 private:
-  MachOper *_opnd_array[15];
+  MachOper *_opnd_array[14];
 public:
   MachOper *opnd_array(uint operand_index) const {
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
@@ -31758,11 +36403,11 @@ private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges(); }
   virtual int            reloc() const;
   virtual uint           oper_input_base() const { return 2; }
 public:
-  vgather_masked_subwordGT8B_avx2Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  vgather_masked_subwordGT8B_avx2Node() {  _num_opnds = 14; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
   virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_avx2Node); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
@@ -31772,73 +36417,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "vgather_masked_subwordGT8B_avx2";}
-#endif
-};
-
-class vgather_masked_subwordLE8B_off_avx2Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[9];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return vgather_masked_subwordLE8B_off_avx2_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  vgather_masked_subwordLE8B_off_avx2Node() {  _num_opnds = 9; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(vgather_masked_subwordLE8B_off_avx2Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "vgather_masked_subwordLE8B_off_avx2";}
-#endif
-};
-
-class vgather_masked_subwordGT8B_off_avx2Node : public MachTypeNode { 
-private:
-  MachOper *_opnd_array[15];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return vgather_masked_subwordGT8B_off_avx2_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_LoadVectorGatherMasked; }
-  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges() + opnd_array(3)->num_edges() + opnd_array(4)->num_edges(); }
-  virtual int            reloc() const;
-  virtual uint           oper_input_base() const { return 2; }
-public:
-  vgather_masked_subwordGT8B_off_avx2Node() {  _num_opnds = 15; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
-  virtual uint           size_of() const { return sizeof(vgather_masked_subwordGT8B_off_avx2Node); }
-  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
-  friend MachNode *State::MachNodeGenerator(int opcode);
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-  virtual const MachOper *memory_operand() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "vgather_masked_subwordGT8B_off_avx2";}
 #endif
 };
 
@@ -35470,6 +40048,266 @@ public:
 #endif
 };
 
+class minmax_reduction2F_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2F_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2F_avx10_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2F_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2F_avx10_2";}
+#endif
+};
+
+class minmax_reduction2F_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2F_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2F_avx10_2_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2F_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2F_avx10_2_0";}
+#endif
+};
+
+class minmax_reductionF_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionF_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionF_avx10_2Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionF_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionF_avx10_2";}
+#endif
+};
+
+class minmax_reductionF_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionF_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionF_avx10_2_0Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionF_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionF_avx10_2_0";}
+#endif
+};
+
+class minmax_reduction2F_av_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2F_av_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2F_av_avx10_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2F_av_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2F_av_avx10_2";}
+#endif
+};
+
+class minmax_reduction2F_av_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2F_av_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2F_av_avx10_2_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2F_av_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2F_av_avx10_2_0";}
+#endif
+};
+
+class minmax_reductionF_av_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionF_av_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionF_av_avx10_2Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionF_av_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionF_av_avx10_2";}
+#endif
+};
+
+class minmax_reductionF_av_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionF_av_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionF_av_avx10_2_0Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionF_av_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionF_av_avx10_2_0";}
+#endif
+};
+
 class minmax_reduction2DNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[8];
@@ -35727,6 +40565,266 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "minmax_reductionD_av_0";}
+#endif
+};
+
+class minmax_reduction2D_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2D_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2D_avx10_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2D_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2D_avx10_2";}
+#endif
+};
+
+class minmax_reduction2D_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2D_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2D_avx10_2_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2D_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2D_avx10_2_0";}
+#endif
+};
+
+class minmax_reductionD_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionD_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionD_avx10_2Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionD_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionD_avx10_2";}
+#endif
+};
+
+class minmax_reductionD_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionD_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionD_avx10_2_0Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionD_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionD_avx10_2_0";}
+#endif
+};
+
+class minmax_reduction2D_av_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2D_av_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2D_av_avx10_2Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2D_av_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2D_av_avx10_2";}
+#endif
+};
+
+class minmax_reduction2D_av_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[5];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reduction2D_av_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reduction2D_av_avx10_2_0Node() {  _num_opnds = 5; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reduction2D_av_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reduction2D_av_avx10_2_0";}
+#endif
+};
+
+class minmax_reductionD_av_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionD_av_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionD_av_avx10_2Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionD_av_avx10_2Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionD_av_avx10_2";}
+#endif
+};
+
+class minmax_reductionD_av_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmax_reductionD_av_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxReductionV; }
+  virtual uint           two_adr() const  { return oper_input_base(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmax_reductionD_av_avx10_2_0Node() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmax_reductionD_av_avx10_2_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmax_reductionD_av_avx10_2_0";}
 #endif
 };
 
@@ -38271,6 +43369,64 @@ public:
 #endif
 };
 
+class minmaxFP_reg_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmaxFP_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmaxFP_reg_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmaxFP_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmaxFP_reg_avx10_2";}
+#endif
+};
+
+class minmaxFP_reg_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return minmaxFP_reg_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxV; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  minmaxFP_reg_avx10_2_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(minmaxFP_reg_avx10_2_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "minmaxFP_reg_avx10_2_0";}
+#endif
+};
+
 class minmaxFP_regNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[6];
@@ -38333,7 +43489,7 @@ public:
 #endif
 };
 
-class evminmaxFP_reg_eavxNode : public MachTypeNode { 
+class evminmaxFP_reg_evexNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[7];
 public:
@@ -38345,7 +43501,7 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
-  virtual uint           rule() const { return evminmaxFP_reg_eavx_rule; }
+  virtual uint           rule() const { return evminmaxFP_reg_evex_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
@@ -38353,19 +43509,19 @@ private:
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
 public:
-  evminmaxFP_reg_eavxNode() {  _num_opnds = 7; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(evminmaxFP_reg_eavxNode); }
+  evminmaxFP_reg_evexNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(evminmaxFP_reg_evexNode); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "evminmaxFP_reg_eavx";}
+  virtual const char    *Name() const { return "evminmaxFP_reg_evex";}
 #endif
 };
 
-class evminmaxFP_reg_eavx_0Node : public MachTypeNode { 
+class evminmaxFP_reg_evex_0Node : public MachTypeNode { 
 private:
   MachOper *_opnd_array[7];
 public:
@@ -38377,7 +43533,7 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
-  virtual uint           rule() const { return evminmaxFP_reg_eavx_0_rule; }
+  virtual uint           rule() const { return evminmaxFP_reg_evex_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
@@ -38385,15 +43541,15 @@ private:
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
   virtual uint           oper_input_base() const { return 1; }
 public:
-  evminmaxFP_reg_eavx_0Node() {  _num_opnds = 7; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(evminmaxFP_reg_eavx_0Node); }
+  evminmaxFP_reg_evex_0Node() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(evminmaxFP_reg_evex_0Node); }
   virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
   friend MachNode *State::MachNodeGenerator(int opcode);
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "evminmaxFP_reg_eavx_0";}
+  virtual const char    *Name() const { return "evminmaxFP_reg_evex_0";}
 #endif
 };
 
@@ -41936,6 +47092,68 @@ public:
 #endif
 };
 
+class castFtoX_reg_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castFtoX_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_VectorCastF2X; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castFtoX_reg_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castFtoX_reg_avx10_2Node); }
+  // Rematerialize castFtoX_reg_avx10_2
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castFtoX_reg_avx10_2";}
+#endif
+};
+
+class castFtoX_mem_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castFtoX_mem_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_VectorCastF2X; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  castFtoX_mem_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(castFtoX_mem_avx10_2Node); }
+  // Rematerialize castFtoX_mem_avx10_2
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castFtoX_mem_avx10_2";}
+#endif
+};
+
 class vcastDtoF_regNode : public MachTypeNode { 
 private:
   MachOper *_opnd_array[2];
@@ -42027,6 +47245,68 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "castDtoX_reg_evex";}
+#endif
+};
+
+class castDtoX_reg_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castDtoX_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_VectorCastD2X; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  castDtoX_reg_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(castDtoX_reg_avx10_2Node); }
+  // Rematerialize castDtoX_reg_avx10_2
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castDtoX_reg_avx10_2";}
+#endif
+};
+
+class castDtoX_mem_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return castDtoX_mem_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_VectorCastD2X; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  castDtoX_mem_avx10_2Node() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(castDtoX_mem_avx10_2Node); }
+  // Rematerialize castDtoX_mem_avx10_2
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "castDtoX_mem_avx10_2";}
 #endif
 };
 
@@ -50355,6 +55635,35 @@ public:
 #endif
 };
 
+class reinterpretHF2SNode : public MachNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return reinterpretHF2S_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_ReinterpretHF2S; }
+public:
+  reinterpretHF2SNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(reinterpretHF2SNode); }
+  // Rematerialize reinterpretHF2S
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "reinterpretHF2S";}
+#endif
+};
+
 class convF2HFAndS2HFNode : public MachNode { 
 private:
   MachOper *_opnd_array[2];
@@ -50410,35 +55719,6 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "convHF2SAndHF2F";}
-#endif
-};
-
-class reinterpretHF2SNode : public MachNode { 
-private:
-  MachOper *_opnd_array[2];
-public:
-  MachOper *opnd_array(uint operand_index) const {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    return _opnd_array[operand_index];
-  }
-  void      set_opnd_array(uint operand_index, MachOper *operand) {
-    assert(operand_index < _num_opnds, "invalid _opnd_array index");
-    _opnd_array[operand_index] = operand;
-  }
-  virtual uint           rule() const { return reinterpretHF2S_rule; }
-private:
-  virtual const RegMask &out_RegMask() const;
-  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_ReinterpretHF2S; }
-public:
-  reinterpretHF2SNode() {  _num_opnds = 2; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(reinterpretHF2SNode); }
-  // Rematerialize reinterpretHF2S
-  static  const Pipeline *pipeline_class();
-  virtual const Pipeline *pipeline() const;
-#ifndef PRODUCT
-  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "reinterpretHF2S";}
 #endif
 };
 
@@ -50542,7 +55822,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_MaxHF; }
+  virtual int            ideal_Opcode() const { return Op_MulHF; }
 public:
   scalar_binOps_HF_reg_1Node() {  _num_opnds = 3; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_1Node); }
@@ -50570,7 +55850,7 @@ public:
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_MinHF; }
+  virtual int            ideal_Opcode() const { return Op_SubHF; }
 public:
   scalar_binOps_HF_reg_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
   virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_2Node); }
@@ -50582,7 +55862,7 @@ public:
 #endif
 };
 
-class scalar_binOps_HF_reg_3Node : public MachNode { 
+class scalar_minmax_HF_reg_avx10_2Node : public MachNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -50594,23 +55874,23 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
-  virtual uint           rule() const { return scalar_binOps_HF_reg_3_rule; }
+  virtual uint           rule() const { return scalar_minmax_HF_reg_avx10_2_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_MulHF; }
+  virtual int            ideal_Opcode() const { return Op_MaxHF; }
 public:
-  scalar_binOps_HF_reg_3Node() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_3Node); }
+  scalar_minmax_HF_reg_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_minmax_HF_reg_avx10_2Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "scalar_binOps_HF_reg_3";}
+  virtual const char    *Name() const { return "scalar_minmax_HF_reg_avx10_2";}
 #endif
 };
 
-class scalar_binOps_HF_reg_4Node : public MachNode { 
+class scalar_minmax_HF_reg_avx10_2_0Node : public MachNode { 
 private:
   MachOper *_opnd_array[3];
 public:
@@ -50622,19 +55902,81 @@ public:
     assert(operand_index < _num_opnds, "invalid _opnd_array index");
     _opnd_array[operand_index] = operand;
   }
-  virtual uint           rule() const { return scalar_binOps_HF_reg_4_rule; }
+  virtual uint           rule() const { return scalar_minmax_HF_reg_avx10_2_0_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
-  virtual int            ideal_Opcode() const { return Op_SubHF; }
+  virtual int            ideal_Opcode() const { return Op_MinHF; }
 public:
-  scalar_binOps_HF_reg_4Node() {  _num_opnds = 3; _opnds = _opnd_array; }
-  virtual uint           size_of() const { return sizeof(scalar_binOps_HF_reg_4Node); }
+  scalar_minmax_HF_reg_avx10_2_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_minmax_HF_reg_avx10_2_0Node); }
   static  const Pipeline *pipeline_class();
   virtual const Pipeline *pipeline() const;
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
-  virtual const char    *Name() const { return "scalar_binOps_HF_reg_4";}
+  virtual const char    *Name() const { return "scalar_minmax_HF_reg_avx10_2_0";}
+#endif
+};
+
+class scalar_minmax_HF_regNode : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_minmax_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxHF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+public:
+  scalar_minmax_HF_regNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_minmax_HF_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_minmax_HF_reg";}
+#endif
+};
+
+class scalar_minmax_HF_reg_0Node : public MachNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return scalar_minmax_HF_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinHF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+public:
+  scalar_minmax_HF_reg_0Node() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(scalar_minmax_HF_reg_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "scalar_minmax_HF_reg_0";}
 #endif
 };
 
@@ -50664,6 +56006,846 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "scalar_fma_HF_reg";}
+#endif
+};
+
+class vector_sqrt_HF_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_sqrt_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SqrtVHF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_sqrt_HF_regNode() {  _num_opnds = 2; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_sqrt_HF_regNode); }
+  // Rematerialize vector_sqrt_HF_reg
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_sqrt_HF_reg";}
+#endif
+};
+
+class vector_sqrt_HF_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[2];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_sqrt_HF_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SqrtVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_sqrt_HF_memNode() {  _num_opnds = 2; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_sqrt_HF_memNode); }
+  // Rematerialize vector_sqrt_HF_mem
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_sqrt_HF_mem";}
+#endif
+};
+
+class vector_binOps_HF_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVHF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_binOps_HF_regNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_reg";}
+#endif
+};
+
+class vector_binOps_HF_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_DivVHF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_binOps_HF_reg_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_reg_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_reg_0";}
+#endif
+};
+
+class vector_binOps_HF_reg_1Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_reg_1_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVHF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_binOps_HF_reg_1Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_reg_1Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_reg_1";}
+#endif
+};
+
+class vector_binOps_HF_reg_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_reg_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVHF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_binOps_HF_reg_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_reg_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_reg_2";}
+#endif
+};
+
+class vector_binOps_HF_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_binOps_HF_memNode() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_memNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_mem";}
+#endif
+};
+
+class vector_binOps_HF_mem_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_mem_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_binOps_HF_mem_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_mem_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_mem_0";}
+#endif
+};
+
+class vector_binOps_HF_mem_1Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_mem_1_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_DivVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_binOps_HF_mem_1Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_mem_1Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_mem_1";}
+#endif
+};
+
+class vector_binOps_HF_mem_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_mem_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_binOps_HF_mem_2Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_mem_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_mem_2";}
+#endif
+};
+
+class vector_binOps_HF_mem_3Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_mem_3_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MulVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_binOps_HF_mem_3Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_mem_3Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_mem_3";}
+#endif
+};
+
+class vector_binOps_HF_mem_4Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_binOps_HF_mem_4_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_SubVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_binOps_HF_mem_4Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_binOps_HF_mem_4Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_binOps_HF_mem_4";}
+#endif
+};
+
+class vector_fma_HF_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_fma_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVHF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_fma_HF_regNode() {  _num_opnds = 4; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_fma_HF_regNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_fma_HF_reg";}
+#endif
+};
+
+class vector_fma_HF_memNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[4];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_fma_HF_mem_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_FmaVHF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_fma_HF_memNode() {  _num_opnds = 4; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_fma_HF_memNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_fma_HF_mem";}
+#endif
+};
+
+class vector_minmax_HF_mem_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_mem_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_minmax_HF_mem_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_mem_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_mem_avx10_2";}
+#endif
+};
+
+class vector_minmax_HF_mem_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_mem_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_minmax_HF_mem_avx10_2_0Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_mem_avx10_2_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_mem_avx10_2_0";}
+#endif
+};
+
+class vector_minmax_HF_mem_avx10_2_1Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_mem_avx10_2_1_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_minmax_HF_mem_avx10_2_1Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_mem_avx10_2_1Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_mem_avx10_2_1";}
+#endif
+};
+
+class vector_minmax_HF_mem_avx10_2_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_mem_avx10_2_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxVHF; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  vector_minmax_HF_mem_avx10_2_2Node() {  _num_opnds = 3; _opnds = _opnd_array; init_flags(Flag_needs_anti_dependence_check); }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_mem_avx10_2_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_mem_avx10_2_2";}
+#endif
+};
+
+class vector_minmax_HF_reg_avx10_2Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_reg_avx10_2_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinVHF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_minmax_HF_reg_avx10_2Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_reg_avx10_2Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_reg_avx10_2";}
+#endif
+};
+
+class vector_minmax_HF_reg_avx10_2_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_reg_avx10_2_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxVHF; }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_minmax_HF_reg_avx10_2_0Node() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_reg_avx10_2_0Node); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_reg_avx10_2_0";}
+#endif
+};
+
+class vector_minmax_HF_regNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_reg_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MinVHF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_minmax_HF_regNode() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_regNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_reg";}
+#endif
+};
+
+class vector_minmax_HF_reg_0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return vector_minmax_HF_reg_0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_MaxVHF; }
+  virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges() + opnd_array(2)->num_edges(); }
+  virtual uint           oper_input_base() const { return 1; }
+public:
+  vector_minmax_HF_reg_0Node() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(vector_minmax_HF_reg_0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "vector_minmax_HF_reg_0";}
+#endif
+};
+
+class leaI_rReg_rReg_peepNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return leaI_rReg_rReg_peep_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+public:
+  leaI_rReg_rReg_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(leaI_rReg_rReg_peepNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "leaI_rReg_rReg_peep";}
+#endif
+};
+
+class leaI_rReg_immI_peepNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return leaI_rReg_immI_peep_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddI; }
+public:
+  leaI_rReg_immI_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(leaI_rReg_immI_peepNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "leaI_rReg_immI_peep";}
+#endif
+};
+
+class leaI_rReg_immI2_peepNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return leaI_rReg_immI2_peep_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftI; }
+public:
+  leaI_rReg_immI2_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(leaI_rReg_immI2_peepNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "leaI_rReg_immI2_peep";}
+#endif
+};
+
+class leaL_rReg_rReg_peepNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return leaL_rReg_rReg_peep_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+public:
+  leaL_rReg_rReg_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(leaL_rReg_rReg_peepNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "leaL_rReg_rReg_peep";}
+#endif
+};
+
+class leaL_rReg_immL32_peepNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return leaL_rReg_immL32_peep_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_AddL; }
+public:
+  leaL_rReg_immL32_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(leaL_rReg_immL32_peepNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "leaL_rReg_immL32_peep";}
+#endif
+};
+
+class leaL_rReg_immI2_peepNode : public MachNode { 
+private:
+  MachOper *_opnd_array[3];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return leaL_rReg_immI2_peep_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_LShiftL; }
+public:
+  leaL_rReg_immI2_peepNode() {  _num_opnds = 3; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(leaL_rReg_immI2_peepNode); }
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "leaL_rReg_immI2_peep";}
 #endif
 };
 
@@ -50882,6 +57064,7 @@ public:
   virtual uint           rule() const { return zLoadP_rule; }
 private:
   virtual const RegMask &out_RegMask() const;
+  virtual bool           is_late_expanded_null_check_candidate() const { return true; }
   virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
   virtual int            ideal_Opcode() const { return Op_LoadP; }
   virtual uint           two_adr() const  { return oper_input_base() + opnd_array(1)->num_edges(); }
@@ -51159,6 +57342,105 @@ public:
 #ifndef PRODUCT
   virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
   virtual const char    *Name() const { return "g1StoreP";}
+#endif
+};
+
+class g1StoreLSpecialOneOopOff0Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1StoreLSpecialOneOopOff0_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StoreLSpecial; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1StoreLSpecialOneOopOff0Node() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(g1StoreLSpecialOneOopOff0Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1StoreLSpecialOneOopOff0";}
+#endif
+};
+
+class g1StoreLSpecialOneOopOff4Node : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[7];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1StoreLSpecialOneOopOff4_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StoreLSpecial; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1StoreLSpecialOneOopOff4Node() {  _num_opnds = 7; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(g1StoreLSpecialOneOopOff4Node); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1StoreLSpecialOneOopOff4";}
+#endif
+};
+
+class g1StoreLSpecialTwoOopsNode : public MachTypeNode { 
+private:
+  MachOper *_opnd_array[6];
+public:
+  MachOper *opnd_array(uint operand_index) const {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    return _opnd_array[operand_index];
+  }
+  void      set_opnd_array(uint operand_index, MachOper *operand) {
+    assert(operand_index < _num_opnds, "invalid _opnd_array index");
+    _opnd_array[operand_index] = operand;
+  }
+  virtual uint           rule() const { return g1StoreLSpecialTwoOops_rule; }
+private:
+  virtual const RegMask &out_RegMask() const;
+  virtual void           emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const;
+  virtual int            ideal_Opcode() const { return Op_StoreLSpecial; }
+  virtual int            reloc() const;
+  virtual uint           oper_input_base() const { return 2; }
+public:
+  g1StoreLSpecialTwoOopsNode() {  _num_opnds = 6; _opnds = _opnd_array; }
+  virtual uint           size_of() const { return sizeof(g1StoreLSpecialTwoOopsNode); }
+  virtual MachNode      *Expand(State *state, Node_List &proj_list, Node* mem);
+  friend MachNode *State::MachNodeGenerator(int opcode);
+  static  const Pipeline *pipeline_class();
+  virtual const Pipeline *pipeline() const;
+  virtual const MachOper *memory_operand() const;
+#ifndef PRODUCT
+  virtual void           format(PhaseRegAlloc *ra, outputStream *st) const;
+  virtual const char    *Name() const { return "g1StoreLSpecialTwoOops";}
 #endif
 };
 
@@ -51562,18 +57844,20 @@ public:
 
 //HeaderForm
 
-#line 421 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 1455 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
 
 #include "peephole_x86_64.hpp"
 
+bool castLL_is_imm32(const Node* n);
 
-#line 51571 "ad_x86.hpp"
+
+#line 57855 "ad_x86.hpp"
 
 
 //HeaderForm
 
-#line 428 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 1474 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
 
 extern RegMask _ANY_REG_mask;
@@ -51600,12 +57884,12 @@ inline const RegMask& STACK_OR_LONG_REG_mask() { return _STACK_OR_LONG_REG_mask;
 inline const RegMask& STACK_OR_INT_REG_mask()  { return _STACK_OR_INT_REG_mask;  }
 
 
-#line 51603 "ad_x86.hpp"
+#line 57887 "ad_x86.hpp"
 
 
 //HeaderForm
 
-#line 1156 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 2813 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
 // Header information of the source block.
 // Method declarations/definitions which are used outside
@@ -51640,33 +57924,12 @@ class HandlerImpl {
 
  public:
 
-  static int emit_exception_handler(C2_MacroAssembler *masm);
   static int emit_deopt_handler(C2_MacroAssembler* masm);
 
-  static uint size_exception_handler() {
-    // NativeCall instruction size is the same as NativeJump.
-    // exception handler starts out as jump and can be patched to
-    // a call be deoptimization.  (4932387)
-    // Note that this value is also credited (in output.cpp) to
-    // the size of the code section.
-    return NativeJump::instruction_size;
-  }
-
-#ifdef _LP64
   static uint size_deopt_handler() {
-    // three 5 byte instructions plus one move for unreachable address.
-    return 15+3;
+    // one call and one jmp.
+    return 7;
   }
-#else
-  static uint size_deopt_handler() {
-    // NativeCall instruction size is the same as NativeJump.
-    // exception handler starts out as jump and can be patched to
-    // a call be deoptimization.  (4932387)
-    // Note that this value is also credited (in output.cpp) to
-    // the size of the code section.
-    return 5 + NativeJump::instruction_size; // pushl(); jmp;
-  }
-#endif
 };
 
 inline Assembler::AvxVectorLen vector_length_encoding(int bytes) {
@@ -51706,7 +57969,7 @@ static inline bool is_clz_non_subword_predicate_evex(BasicType bt, int vlen_byte
 
 class Node::PD {
 public:
-  enum NodeFlags {
+  enum NodeFlags : uint64_t {
     Flag_intel_jcc_erratum    = Node::_last_flag << 1,
     Flag_sets_carry_flag      = Node::_last_flag << 2,
     Flag_sets_parity_flag     = Node::_last_flag << 3,
@@ -51718,27 +57981,29 @@ public:
     Flag_clears_zero_flag     = Node::_last_flag << 9,
     Flag_clears_overflow_flag = Node::_last_flag << 10,
     Flag_clears_sign_flag     = Node::_last_flag << 11,
-    _last_flag                = Flag_clears_sign_flag
+    Flag_ndd_demotable_opr1   = Node::_last_flag << 12,
+    Flag_ndd_demotable_opr2   = Node::_last_flag << 13,
+    _last_flag                = Flag_ndd_demotable_opr2
   };
 };
 
 
-#line 51726 "ad_x86.hpp"
+#line 57991 "ad_x86.hpp"
 
 
 //HeaderForm
 
-#line 25 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/shenandoah/shenandoah_x86_64.ad"
+#line 25 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/shenandoah/shenandoah_x86_64.ad"
 
 #include "gc/shenandoah/shenandoahBarrierSetAssembler.hpp"
 #include "gc/shenandoah/c2/shenandoahSupport.hpp"
 
-#line 51736 "ad_x86.hpp"
+#line 58001 "ad_x86.hpp"
 
 
 //HeaderForm
 
-#line 24 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
+#line 24 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/z/z_x86_64.ad"
 
 
 #include "gc/shared/gc_globals.hpp"
@@ -51746,19 +58011,19 @@ public:
 #include "gc/z/zThreadLocalData.hpp"
 
 
-#line 51749 "ad_x86.hpp"
+#line 58014 "ad_x86.hpp"
 
 
 //HeaderForm
 
-#line 24 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
+#line 24 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/gc/g1/g1_x86_64.ad"
 
 
 #include "gc/g1/c2/g1BarrierSetC2.hpp"
 #include "gc/shared/gc_globals.hpp"
 
 
-#line 51761 "ad_x86.hpp"
+#line 58026 "ad_x86.hpp"
 
 
 extern const char  register_save_policy[];
@@ -51860,95 +58125,95 @@ inline const RegMask &ALL_REG_mask() { return _ALL_REG_mask; }
 extern const RegMask _ALL_INT_REG_mask;
 inline const RegMask &ALL_INT_REG_mask() { return _ALL_INT_REG_mask; }
 inline const RegMask &ANY_REG_mask() { 
-#line 300 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 883 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _ANY_REG_mask;
 
-#line 51867 "ad_x86.hpp"
+#line 58132 "ad_x86.hpp"
  }
 inline const RegMask &PTR_REG_mask() { 
-#line 305 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 888 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _PTR_REG_mask;
 
-#line 51874 "ad_x86.hpp"
+#line 58139 "ad_x86.hpp"
  }
 inline const RegMask &PTR_REG_NO_RBP_mask() { 
-#line 310 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 893 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _PTR_REG_NO_RBP_mask;
 
-#line 51881 "ad_x86.hpp"
+#line 58146 "ad_x86.hpp"
  }
 inline const RegMask &PTR_NO_RAX_REG_mask() { 
-#line 315 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 898 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _PTR_NO_RAX_REG_mask;
 
-#line 51888 "ad_x86.hpp"
+#line 58153 "ad_x86.hpp"
  }
 inline const RegMask &PTR_NO_RAX_RBX_REG_mask() { 
-#line 320 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 903 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _PTR_NO_RAX_RBX_REG_mask;
 
-#line 51895 "ad_x86.hpp"
+#line 58160 "ad_x86.hpp"
  }
 inline const RegMask &LONG_REG_mask() { 
-#line 325 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 908 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _LONG_REG_mask;
 
-#line 51902 "ad_x86.hpp"
+#line 58167 "ad_x86.hpp"
  }
 inline const RegMask &LONG_NO_RAX_RDX_REG_mask() { 
-#line 330 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 913 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _LONG_NO_RAX_RDX_REG_mask;
 
-#line 51909 "ad_x86.hpp"
+#line 58174 "ad_x86.hpp"
  }
 inline const RegMask &LONG_NO_RCX_REG_mask() { 
-#line 335 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 918 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _LONG_NO_RCX_REG_mask;
 
-#line 51916 "ad_x86.hpp"
+#line 58181 "ad_x86.hpp"
  }
 inline const RegMask &LONG_NO_RBP_R13_REG_mask() { 
-#line 340 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 923 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _LONG_NO_RBP_R13_REG_mask;
 
-#line 51923 "ad_x86.hpp"
+#line 58188 "ad_x86.hpp"
  }
 inline const RegMask &INT_REG_mask() { 
-#line 345 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 928 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _INT_REG_mask;
 
-#line 51930 "ad_x86.hpp"
+#line 58195 "ad_x86.hpp"
  }
 inline const RegMask &INT_NO_RAX_RDX_REG_mask() { 
-#line 350 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 933 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _INT_NO_RAX_RDX_REG_mask;
 
-#line 51937 "ad_x86.hpp"
+#line 58202 "ad_x86.hpp"
  }
 inline const RegMask &INT_NO_RCX_REG_mask() { 
-#line 355 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 938 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _INT_NO_RCX_REG_mask;
 
-#line 51944 "ad_x86.hpp"
+#line 58209 "ad_x86.hpp"
  }
 inline const RegMask &INT_NO_RBP_R13_REG_mask() { 
-#line 360 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86_64.ad"
+#line 943 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 
   return _INT_NO_RBP_R13_REG_mask;
 
-#line 51951 "ad_x86.hpp"
+#line 58216 "ad_x86.hpp"
  }
 extern const RegMask _PTR_RAX_REG_mask;
 inline const RegMask &PTR_RAX_REG_mask() { return _PTR_RAX_REG_mask; }
@@ -52009,24 +58274,24 @@ inline const RegMask &FLOAT_REG_EVEX_mask() { return _FLOAT_REG_EVEX_mask; }
 extern const RegMask _STACK_OR_FLOAT_REG_EVEX_mask;
 inline const RegMask &STACK_OR_FLOAT_REG_EVEX_mask() { return _STACK_OR_FLOAT_REG_EVEX_mask; }
 inline const RegMask &FLOAT_REG_mask() { return (
-#line 779 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1113 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52014 "ad_x86.hpp"
+#line 58279 "ad_x86.hpp"
 ) ? FLOAT_REG_EVEX_mask() : FLOAT_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_FLOAT_REG_mask() { return (
-#line 779 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1113 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52019 "ad_x86.hpp"
+#line 58284 "ad_x86.hpp"
 ) ? STACK_OR_FLOAT_REG_EVEX_mask() : STACK_OR_FLOAT_REG_LEGACY_mask(); }
 inline const RegMask &FLOAT_REG_VL_mask() { return (
-#line 780 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1114 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 52024 "ad_x86.hpp"
+#line 58289 "ad_x86.hpp"
 ) ? FLOAT_REG_EVEX_mask() : FLOAT_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_FLOAT_REG_VL_mask() { return (
-#line 780 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1114 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 52029 "ad_x86.hpp"
+#line 58294 "ad_x86.hpp"
 ) ? STACK_OR_FLOAT_REG_EVEX_mask() : STACK_OR_FLOAT_REG_LEGACY_mask(); }
 extern const RegMask _DOUBLE_REG_LEGACY_mask;
 inline const RegMask &DOUBLE_REG_LEGACY_mask() { return _DOUBLE_REG_LEGACY_mask; }
@@ -52037,94 +58302,94 @@ inline const RegMask &DOUBLE_REG_EVEX_mask() { return _DOUBLE_REG_EVEX_mask; }
 extern const RegMask _STACK_OR_DOUBLE_REG_EVEX_mask;
 inline const RegMask &STACK_OR_DOUBLE_REG_EVEX_mask() { return _STACK_OR_DOUBLE_REG_EVEX_mask; }
 inline const RegMask &DOUBLE_REG_mask() { return (
-#line 840 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1168 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52042 "ad_x86.hpp"
+#line 58307 "ad_x86.hpp"
 ) ? DOUBLE_REG_EVEX_mask() : DOUBLE_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_DOUBLE_REG_mask() { return (
-#line 840 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1168 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52047 "ad_x86.hpp"
+#line 58312 "ad_x86.hpp"
 ) ? STACK_OR_DOUBLE_REG_EVEX_mask() : STACK_OR_DOUBLE_REG_LEGACY_mask(); }
 inline const RegMask &DOUBLE_REG_VL_mask() { return (
-#line 841 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1169 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 52052 "ad_x86.hpp"
+#line 58317 "ad_x86.hpp"
 ) ? DOUBLE_REG_EVEX_mask() : DOUBLE_REG_LEGACY_mask(); }
 inline const RegMask &STACK_OR_DOUBLE_REG_VL_mask() { return (
-#line 841 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1169 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 52057 "ad_x86.hpp"
+#line 58322 "ad_x86.hpp"
 ) ? STACK_OR_DOUBLE_REG_EVEX_mask() : STACK_OR_DOUBLE_REG_LEGACY_mask(); }
 extern const RegMask _VECTORS_REG_LEGACY_mask;
 inline const RegMask &VECTORS_REG_LEGACY_mask() { return _VECTORS_REG_LEGACY_mask; }
 extern const RegMask _VECTORS_REG_EVEX_mask;
 inline const RegMask &VECTORS_REG_EVEX_mask() { return _VECTORS_REG_EVEX_mask; }
 inline const RegMask &VECTORS_REG_mask() { return (
-#line 901 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1223 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52066 "ad_x86.hpp"
+#line 58331 "ad_x86.hpp"
 ) ? VECTORS_REG_EVEX_mask() : VECTORS_REG_LEGACY_mask(); }
 inline const RegMask &VECTORS_REG_VLBWDQ_mask() { return (
-#line 902 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1224 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 52071 "ad_x86.hpp"
+#line 58336 "ad_x86.hpp"
 ) ? VECTORS_REG_EVEX_mask() : VECTORS_REG_LEGACY_mask(); }
 extern const RegMask _VECTORD_REG_LEGACY_mask;
 inline const RegMask &VECTORD_REG_LEGACY_mask() { return _VECTORD_REG_LEGACY_mask; }
 extern const RegMask _VECTORD_REG_EVEX_mask;
 inline const RegMask &VECTORD_REG_EVEX_mask() { return _VECTORD_REG_EVEX_mask; }
 inline const RegMask &VECTORD_REG_mask() { return (
-#line 962 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1278 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52080 "ad_x86.hpp"
+#line 58345 "ad_x86.hpp"
 ) ? VECTORD_REG_EVEX_mask() : VECTORD_REG_LEGACY_mask(); }
 inline const RegMask &VECTORD_REG_VLBWDQ_mask() { return (
-#line 963 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1279 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 52085 "ad_x86.hpp"
+#line 58350 "ad_x86.hpp"
 ) ? VECTORD_REG_EVEX_mask() : VECTORD_REG_LEGACY_mask(); }
 extern const RegMask _VECTORX_REG_LEGACY_mask;
 inline const RegMask &VECTORX_REG_LEGACY_mask() { return _VECTORX_REG_LEGACY_mask; }
 extern const RegMask _VECTORX_REG_EVEX_mask;
 inline const RegMask &VECTORX_REG_EVEX_mask() { return _VECTORX_REG_EVEX_mask; }
 inline const RegMask &VECTORX_REG_mask() { return (
-#line 1023 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1333 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52094 "ad_x86.hpp"
+#line 58359 "ad_x86.hpp"
 ) ? VECTORX_REG_EVEX_mask() : VECTORX_REG_LEGACY_mask(); }
 inline const RegMask &VECTORX_REG_VLBWDQ_mask() { return (
-#line 1024 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1334 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 52099 "ad_x86.hpp"
+#line 58364 "ad_x86.hpp"
 ) ? VECTORX_REG_EVEX_mask() : VECTORX_REG_LEGACY_mask(); }
 extern const RegMask _VECTORY_REG_LEGACY_mask;
 inline const RegMask &VECTORY_REG_LEGACY_mask() { return _VECTORY_REG_LEGACY_mask; }
 extern const RegMask _VECTORY_REG_EVEX_mask;
 inline const RegMask &VECTORY_REG_EVEX_mask() { return _VECTORY_REG_EVEX_mask; }
 inline const RegMask &VECTORY_REG_mask() { return (
-#line 1084 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1388 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52108 "ad_x86.hpp"
+#line 58373 "ad_x86.hpp"
 ) ? VECTORY_REG_EVEX_mask() : VECTORY_REG_LEGACY_mask(); }
 inline const RegMask &VECTORY_REG_VLBWDQ_mask() { return (
-#line 1085 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1389 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_avx512vlbwdq() 
-#line 52113 "ad_x86.hpp"
+#line 58378 "ad_x86.hpp"
 ) ? VECTORY_REG_EVEX_mask() : VECTORY_REG_LEGACY_mask(); }
 extern const RegMask _VECTORZ_REG_EVEX_mask;
 inline const RegMask &VECTORZ_REG_EVEX_mask() { return _VECTORZ_REG_EVEX_mask; }
 extern const RegMask _VECTORZ_REG_LEGACY_mask;
 inline const RegMask &VECTORZ_REG_LEGACY_mask() { return _VECTORZ_REG_LEGACY_mask; }
 inline const RegMask &VECTORZ_REG_mask() { return (
-#line 1145 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1443 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() 
-#line 52122 "ad_x86.hpp"
+#line 58387 "ad_x86.hpp"
 ) ? VECTORZ_REG_EVEX_mask() : VECTORZ_REG_LEGACY_mask(); }
 inline const RegMask &VECTORZ_REG_VL_mask() { return (
-#line 1146 "/priv/d038402/git/reinrich/jdk/src/hotspot/cpu/x86/x86.ad"
+#line 1444 "/priv/d038402/git/reinrich/valhalla/src/hotspot/cpu/x86/x86.ad"
 VM_Version::supports_evex() && VM_Version::supports_avx512vl() 
-#line 52127 "ad_x86.hpp"
+#line 58392 "ad_x86.hpp"
 ) ? VECTORZ_REG_EVEX_mask() : VECTORZ_REG_LEGACY_mask(); }
 extern const RegMask _XMM0_REG_mask;
 inline const RegMask &XMM0_REG_mask() { return _XMM0_REG_mask; }
