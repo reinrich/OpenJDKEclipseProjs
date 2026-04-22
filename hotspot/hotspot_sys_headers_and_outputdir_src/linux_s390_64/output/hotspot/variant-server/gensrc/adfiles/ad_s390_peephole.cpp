@@ -1,7 +1,7 @@
 #line 1 "ad_s390_peephole.cpp"
 //
-// Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2017, SAP SE. All rights reserved.
+// Copyright (c) 2017, 2026, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2017, 2024 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -25,21 +25,20 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_s390.hpp"
-MachNode *loadINode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted) {
+int loadINode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
   bool  matches = true;
   MachNode *inst0 = this;
-  MachNode *inst1 = NULL;
-  if( (OptoPeepholeAt == -1) || (OptoPeepholeAt==0) ) {
+  MachNode *inst1 = nullptr;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==0)) && ( true ) ) {
     matches = true;
   // Check instruction sub-tree
   // Identify previous instruction if inside this block
   if( block_index - 1 > 0 ) {
     Node *n = block->get_node(block_index - 1);
-    inst1 = (n->is_Mach()) ? n->as_Mach() : NULL;
+    inst1 = (n->is_Mach()) ? n->as_Mach() : nullptr;
   }
-  matches = matches && (inst1 != NULL) && (inst1->rule() == storeI_rule);
+  matches = matches && (inst1 != nullptr) && (inst1->rule() == storeI_rule);
     // If instruction subtree matches
     if( matches ) {
 
@@ -72,7 +71,6 @@ MachNode *loadINode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
         root->add_req(_in[0]);                // control edge
         root->add_req(inst1->in(1));        // unmatched ideal edge
         root->_bottom_type = inst1->bottom_type();
-        ra_->add_reference(root, inst1);
         ra_->set_oop (root, ra_->is_oop(inst1));
         ra_->set_pair(root->_idx, ra_->get_reg_second(inst1), ra_->get_reg_first(inst1));
         root->_opnds[0] = inst1->_opnds[0]->clone(); // result
@@ -83,28 +81,36 @@ MachNode *loadINode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
         for( unsigned x2 = inst1_idx2; x2 < inst1_idx3; x2++ )
           root->add_req( inst1->in(x2) );
         root->_opnds[2] = inst1->_opnds[2]->clone();
-        deleted = 2;
-        return root;  // return new root;
+        inst0->replace_by(root);
+        inst0->set_removed();
+        cfg_->map_node_to_block(inst0, nullptr);
+        inst1->set_removed();
+        cfg_->map_node_to_block(inst1, nullptr);
+        block->remove_node(block_index - 0);
+        block->remove_node(block_index - 1);
+        block->insert_node(root, block_index - 1);
+        cfg_->map_node_to_block(root, block);
+        return 0;  // return the peephole index;
       }
     }
   } // end of peephole rule #0
 
-  return NULL;  // No peephole rules matched
+  return -1;  // No peephole rules matched
 }
 
-MachNode *loadLNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted) {
+int loadLNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
   bool  matches = true;
   MachNode *inst0 = this;
-  MachNode *inst1 = NULL;
-  if( (OptoPeepholeAt == -1) || (OptoPeepholeAt==1) ) {
+  MachNode *inst1 = nullptr;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==1)) && ( true ) ) {
     matches = true;
   // Check instruction sub-tree
   // Identify previous instruction if inside this block
   if( block_index - 1 > 0 ) {
     Node *n = block->get_node(block_index - 1);
-    inst1 = (n->is_Mach()) ? n->as_Mach() : NULL;
+    inst1 = (n->is_Mach()) ? n->as_Mach() : nullptr;
   }
-  matches = matches && (inst1 != NULL) && (inst1->rule() == storeL_rule);
+  matches = matches && (inst1 != nullptr) && (inst1->rule() == storeL_rule);
     // If instruction subtree matches
     if( matches ) {
 
@@ -137,7 +143,6 @@ MachNode *loadLNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
         root->add_req(_in[0]);                // control edge
         root->add_req(inst1->in(1));        // unmatched ideal edge
         root->_bottom_type = inst1->bottom_type();
-        ra_->add_reference(root, inst1);
         ra_->set_oop (root, ra_->is_oop(inst1));
         ra_->set_pair(root->_idx, ra_->get_reg_second(inst1), ra_->get_reg_first(inst1));
         root->_opnds[0] = inst1->_opnds[0]->clone(); // result
@@ -148,28 +153,36 @@ MachNode *loadLNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
         for( unsigned x2 = inst1_idx2; x2 < inst1_idx3; x2++ )
           root->add_req( inst1->in(x2) );
         root->_opnds[2] = inst1->_opnds[2]->clone();
-        deleted = 2;
-        return root;  // return new root;
+        inst0->replace_by(root);
+        inst0->set_removed();
+        cfg_->map_node_to_block(inst0, nullptr);
+        inst1->set_removed();
+        cfg_->map_node_to_block(inst1, nullptr);
+        block->remove_node(block_index - 0);
+        block->remove_node(block_index - 1);
+        block->insert_node(root, block_index - 1);
+        cfg_->map_node_to_block(root, block);
+        return 1;  // return the peephole index;
       }
     }
   } // end of peephole rule #1
 
-  return NULL;  // No peephole rules matched
+  return -1;  // No peephole rules matched
 }
 
-MachNode *loadPNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_, int &deleted) {
+int loadPNode::peephole(Block* block, int block_index, PhaseCFG* cfg_, PhaseRegAlloc* ra_) {
   bool  matches = true;
   MachNode *inst0 = this;
-  MachNode *inst1 = NULL;
-  if( (OptoPeepholeAt == -1) || (OptoPeepholeAt==2) ) {
+  MachNode *inst1 = nullptr;
+  if( ((OptoPeepholeAt == -1) || (OptoPeepholeAt==2)) && ( true ) ) {
     matches = true;
   // Check instruction sub-tree
   // Identify previous instruction if inside this block
   if( block_index - 1 > 0 ) {
     Node *n = block->get_node(block_index - 1);
-    inst1 = (n->is_Mach()) ? n->as_Mach() : NULL;
+    inst1 = (n->is_Mach()) ? n->as_Mach() : nullptr;
   }
-  matches = matches && (inst1 != NULL) && (inst1->rule() == storeP_rule);
+  matches = matches && (inst1 != nullptr) && (inst1->rule() == storeP_rule);
     // If instruction subtree matches
     if( matches ) {
 
@@ -202,7 +215,6 @@ MachNode *loadPNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
         root->add_req(_in[0]);                // control edge
         root->add_req(inst1->in(1));        // unmatched ideal edge
         root->_bottom_type = inst1->bottom_type();
-        ra_->add_reference(root, inst1);
         ra_->set_oop (root, ra_->is_oop(inst1));
         ra_->set_pair(root->_idx, ra_->get_reg_second(inst1), ra_->get_reg_first(inst1));
         root->_opnds[0] = inst1->_opnds[0]->clone(); // result
@@ -213,13 +225,21 @@ MachNode *loadPNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
         for( unsigned x2 = inst1_idx2; x2 < inst1_idx3; x2++ )
           root->add_req( inst1->in(x2) );
         root->_opnds[2] = inst1->_opnds[2]->clone();
-        deleted = 2;
-        return root;  // return new root;
+        inst0->replace_by(root);
+        inst0->set_removed();
+        cfg_->map_node_to_block(inst0, nullptr);
+        inst1->set_removed();
+        cfg_->map_node_to_block(inst1, nullptr);
+        block->remove_node(block_index - 0);
+        block->remove_node(block_index - 1);
+        block->insert_node(root, block_index - 1);
+        cfg_->map_node_to_block(root, block);
+        return 2;  // return the peephole index;
       }
     }
   } // end of peephole rule #2
 
-  return NULL;  // No peephole rules matched
+  return -1;  // No peephole rules matched
 }
 
 // Check consistency of C++ compilation with ADLC options:
@@ -239,3 +259,7 @@ MachNode *loadPNode::peephole(Block *block, int block_index, PhaseRegAlloc *ra_,
 #ifndef _LP64
 #  error "_LP64 must be defined"
 #endif // _LP64
+// Check adlc -DASSERT=1
+#ifndef ASSERT
+#  error "ASSERT must be defined"
+#endif // ASSERT
