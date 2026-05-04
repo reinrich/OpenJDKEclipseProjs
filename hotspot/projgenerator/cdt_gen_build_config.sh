@@ -110,13 +110,6 @@ function initialize() {
     mkdir -p $WORK_DIR
     cmdline_file=$CMDLINE_DIR/globalDefinitions.+(o|obj).cmdline
 
-    if ! $GSED -n "/DONT_USE_PRECOMPILED_HEADER/! q 1" <$cmdline_file > /dev/null ; then
-        echo
-        echo "*** ERROR(line $LINENO): you must use a build without precompiled headers!"
-        echo
-        exit 1
-    fi
-
     READLINK=readlink
     # readlink command to be used on build host
     READLINK_BUILD_HOST=$READLINK
@@ -165,6 +158,13 @@ function initialize() {
         fi
     done
     echo "OUTPUTDIR is $OUTPUTDIR"
+
+    if $GSED -n "/USE_PRECOMPILED_HEADER/! q 1" <$OUTPUTDIR/spec.gmk > /dev/null ; then
+        echo
+        echo "*** ERROR(line $LINENO): you must use a build without precompiled headers!"
+        echo
+        exit 1
+    fi
 
     JDK_VERSION=$($GSED -n '/VERSION_FEATURE := \(.*\)/ s//\1/p' $OUTPUTDIR/spec.gmk)
     TOPDIR_ABS=$($GSED -n '/TOPDIR := \(.*\)/ s//\1/p' $OUTPUTDIR/spec.gmk)

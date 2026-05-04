@@ -1,7 +1,7 @@
 #line 1 "ad_s390_clone.cpp"
 //
-// Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2017, SAP SE. All rights reserved.
+// Copyright (c) 2017, 2026, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2017, 2024 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -25,7 +25,6 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_s390.hpp"
 MachOper *UniverseOper::clone() const {
   return new UniverseOper();
@@ -44,6 +43,39 @@ MachOper *sRegDOper::clone() const {
 }
 MachOper *sRegLOper::clone() const {
   return new sRegLOper();
+}
+MachOper *vecXOper::clone() const {
+  return new vecXOper();
+}
+MachOper *v16TempRegOper::clone() const {
+  return new v16TempRegOper();
+}
+MachOper *v17TempRegOper::clone() const {
+  return new v17TempRegOper();
+}
+MachOper *v18TempRegOper::clone() const {
+  return new v18TempRegOper();
+}
+MachOper *v19TempRegOper::clone() const {
+  return new v19TempRegOper();
+}
+MachOper *v20TempRegOper::clone() const {
+  return new v20TempRegOper();
+}
+MachOper *v21TempRegOper::clone() const {
+  return new v21TempRegOper();
+}
+MachOper *v22TempRegOper::clone() const {
+  return new v22TempRegOper();
+}
+MachOper *v23TempRegOper::clone() const {
+  return new v23TempRegOper();
+}
+MachOper *v24TempRegOper::clone() const {
+  return new v24TempRegOper();
+}
+MachOper *v25TempRegOper::clone() const {
+  return new v25TempRegOper();
 }
 MachOper *immB_minus1Oper::clone() const {
   return new immB_minus1Oper(_c0);
@@ -90,12 +122,6 @@ MachOper *uimmI12Oper::clone() const {
 MachOper *uimmI8Oper::clone() const {
   return new uimmI8Oper(_c0);
 }
-MachOper *uimmI6Oper::clone() const {
-  return new uimmI6Oper(_c0);
-}
-MachOper *uimmI5Oper::clone() const {
-  return new uimmI5Oper(_c0);
-}
 MachOper *SSlenDWOper::clone() const {
   return new SSlenDWOper(_c0);
 }
@@ -107,9 +133,6 @@ MachOper *immI_16Oper::clone() const {
 }
 MachOper *immI_24Oper::clone() const {
   return new immI_24Oper(_c0);
-}
-MachOper *immI_255Oper::clone() const {
-  return new immI_255Oper(_c0);
 }
 MachOper *immI_32_63Oper::clone() const {
   return new immI_32_63Oper(_c0);
@@ -144,15 +167,6 @@ MachOper *uimmL16Oper::clone() const {
 MachOper *uimmL12Oper::clone() const {
   return new uimmL12Oper(_c0);
 }
-MachOper *uimmL8Oper::clone() const {
-  return new uimmL8Oper(_c0);
-}
-MachOper *immL_FFOper::clone() const {
-  return new immL_FFOper(_c0);
-}
-MachOper *immL_FFFFOper::clone() const {
-  return new immL_FFFFOper(_c0);
-}
 MachOper *immL_FFFFFFFFOper::clone() const {
   return new immL_FFFFFFFFOper(_c0);
 }
@@ -176,9 +190,6 @@ MachOper *immL_32bitsOper::clone() const {
 }
 MachOper *immPOper::clone() const {
   return new immPOper(_c0);
-}
-MachOper *immP32Oper::clone() const {
-  return new immP32Oper(_c0);
 }
 MachOper *immP16Oper::clone() const {
   return new immP16Oper(_c0);
@@ -255,6 +266,12 @@ MachOper *iRegPOper::clone() const {
 MachOper *threadRegPOper::clone() const {
   return new threadRegPOper();
 }
+MachOper *r10TempRegPOper::clone() const {
+  return new r10TempRegPOper();
+}
+MachOper *r11TempRegPOper::clone() const {
+  return new r11TempRegPOper();
+}
 MachOper *noArg_iRegPOper::clone() const {
   return new noArg_iRegPOper();
 }
@@ -281,12 +298,6 @@ MachOper *revenRegPOper::clone() const {
 }
 MachOper *roddRegPOper::clone() const {
   return new roddRegPOper();
-}
-MachOper *lock_ptr_RegPOper::clone() const {
-  return new lock_ptr_RegPOper();
-}
-MachOper *rscratch2RegPOper::clone() const {
-  return new rscratch2RegPOper();
 }
 MachOper *iRegNOper::clone() const {
   return new iRegNOper();
@@ -318,6 +329,9 @@ MachOper *revenRegLOper::clone() const {
 MachOper *roddRegLOper::clone() const {
   return new roddRegLOper();
 }
+MachOper *allRoddRegLOper::clone() const {
+  return new allRoddRegLOper();
+}
 MachOper *rarg1RegLOper::clone() const {
   return new rarg1RegLOper();
 }
@@ -327,35 +341,14 @@ MachOper *rarg5RegLOper::clone() const {
 MachOper *flagsRegOper::clone() const {
   return new flagsRegOper();
 }
-MachOper *TD_flagsRegOper::clone() const {
-  return new TD_flagsRegOper();
-}
 MachOper *regDOper::clone() const {
   return new regDOper();
-}
-MachOper *rscratchRegDOper::clone() const {
-  return new rscratchRegDOper();
 }
 MachOper *regFOper::clone() const {
   return new regFOper();
 }
-MachOper *rscratchRegFOper::clone() const {
-  return new rscratchRegFOper();
-}
 MachOper *inline_cache_regPOper::clone() const {
   return new inline_cache_regPOper();
-}
-MachOper *compiler_method_oop_regPOper::clone() const {
-  return new compiler_method_oop_regPOper();
-}
-MachOper *interpreter_method_oop_regPOper::clone() const {
-  return new interpreter_method_oop_regPOper();
-}
-MachOper *iRegP2NOper::clone() const {
-  return new iRegP2NOper();
-}
-MachOper *iRegN2POper::clone() const {
-  return new iRegN2POper();
 }
 MachOper *indirectOper::clone() const {
   return new indirectOper();
@@ -428,3 +421,7 @@ MachOper *cmpOpOper::clone() const {
 #ifndef _LP64
 #  error "_LP64 must be defined"
 #endif // _LP64
+// Check adlc -DASSERT=1
+#ifndef ASSERT
+#  error "ASSERT must be defined"
+#endif // ASSERT

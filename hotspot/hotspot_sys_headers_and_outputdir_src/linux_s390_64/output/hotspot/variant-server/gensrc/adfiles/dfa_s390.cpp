@@ -1,7 +1,7 @@
 #line 1 "dfa_s390.cpp"
 //
-// Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
-// Copyright (c) 2017, SAP SE. All rights reserved.
+// Copyright (c) 2017, 2026, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2017, 2024 SAP SE. All rights reserved.
 // DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // This code is free software; you can redistribute it and/or modify it
@@ -25,14 +25,17 @@
 
 // Machine Generated File.  Do Not Edit!
 
-#include "precompiled.hpp"
 #include "adfiles/ad_s390.hpp"
+#include "code/aotCodeCache.hpp"
+#include "oops/compressedOops.hpp"
 #include "opto/cfgnode.hpp"
 #include "opto/intrinsicnode.hpp"
 #include "opto/matcher.hpp"
 #include "opto/narrowptrnode.hpp"
 #include "opto/opcodes.hpp"
 #include "opto/convertnode.hpp"
+#include "opto/superword.hpp"
+#include "utilities/powerOfTwo.hpp"
 
 //------------------------- Source -----------------------------------------
 
@@ -64,10 +67,7 @@ static const int ins_should_rematerialize = false;
 
 //------------------------- Macros -----------------------------------------
 #define DFA_PRODUCTION(result, rule, cost)\
-  _cost[ (result) ] = cost; _rule[ (result) ] = rule;
-
-#define DFA_PRODUCTION__SET_VALID(result, rule, cost)\
-  DFA_PRODUCTION( (result), (rule), (cost) ); STATE__SET_VALID( (result) );
+  assert(rule < (1 << 15), "too many rules"); _cost[ (result) ] = cost; _rule[ (result) ] = (rule << 1) | 0x1;
 
 //------------------------- DFA --------------------------------------------
 // DFA is a large switch with case statements for each ideal opcode encountered
@@ -82,33 +82,33 @@ static const int ins_should_rematerialize = false;
 void  State::_sub_Op_RegN(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IREGN, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, noArg_iRegN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, rarg1RegN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, rarg2RegN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, rarg3RegN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, rarg4RegN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, rarg5RegN_rule, c+1)
+        DFA_PRODUCTION(IREGN, iRegN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, noArg_iRegN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, rarg1RegN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, rarg2RegN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, rarg3RegN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, rarg4RegN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, rarg5RegN_rule, c+1)
     }
 }
 void  State::_sub_Op_RegI(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, noOdd_iRegI_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, iRegI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, revenRegI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, roddRegI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, rarg1RegI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, rarg2RegI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, rarg3RegI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, rarg4RegI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, rarg5RegI_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, noOdd_iRegI_rule, c)
+        DFA_PRODUCTION(IREGI, iRegI_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, revenRegI_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, roddRegI_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, rarg1RegI_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, rarg2RegI_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, rarg3RegI_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, rarg4RegI_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, rarg5RegI_rule, c+1+1)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGI, noArg_iRegI_rule, c)
+        DFA_PRODUCTION(NOARG_IREGI, noArg_iRegI_rule, c)
     }
     {
       unsigned int c = 1;
@@ -127,3614 +127,4117 @@ void  State::_sub_Op_RegI(const Node *n){
 void  State::_sub_Op_RegP(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(RSCRATCH2REGP, rscratch2RegP_rule, c)
+        DFA_PRODUCTION(MEMORYREGP, memoryRegP_rule, c)
+        DFA_PRODUCTION(INDIRECT, indirect_rule, c+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(LOCK_PTR_REGP, lock_ptr_RegP_rule, c)
+        DFA_PRODUCTION(THREADREGP, threadRegP_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, memoryRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, indirect_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1)
-    }
-    {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(THREADREGP, threadRegP_rule, c)
-    }
-    {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IREGP, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, noArg_iRegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, rarg1RegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, rarg2RegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, rarg3RegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, rarg4RegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, rarg5RegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, revenRegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, roddRegP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, inline_cache_regP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, compiler_method_oop_regP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, interpreter_method_oop_regP_rule, c+1)
+        DFA_PRODUCTION(IREGP, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, r10TempRegP_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, r11TempRegP_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, noArg_iRegP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, rarg1RegP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, rarg2RegP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, rarg3RegP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, rarg4RegP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, rarg5RegP_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, revenRegP_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, roddRegP_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, inline_cache_regP_rule, c+1)
     }
      DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, MEMORY_REF_COST)	  // overwrites higher cost rule
 }
 void  State::_sub_Op_RegF(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(RSCRATCHREGF, rscratchRegF_rule, c)
-    }
-    {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(REGF, regF_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, regF_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
      DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, MEMORY_REF_COST)	  // overwrites higher cost rule
 }
 void  State::_sub_Op_RegD(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(RSCRATCHREGD, rscratchRegD_rule, c)
-    }
-    {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(REGD, regD_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, regD_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
      DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, MEMORY_REF_COST)	  // overwrites higher cost rule
 }
 void  State::_sub_Op_RegL(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IREGL, iRegL_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, revenRegL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, roddRegL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, rarg1RegL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, rarg5RegL_rule, c+1)
+        DFA_PRODUCTION(IREGL, iRegL_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, revenRegL_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, roddRegL_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, allRoddRegL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, rarg1RegL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, rarg5RegL_rule, c+1)
     }
      DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, MEMORY_REF_COST)	  // overwrites higher cost rule
+}
+void  State::_sub_Op_VecX(const Node *n){
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V25TEMPREG, v25TempReg_rule, c)
+        DFA_PRODUCTION(VECX, vecX_rule, c+1)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V24TEMPREG, v24TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V23TEMPREG, v23TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V22TEMPREG, v22TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V21TEMPREG, v21TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V20TEMPREG, v20TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V19TEMPREG, v19TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V18TEMPREG, v18TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V17TEMPREG, v17TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(V16TEMPREG, v16TempReg_rule, c)
+    }
+    {
+      unsigned int c = 1;
+        DFA_PRODUCTION(VECX, vecX_rule, c)	  // overwrites higher cost rule
+    }
 }
 void  State::_sub_Op_RegFlags(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(TD_FLAGSREG, TD_flagsReg_rule, c)
-    }
-    {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, flagsReg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, flagsReg_rule, c)
     }
 }
 void  State::_sub_Op_AbsD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD];
-        DFA_PRODUCTION__SET_VALID(_ABSD_REGD_, _AbsD_regD__rule, c)
+        DFA_PRODUCTION(_ABSD_REGD_, _AbsD_regD__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, absD_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, absD_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_AbsF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF];
-        DFA_PRODUCTION__SET_VALID(_ABSF_REGF_, _AbsF_regF__rule, c)
+        DFA_PRODUCTION(_ABSF_REGF_, _AbsF_regF__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, absF_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, absF_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_AbsI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_ABSI_IREGI_, _AbsI_iRegI__rule, c)
+        DFA_PRODUCTION(_ABSI_IREGI_, _AbsI_iRegI__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST_LOW;
-        DFA_PRODUCTION__SET_VALID(IREGI, absI_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, absI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, absI_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, absI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, absI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, absI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, absI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, absI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, absI_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, absI_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, absI_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, absI_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, absI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, absI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, absI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, absI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, absI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, absI_reg_rule, c+1)
+    }
+}
+void  State::_sub_Op_AbsL(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
+      unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST_LOW;
+        DFA_PRODUCTION(IREGL, absL_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, absL_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, absL_reg_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, absL_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, absL_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, absL_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_AddD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORYRX_) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORYRX_]+_kids[1]->_cost[REGD] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, addD_reg_mem_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, addD_reg_mem_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, addD_reg_mem_rule, c)
+        DFA_PRODUCTION(REGD, addD_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, addD_reg_reg_rule, c)
+        DFA_PRODUCTION(REGD, addD_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_AddF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORYRX_) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORYRX_]+_kids[1]->_cost[REGF] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, addF_reg_mem_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, addF_reg_mem_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, addF_reg_mem_rule, c)
+        DFA_PRODUCTION(REGF, addF_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, addF_reg_reg_rule, c)
+        DFA_PRODUCTION(REGF, addF_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_AddI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORYRSY_) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORYRSY_]+_kids[1]->_cost[IMMI8];
-        DFA_PRODUCTION__SET_VALID(_ADDI__LOADI_MEMORYRSY__IMMI8, _AddI__LoadI_memoryRSY__immI8_rule, c)
+        DFA_PRODUCTION(_ADDI__LOADI_MEMORYRSY__IMMI8, _AddI__LoadI_memoryRSY__immI8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_Reg_mem_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_Reg_mem_0_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(IREGI, addI_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, addI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_Reg_mem_0_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, addI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_Reg_mem_0_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGI, addI_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_Reg_mem_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_Reg_mem_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI_IREGI_IREGI) && STATE__VALID_CHILD(_kids[1], IMMI20) &&
         (
-#line 5874 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5971 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 361 "dfa_s390.cpp"
+#line 401 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDI_IREGI_IREGI]+_kids[1]->_cost[IMMI20] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_reg_imm20_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_reg_imm20_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_reg_imm20_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_reg_imm20_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_reg_imm20_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDI_IREGI_IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI12) &&
         (
-#line 5863 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5960 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  PreferLAoverADD
-#line 399 "dfa_s390.cpp"
+#line 439 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDI_IREGI_IREGI]+_kids[1]->_cost[UIMMI12] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_reg_imm12_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_reg_imm12_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_reg_imm12_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_reg_imm12_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_reg_imm12_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_ADDI_IREGI_IREGI, _AddI_iRegI_iRegI_rule, c)
+        DFA_PRODUCTION(_ADDI_IREGI_IREGI, _AddI_iRegI_iRegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI20) &&
         (
-#line 5852 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5949 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 441 "dfa_s390.cpp"
+#line 481 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI20] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_imm20_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_imm20_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_imm20_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_imm20_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_imm20_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI12) &&
         (
-#line 5840 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5937 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 479 "dfa_s390.cpp"
+#line 519 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI12] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_imm12_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_imm12_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_imm12_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_imm12_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_imm12_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST_HIGH;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_imm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_imm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) &&
         (
-#line 5816 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5913 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  VM_Version::has_DistinctOpnds()
-#line 550 "dfa_s390.cpp"
+#line 590 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_imm16_RISC_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_imm16_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_imm16_RISC_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_imm16_RISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_imm16_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_imm16_CISC_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_imm16_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_imm16_CISC_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_imm16_CISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_imm16_CISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 5787 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5884 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_DistinctOpnds()
-#line 621 "dfa_s390.cpp"
+#line 661 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_reg_RISC_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_reg_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_reg_RISC_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_reg_RISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_reg_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_reg_reg_CISC_rule, c)
+        DFA_PRODUCTION(IREGI, addI_reg_reg_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_reg_reg_CISC_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_reg_reg_CISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_reg_reg_CISC_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_AddL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORYRSY_) && STATE__VALID_CHILD(_kids[1], IMML8) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORYRSY_]+_kids[1]->_cost[IMML8];
-        DFA_PRODUCTION__SET_VALID(_ADDL__LOADL_MEMORYRSY__IMML8, _AddL__LoadL_memoryRSY__immL8_rule, c)
+        DFA_PRODUCTION(_ADDL__LOADL_MEMORYRSY__IMML8, _AddL__LoadL_memoryRSY__immL8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL_IREGL_IREGL) && STATE__VALID_CHILD(_kids[1], IMML20) &&
         (
-#line 6046 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6143 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 698 "dfa_s390.cpp"
+#line 738 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDL_IREGL_IREGL]+_kids[1]->_cost[IMML20] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_reg_imm20_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(IREGL, addL_reg_reg_imm20_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, addL_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_reg_imm20_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDL_IREGL_IREGL) && STATE__VALID_CHILD(_kids[1], UIMML12) &&
         (
-#line 6035 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6132 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  PreferLAoverADD
-#line 712 "dfa_s390.cpp"
+#line 753 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDL_IREGL_IREGL]+_kids[1]->_cost[UIMML12] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_reg_imm12_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_reg_imm12_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_reg_imm12_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_reg_imm12_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL];
-        DFA_PRODUCTION__SET_VALID(_ADDL_IREGL_IREGL, _AddL_iRegL_iRegL_rule, c)
+        DFA_PRODUCTION(_ADDL_IREGL_IREGL, _AddL_iRegL_iRegL_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(IREGL, addL_Reg_mem_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_Reg_mem_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_Reg_mem_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_LOADL_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGL, addL_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_Reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L__LOADI_MEMORY__) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L__LOADI_MEMORY__]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_Reg_memI_0_rule, c)
+        DFA_PRODUCTION(IREGL, addL_Reg_memI_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_Reg_memI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_Reg_memI_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_Reg_memI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_Reg_memI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_Reg_memI_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L__LOADI_MEMORY__) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L__LOADI_MEMORY__] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_Reg_memI_rule, c)
+        DFA_PRODUCTION(IREGL, addL_Reg_memI_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_Reg_memI_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_Reg_memI_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML16) &&
         (
-#line 6000 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6097 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  VM_Version::has_DistinctOpnds()
-#line 826 "dfa_s390.cpp"
+#line 882 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_imm16_RISC_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_imm16_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_imm16_RISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_imm16_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_imm16_CISC_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_imm16_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_imm16_CISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_imm16_CISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML32] + DEFAULT_COST_HIGH;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_imm32_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML20) &&
         (
-#line 5964 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6061 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 894 "dfa_s390.cpp"
+#line 959 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML20] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_imm20_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_imm20_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_imm20_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_imm20_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML12) &&
         (
-#line 5953 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6050 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  PreferLAoverADD
-#line 920 "dfa_s390.cpp"
+#line 988 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML12] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_imm12_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_imm12_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_imm12_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_imm12_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 5940 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6037 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_DistinctOpnds()
-#line 946 "dfa_s390.cpp"
+#line 1017 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_reg_RISC_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_reg_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_reg_RISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_reg_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_reg_CISC_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_reg_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_reg_CISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_reg_CISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L_IREGI_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L_IREGI_]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_regI_0_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_regI_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_regI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_regI_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_regI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_regI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_regI_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L_IREGI_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L_IREGI_] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_reg_regI_rule, c)
+        DFA_PRODUCTION(IREGL, addL_reg_regI_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_reg_regI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_reg_regI_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_reg_regI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_reg_regI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_reg_regI_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_AddP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADP_MEMORYRSY_) && STATE__VALID_CHILD(_kids[1], IMML8) ) {
       unsigned int c = _kids[0]->_cost[_LOADP_MEMORYRSY_]+_kids[1]->_cost[IMML8];
-        DFA_PRODUCTION__SET_VALID(_ADDP__LOADP_MEMORYRSY__IMML8, _AddP__LoadP_memoryRSY__immL8_rule, c)
+        DFA_PRODUCTION(_ADDP__LOADP_MEMORYRSY__IMML8, _AddP__LoadP_memoryRSY__immL8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_IREGP_N2P_IREGL) && STATE__VALID_CHILD(_kids[1], IMML20) &&
         (
-#line 6212 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
- PreferLAoverADD && Universe::narrow_oop_base() == NULL && Universe::narrow_oop_shift() == 0
-#line 1041 "dfa_s390.cpp"
+#line 6309 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+ PreferLAoverADD && CompressedOops::base() == nullptr && CompressedOops::shift() == 0
+#line 1124 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDP_IREGP_N2P_IREGL]+_kids[1]->_cost[IMML20] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_regN_reg_imm20_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_regN_reg_imm20_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_regN_reg_imm20_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(IREGP, addP_regN_reg_imm20_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, addP_regN_reg_imm20_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_regN_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_regN_reg_imm20_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_MEMORYREGP_IREGL) && STATE__VALID_CHILD(_kids[1], IMML20) &&
         (
-#line 6201 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6298 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 1070 "dfa_s390.cpp"
+#line 1153 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDP_MEMORYREGP_IREGL]+_kids[1]->_cost[IMML20] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_reg_imm20_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_reg_imm20_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_reg_imm20_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_reg_imm20_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_reg_imm20_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_reg_imm20_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_reg_imm20_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_reg_imm20_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_IREGP_N2P_IREGL) && STATE__VALID_CHILD(_kids[1], UIMML12) &&
         (
-#line 6190 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
- PreferLAoverADD && Universe::narrow_oop_base() == NULL && Universe::narrow_oop_shift() == 0
-#line 1141 "dfa_s390.cpp"
+#line 6287 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+ PreferLAoverADD && CompressedOops::base() == nullptr && CompressedOops::shift() == 0
+#line 1224 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDP_IREGP_N2P_IREGL]+_kids[1]->_cost[UIMML12] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_regN_reg_imm12_rule, c)
+        DFA_PRODUCTION(IREGP, addP_regN_reg_imm12_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_regN_reg_imm12_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_regN_reg_imm12_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_regN_reg_imm12_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_regN_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_regN_reg_imm12_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_regN_reg_imm12_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_regN_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_regN_reg_imm12_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IREGL];
-        DFA_PRODUCTION__SET_VALID(_ADDP_IREGP_N2P_IREGL, _AddP_iRegP_N2P_iRegL_rule, c)
+        DFA_PRODUCTION(_ADDP_IREGP_N2P_IREGL, _AddP_iRegP_N2P_iRegL_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_MEMORYREGP_IREGL) && STATE__VALID_CHILD(_kids[1], UIMML12) &&
         (
-#line 6179 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6276 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  PreferLAoverADD
-#line 1216 "dfa_s390.cpp"
+#line 1299 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_ADDP_MEMORYREGP_IREGL]+_kids[1]->_cost[UIMML12] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_reg_imm12_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_reg_imm12_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_reg_imm12_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_reg_imm12_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_reg_imm12_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_reg_imm12_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_reg_imm12_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_reg_imm12_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IMML32] + DEFAULT_COST_HIGH;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_imm32_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_imm32_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_imm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_imm32_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_imm32_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYREGP) && STATE__VALID_CHILD(_kids[1], IMML20) &&
         (
-#line 6154 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6251 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 1353 "dfa_s390.cpp"
+#line 1436 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORYREGP]+_kids[1]->_cost[IMML20] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_imm20_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_imm20_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_imm20_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_imm20_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_imm20_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_imm20_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_imm20_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_imm20_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_imm20_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_imm20_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IMML16) &&
         (
-#line 6143 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6240 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 !PreferLAoverADD && VM_Version::has_DistinctOpnds()
-#line 1424 "dfa_s390.cpp"
+#line 1507 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IMML16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_imm16_RISC_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_imm16_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_imm16_RISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_imm16_RISC_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_imm16_RISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_imm16_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_imm16_RISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_imm16_RISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_imm16_RISC_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_imm16_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IMML16) &&
         (
-#line 6130 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6227 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 !PreferLAoverADD && !VM_Version::has_DistinctOpnds()
-#line 1495 "dfa_s390.cpp"
+#line 1578 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IMML16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_imm16_CISC_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_imm16_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_imm16_CISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_imm16_CISC_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_imm16_CISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_imm16_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_imm16_CISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_imm16_CISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_imm16_CISC_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_imm16_CISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], UIMML12) &&
         (
-#line 6117 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6214 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  PreferLAoverADD
-#line 1566 "dfa_s390.cpp"
+#line 1649 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[UIMML12] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_imm12_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_imm12_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_imm12_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_imm12_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_imm12_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_imm12_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_imm12_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_imm12_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_imm12_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_imm12_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 6104 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6201 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 !PreferLAoverADD && VM_Version::has_DistinctOpnds()
-#line 1637 "dfa_s390.cpp"
+#line 1720 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_reg_RISC_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_reg_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_reg_RISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_reg_RISC_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_reg_RISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_reg_RISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_reg_RISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_reg_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 6090 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6187 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 !PreferLAoverADD && !VM_Version::has_DistinctOpnds()
-#line 1708 "dfa_s390.cpp"
+#line 1791 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_reg_CISC_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_reg_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_reg_CISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_reg_CISC_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_reg_CISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_reg_CISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_reg_CISC_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_reg_CISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 6076 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6173 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
  PreferLAoverADD
-#line 1779 "dfa_s390.cpp"
+#line 1862 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, addP_reg_reg_LA_rule, c)
+        DFA_PRODUCTION(IREGP, addP_reg_reg_LA_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, addP_reg_reg_LA_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, addP_reg_reg_LA_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, addP_reg_reg_LA_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, addP_reg_reg_LA_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, addP_reg_reg_LA_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, addP_reg_reg_LA_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, addP_reg_reg_LA_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, addP_reg_reg_LA_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP__DECODEN_IREGN__IREGL) && STATE__VALID_CHILD(_kids[1], UIMML12) &&
         
-#line 3634 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3742 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Matcher::narrow_oop_use_complex_address()
-#line 1850 "dfa_s390.cpp"
+#line 1933 "dfa_s390.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP__DECODEN_IREGN__IREGL]+_kids[1]->_cost[UIMML12]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET12INDEXNARROW, indOffset12indexNarrow_rule, c)
+        DFA_PRODUCTION(INDOFFSET12INDEXNARROW, indOffset12indexNarrow_rule, c)
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indOffset12indexNarrow_rule, c)
+        DFA_PRODUCTION(MEMORYRX, indOffset12indexNarrow_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_MEMORYREGP_IREGL) && STATE__VALID_CHILD(_kids[1], UIMML12) ) {
       unsigned int c = _kids[0]->_cost[_ADDP_MEMORYREGP_IREGL]+_kids[1]->_cost[UIMML12]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET12INDEX, indOffset12index_rule, c)
+        DFA_PRODUCTION(INDOFFSET12INDEX, indOffset12index_rule, c)
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indOffset12index_rule, c)
+        DFA_PRODUCTION(MEMORYRX, indOffset12index_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP__DECODEN_IREGN__IREGL) && STATE__VALID_CHILD(_kids[1], IMML20) &&
         
-#line 3606 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3714 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Matcher::narrow_oop_use_complex_address()
-#line 1869 "dfa_s390.cpp"
+#line 1952 "dfa_s390.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_ADDP__DECODEN_IREGN__IREGL]+_kids[1]->_cost[IMML20]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET20INDEXNARROW, indOffset20indexNarrow_rule, c)
+        DFA_PRODUCTION(INDOFFSET20INDEXNARROW, indOffset20indexNarrow_rule, c)
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indOffset20indexNarrow_rule, c)
+        DFA_PRODUCTION(MEMORY, indOffset20indexNarrow_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indOffset20indexNarrow_rule, c)
+        DFA_PRODUCTION(MEMORYRXY, indOffset20indexNarrow_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_IREGN_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_IREGN_]+_kids[1]->_cost[IREGL];
-        DFA_PRODUCTION__SET_VALID(_ADDP__DECODEN_IREGN__IREGL, _AddP__DecodeN_iRegN__iRegL_rule, c)
+        DFA_PRODUCTION(_ADDP__DECODEN_IREGN__IREGL, _AddP__DecodeN_iRegN__iRegL_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _ADDP_MEMORYREGP_IREGL) && STATE__VALID_CHILD(_kids[1], IMML20) ) {
       unsigned int c = _kids[0]->_cost[_ADDP_MEMORYREGP_IREGL]+_kids[1]->_cost[IMML20]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET20INDEX, indOffset20index_rule, c)
+        DFA_PRODUCTION(INDOFFSET20INDEX, indOffset20index_rule, c)
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indOffset20index_rule, c)
+        DFA_PRODUCTION(MEMORY, indOffset20index_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indOffset20index_rule, c)
+        DFA_PRODUCTION(MEMORYRXY, indOffset20index_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYREGP) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[MEMORYREGP]+_kids[1]->_cost[IREGL];
-        DFA_PRODUCTION__SET_VALID(_ADDP_MEMORYREGP_IREGL, _AddP_memoryRegP_iRegL_rule, c)
+        DFA_PRODUCTION(_ADDP_MEMORYREGP_IREGL, _AddP_memoryRegP_iRegL_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYREGP) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[MEMORYREGP]+_kids[1]->_cost[IREGL]+1;
-        DFA_PRODUCTION__SET_VALID(INDINDEX, indIndex_rule, c)
+        DFA_PRODUCTION(INDINDEX, indIndex_rule, c)
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indIndex_rule, c)
+        DFA_PRODUCTION(MEMORY, indIndex_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indIndex_rule, c)
+        DFA_PRODUCTION(MEMORYRXY, indIndex_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indIndex_rule, c)
+        DFA_PRODUCTION(MEMORYRX, indIndex_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_IREGN_) && STATE__VALID_CHILD(_kids[1], UIMML12) &&
         
-#line 3564 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3672 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Matcher::narrow_oop_use_complex_address()
-#line 1915 "dfa_s390.cpp"
+#line 1998 "dfa_s390.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_IREGN_]+_kids[1]->_cost[UIMML12]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET12NARROW, indOffset12Narrow_rule, c)
+        DFA_PRODUCTION(INDOFFSET12NARROW, indOffset12Narrow_rule, c)
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indOffset12Narrow_rule, c)
+        DFA_PRODUCTION(MEMORYRX, indOffset12Narrow_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indOffset12Narrow_rule, c)
+        DFA_PRODUCTION(MEMORYRS, indOffset12Narrow_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYREGP) && STATE__VALID_CHILD(_kids[1], UIMML12) ) {
       unsigned int c = _kids[0]->_cost[MEMORYREGP]+_kids[1]->_cost[UIMML12]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET12, indOffset12_rule, c)
+        DFA_PRODUCTION(INDOFFSET12, indOffset12_rule, c)
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indOffset12_rule, c)
+        DFA_PRODUCTION(MEMORYRX, indOffset12_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indOffset12_rule, c)
+        DFA_PRODUCTION(MEMORYRS, indOffset12_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_IREGN_) && STATE__VALID_CHILD(_kids[1], IMML20) &&
         
-#line 3536 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3644 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Matcher::narrow_oop_use_complex_address()
-#line 1940 "dfa_s390.cpp"
+#line 2023 "dfa_s390.cpp"
  ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_IREGN_]+_kids[1]->_cost[IMML20]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET20NARROW, indOffset20Narrow_rule, c)
+        DFA_PRODUCTION(INDOFFSET20NARROW, indOffset20Narrow_rule, c)
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indOffset20Narrow_rule, c)
+        DFA_PRODUCTION(MEMORY, indOffset20Narrow_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indOffset20Narrow_rule, c)
+        DFA_PRODUCTION(MEMORYRXY, indOffset20Narrow_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indOffset20Narrow_rule, c)
+        DFA_PRODUCTION(MEMORYRSY, indOffset20Narrow_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYREGP) && STATE__VALID_CHILD(_kids[1], IMML20) ) {
       unsigned int c = _kids[0]->_cost[MEMORYREGP]+_kids[1]->_cost[IMML20]+1;
-        DFA_PRODUCTION__SET_VALID(INDOFFSET20, indOffset20_rule, c)
+        DFA_PRODUCTION(INDOFFSET20, indOffset20_rule, c)
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indOffset20_rule, c)
+        DFA_PRODUCTION(MEMORY, indOffset20_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indOffset20_rule, c)
+        DFA_PRODUCTION(MEMORYRXY, indOffset20_rule, c)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indOffset20_rule, c)
+        DFA_PRODUCTION(MEMORYRSY, indOffset20_rule, c)
       }
     }
 }
 void  State::_sub_Op_AndI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI_LL1) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI_LL1] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, andI_reg_uimmI_LL1_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, andI_reg_uimmI_LL1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, andI_reg_uimmI_LL1_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, andI_reg_uimmI_LL1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, andI_reg_uimmI_LL1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, andI_reg_uimmI_LL1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, andI_reg_uimmI_LL1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, andI_reg_uimmI_LL1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, andI_reg_uimmI_LL1_rule, c+1)
+        DFA_PRODUCTION(IREGI, andI_reg_uimmI_LL1_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, andI_reg_uimmI_LL1_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, andI_reg_uimmI_LL1_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, andI_reg_uimmI_LL1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, andI_reg_uimmI_LL1_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, andI_reg_uimmI_LL1_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, andI_reg_uimmI_LL1_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, andI_reg_uimmI_LL1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, andI_reg_uimmI_LL1_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI_LH1) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI_LH1] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, andI_reg_uimmI_LH1_rule, c)
+        DFA_PRODUCTION(IREGI, andI_reg_uimmI_LH1_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, andI_reg_uimmI_LH1_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, andI_reg_uimmI_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, andI_reg_uimmI_LH1_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, andI_reg_uimmI_LH1_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, andI_reg_uimmI_LH1_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, andI_reg_uimmI_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, andI_reg_uimmI_LH1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, andI_reg_uimmI_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, andI_reg_uimmI_LH1_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, andI_reg_uimmI_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, andI_reg_uimmI_LH1_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, andI_reg_uimmI_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, andI_reg_uimmI_LH1_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, andI_reg_uimmI_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, andI_reg_uimmI_LH1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, andI_reg_uimmI_LH1_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI] + DEFAULT_COST_HIGH;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, andI_reg_uimm32_rule, c)
+        DFA_PRODUCTION(IREGI, andI_reg_uimm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, andI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, andI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, andI_reg_uimm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, andI_reg_uimm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, andI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, andI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, andI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, andI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, andI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, andI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, andI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, andI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, andI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, andI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, andI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, andI_reg_uimm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, andI_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(IREGI, andI_Reg_mem_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, andI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, andI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, andI_Reg_mem_0_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, andI_Reg_mem_0_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, andI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, andI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, andI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, andI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, andI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, andI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, andI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, andI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, andI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, andI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, andI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, andI_Reg_mem_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, andI_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGI, andI_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, andI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, andI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, andI_Reg_mem_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, andI_Reg_mem_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, andI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, andI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, andI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, andI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, andI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, andI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, andI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, andI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, andI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, andI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, andI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, andI_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, andI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, andI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, andI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, andI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, andI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, andI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, andI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, andI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, andI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, andI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, andI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, andI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, andI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, andI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, andI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, andI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, andI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, andI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_AndL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML_32BITS) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML_32BITS] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, zeroExtend_long_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, zeroExtend_long_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, zeroExtend_long_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, zeroExtend_long_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, zeroExtend_long_rule, c+1)
+        DFA_PRODUCTION(IREGL, zeroExtend_long_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, zeroExtend_long_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, zeroExtend_long_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, zeroExtend_long_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, zeroExtend_long_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, zeroExtend_long_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L__LOADI_MEMORY__) && STATE__VALID_CHILD(_kids[1], IMML_32BITS) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L__LOADI_MEMORY__]+_kids[1]->_cost[IMML_32BITS] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, convI2L_mem_zex_rule, c)
+        DFA_PRODUCTION(IREGL, convI2L_mem_zex_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, convI2L_mem_zex_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, convI2L_mem_zex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, convI2L_mem_zex_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, convI2L_mem_zex_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, convI2L_mem_zex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, convI2L_mem_zex_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, convI2L_mem_zex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, convI2L_mem_zex_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, convI2L_mem_zex_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L_IREGI_) && STATE__VALID_CHILD(_kids[1], IMML_32BITS) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L_IREGI_]+_kids[1]->_cost[IMML_32BITS] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, convI2L_reg_zex_rule, c)
+        DFA_PRODUCTION(IREGL, convI2L_reg_zex_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, convI2L_reg_zex_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, convI2L_reg_zex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, convI2L_reg_zex_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, convI2L_reg_zex_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, convI2L_reg_zex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, convI2L_reg_zex_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, convI2L_reg_zex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, convI2L_reg_zex_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, convI2L_reg_zex_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML_HH1) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML_HH1] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, andL_reg_uimmL_HH1_rule, c)
+        DFA_PRODUCTION(IREGL, andL_reg_uimmL_HH1_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, andL_reg_uimmL_HH1_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, andL_reg_uimmL_HH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, andL_reg_uimmL_HH1_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, andL_reg_uimmL_HH1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, andL_reg_uimmL_HH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, andL_reg_uimmL_HH1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, andL_reg_uimmL_HH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, andL_reg_uimmL_HH1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, andL_reg_uimmL_HH1_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML_HL1) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML_HL1] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, andL_reg_uimmL_HL1_rule, c)
+        DFA_PRODUCTION(IREGL, andL_reg_uimmL_HL1_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, andL_reg_uimmL_HL1_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, andL_reg_uimmL_HL1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, andL_reg_uimmL_HL1_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, andL_reg_uimmL_HL1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, andL_reg_uimmL_HL1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, andL_reg_uimmL_HL1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, andL_reg_uimmL_HL1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, andL_reg_uimmL_HL1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, andL_reg_uimmL_HL1_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML_LH1) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML_LH1] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, andL_reg_uimmL_LH1_rule, c)
+        DFA_PRODUCTION(IREGL, andL_reg_uimmL_LH1_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, andL_reg_uimmL_LH1_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, andL_reg_uimmL_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, andL_reg_uimmL_LH1_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, andL_reg_uimmL_LH1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, andL_reg_uimmL_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, andL_reg_uimmL_LH1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, andL_reg_uimmL_LH1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, andL_reg_uimmL_LH1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, andL_reg_uimmL_LH1_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML_LL1) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML_LL1] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, andL_reg_uimmL_LL1_rule, c)
+        DFA_PRODUCTION(IREGL, andL_reg_uimmL_LL1_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, andL_reg_uimmL_LL1_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, andL_reg_uimmL_LL1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, andL_reg_uimmL_LL1_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, andL_reg_uimmL_LL1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, andL_reg_uimmL_LL1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, andL_reg_uimmL_LL1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, andL_reg_uimmL_LL1_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, andL_reg_uimmL_LL1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, andL_reg_uimmL_LL1_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, andL_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(IREGL, andL_Reg_mem_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, andL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, andL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, andL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, andL_Reg_mem_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, andL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, andL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, andL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, andL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, andL_Reg_mem_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_LOADL_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, andL_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGL, andL_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, andL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, andL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, andL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, andL_Reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, andL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, andL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, andL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, andL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, andL_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, andL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, andL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, andL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, andL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, andL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, andL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, andL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, andL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, andL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, andL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, andL_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L__LOADI_MEMORY__) && STATE__VALID_CHILD(_kids[1], IMML_FFFFFFFF) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L__LOADI_MEMORY__]+_kids[1]->_cost[IMML_FFFFFFFF] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadUI2L_rule, c)
+        DFA_PRODUCTION(IREGL, loadUI2L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadUI2L_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, loadUI2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadUI2L_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadUI2L_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadUI2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadUI2L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadUI2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadUI2L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadUI2L_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_AryEq(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGP) &&
         (
-#line 10022 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10286 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((AryEqNode*)n)->encoding() == StrIntrinsicNode::UU
-#line 2374 "dfa_s390.cpp"
+#line 2488 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGP]+300;
-        DFA_PRODUCTION__SET_VALID(IREGI, array_equalsC_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, array_equalsC_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, array_equalsC_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, array_equalsC_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, array_equalsC_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, array_equalsC_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, array_equalsC_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, array_equalsC_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, array_equalsC_rule, c+1)
+        DFA_PRODUCTION(IREGI, array_equalsC_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, array_equalsC_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, array_equalsC_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, array_equalsC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, array_equalsC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, array_equalsC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, array_equalsC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, array_equalsC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, array_equalsC_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGP) &&
         (
-#line 10008 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10272 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((AryEqNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 2392 "dfa_s390.cpp"
+#line 2506 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGP]+300;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, array_equalsB_rule, c)
+        DFA_PRODUCTION(IREGI, array_equalsB_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, array_equalsB_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, array_equalsB_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, array_equalsB_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, array_equalsB_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, array_equalsB_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, array_equalsB_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, array_equalsB_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, array_equalsB_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, array_equalsB_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, array_equalsB_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, array_equalsB_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, array_equalsB_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, array_equalsB_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, array_equalsB_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, array_equalsB_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, array_equalsB_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_Binary(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IMMI];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_IMMI, _Binary_iRegP_immI_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_IMMI, _Binary_iRegP_immI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IMMI16];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_IMMI16, _Binary_iRegP_immI16_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_IMMI16, _Binary_iRegP_immI16_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IMMP) && STATE__VALID_CHILD(_kids[1], IMMI_1) ) {
       unsigned int c = _kids[0]->_cost[IMMP]+_kids[1]->_cost[IMMI_1];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IMMP_IMMI_1, _Binary_immP_immI_1_rule, c)
+        DFA_PRODUCTION(_BINARY_IMMP_IMMI_1, _Binary_immP_immI_1_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_IREGI, _Binary_iRegP_iRegI_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_IREGI, _Binary_iRegP_iRegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], RARG5REGI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[RARG5REGI];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_RARG5REGI, _Binary_iRegP_rarg5RegI_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_RARG5REGI, _Binary_iRegP_rarg5RegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], RARG2REGI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[RARG2REGI];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_RARG2REGI, _Binary_iRegP_rarg2RegI_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_RARG2REGI, _Binary_iRegP_rarg2RegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGP];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_IREGP, _Binary_iRegP_iRegP_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_IREGP, _Binary_iRegP_iRegP_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RARG1REGP) && STATE__VALID_CHILD(_kids[1], IMMP) ) {
+      unsigned int c = _kids[0]->_cost[RARG1REGP]+_kids[1]->_cost[IMMP];
+        DFA_PRODUCTION(_BINARY_RARG1REGP_IMMP, _Binary_rarg1RegP_immP_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORYRX_) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORYRX_]+_kids[1]->_cost[REGD];
-        DFA_PRODUCTION__SET_VALID(_BINARY__LOADD_MEMORYRX__REGD, _Binary__LoadD_memoryRX__regD_rule, c)
+        DFA_PRODUCTION(_BINARY__LOADD_MEMORYRX__REGD, _Binary__LoadD_memoryRX__regD_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORYRX_) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORYRX_]+_kids[1]->_cost[REGF];
-        DFA_PRODUCTION__SET_VALID(_BINARY__LOADF_MEMORYRX__REGF, _Binary__LoadF_memoryRX__regF_rule, c)
+        DFA_PRODUCTION(_BINARY__LOADF_MEMORYRX__REGF, _Binary__LoadF_memoryRX__regF_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORYRX_];
-        DFA_PRODUCTION__SET_VALID(_BINARY_REGD__LOADD_MEMORYRX_, _Binary_regD__LoadD_memoryRX__rule, c)
+        DFA_PRODUCTION(_BINARY_REGD__LOADD_MEMORYRX_, _Binary_regD__LoadD_memoryRX__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORYRX_];
-        DFA_PRODUCTION__SET_VALID(_BINARY_REGF__LOADF_MEMORYRX_, _Binary_regF__LoadF_memoryRX__rule, c)
+        DFA_PRODUCTION(_BINARY_REGF__LOADF_MEMORYRX_, _Binary_regF__LoadF_memoryRX__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], RARG5REGN) && STATE__VALID_CHILD(_kids[1], IREGN_P2N) ) {
       unsigned int c = _kids[0]->_cost[RARG5REGN]+_kids[1]->_cost[IREGN_P2N];
-        DFA_PRODUCTION__SET_VALID(_BINARY_RARG5REGN_IREGN_P2N, _Binary_rarg5RegN_iRegN_P2N_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RARG5REGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
-      unsigned int c = _kids[0]->_cost[RARG5REGI]+_kids[1]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_BINARY_RARG5REGI_IREGI, _Binary_rarg5RegI_iRegI_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], RARG5REGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
-      unsigned int c = _kids[0]->_cost[RARG5REGL]+_kids[1]->_cost[IREGL];
-        DFA_PRODUCTION__SET_VALID(_BINARY_RARG5REGL_IREGL, _Binary_rarg5RegL_iRegL_rule, c)
+        DFA_PRODUCTION(_BINARY_RARG5REGN_IREGN_P2N, _Binary_rarg5RegN_iRegN_P2N_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], RARG5REGP) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[RARG5REGP]+_kids[1]->_cost[IREGP_N2P];
-        DFA_PRODUCTION__SET_VALID(_BINARY_RARG5REGP_IREGP_N2P, _Binary_rarg5RegP_iRegP_N2P_rule, c)
+        DFA_PRODUCTION(_BINARY_RARG5REGP_IREGP_N2P, _Binary_rarg5RegP_iRegP_N2P_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RARG5REGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
+      unsigned int c = _kids[0]->_cost[RARG5REGL]+_kids[1]->_cost[IREGL];
+        DFA_PRODUCTION(_BINARY_RARG5REGL_IREGL, _Binary_rarg5RegL_iRegL_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], RARG5REGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
+      unsigned int c = _kids[0]->_cost[RARG5REGI]+_kids[1]->_cost[IREGI];
+        DFA_PRODUCTION(_BINARY_RARG5REGI_IREGI, _Binary_rarg5RegI_iRegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML16];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGL_IMML16, _Binary_iRegL_immL16_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGL_IMML16, _Binary_iRegL_immL16_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGL_IREGL, _Binary_iRegL_iRegL_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGL_IREGL, _Binary_iRegL_iRegL_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD];
-        DFA_PRODUCTION__SET_VALID(_BINARY_REGD_REGD, _Binary_regD_regD_rule, c)
+        DFA_PRODUCTION(_BINARY_REGD_REGD, _Binary_regD_regD_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF];
-        DFA_PRODUCTION__SET_VALID(_BINARY_REGF_REGF, _Binary_regF_regF_rule, c)
+        DFA_PRODUCTION(_BINARY_REGF_REGF, _Binary_regF_regF_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPF) && STATE__VALID_CHILD(_kids[1], FLAGSREG) ) {
       unsigned int c = _kids[0]->_cost[CMPOPF]+_kids[1]->_cost[FLAGSREG];
-        DFA_PRODUCTION__SET_VALID(_BINARY_CMPOPF_FLAGSREG, _Binary_cmpOpF_flagsReg_rule, c)
+        DFA_PRODUCTION(_BINARY_CMPOPF_FLAGSREG, _Binary_cmpOpF_flagsReg_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IMMP0) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IMMP0];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_IMMP0, _Binary_iRegP_immP0_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_IMMP0, _Binary_iRegP_immP0_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGP_N2P];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGP_IREGP_N2P, _Binary_iRegP_iRegP_N2P_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGP_IREGP_N2P, _Binary_iRegP_iRegP_N2P_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGI_IMMI16, _Binary_iRegI_immI16_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGI_IMMI16, _Binary_iRegI_immI16_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGI_IREGI, _Binary_iRegI_iRegI_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGI_IREGI, _Binary_iRegI_iRegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) && STATE__VALID_CHILD(_kids[1], IMMN0) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+_kids[1]->_cost[IMMN0];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGN_IMMN0, _Binary_iRegN_immN0_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGN_IMMN0, _Binary_iRegN_immN0_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) && STATE__VALID_CHILD(_kids[1], IREGN_P2N) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+_kids[1]->_cost[IREGN_P2N];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGN_IREGN_P2N, _Binary_iRegN_iRegN_P2N_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGN_IREGN_P2N, _Binary_iRegN_iRegN_P2N_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOP) && STATE__VALID_CHILD(_kids[1], FLAGSREG) ) {
       unsigned int c = _kids[0]->_cost[CMPOP]+_kids[1]->_cost[FLAGSREG];
-        DFA_PRODUCTION__SET_VALID(_BINARY_CMPOP_FLAGSREG, _Binary_cmpOp_flagsReg_rule, c)
+        DFA_PRODUCTION(_BINARY_CMPOP_FLAGSREG, _Binary_cmpOp_flagsReg_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGN) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGN];
-        DFA_PRODUCTION__SET_VALID(_BINARY_IREGL_IREGN, _Binary_iRegL_iRegN_rule, c)
+        DFA_PRODUCTION(_BINARY_IREGL_IREGN, _Binary_iRegL_iRegN_rule, c)
     }
 }
 void  State::_sub_Op_Bool(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(CMPOP, cmpOp_rule, c)
+        DFA_PRODUCTION(CMPOP, cmpOp_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(CMPOPF, cmpOpF_rule, c)
+        DFA_PRODUCTION(CMPOPF, cmpOpF_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(CMPOPT, cmpOpT_rule, c)
+        DFA_PRODUCTION(CMPOPT, cmpOpT_rule, c)
     }
 }
 void  State::_sub_Op_ReverseBytesI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) &&
         (
-#line 10768 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 11656 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 UseByteReverseInstruction
-#line 2560 "dfa_s390.cpp"
+#line 2678 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, bytes_reverse_int_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, bytes_reverse_int_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, bytes_reverse_int_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, bytes_reverse_int_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, bytes_reverse_int_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, bytes_reverse_int_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, bytes_reverse_int_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, bytes_reverse_int_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, bytes_reverse_int_rule, c+1)
+        DFA_PRODUCTION(IREGI, bytes_reverse_int_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, bytes_reverse_int_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, bytes_reverse_int_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, bytes_reverse_int_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, bytes_reverse_int_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, bytes_reverse_int_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, bytes_reverse_int_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, bytes_reverse_int_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, bytes_reverse_int_rule, c+1)
     }
 }
 void  State::_sub_Op_ReverseBytesL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) &&
         (
-#line 10779 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 11667 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 UseByteReverseInstruction
-#line 2580 "dfa_s390.cpp"
+#line 2698 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, bytes_reverse_long_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, bytes_reverse_long_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, bytes_reverse_long_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, bytes_reverse_long_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, bytes_reverse_long_rule, c+1)
+        DFA_PRODUCTION(IREGL, bytes_reverse_long_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, bytes_reverse_long_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, bytes_reverse_long_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, bytes_reverse_long_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, bytes_reverse_long_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, bytes_reverse_long_rule, c+1)
+    }
+}
+void  State::_sub_Op_ReverseBytesUS(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 11640 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UseByteReverseInstruction
+#line 2715 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI]+2 * DEFAULT_COST;
+        DFA_PRODUCTION(IREGI, bytes_reverse_unsigned_short_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, bytes_reverse_unsigned_short_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, bytes_reverse_unsigned_short_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, bytes_reverse_unsigned_short_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, bytes_reverse_unsigned_short_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, bytes_reverse_unsigned_short_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, bytes_reverse_unsigned_short_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, bytes_reverse_unsigned_short_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, bytes_reverse_unsigned_short_rule, c+1)
+    }
+}
+void  State::_sub_Op_ReverseBytesS(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 11624 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UseByteReverseInstruction
+#line 2735 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI]+2 * DEFAULT_COST;
+        DFA_PRODUCTION(IREGI, bytes_reverse_short_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, bytes_reverse_short_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, bytes_reverse_short_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, bytes_reverse_short_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, bytes_reverse_short_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, bytes_reverse_short_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, bytes_reverse_short_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, bytes_reverse_short_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, bytes_reverse_short_rule, c+1)
     }
 }
 void  State::_sub_Op_CallDynamicJava(const Node *n){
     {
       unsigned int c = CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, CallDynamicJavaDirect_dynTOC_rule, c)
+        DFA_PRODUCTION(UNIVERSE, CallDynamicJavaDirect_dynTOC_rule, c)
     }
 }
 void  State::_sub_Op_CallLeaf(const Node *n){
     {
       unsigned int c = CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, CallLeafDirect_rule, c)
+        DFA_PRODUCTION(UNIVERSE, CallLeafDirect_rule, c)
     }
 }
 void  State::_sub_Op_CallLeafNoFP(const Node *n){
     {
       unsigned int c = CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, CallLeafNoFPDirect_rule, c)
+        DFA_PRODUCTION(UNIVERSE, CallLeafNoFPDirect_rule, c)
     }
 }
 void  State::_sub_Op_CallRuntime(const Node *n){
     {
       unsigned int c = CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, CallRuntimeDirect_rule, c)
+        DFA_PRODUCTION(UNIVERSE, CallRuntimeDirect_rule, c)
     }
 }
 void  State::_sub_Op_CallStaticJava(const Node *n){
     {
       unsigned int c = CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, CallStaticJavaDirect_dynTOC_rule, c)
+        DFA_PRODUCTION(UNIVERSE, CallStaticJavaDirect_dynTOC_rule, c)
+    }
+}
+void  State::_sub_Op_CastDD(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], REGD) ) {
+      unsigned int c = _kids[0]->_cost[REGD] + DEFAULT_COST;
+        DFA_PRODUCTION(REGD, castDD_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+    }
+}
+void  State::_sub_Op_CastFF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
+      unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
+        DFA_PRODUCTION(REGF, castFF_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_CastII(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, castII_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, castII_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, castII_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, castII_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, castII_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, castII_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, castII_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, castII_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, castII_rule, c+1)
+        DFA_PRODUCTION(IREGI, castII_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, castII_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, castII_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, castII_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, castII_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, castII_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, castII_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, castII_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, castII_rule, c+1)
+    }
+}
+void  State::_sub_Op_CastLL(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
+      unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGL, castLL_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, castLL_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, castLL_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, castLL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, castLL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, castLL_rule, c+1)
+    }
+}
+void  State::_sub_Op_CastVV(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
+      unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGL, castVV_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, castVV_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, castVV_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, castVV_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, castVV_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, castVV_rule, c+1)
     }
 }
 void  State::_sub_Op_CastX2P(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, castX2P_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, castX2P_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, castX2P_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(IREGP, castX2P_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, castX2P_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, castX2P_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, castX2P_rule, c+1)
     }
 }
 void  State::_sub_Op_CastP2X(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P];
-        DFA_PRODUCTION__SET_VALID(_CASTP2X_IREGP_N2P_, _CastP2X_iRegP_N2P__rule, c)
+        DFA_PRODUCTION(_CASTP2X_IREGP_N2P_, _CastP2X_iRegP_N2P__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, castP2X_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, castP2X_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, castP2X_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, castP2X_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, castP2X_rule, c+1)
+        DFA_PRODUCTION(IREGL, castP2X_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, castP2X_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, castP2X_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, castP2X_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, castP2X_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, castP2X_rule, c+1)
     }
-    if( STATE__VALID_CHILD(_kids[0], _LOADP_MEMORY_) ) {
+    if( STATE__VALID_CHILD(_kids[0], _LOADP_MEMORY_) &&
+        (
+#line 4318 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Load()->barrier_data() == 0
+#line 2878 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_LOADP_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, castP2X_loadP_rule, c)
+        DFA_PRODUCTION(IREGL, castP2X_loadP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, castP2X_loadP_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, castP2X_loadP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, castP2X_loadP_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, castP2X_loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, castP2X_loadP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, castP2X_loadP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, castP2X_loadP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, castP2X_loadP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, castP2X_loadP_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_CastPP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, castPP_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, castPP_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, castPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, castPP_rule, c+1)
+        DFA_PRODUCTION(IREGP, castPP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, castPP_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, castPP_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, castPP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, castPP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, castPP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, castPP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, castPP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, castPP_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, castPP_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, castPP_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, castPP_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, castPP_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, castPP_rule, c+1)
     }
 }
 void  State::_sub_Op_CheckCastPP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, checkCastPP_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, checkCastPP_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, checkCastPP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(IREGP, checkCastPP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, checkCastPP_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, checkCastPP_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, checkCastPP_rule, c+1)
     }
 }
 void  State::_sub_Op_ClearArray(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGP_N2P]+300;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, inlineCallClearArray_rule, c)
+        DFA_PRODUCTION(UNIVERSE, inlineCallClearArray_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IMML) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IMML]+_kids[1]->_cost[IREGP_N2P]+200;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, inlineCallClearArrayConstBig_rule, c)
+        DFA_PRODUCTION(UNIVERSE, inlineCallClearArrayConstBig_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], SSLENDW) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[SSLENDW]+_kids[1]->_cost[IREGP_N2P]+100;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, inlineCallClearArrayConst_rule, c)
+        DFA_PRODUCTION(UNIVERSE, inlineCallClearArrayConst_rule, c)
       }
     }
 }
 void  State::_sub_Op_CMoveD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPF_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD_REGD) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPF_FLAGSREG]+_kids[1]->_cost[_BINARY_REGD_REGD]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, cmovD_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, cmovD_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_CMoveF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOPF_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF_REGF) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOPF_FLAGSREG]+_kids[1]->_cost[_BINARY_REGF_REGF]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, cmovF_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, cmovF_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_CMoveI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGI_IMMI16) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGI_IMMI16]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, cmovI_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, cmovI_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, cmovI_imm_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, cmovI_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, cmovI_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, cmovI_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, cmovI_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, cmovI_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, cmovI_imm_rule, c+1)
+        DFA_PRODUCTION(IREGI, cmovI_imm_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, cmovI_imm_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, cmovI_imm_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, cmovI_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, cmovI_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, cmovI_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, cmovI_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, cmovI_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, cmovI_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGI_IREGI) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGI_IREGI]+DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, cmovI_reg_rule, c)
+        DFA_PRODUCTION(IREGI, cmovI_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, cmovI_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, cmovI_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, cmovI_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, cmovI_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, cmovI_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, cmovI_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, cmovI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, cmovI_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, cmovI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, cmovI_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, cmovI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, cmovI_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, cmovI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, cmovI_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, cmovI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, cmovI_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_CMoveL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGL_IMML16) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGL_IMML16]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, cmovL_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, cmovL_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, cmovL_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, cmovL_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, cmovL_imm_rule, c+1)
+        DFA_PRODUCTION(IREGL, cmovL_imm_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, cmovL_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, cmovL_imm_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, cmovL_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, cmovL_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, cmovL_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGL_IREGL) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGL_IREGL]+DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, cmovL_reg_rule, c)
+        DFA_PRODUCTION(IREGL, cmovL_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, cmovL_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, cmovL_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, cmovL_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, cmovL_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, cmovL_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, cmovL_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, cmovL_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, cmovL_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, cmovL_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_CMoveP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IMMP0) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGP_IMMP0]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, cmovP_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, cmovP_imm_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, cmovP_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(IREGP, cmovP_imm_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, cmovP_imm_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, cmovP_imm_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, cmovP_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGP_IREGP_N2P]+DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, cmovP_reg_rule, c)
+        DFA_PRODUCTION(IREGP, cmovP_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, cmovP_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, cmovP_reg_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, cmovP_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, cmovP_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, cmovP_reg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, cmovP_reg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, cmovP_reg_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, cmovP_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_CMoveN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGN_IMMN0) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGN_IMMN0]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGN, cmovN_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, cmovN_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, cmovN_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, cmovN_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, cmovN_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, cmovN_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, cmovN_imm_rule, c+1)
+        DFA_PRODUCTION(IREGN, cmovN_imm_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, cmovN_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, cmovN_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, cmovN_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, cmovN_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, cmovN_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, cmovN_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_CMPOP_FLAGSREG) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGN_IREGN_P2N) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_CMPOP_FLAGSREG]+_kids[1]->_cost[_BINARY_IREGN_IREGN_P2N]+DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN, cmovN_reg_rule, c)
+        DFA_PRODUCTION(IREGN, cmovN_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, cmovN_reg_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGN, cmovN_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, cmovN_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, cmovN_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, cmovN_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, cmovN_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, cmovN_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, cmovN_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, cmovN_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, cmovN_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, cmovN_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, cmovN_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_CmpN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGN_P2N) && STATE__VALID_CHILD(_kids[1], IMMN0) ) {
       unsigned int c = _kids[0]->_cost[IREGN_P2N]+_kids[1]->_cost[IMMN0];
-        DFA_PRODUCTION__SET_VALID(_CMPN_IREGN_P2N_IMMN0, _CmpN_iRegN_P2N_immN0_rule, c)
+        DFA_PRODUCTION(_CMPN_IREGN_P2N_IMMN0, _CmpN_iRegN_P2N_immN0_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN_P2N) && STATE__VALID_CHILD(_kids[1], IMMN0) ) {
       unsigned int c = _kids[0]->_cost[IREGN_P2N]+_kids[1]->_cost[IMMN0] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compN_iRegN_immN0_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compN_iRegN_immN0_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) && STATE__VALID_CHILD(_kids[1], IMMNKLASS) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+_kids[1]->_cost[IMMNKLASS] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compNKlass_iRegN_immN_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compNKlass_iRegN_immN_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN_P2N) && STATE__VALID_CHILD(_kids[1], IMMN) ) {
       unsigned int c = _kids[0]->_cost[IREGN_P2N]+_kids[1]->_cost[IMMN] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compN_iRegN_immN_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compN_iRegN_immN_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN_P2N) && STATE__VALID_CHILD(_kids[1], IREGN_P2N) ) {
       unsigned int c = _kids[0]->_cost[IREGN_P2N]+_kids[1]->_cost[IREGN_P2N] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compN_iRegN_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compN_iRegN_rule, c)
       }
     }
 }
 void  State::_sub_Op_CmpD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], IMMDPM0) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[IMMDPM0] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpD0_cc_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpD0_cc_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpD_cc_mem_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpD_cc_mem_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpD_cc_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpD_cc_rule, c)
       }
     }
 }
 void  State::_sub_Op_CmpD3(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD]+DEFAULT_COST * 5 + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, cmpD_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, cmpD_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, cmpD_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, cmpD_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, cmpD_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, cmpD_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, cmpD_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, cmpD_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, cmpD_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, cmpD_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, cmpD_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, cmpD_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, cmpD_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, cmpD_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, cmpD_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, cmpD_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, cmpD_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, cmpD_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_CmpF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], IMMFPM0) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[IMMFPM0] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpF0_cc_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpF0_cc_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpF_cc_mem_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpF_cc_mem_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpF_cc_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpF_cc_rule, c)
       }
     }
 }
 void  State::_sub_Op_CmpF3(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF]+DEFAULT_COST * 5 + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, cmpF_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, cmpF_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, cmpF_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, cmpF_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, cmpF_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, cmpF_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, cmpF_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, cmpF_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, cmpF_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, cmpF_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, cmpF_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, cmpF_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, cmpF_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, cmpF_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, cmpF_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, cmpF_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, cmpF_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, cmpF_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_CmpI(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], _PARTIALSUBTYPECHECK_RARG2REGP_RARG3REGP) && STATE__VALID_CHILD(_kids[1], IMMP0) ) {
-      unsigned int c = _kids[0]->_cost[_PARTIALSUBTYPECHECK_RARG2REGP_RARG3REGP]+_kids[1]->_cost[IMMP0]+10 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, partialSubtypeCheck_vs_zero_rule, c)
-    }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI8];
-        DFA_PRODUCTION__SET_VALID(_CMPI_IREGI_IMMI8, _CmpI_iRegI_immI8_rule, c)
+        DFA_PRODUCTION(_CMPI_IREGI_IMMI8, _CmpI_iRegI_immI8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_CMPI_IREGI_IREGI, _CmpI_iRegI_iRegI_rule, c)
+        DFA_PRODUCTION(_CMPI_IREGI_IREGI, _CmpI_iRegI_iRegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
-      if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compI_reg_mem_rule, c)
-      }
+        DFA_PRODUCTION(FLAGSREG, compI_reg_mem_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI_0) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI_0] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compI_reg_imm0_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compI_reg_imm0_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compI_reg_imm16_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compI_reg_imm16_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compI_reg_imm_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compI_reg_imm_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compI_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compI_reg_reg_rule, c)
       }
     }
 }
 void  State::_sub_Op_CmpL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML8) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML8];
-        DFA_PRODUCTION__SET_VALID(_CMPL_IREGL_IMML8, _CmpL_iRegL_immL8_rule, c)
+        DFA_PRODUCTION(_CMPL_IREGL_IMML8, _CmpL_iRegL_immL8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL];
-        DFA_PRODUCTION__SET_VALID(_CMPL_IREGL_IREGL, _CmpL_iRegL_iRegL_rule, c)
+        DFA_PRODUCTION(_CMPL_IREGL_IREGL, _CmpL_iRegL_iRegL_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L__LOADI_MEMORY__) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L__LOADI_MEMORY__] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_reg_memI_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_reg_memI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_LOADL_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_reg_mem_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_reg_mem_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L_IREGI_) && STATE__VALID_CHILD(_kids[1], IMML_0) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L_IREGI_]+_kids[1]->_cost[IMML_0] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_conv_reg_imm0_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_conv_reg_imm0_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML_0) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML_0] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_reg_imm0_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_reg_imm0_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_reg_imm16_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_reg_imm16_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML32] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_reg_imm32_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_reg_imm32_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L_IREGI_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L_IREGI_] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_reg_regI_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_reg_regI_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compL_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compL_reg_reg_rule, c)
       }
     }
 }
 void  State::_sub_Op_CmpL3(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL]+DEFAULT_COST * 5 + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, cmpL3_reg_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, cmpL3_reg_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, cmpL3_reg_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, cmpL3_reg_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, cmpL3_reg_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, cmpL3_reg_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, cmpL3_reg_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, cmpL3_reg_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, cmpL3_reg_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, cmpL3_reg_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, cmpL3_reg_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, cmpL3_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, cmpL3_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, cmpL3_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, cmpL3_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, cmpL3_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, cmpL3_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, cmpL3_reg_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_CmpLTMask(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI_0) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI_0] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, cmpLTMask_reg_zero_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, cmpLTMask_reg_zero_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, cmpLTMask_reg_zero_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, cmpLTMask_reg_zero_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, cmpLTMask_reg_zero_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, cmpLTMask_reg_zero_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, cmpLTMask_reg_zero_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, cmpLTMask_reg_zero_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, cmpLTMask_reg_zero_rule, c+1)
+        DFA_PRODUCTION(IREGI, cmpLTMask_reg_zero_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, cmpLTMask_reg_zero_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, cmpLTMask_reg_zero_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, cmpLTMask_reg_zero_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, cmpLTMask_reg_zero_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, cmpLTMask_reg_zero_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, cmpLTMask_reg_zero_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, cmpLTMask_reg_zero_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, cmpLTMask_reg_zero_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+2 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, cmpLTMask_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, cmpLTMask_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, cmpLTMask_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, cmpLTMask_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, cmpLTMask_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, cmpLTMask_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, cmpLTMask_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, cmpLTMask_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, cmpLTMask_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, cmpLTMask_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, cmpLTMask_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, cmpLTMask_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, cmpLTMask_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, cmpLTMask_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, cmpLTMask_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, cmpLTMask_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, cmpLTMask_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, cmpLTMask_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_CmpP(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_IREGN_) && STATE__VALID_CHILD(_kids[1], _DECODEN_IMMN8_) ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_IREGN_]+_kids[1]->_cost[_DECODEN_IMMN8_];
-        DFA_PRODUCTION__SET_VALID(_CMPP__DECODEN_IREGN___DECODEN_IMMN8_, _CmpP__DecodeN_iRegN___DecodeN_immN8__rule, c)
+        DFA_PRODUCTION(_CMPP__DECODEN_IREGN___DECODEN_IMMN8_, _CmpP__DecodeN_iRegN___DecodeN_immN8__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_IREGN_) && STATE__VALID_CHILD(_kids[1], IMMP0) ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_IREGN_]+_kids[1]->_cost[IMMP0];
-        DFA_PRODUCTION__SET_VALID(_CMPP__DECODEN_IREGN__IMMP0, _CmpP__DecodeN_iRegN__immP0_rule, c)
+        DFA_PRODUCTION(_CMPP__DECODEN_IREGN__IMMP0, _CmpP__DecodeN_iRegN__immP0_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IMMP8) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IMMP8];
-        DFA_PRODUCTION__SET_VALID(_CMPP_IREGP_IMMP8, _CmpP_iRegP_immP8_rule, c)
+        DFA_PRODUCTION(_CMPP_IREGP_IMMP8, _CmpP_iRegP_immP8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_IREGN_) && STATE__VALID_CHILD(_kids[1], _DECODEN_IREGN_) ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_IREGN_]+_kids[1]->_cost[_DECODEN_IREGN_];
-        DFA_PRODUCTION__SET_VALID(_CMPP__DECODEN_IREGN___DECODEN_IREGN_, _CmpP__DecodeN_iRegN___DecodeN_iRegN__rule, c)
+        DFA_PRODUCTION(_CMPP__DECODEN_IREGN___DECODEN_IREGN_, _CmpP__DecodeN_iRegN___DecodeN_iRegN__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGP];
-        DFA_PRODUCTION__SET_VALID(_CMPP_IREGP_IREGP, _CmpP_iRegP_iRegP_rule, c)
+        DFA_PRODUCTION(_CMPP_IREGP_IREGP, _CmpP_iRegP_iRegP_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _LOADP_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_LOADP_MEMORY_] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compP_reg_mem_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compP_reg_mem_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _DECODEN_IREGN_) && STATE__VALID_CHILD(_kids[1], IMMP0) &&
         (
-#line 8536 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Universe::narrow_oop_base() == NULL && Universe::narrow_oop_shift() == 0
-#line 3280 "dfa_s390.cpp"
+#line 8740 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+CompressedOops::base() == nullptr && CompressedOops::shift() == 0
+#line 3484 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_DECODEN_IREGN_]+_kids[1]->_cost[IMMP0] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compP_decode_reg_imm0_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compP_decode_reg_imm0_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IMMP0) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IMMP0] + DEFAULT_COST_LOW;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compP_reg_imm0_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compP_reg_imm0_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IREGP_N2P] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compP_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compP_reg_reg_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IMMP0) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IMMP0];
-        DFA_PRODUCTION__SET_VALID(_CMPP_IREGP_N2P_IMMP0, _CmpP_iRegP_N2P_immP0_rule, c)
+        DFA_PRODUCTION(_CMPP_IREGP_N2P_IMMP0, _CmpP_iRegP_N2P_immP0_rule, c)
     }
 }
 void  State::_sub_Op_CmpU(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI8) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI8];
-        DFA_PRODUCTION__SET_VALID(_CMPU_IREGI_UIMMI8, _CmpU_iRegI_uimmI8_rule, c)
+        DFA_PRODUCTION(_CMPU_IREGI_UIMMI8, _CmpU_iRegI_uimmI8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compU_reg_mem_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compU_reg_mem_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compU_reg_uimm_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compU_reg_uimm_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compU_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compU_reg_reg_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_CMPU_IREGI_IREGI, _CmpU_iRegI_iRegI_rule, c)
+        DFA_PRODUCTION(_CMPU_IREGI_IREGI, _CmpU_iRegI_iRegI_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI16];
-        DFA_PRODUCTION__SET_VALID(_CMPU_IREGI_UIMMI16, _CmpU_iRegI_uimmI16_rule, c)
+        DFA_PRODUCTION(_CMPU_IREGI_UIMMI16, _CmpU_iRegI_uimmI16_rule, c)
     }
 }
 void  State::_sub_Op_CmpUL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML32) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML32] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compUL_reg_imm32_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compUL_reg_imm32_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, compUL_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, compUL_reg_reg_rule, c)
       }
     }
 }
 void  State::_sub_Op_CompareAndSwapI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGI_IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGI_IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, compareAndSwapI_bool_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, compareAndSwapI_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, compareAndSwapI_bool_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, compareAndSwapI_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, compareAndSwapI_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, compareAndSwapI_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, compareAndSwapI_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, compareAndSwapI_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, compareAndSwapI_bool_rule, c+1)
+        DFA_PRODUCTION(IREGI, compareAndSwapI_bool_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, compareAndSwapI_bool_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, compareAndSwapI_bool_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, compareAndSwapI_bool_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, compareAndSwapI_bool_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, compareAndSwapI_bool_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, compareAndSwapI_bool_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, compareAndSwapI_bool_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, compareAndSwapI_bool_rule, c+1)
     }
 }
 void  State::_sub_Op_CompareAndSwapL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGL_IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGL_IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, compareAndSwapL_bool_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, compareAndSwapL_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, compareAndSwapL_bool_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, compareAndSwapL_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, compareAndSwapL_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, compareAndSwapL_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, compareAndSwapL_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, compareAndSwapL_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, compareAndSwapL_bool_rule, c+1)
+        DFA_PRODUCTION(IREGI, compareAndSwapL_bool_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, compareAndSwapL_bool_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, compareAndSwapL_bool_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, compareAndSwapL_bool_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, compareAndSwapL_bool_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, compareAndSwapL_bool_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, compareAndSwapL_bool_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, compareAndSwapL_bool_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, compareAndSwapL_bool_rule, c+1)
     }
 }
 void  State::_sub_Op_CompareAndSwapP(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGP_IREGP_N2P) ) {
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGP_IREGP_N2P) &&
+        (
+#line 291 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 3585 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGP_IREGP_N2P] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, compareAndSwapP_bool_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, compareAndSwapP_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, compareAndSwapP_bool_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, compareAndSwapP_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, compareAndSwapP_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, compareAndSwapP_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, compareAndSwapP_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, compareAndSwapP_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, compareAndSwapP_bool_rule, c+1)
+        DFA_PRODUCTION(IREGI, g1CompareAndSwapP_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, g1CompareAndSwapP_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, g1CompareAndSwapP_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, g1CompareAndSwapP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, g1CompareAndSwapP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, g1CompareAndSwapP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, g1CompareAndSwapP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, g1CompareAndSwapP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, g1CompareAndSwapP_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGP_IREGP_N2P) &&
+        (
+#line 5540 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_LoadStore()->barrier_data() == 0
+#line 3603 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGP_IREGP_N2P] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
+        DFA_PRODUCTION(IREGI, compareAndSwapP_bool_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
+        DFA_PRODUCTION(REVENREGI, compareAndSwapP_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
+        DFA_PRODUCTION(NOODD_IREGI, compareAndSwapP_bool_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
+        DFA_PRODUCTION(RODDREGI, compareAndSwapP_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
+        DFA_PRODUCTION(RARG1REGI, compareAndSwapP_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
+        DFA_PRODUCTION(RARG2REGI, compareAndSwapP_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
+        DFA_PRODUCTION(RARG3REGI, compareAndSwapP_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
+        DFA_PRODUCTION(RARG4REGI, compareAndSwapP_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
+        DFA_PRODUCTION(RARG5REGI, compareAndSwapP_bool_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_CompareAndSwapN(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGN_IREGN_P2N) ) {
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGN_IREGN_P2N) &&
+        (
+#line 140 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 3643 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RARG5REGN_IREGN_P2N] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGI, g1CompareAndSwapN_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, g1CompareAndSwapN_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, g1CompareAndSwapN_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, g1CompareAndSwapN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, g1CompareAndSwapN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, g1CompareAndSwapN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, g1CompareAndSwapN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, g1CompareAndSwapN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, g1CompareAndSwapN_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGN_IREGN_P2N) &&
+        (
+#line 5551 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_LoadStore()->barrier_data() == 0
+#line 3661 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGN_IREGN_P2N] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, compareAndSwapN_bool_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, compareAndSwapN_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, compareAndSwapN_bool_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, compareAndSwapN_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, compareAndSwapN_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, compareAndSwapN_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, compareAndSwapN_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, compareAndSwapN_bool_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, compareAndSwapN_bool_rule, c+1)
+      if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
+        DFA_PRODUCTION(IREGI, compareAndSwapN_bool_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
+        DFA_PRODUCTION(REVENREGI, compareAndSwapN_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
+        DFA_PRODUCTION(NOODD_IREGI, compareAndSwapN_bool_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
+        DFA_PRODUCTION(RODDREGI, compareAndSwapN_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
+        DFA_PRODUCTION(RARG1REGI, compareAndSwapN_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
+        DFA_PRODUCTION(RARG2REGI, compareAndSwapN_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
+        DFA_PRODUCTION(RARG3REGI, compareAndSwapN_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
+        DFA_PRODUCTION(RARG4REGI, compareAndSwapN_bool_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
+        DFA_PRODUCTION(RARG5REGI, compareAndSwapN_bool_rule, c+1)
+      }
+    }
+}
+void  State::_sub_Op_WeakCompareAndSwapP(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGP_IREGP_N2P) &&
+        (
+#line 291 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 3701 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGP_IREGP_N2P] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGI, g1CompareAndSwapP_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, g1CompareAndSwapP_0_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, g1CompareAndSwapP_0_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, g1CompareAndSwapP_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, g1CompareAndSwapP_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, g1CompareAndSwapP_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, g1CompareAndSwapP_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, g1CompareAndSwapP_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, g1CompareAndSwapP_0_rule, c+1)
+    }
+}
+void  State::_sub_Op_WeakCompareAndSwapN(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGN_IREGN_P2N) &&
+        (
+#line 140 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 3721 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RARG5REGN_IREGN_P2N] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGI, g1CompareAndSwapN_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, g1CompareAndSwapN_0_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, g1CompareAndSwapN_0_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, g1CompareAndSwapN_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, g1CompareAndSwapN_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, g1CompareAndSwapN_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, g1CompareAndSwapN_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, g1CompareAndSwapN_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, g1CompareAndSwapN_0_rule, c+1)
+    }
+}
+void  State::_sub_Op_CompareAndExchangeP(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGP_IREGP_N2P) &&
+        (
+#line 338 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 3741 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGP_IREGP_N2P] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGP, g1CompareAndExchangeP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, g1CompareAndExchangeP_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, g1CompareAndExchangeP_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, g1CompareAndExchangeP_rule, c+1)
+    }
+}
+void  State::_sub_Op_CompareAndExchangeN(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGN_IREGN_P2N) &&
+        (
+#line 190 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 3772 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_RARG5REGN_IREGN_P2N] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGN, g1CompareAndExchangeN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, g1CompareAndExchangeN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, g1CompareAndExchangeN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, g1CompareAndExchangeN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, g1CompareAndExchangeN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, g1CompareAndExchangeN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, g1CompareAndExchangeN_rule, c+1)
     }
 }
 void  State::_sub_Op_GetAndAddI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 5707 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5802 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadAndALUAtomicV1()
-#line 3411 "dfa_s390.cpp"
+#line 3790 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGI]+MEMORY_REF_COST + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_mem_reg_atomic_z196_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_mem_reg_atomic_z196_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(IREGI, addI_mem_reg_atomic_z196_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, addI_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_mem_reg_atomic_z196_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, addI_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_mem_reg_atomic_z196_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGI]+MEMORY_REF_COST+100*DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_mem_reg_atomic_rule, c)
+        DFA_PRODUCTION(IREGI, addI_mem_reg_atomic_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_mem_reg_atomic_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_mem_reg_atomic_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_mem_reg_atomic_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IMMI]+MEMORY_REF_COST+200*DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_mem_imm32_atomic_rule, c)
+        DFA_PRODUCTION(IREGI, addI_mem_imm32_atomic_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_mem_imm32_atomic_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_mem_imm32_atomic_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_mem_imm32_atomic_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IMMI16]+MEMORY_REF_COST+100*DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, addI_mem_imm16_atomic_rule, c)
+        DFA_PRODUCTION(IREGI, addI_mem_imm16_atomic_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, addI_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, addI_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, addI_mem_imm16_atomic_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, addI_mem_imm16_atomic_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, addI_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, addI_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, addI_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, addI_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, addI_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, addI_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, addI_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, addI_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, addI_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, addI_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, addI_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, addI_mem_imm16_atomic_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 5476 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5571 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_AtomicMemWithImmALUOps() && n->as_LoadStore()->result_not_used()
-#line 3528 "dfa_s390.cpp"
+#line 3907 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IMMI8] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, addI_mem_imm8_atomic_no_res_rule, c)
+        DFA_PRODUCTION(UNIVERSE, addI_mem_imm8_atomic_no_res_rule, c)
     }
 }
 void  State::_sub_Op_GetAndAddL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 5718 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5813 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadAndALUAtomicV1()
-#line 3539 "dfa_s390.cpp"
+#line 3918 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGL]+MEMORY_REF_COST + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_mem_reg_atomic_z196_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_mem_reg_atomic_z196_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(IREGL, addL_mem_reg_atomic_z196_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, addL_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, addL_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_mem_reg_atomic_z196_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_mem_reg_atomic_z196_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGL]+MEMORY_REF_COST+100*DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_mem_reg_atomic_rule, c)
+        DFA_PRODUCTION(IREGL, addL_mem_reg_atomic_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_mem_reg_atomic_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_mem_reg_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_mem_reg_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_mem_reg_atomic_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IMML32]+MEMORY_REF_COST+100*DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_mem_imm32_atomic_rule, c)
+        DFA_PRODUCTION(IREGL, addL_mem_imm32_atomic_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_mem_imm32_atomic_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_mem_imm32_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_mem_imm32_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_mem_imm32_atomic_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IMML16]+MEMORY_REF_COST+100*DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, addL_mem_imm16_atomic_rule, c)
+        DFA_PRODUCTION(IREGL, addL_mem_imm16_atomic_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, addL_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, addL_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, addL_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, addL_mem_imm16_atomic_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, addL_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, addL_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, addL_mem_imm16_atomic_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, addL_mem_imm16_atomic_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, addL_mem_imm16_atomic_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IMML8) &&
         (
-#line 5596 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5691 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_AtomicMemWithImmALUOps() && n->as_LoadStore()->result_not_used()
-#line 3616 "dfa_s390.cpp"
+#line 4005 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IMML8] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, addL_mem_imm8_atomic_no_res_rule, c)
+        DFA_PRODUCTION(UNIVERSE, addL_mem_imm8_atomic_no_res_rule, c)
     }
 }
 void  State::_sub_Op_GetAndSetI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, xchgI_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, xchgI_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, xchgI_reg_mem_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, xchgI_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, xchgI_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, xchgI_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, xchgI_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, xchgI_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, xchgI_reg_mem_rule, c+1)
+        DFA_PRODUCTION(IREGI, xchgI_reg_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, xchgI_reg_mem_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, xchgI_reg_mem_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, xchgI_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, xchgI_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, xchgI_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, xchgI_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, xchgI_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, xchgI_reg_mem_rule, c+1)
     }
 }
 void  State::_sub_Op_GetAndSetL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, xchgL_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, xchgL_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, xchgL_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, xchgL_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, xchgL_reg_mem_rule, c+1)
+        DFA_PRODUCTION(IREGL, xchgL_reg_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, xchgL_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, xchgL_reg_mem_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, xchgL_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, xchgL_reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, xchgL_reg_mem_rule, c+1)
     }
 }
 void  State::_sub_Op_GetAndSetP(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGP) ) {
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], IREGP) &&
+        (
+#line 391 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 4043 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[IREGP] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGP, g1GetAndSetP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, g1GetAndSetP_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, g1GetAndSetP_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, g1GetAndSetP_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGP) &&
+        (
+#line 5849 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_LoadStore()->barrier_data() == 0
+#line 4072 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGP] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, xchgP_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, xchgP_reg_mem_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, xchgP_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, xchgP_reg_mem_rule, c+1)
+      if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
+        DFA_PRODUCTION(IREGP, xchgP_reg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
+        DFA_PRODUCTION(NOARG_IREGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
+        DFA_PRODUCTION(RARG1REGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
+        DFA_PRODUCTION(RARG2REGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
+        DFA_PRODUCTION(RARG3REGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
+        DFA_PRODUCTION(RARG4REGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
+        DFA_PRODUCTION(RARG5REGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
+        DFA_PRODUCTION(MEMORYREGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
+        DFA_PRODUCTION(INDIRECT, xchgP_reg_mem_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
+        DFA_PRODUCTION(REVENREGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
+        DFA_PRODUCTION(RODDREGP, xchgP_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
+        DFA_PRODUCTION(INLINE_CACHE_REGP, xchgP_reg_mem_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_GetAndSetN(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGN) ) {
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], IREGN) &&
+        (
+#line 250 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_LoadStore()->barrier_data() != 0
+#line 4145 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[IREGN] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGN, g1GetAndSetN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, g1GetAndSetN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, g1GetAndSetN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, g1GetAndSetN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, g1GetAndSetN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, g1GetAndSetN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, g1GetAndSetN_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IREGN) &&
+        (
+#line 5839 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_LoadStore()->barrier_data() == 0
+#line 4161 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IREGN] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGN, xchgN_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, xchgN_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, xchgN_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, xchgN_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, xchgN_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, xchgN_reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, xchgN_reg_mem_rule, c+1)
+      if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
+        DFA_PRODUCTION(IREGN, xchgN_reg_mem_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
+        DFA_PRODUCTION(NOARG_IREGN, xchgN_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
+        DFA_PRODUCTION(RARG1REGN, xchgN_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
+        DFA_PRODUCTION(RARG2REGN, xchgN_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
+        DFA_PRODUCTION(RARG3REGN, xchgN_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
+        DFA_PRODUCTION(RARG4REGN, xchgN_reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
+        DFA_PRODUCTION(RARG5REGN, xchgN_reg_mem_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_ConN(const Node *n){
     if(         
-#line 3068 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3221 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 n->get_narrowcon() == 0
-#line 3691 "dfa_s390.cpp"
+#line 4194 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMN0, immN0_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN, loadConN0_rule, c+DEFAULT_COST_LOW)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(IMMN0, immN0_rule, c)
+        DFA_PRODUCTION(IREGN, loadConN0_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(NOARG_IREGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG1REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG2REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG3REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG4REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG5REGN, loadConN0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c+DEFAULT_COST_LOW)
     }
     if(         
-#line 3059 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3212 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm8(n->get_narrowcon())
-#line 3707 "dfa_s390.cpp"
+#line 4210 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMN8, immN8_rule, c)
+        DFA_PRODUCTION(IMMN8, immN8_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMN, immN_rule, c)
+        DFA_PRODUCTION(IMMN, immN_rule, c)
       if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c+DEFAULT_COST) {
-        DFA_PRODUCTION__SET_VALID(IREGN, loadConN_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(IREGN, loadConN_rule, c+DEFAULT_COST)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, loadConN_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(NOARG_IREGN, loadConN_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, loadConN_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG1REGN, loadConN_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, loadConN_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG2REGN, loadConN_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, loadConN_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG3REGN, loadConN_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, loadConN_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG4REGN, loadConN_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, loadConN_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG5REGN, loadConN_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c+DEFAULT_COST) {
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c+DEFAULT_COST)
       }
     }
    if ( /* IREGN KNOWN_VALID || */ _cost[IREGN] > DEFAULT_COST) {
@@ -3765,15 +4268,15 @@ Immediate::is_uimm8(n->get_narrowcon())
 void  State::_sub_Op_ConNKlass(const Node *n){
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMNKLASS, immNKlass_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN, loadConNKlass_rule, c+DEFAULT_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, loadConNKlass_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(IMMNKLASS, immNKlass_rule, c)
+        DFA_PRODUCTION(IREGN, loadConNKlass_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(NOARG_IREGN, loadConNKlass_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG1REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG2REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG3REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG4REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG5REGN, loadConNKlass_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c+DEFAULT_COST)
     }
      DFA_PRODUCTION(IREGN, loadConNKlass_rule, DEFAULT_COST)	  // overwrites higher cost rule
      DFA_PRODUCTION(NOARG_IREGN, loadConNKlass_rule, DEFAULT_COST+1)	  // overwrites higher cost rule
@@ -3786,31 +4289,31 @@ void  State::_sub_Op_ConNKlass(const Node *n){
 }
 void  State::_sub_Op_ConD(const Node *n){
     if(         
-#line 3096 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3249 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 jlong_cast(n->getd()) == 0
-#line 3791 "dfa_s390.cpp"
+#line 4294 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMDP0, immDp0_rule, c)
-        DFA_PRODUCTION__SET_VALID(REGD, loadConD0_rule, c+DEFAULT_COST_LOW)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
+        DFA_PRODUCTION(IMMDP0, immDp0_rule, c)
+        DFA_PRODUCTION(REGD, loadConD0_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
     }
     if(         
-#line 3087 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3240 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 n->getd() == 0
-#line 3801 "dfa_s390.cpp"
+#line 4304 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMDPM0, immDpm0_rule, c)
+        DFA_PRODUCTION(IMMDPM0, immDpm0_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMD, immD_rule, c)
+        DFA_PRODUCTION(IMMD, immD_rule, c)
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(REGD, loadConD_dynTOC_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, loadConD_dynTOC_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST+MEMORY_REF_COST)
       }
     }
    if ( /* REGD KNOWN_VALID || */ _cost[REGD] > MEMORY_REF_COST) {
@@ -3822,31 +4325,31 @@ n->getd() == 0
 }
 void  State::_sub_Op_ConF(const Node *n){
     if(         
-#line 3122 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3275 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 jint_cast(n->getf()) == 0
-#line 3827 "dfa_s390.cpp"
+#line 4330 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMFP0, immFp0_rule, c)
-        DFA_PRODUCTION__SET_VALID(REGF, loadConF0_rule, c+DEFAULT_COST_LOW)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
+        DFA_PRODUCTION(IMMFP0, immFp0_rule, c)
+        DFA_PRODUCTION(REGF, loadConF0_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
     }
     if(         
-#line 3113 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3266 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 n->getf() == 0
-#line 3837 "dfa_s390.cpp"
+#line 4340 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMFPM0, immFpm0_rule, c)
+        DFA_PRODUCTION(IMMFPM0, immFpm0_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMF, immF_rule, c)
+        DFA_PRODUCTION(IMMF, immF_rule, c)
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(REGF, loadConF_dynTOC_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, loadConF_dynTOC_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST+MEMORY_REF_COST)
       }
     }
    if ( /* REGF KNOWN_VALID || */ _cost[REGF] > MEMORY_REF_COST) {
@@ -3859,288 +4362,264 @@ n->getf() == 0
 void  State::_sub_Op_ConI(const Node *n){
     int _n_get_int__ = n->get_int();
     if(         
-#line 2809 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2998 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_int__ & 0xFFFF) == 0xFFFF
-#line 3864 "dfa_s390.cpp"
+#line 4367 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI_LH1, uimmI_LH1_rule, c)
+        DFA_PRODUCTION(UIMMI_LH1, uimmI_LH1_rule, c)
     }
     if(         
-#line 2800 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2989 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_int__ & 0xFFFF0000) == 0xFFFF0000
-#line 3872 "dfa_s390.cpp"
+#line 4375 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI_LL1, uimmI_LL1_rule, c)
+        DFA_PRODUCTION(UIMMI_LL1, uimmI_LL1_rule, c)
     }
     if(         
-#line 2791 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2980 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ >= 32 && _n_get_int__ <= 63
-#line 3880 "dfa_s390.cpp"
+#line 4383 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_32_63, immI_32_63_rule, c)
+        DFA_PRODUCTION(IMMI_32_63, immI_32_63_rule, c)
     }
     if(         
-#line 2782 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-_n_get_int__ == 255
-#line 3888 "dfa_s390.cpp"
- ) {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_255, immI_255_rule, c)
-    }
-    if(         
-#line 2773 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2971 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ == 24
-#line 3896 "dfa_s390.cpp"
+#line 4391 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_24, immI_24_rule, c)
+        DFA_PRODUCTION(IMMI_24, immI_24_rule, c)
     }
     if(         
-#line 2764 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2962 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ == 16
-#line 3904 "dfa_s390.cpp"
+#line 4399 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_16, immI_16_rule, c)
+        DFA_PRODUCTION(IMMI_16, immI_16_rule, c)
     }
     if(         
-#line 2755 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2953 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ == 1
-#line 3912 "dfa_s390.cpp"
+#line 4407 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_1, immI_1_rule, c)
+        DFA_PRODUCTION(IMMI_1, immI_1_rule, c)
     }
     if(         
-#line 2729 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Immediate::is_uimm(_n_get_int__, 5)
-#line 3920 "dfa_s390.cpp"
- ) {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI5, uimmI5_rule, c)
-    }
-    if(         
-#line 2720 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Immediate::is_uimm(_n_get_int__, 6)
-#line 3928 "dfa_s390.cpp"
- ) {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI6, uimmI6_rule, c)
-    }
-    if(         
-#line 2711 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2927 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm8(_n_get_int__)
-#line 3936 "dfa_s390.cpp"
+#line 4415 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI8, uimmI8_rule, c)
+        DFA_PRODUCTION(UIMMI8, uimmI8_rule, c)
     }
     if(         
-#line 2702 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2918 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm12(_n_get_int__)
-#line 3944 "dfa_s390.cpp"
+#line 4423 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI12, uimmI12_rule, c)
+        DFA_PRODUCTION(UIMMI12, uimmI12_rule, c)
     }
     if(         
-#line 2693 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2909 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm16(_n_get_int__)
-#line 3952 "dfa_s390.cpp"
+#line 4431 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI16, uimmI16_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, loadConUI16_rule, c+DEFAULT_COST)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadConUI16_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadConUI16_rule, c+DEFAULT_COST+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadConUI16_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadConUI16_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadConUI16_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadConUI16_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadConUI16_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadConUI16_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(UIMMI16, uimmI16_rule, c)
+        DFA_PRODUCTION(IREGI, loadConUI16_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, loadConUI16_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadConUI16_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(RODDREGI, loadConUI16_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG1REGI, loadConUI16_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG2REGI, loadConUI16_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG3REGI, loadConUI16_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG4REGI, loadConUI16_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG5REGI, loadConUI16_rule, c+DEFAULT_COST+1)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMMI, uimmI_rule, c)
+        DFA_PRODUCTION(UIMMI, uimmI_rule, c)
     }
     if(         
-#line 2672 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2888 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ != 0 && _n_get_int__ != -1
-#line 3974 "dfa_s390.cpp"
+#line 4453 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_N0M1, immI_n0m1_rule, c)
+        DFA_PRODUCTION(IMMI_N0M1, immI_n0m1_rule, c)
     }
     if(         
-#line 2663 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2879 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ == -1
-#line 3982 "dfa_s390.cpp"
+#line 4461 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_MINUS1, immI_minus1_rule, c)
+        DFA_PRODUCTION(IMMI_MINUS1, immI_minus1_rule, c)
     }
     if(         
-#line 2654 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2870 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ == 0
-#line 3990 "dfa_s390.cpp"
+#line 4469 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI_0, immI_0_rule, c)
+        DFA_PRODUCTION(IMMI_0, immI_0_rule, c)
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c+DEFAULT_COST_LOW) {
-        DFA_PRODUCTION__SET_VALID(IREGI, loadConI_0_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(IREGI, loadConI_0_rule, c+DEFAULT_COST_LOW)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+DEFAULT_COST_LOW+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(REVENREGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+DEFAULT_COST_LOW+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RODDREGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG1REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG2REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG3REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG4REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG5REGI, loadConI_0_rule, c+DEFAULT_COST_LOW+1)
       }
     }
     if(         
-#line 2645 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2861 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_simm8(_n_get_int__)
-#line 4028 "dfa_s390.cpp"
+#line 4507 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI8, immI8_rule, c)
+        DFA_PRODUCTION(IMMI8, immI8_rule, c)
     }
     if(         
-#line 2636 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2852 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_simm16(_n_get_int__)
-#line 4036 "dfa_s390.cpp"
+#line 4515 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI16, immI16_rule, c)
+        DFA_PRODUCTION(IMMI16, immI16_rule, c)
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c+DEFAULT_COST_LOW) {
-        DFA_PRODUCTION__SET_VALID(IREGI, loadConI16_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(IREGI, loadConI16_rule, c+DEFAULT_COST_LOW)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+DEFAULT_COST_LOW+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(REVENREGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+DEFAULT_COST_LOW+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadConI16_rule, c+DEFAULT_COST_LOW+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadConI16_rule, c+DEFAULT_COST_LOW+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RODDREGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG1REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG2REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG3REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG4REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG5REGI, loadConI16_rule, c+DEFAULT_COST_LOW+1)
       }
     }
     if(         
-#line 2627 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2843 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_simm20(_n_get_int__)
-#line 4074 "dfa_s390.cpp"
+#line 4553 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI20, immI20_rule, c)
+        DFA_PRODUCTION(IMMI20, immI20_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMI, immI_rule, c)
+        DFA_PRODUCTION(IMMI, immI_rule, c)
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c+DEFAULT_COST) {
-        DFA_PRODUCTION__SET_VALID(IREGI, loadConI_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(IREGI, loadConI_rule, c+DEFAULT_COST)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+DEFAULT_COST+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+DEFAULT_COST+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadConI_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(REVENREGI, loadConI_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+DEFAULT_COST+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadConI_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadConI_rule, c+DEFAULT_COST+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadConI_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RODDREGI, loadConI_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadConI_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG1REGI, loadConI_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadConI_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG2REGI, loadConI_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadConI_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG3REGI, loadConI_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadConI_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG4REGI, loadConI_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadConI_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG5REGI, loadConI_rule, c+DEFAULT_COST+1)
       }
     }
     if(         
-#line 2606 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2822 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ != 0 && _n_get_int__ != -1 && (_n_get_int__&0x0000ffff) != 0x0000ffff
-#line 4116 "dfa_s390.cpp"
+#line 4595 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMS_N0M1, immS_n0m1_rule, c)
+        DFA_PRODUCTION(IMMS_N0M1, immS_n0m1_rule, c)
     }
     if(         
-#line 2596 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2812 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_int__ == -1) || ((_n_get_int__&0x0000ffff) == 0x0000ffff)
-#line 4124 "dfa_s390.cpp"
+#line 4603 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMS_MINUS1, immS_minus1_rule, c)
+        DFA_PRODUCTION(IMMS_MINUS1, immS_minus1_rule, c)
     }
     if(         
-#line 2586 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2802 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_int__ != 0 && _n_get_int__ != -1 && (_n_get_int__&0x000000ff) != 0x000000ff
-#line 4132 "dfa_s390.cpp"
+#line 4611 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMB_N0M1, immB_n0m1_rule, c)
+        DFA_PRODUCTION(IMMB_N0M1, immB_n0m1_rule, c)
     }
     if(         
-#line 2576 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 2792 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_int__ == -1) || ((_n_get_int__&0x000000ff) == 0x000000ff)
-#line 4140 "dfa_s390.cpp"
+#line 4619 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMB_MINUS1, immB_minus1_rule, c)
+        DFA_PRODUCTION(IMMB_MINUS1, immB_minus1_rule, c)
     }
    if ( /* IREGI KNOWN_VALID || */ _cost[IREGI] > DEFAULT_COST) {
      DFA_PRODUCTION(IREGI, loadConI_rule, DEFAULT_COST)
@@ -4176,212 +4655,198 @@ _n_get_int__ != 0 && _n_get_int__ != -1 && (_n_get_int__&0x000000ff) != 0x000000
 void  State::_sub_Op_ConL(const Node *n){
     jlong _n_get_long__ = n->get_long();
     if(         
-#line 2979 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3141 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_long__ == 0xFFFFFFFFL
-#line 4181 "dfa_s390.cpp"
+#line 4660 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML_32BITS, immL_32bits_rule, c)
+        DFA_PRODUCTION(IMML_32BITS, immL_32bits_rule, c)
     }
     if(         
-#line 2970 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3132 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_long__ & 0xFFFFFFFFFFFFL) == 0xFFFFFFFFFFFFL
-#line 4189 "dfa_s390.cpp"
+#line 4668 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML_HH1, uimmL_HH1_rule, c)
+        DFA_PRODUCTION(UIMML_HH1, uimmL_HH1_rule, c)
     }
     if(         
-#line 2961 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3123 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_long__ & 0xFFFF0000FFFFFFFFL) == 0xFFFF0000FFFFFFFFL
-#line 4197 "dfa_s390.cpp"
+#line 4676 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML_HL1, uimmL_HL1_rule, c)
+        DFA_PRODUCTION(UIMML_HL1, uimmL_HL1_rule, c)
     }
     if(         
-#line 2952 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3114 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_long__ & 0xFFFFFFFF0000FFFFL) == 0xFFFFFFFF0000FFFFL
-#line 4205 "dfa_s390.cpp"
+#line 4684 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML_LH1, uimmL_LH1_rule, c)
+        DFA_PRODUCTION(UIMML_LH1, uimmL_LH1_rule, c)
     }
     if(         
-#line 2943 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3105 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (_n_get_long__ & 0xFFFFFFFFFFFF0000L) == 0xFFFFFFFFFFFF0000L
-#line 4213 "dfa_s390.cpp"
+#line 4692 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML_LL1, uimmL_LL1_rule, c)
+        DFA_PRODUCTION(UIMML_LL1, uimmL_LL1_rule, c)
     }
     if(         
-#line 2934 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3096 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_long__ == 0L
-#line 4221 "dfa_s390.cpp"
+#line 4700 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML_0, immL_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGL, loadConL_0_rule, c+DEFAULT_COST_LOW)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(IMML_0, immL_0_rule, c)
+        DFA_PRODUCTION(IREGL, loadConL_0_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RODDREGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(ALLRODDREGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG1REGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG5REGL, loadConL_0_rule, c+DEFAULT_COST_LOW+1)
     }
     if(         
-#line 2926 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3088 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 _n_get_long__ == 0xFFFFFFFFL
-#line 4235 "dfa_s390.cpp"
+#line 4715 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML_FFFFFFFF, immL_FFFFFFFF_rule, c)
+        DFA_PRODUCTION(IMML_FFFFFFFF, immL_FFFFFFFF_rule, c)
     }
     if(         
-#line 2917 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-_n_get_long__ == 0xFFFFL
-#line 4243 "dfa_s390.cpp"
- ) {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML_FFFF, immL_FFFF_rule, c)
-    }
-    if(         
-#line 2908 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-_n_get_long__ == 0xFFL
-#line 4251 "dfa_s390.cpp"
- ) {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML_FF, immL_FF_rule, c)
-    }
-    if(         
-#line 2895 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Immediate::is_uimm8(_n_get_long__)
-#line 4259 "dfa_s390.cpp"
- ) {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML8, uimmL8_rule, c)
-    }
-    if(         
-#line 2886 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3075 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm12(_n_get_long__)
-#line 4267 "dfa_s390.cpp"
+#line 4723 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML12, uimmL12_rule, c)
+        DFA_PRODUCTION(UIMML12, uimmL12_rule, c)
     }
     if(         
-#line 2877 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3066 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm16(_n_get_long__)
-#line 4275 "dfa_s390.cpp"
+#line 4731 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML16, uimmL16_rule, c)
+        DFA_PRODUCTION(UIMML16, uimmL16_rule, c)
     }
     if(         
-#line 2868 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3057 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm32(_n_get_long__)
-#line 4283 "dfa_s390.cpp"
+#line 4739 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(UIMML32, uimmL32_rule, c)
+        DFA_PRODUCTION(UIMML32, uimmL32_rule, c)
     }
     if(         
-#line 2856 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3045 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_simm8(_n_get_long__)
-#line 4291 "dfa_s390.cpp"
+#line 4747 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML8, immL8_rule, c)
+        DFA_PRODUCTION(IMML8, immL8_rule, c)
     }
     if(         
-#line 2847 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3036 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_simm16(_n_get_long__)
-#line 4299 "dfa_s390.cpp"
+#line 4755 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML16, immL16_rule, c)
+        DFA_PRODUCTION(IMML16, immL16_rule, c)
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c+DEFAULT_COST_LOW) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadConL16_rule, c+DEFAULT_COST_LOW)
+        DFA_PRODUCTION(IREGL, loadConL16_rule, c+DEFAULT_COST_LOW)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+DEFAULT_COST_LOW+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+DEFAULT_COST_LOW+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(REVENREGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RODDREGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+DEFAULT_COST_LOW+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG1REGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+DEFAULT_COST_LOW+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
+        DFA_PRODUCTION(RARG5REGL, loadConL16_rule, c+DEFAULT_COST_LOW+1)
       }
     }
     if(         
-#line 2838 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3027 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_simm20(_n_get_long__)
-#line 4325 "dfa_s390.cpp"
+#line 4784 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML20, immL20_rule, c)
+        DFA_PRODUCTION(IMML20, immL20_rule, c)
     }
     if(         
-#line 2829 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3018 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_simm32(_n_get_long__)
-#line 4333 "dfa_s390.cpp"
+#line 4792 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML32, immL32_rule, c)
+        DFA_PRODUCTION(IMML32, immL32_rule, c)
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c+DEFAULT_COST) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadConL32_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(IREGL, loadConL32_rule, c+DEFAULT_COST)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+DEFAULT_COST+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+DEFAULT_COST+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+DEFAULT_COST+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadConL32_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(REVENREGL, loadConL32_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadConL32_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RODDREGL, loadConL32_rule, c+DEFAULT_COST+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+DEFAULT_COST+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadConL32_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadConL32_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG1REGL, loadConL32_rule, c+DEFAULT_COST+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+DEFAULT_COST+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadConL32_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG5REGL, loadConL32_rule, c+DEFAULT_COST+1)
       }
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMML, immL_rule, c)
+        DFA_PRODUCTION(IMML, immL_rule, c)
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c+MEMORY_REF_COST_LO) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO)
+        DFA_PRODUCTION(IREGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST_LO+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST_LO+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST_LO+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(REVENREGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RODDREGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+MEMORY_REF_COST_LO+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RARG1REGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RARG5REGL, loadConL_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
     }
     if(         
-#line 2742 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Immediate::is_uimm8(_n_get_long__-1)
-#line 4381 "dfa_s390.cpp"
+#line 2940 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+Immediate::is_uimm8((julong)n->get_long()-1)
+#line 4846 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(SSLENDW, SSlenDW_rule, c)
+        DFA_PRODUCTION(SSLENDW, SSlenDW_rule, c)
     }
    if ( /* IREGL KNOWN_VALID || */ _cost[IREGL] > MEMORY_REF_COST_LO) {
      DFA_PRODUCTION(IREGL, loadConL_pcrelTOC_rule, MEMORY_REF_COST_LO)
@@ -4395,6 +4860,9 @@ Immediate::is_uimm8(_n_get_long__-1)
    if ( /* RODDREGL KNOWN_VALID || */ _cost[RODDREGL] > MEMORY_REF_COST_LO+1) {
      DFA_PRODUCTION(RODDREGL, loadConL_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
    }
+   if ( /* ALLRODDREGL KNOWN_VALID || */ _cost[ALLRODDREGL] > MEMORY_REF_COST_LO+1) {
+     DFA_PRODUCTION(ALLRODDREGL, loadConL_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
+   }
    if ( /* RARG1REGL KNOWN_VALID || */ _cost[RARG1REGL] > MEMORY_REF_COST_LO+1) {
      DFA_PRODUCTION(RARG1REGL, loadConL_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
    }
@@ -4404,123 +4872,115 @@ Immediate::is_uimm8(_n_get_long__-1)
 }
 void  State::_sub_Op_ConP(const Node *n){
     if(         
-#line 3031 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3184 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 n->get_ptr() == 0
-#line 4409 "dfa_s390.cpp"
+#line 4877 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMP0, immP0_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP, loadConP0_rule, c+DEFAULT_COST)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+DEFAULT_COST+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, loadConP0_rule, c+DEFAULT_COST+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+DEFAULT_COST+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+DEFAULT_COST+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+DEFAULT_COST+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+DEFAULT_COST+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+DEFAULT_COST+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, loadConP0_rule, c+DEFAULT_COST+1)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(IMMP0, immP0_rule, c)
+        DFA_PRODUCTION(IREGP, loadConP0_rule, c+DEFAULT_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+DEFAULT_COST+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(R11TEMPREGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(NOARG_IREGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG1REGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG2REGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG3REGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG4REGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RARG5REGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(MEMORYREGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(INDIRECT, loadConP0_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+DEFAULT_COST+1+1)
+        DFA_PRODUCTION(REVENREGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(RODDREGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, loadConP0_rule, c+DEFAULT_COST+1)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c+DEFAULT_COST)
     }
     if(         
-#line 3018 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3171 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm8(n->get_ptr())
-#line 4438 "dfa_s390.cpp"
+#line 4906 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMP8, immP8_rule, c)
+        DFA_PRODUCTION(IMMP8, immP8_rule, c)
     }
     if(         
-#line 3009 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 3162 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Immediate::is_uimm16(n->get_ptr())
-#line 4446 "dfa_s390.cpp"
+#line 4914 "dfa_s390.cpp"
  ) {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMP16, immP16_rule, c)
-    }
-    if(         
-#line 3000 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Immediate::is_uimm32(n->get_ptr())
-#line 4454 "dfa_s390.cpp"
- ) {
-      unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMP32, immP32_rule, c)
+        DFA_PRODUCTION(IMMP16, immP16_rule, c)
     }
     {
       unsigned int c = 1;
-        DFA_PRODUCTION__SET_VALID(IMMP, immP_rule, c)
+        DFA_PRODUCTION(IMMP, immP_rule, c)
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c+MEMORY_REF_COST_LO) {
-        DFA_PRODUCTION__SET_VALID(IREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO)
+        DFA_PRODUCTION(IREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST_LO+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST_LO+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST_LO+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+MEMORY_REF_COST_LO+1) {
+        DFA_PRODUCTION(R10TEMPREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+MEMORY_REF_COST_LO+1) {
+        DFA_PRODUCTION(R11TEMPREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(NOARG_IREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RARG1REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RARG2REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RARG3REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RARG4REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RARG5REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(MEMORYREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+MEMORY_REF_COST_LO+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1+1)
+        DFA_PRODUCTION(INDIRECT, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+MEMORY_REF_COST_LO+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+MEMORY_REF_COST_LO+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+MEMORY_REF_COST_LO+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+MEMORY_REF_COST_LO+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+MEMORY_REF_COST_LO+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+MEMORY_REF_COST_LO+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(REVENREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(RODDREGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+MEMORY_REF_COST_LO+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, loadConP_pcrelTOC_rule, c+MEMORY_REF_COST_LO+1)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c+MEMORY_REF_COST_LO) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c+MEMORY_REF_COST_LO)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c+MEMORY_REF_COST_LO)
       }
     }
    if ( /* IREGP KNOWN_VALID || */ _cost[IREGP] > MEMORY_REF_COST_LO) {
@@ -4528,6 +4988,12 @@ Immediate::is_uimm32(n->get_ptr())
    }
    if ( /* STACKSLOTP KNOWN_VALID || */ _cost[STACKSLOTP] > MEMORY_REF_COST_LO+MEMORY_REF_COST) {
      DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, MEMORY_REF_COST_LO+MEMORY_REF_COST)
+   }
+   if ( /* R10TEMPREGP KNOWN_VALID || */ _cost[R10TEMPREGP] > MEMORY_REF_COST_LO+1) {
+     DFA_PRODUCTION(R10TEMPREGP, loadConP_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
+   }
+   if ( /* R11TEMPREGP KNOWN_VALID || */ _cost[R11TEMPREGP] > MEMORY_REF_COST_LO+1) {
+     DFA_PRODUCTION(R11TEMPREGP, loadConP_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
    }
    if ( /* NOARG_IREGP KNOWN_VALID || */ _cost[NOARG_IREGP] > MEMORY_REF_COST_LO+1) {
      DFA_PRODUCTION(NOARG_IREGP, loadConP_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
@@ -4577,12 +5043,6 @@ Immediate::is_uimm32(n->get_ptr())
    if ( /* INLINE_CACHE_REGP KNOWN_VALID || */ _cost[INLINE_CACHE_REGP] > MEMORY_REF_COST_LO+1) {
      DFA_PRODUCTION(INLINE_CACHE_REGP, loadConP_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
    }
-   if ( /* COMPILER_METHOD_OOP_REGP KNOWN_VALID || */ _cost[COMPILER_METHOD_OOP_REGP] > MEMORY_REF_COST_LO+1) {
-     DFA_PRODUCTION(COMPILER_METHOD_OOP_REGP, loadConP_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
-   }
-   if ( /* INTERPRETER_METHOD_OOP_REGP KNOWN_VALID || */ _cost[INTERPRETER_METHOD_OOP_REGP] > MEMORY_REF_COST_LO+1) {
-     DFA_PRODUCTION(INTERPRETER_METHOD_OOP_REGP, loadConP_pcrelTOC_rule, MEMORY_REF_COST_LO+1)
-   }
    if ( /* IREGP_N2P KNOWN_VALID || */ _cost[IREGP_N2P] > MEMORY_REF_COST_LO) {
      DFA_PRODUCTION(IREGP_N2P, iRegP_rule, MEMORY_REF_COST_LO)
    }
@@ -4590,5943 +5050,7053 @@ Immediate::is_uimm32(n->get_ptr())
 void  State::_sub_Op_Conv2B(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+3 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, convP2B_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, convP2B_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, convP2B_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, convP2B_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, convP2B_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, convP2B_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, convP2B_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, convP2B_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, convP2B_rule, c+1)
+        DFA_PRODUCTION(IREGI, convP2B_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, convP2B_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, convP2B_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, convP2B_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, convP2B_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, convP2B_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, convP2B_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, convP2B_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, convP2B_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, convI2B_rule, c)
+        DFA_PRODUCTION(IREGI, convI2B_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, convI2B_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, convI2B_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, convI2B_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, convI2B_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, convI2B_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, convI2B_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, convI2B_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, convI2B_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, convI2B_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, convI2B_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, convI2B_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, convI2B_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, convI2B_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, convI2B_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, convI2B_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, convI2B_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_ConvD2F(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, convD2F_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
-    }
-    if( STATE__VALID_CHILD(_kids[0], _SQRTD__CONVF2D_MEMORYRX__) ) {
-      unsigned int c = _kids[0]->_cost[_SQRTD__CONVF2D_MEMORYRX__] + ALU_MEMORY_COST;
-      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, sqrtF_mem_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], _SQRTD__CONVF2D_REGF__) ) {
-      unsigned int c = _kids[0]->_cost[_SQRTD__CONVF2D_REGF__] + ALU_REG_COST;
-      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, sqrtF_reg_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
-      }
+        DFA_PRODUCTION(REGF, convD2F_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_ConvD2I(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+2 * DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, convD2I_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, convD2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, convD2I_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, convD2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, convD2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, convD2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, convD2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, convD2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, convD2I_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, convD2I_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, convD2I_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, convD2I_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, convD2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, convD2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, convD2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, convD2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, convD2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, convD2I_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_ConvD2L(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+2 * DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, convD2L_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, convD2L_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, convD2L_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, convD2L_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, convD2L_reg_rule, c+1)
+        DFA_PRODUCTION(IREGL, convD2L_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, convD2L_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, convD2L_reg_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, convD2L_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, convD2L_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, convD2L_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_ConvF2D(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRX) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRX] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, convF2D_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, convF2D_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, convF2D_reg_rule, c)
+        DFA_PRODUCTION(REGD, convF2D_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORYRX) ) {
-      unsigned int c = _kids[0]->_cost[MEMORYRX];
-        DFA_PRODUCTION__SET_VALID(_CONVF2D_MEMORYRX_, _ConvF2D_memoryRX__rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
-      unsigned int c = _kids[0]->_cost[REGF];
-        DFA_PRODUCTION__SET_VALID(_CONVF2D_REGF_, _ConvF2D_regF__rule, c)
     }
 }
 void  State::_sub_Op_ConvF2I(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+2 * DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, convF2I_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, convF2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, convF2I_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, convF2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, convF2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, convF2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, convF2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, convF2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, convF2I_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, convF2I_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, convF2I_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, convF2I_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, convF2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, convF2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, convF2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, convF2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, convF2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, convF2I_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_ConvF2L(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+2 * DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, convF2L_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, convF2L_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, convF2L_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, convF2L_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, convF2L_reg_rule, c+1)
+        DFA_PRODUCTION(IREGL, convF2L_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, convF2L_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, convF2L_reg_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, convF2L_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, convF2L_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, convF2L_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_ConvI2D(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, convI2D_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, convI2D_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_ConvI2F(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, convI2F_ireg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, convI2F_ireg_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_ConvI2L(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) &&
         (
-#line 10492 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10803 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 false
-#line 4758 "dfa_s390.cpp"
+#line 5194 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, expand_Repl2I_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, expand_Repl2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, expand_Repl2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, expand_Repl2I_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, expand_Repl2I_reg_rule, c+1)
+        DFA_PRODUCTION(IREGL, expand_Repl2I_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, expand_Repl2I_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, expand_Repl2I_reg_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, expand_Repl2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, expand_Repl2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, expand_Repl2I_reg_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, convI2L_reg_rule, c)
+        DFA_PRODUCTION(IREGL, convI2L_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, convI2L_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, convI2L_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, convI2L_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, convI2L_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, convI2L_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, convI2L_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, convI2L_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, convI2L_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, convI2L_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI];
-        DFA_PRODUCTION__SET_VALID(_CONVI2L_IREGI_, _ConvI2L_iRegI__rule, c)
+        DFA_PRODUCTION(_CONVI2L_IREGI_, _ConvI2L_iRegI__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_];
-        DFA_PRODUCTION__SET_VALID(_CONVI2L__LOADI_MEMORY__, _ConvI2L__LoadI_memory___rule, c)
+        DFA_PRODUCTION(_CONVI2L__LOADI_MEMORY__, _ConvI2L__LoadI_memory___rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadI2L_rule, c)
+        DFA_PRODUCTION(IREGL, loadI2L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadI2L_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, loadI2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadI2L_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadI2L_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadI2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadI2L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadI2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadI2L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadI2L_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADUS_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_LOADUS_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadUS2L_rule, c)
+        DFA_PRODUCTION(IREGL, loadUS2L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadUS2L_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, loadUS2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadUS2L_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadUS2L_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadUS2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadUS2L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadUS2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadUS2L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadUS2L_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADS_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_LOADS_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadS2L_rule, c)
+        DFA_PRODUCTION(IREGL, loadS2L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadS2L_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, loadS2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadS2L_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadS2L_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadS2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadS2L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadS2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadS2L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadS2L_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADUB_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_LOADUB_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadUB2L_rule, c)
+        DFA_PRODUCTION(IREGL, loadUB2L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadUB2L_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, loadUB2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadUB2L_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadUB2L_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadUB2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadUB2L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadUB2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadUB2L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadUB2L_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADB_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[_LOADB_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, loadB2L_rule, c)
+        DFA_PRODUCTION(IREGL, loadB2L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadB2L_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, loadB2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadB2L_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadB2L_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, loadB2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadB2L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadB2L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadB2L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadB2L_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_ConvL2D(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, convL2D_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, convL2D_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_ConvL2F(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, convL2F_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, convL2F_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_ConvL2I(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _RSHIFTL_IREGL_IMMI_32_63) ) {
       unsigned int c = _kids[0]->_cost[_RSHIFTL_IREGL_IMMI_32_63] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, shrL_reg_imm6_L2I_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, shrL_reg_imm6_L2I_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, shrL_reg_imm6_L2I_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, shrL_reg_imm6_L2I_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, shrL_reg_imm6_L2I_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, shrL_reg_imm6_L2I_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, shrL_reg_imm6_L2I_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, shrL_reg_imm6_L2I_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, shrL_reg_imm6_L2I_rule, c+1)
+        DFA_PRODUCTION(IREGI, shrL_reg_imm6_L2I_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, shrL_reg_imm6_L2I_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, shrL_reg_imm6_L2I_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, shrL_reg_imm6_L2I_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, shrL_reg_imm6_L2I_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, shrL_reg_imm6_L2I_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, shrL_reg_imm6_L2I_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, shrL_reg_imm6_L2I_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, shrL_reg_imm6_L2I_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, convL2I_reg_rule, c)
+        DFA_PRODUCTION(IREGI, convL2I_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, convL2I_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, convL2I_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, convL2I_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, convL2I_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, convL2I_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, convL2I_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, convL2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, convL2I_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, convL2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, convL2I_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, convL2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, convL2I_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, convL2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, convL2I_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, convL2I_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, convL2I_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_CountedLoopEnd(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPI_IREGI_IMMI8) &&
         (
-#line 9515 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9730 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 4970 "dfa_s390.cpp"
+#line 5425 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPI_IREGI_IMMI8]+BRANCH_COST+DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, testAndBranchLoopEnd_ImmFar_rule, c)
+        DFA_PRODUCTION(UNIVERSE, testAndBranchLoopEnd_ImmFar_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPI_IREGI_IREGI) &&
         (
-#line 9427 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9642 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 4979 "dfa_s390.cpp"
+#line 5434 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPI_IREGI_IREGI]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, testAndBranchLoopEnd_RegFar_rule, c)
+        DFA_PRODUCTION(UNIVERSE, testAndBranchLoopEnd_RegFar_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOP) && STATE__VALID_CHILD(_kids[1], FLAGSREG) ) {
       unsigned int c = _kids[0]->_cost[CMPOP]+_kids[1]->_cost[FLAGSREG] + BRANCH_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, branchLoopEndFar_rule, c)
+        DFA_PRODUCTION(UNIVERSE, branchLoopEndFar_rule, c)
       }
     }
 }
 void  State::_sub_Op_CountLeadingZerosI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+3 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REVENREGI, countLeadingZerosI_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, countLeadingZerosI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, countLeadingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, countLeadingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, countLeadingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, countLeadingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, countLeadingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, countLeadingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, countLeadingZerosI_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, countLeadingZerosI_rule, c)
+        DFA_PRODUCTION(IREGI, countLeadingZerosI_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGI, countLeadingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, countLeadingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, countLeadingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, countLeadingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, countLeadingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, countLeadingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, countLeadingZerosI_rule, c+1)
     }
 }
 void  State::_sub_Op_CountLeadingZerosL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REVENREGI, countLeadingZerosL_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, countLeadingZerosL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, countLeadingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, countLeadingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, countLeadingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, countLeadingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, countLeadingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, countLeadingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, countLeadingZerosL_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, countLeadingZerosL_rule, c)
+        DFA_PRODUCTION(IREGI, countLeadingZerosL_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGI, countLeadingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, countLeadingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, countLeadingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, countLeadingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, countLeadingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, countLeadingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, countLeadingZerosL_rule, c+1)
     }
 }
 void  State::_sub_Op_CountTrailingZerosI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+8 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REVENREGI, countTrailingZerosI_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, countTrailingZerosI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, countTrailingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, countTrailingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, countTrailingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, countTrailingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, countTrailingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, countTrailingZerosI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, countTrailingZerosI_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, countTrailingZerosI_rule, c)
+        DFA_PRODUCTION(IREGI, countTrailingZerosI_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGI, countTrailingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, countTrailingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, countTrailingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, countTrailingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, countTrailingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, countTrailingZerosI_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, countTrailingZerosI_rule, c+1)
     }
 }
 void  State::_sub_Op_CountTrailingZerosL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+8 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REVENREGI, countTrailingZerosL_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, countTrailingZerosL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, countTrailingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, countTrailingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, countTrailingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, countTrailingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, countTrailingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, countTrailingZerosL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, countTrailingZerosL_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, countTrailingZerosL_rule, c)
+        DFA_PRODUCTION(IREGI, countTrailingZerosL_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGI, countTrailingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, countTrailingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, countTrailingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, countTrailingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, countTrailingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, countTrailingZerosL_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, countTrailingZerosL_rule, c+1)
     }
 }
 void  State::_sub_Op_CreateEx(const Node *n){
     {
       unsigned int c = 0;
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, CreateException_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP, CreateException_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, CreateException_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, CreateException_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, CreateException_rule, c)
+        DFA_PRODUCTION(IREGP, CreateException_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(R11TEMPREGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(NOARG_IREGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYREGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, CreateException_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(REVENREGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, CreateException_rule, c+1+1)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c+1)
     }
 }
 void  State::_sub_Op_DecodeN(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IMMN8) ) {
       unsigned int c = _kids[0]->_cost[IMMN8];
-        DFA_PRODUCTION__SET_VALID(_DECODEN_IMMN8_, _DecodeN_immN8__rule, c)
+        DFA_PRODUCTION(_DECODEN_IMMN8_, _DecodeN_immN8__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) &&
         (
-#line 4893 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5000 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (n->bottom_type()->make_ptr()->ptr() == TypePtr::NotNull ||
              n->bottom_type()->is_oopptr()->ptr() == TypePtr::Constant) &&
-            Universe::narrow_oop_base() != NULL && ExpandLoadingBaseDecode_NN
-#line 5090 "dfa_s390.cpp"
+            CompressedOops::base() != nullptr && ExpandLoadingBaseDecode_NN
+#line 5545 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+MEMORY_REF_COST+2 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeN_NN_Ex_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeN_NN_Ex_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeN_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(IREGP, decodeN_NN_Ex_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, decodeN_NN_Ex_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeN_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeN_NN_Ex_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) &&
         (
-#line 4879 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Universe::narrow_oop_base() != NULL && ExpandLoadingBaseDecode
-#line 5119 "dfa_s390.cpp"
+#line 4986 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+CompressedOops::base() != nullptr && ExpandLoadingBaseDecode
+#line 5574 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+MEMORY_REF_COST+3 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeN_Ex_rule, c)
+        DFA_PRODUCTION(IREGP, decodeN_Ex_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, decodeN_Ex_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeN_Ex_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, decodeN_Ex_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeN_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeN_Ex_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeN_Ex_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeN_Ex_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeN_Ex_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 4852 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 4959 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 false
-#line 5190 "dfa_s390.cpp"
+#line 5645 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeN_base_rule, c)
+        DFA_PRODUCTION(IREGP, decodeN_base_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, decodeN_base_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeN_base_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, decodeN_base_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeN_base_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeN_base_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeN_base_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeN_base_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) &&
         (
-#line 4826 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 4933 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (n->bottom_type()->make_ptr()->ptr() == TypePtr::NotNull ||
              n->bottom_type()->is_oopptr()->ptr() == TypePtr::Constant) &&
-            (Universe::narrow_oop_base()== NULL || !ExpandLoadingBaseDecode_NN)
-#line 5263 "dfa_s390.cpp"
+            (CompressedOops::base()== nullptr || !ExpandLoadingBaseDecode_NN)
+#line 5718 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+MEMORY_REF_COST+2 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeN_NN_rule, c)
+        DFA_PRODUCTION(IREGP, decodeN_NN_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, decodeN_NN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeN_NN_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, decodeN_NN_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeN_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeN_NN_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeN_NN_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeN_NN_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeN_NN_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) &&
         (
-#line 4804 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Universe::narrow_oop_base() == NULL || !ExpandLoadingBaseDecode
-#line 5334 "dfa_s390.cpp"
+#line 4911 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+CompressedOops::base() == nullptr || !ExpandLoadingBaseDecode
+#line 5789 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+MEMORY_REF_COST+3 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeN_rule, c)
+        DFA_PRODUCTION(IREGP, decodeN_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, decodeN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeN_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, decodeN_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeN_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeN_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeN_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeN_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADN_MEMORY_) &&
         (
-#line 4765 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-false && (Universe::narrow_oop_base()==NULL)&&(Universe::narrow_oop_shift()==0)
-#line 5405 "dfa_s390.cpp"
+#line 4872 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+false && (CompressedOops::base()==nullptr) && (CompressedOops::shift()==0)
+#line 5860 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADN_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeLoadN_rule, c)
+        DFA_PRODUCTION(IREGP, decodeLoadN_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, decodeLoadN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeLoadN_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, decodeLoadN_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeLoadN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeLoadN_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeLoadN_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeLoadN_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeLoadN_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGN) ) {
       unsigned int c = _kids[0]->_cost[IREGN];
-        DFA_PRODUCTION__SET_VALID(_DECODEN_IREGN_, _DecodeN_iRegN__rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], IREGN) &&
-        
-#line 3496 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Universe::narrow_oop_base() == NULL && Universe::narrow_oop_shift() == 0 &&
-            _leaf->as_DecodeN()->in(0) == NULL
-#line 5481 "dfa_s390.cpp"
- ) {
-      unsigned int c = _kids[0]->_cost[IREGN]+1;
-        DFA_PRODUCTION__SET_VALID(IREGN2P, iRegN2P_rule, c)
+        DFA_PRODUCTION(_DECODEN_IREGN_, _DecodeN_iRegN__rule, c)
     }
 }
 void  State::_sub_Op_DecodeNKlass(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGN) ) {
       unsigned int c = _kids[0]->_cost[IREGN]+3 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeKlass_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeKlass_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(IREGP, decodeKlass_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, decodeKlass_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeKlass_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeKlass_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IMMNKLASS) ) {
       unsigned int c = _kids[0]->_cost[IMMNKLASS]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeLoadConNKlass_rule, c)
+        DFA_PRODUCTION(IREGP, decodeLoadConNKlass_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, decodeLoadConNKlass_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeLoadConNKlass_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, decodeLoadConNKlass_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeLoadConNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeLoadConNKlass_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeLoadConNKlass_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeLoadConNKlass_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeLoadConNKlass_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADNKLASS_MEMORY_) &&
         (
-#line 4776 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-false && (Universe::narrow_klass_base()==NULL)&&(Universe::narrow_klass_shift()==0)
-#line 5582 "dfa_s390.cpp"
+#line 4883 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+false && (CompressedKlassPointers::base()==nullptr)&&(CompressedKlassPointers::shift()==0)
+#line 6027 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_LOADNKLASS_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP, decodeLoadNKlass_rule, c)
+        DFA_PRODUCTION(IREGP, decodeLoadNKlass_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, decodeLoadNKlass_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(INDIRECT, decodeLoadNKlass_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, decodeLoadNKlass_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(REVENREGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, decodeLoadNKlass_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, decodeLoadNKlass_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(COMPILER_METHOD_OOP_REGP) || _cost[COMPILER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, decodeLoadNKlass_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(INTERPRETER_METHOD_OOP_REGP) || _cost[INTERPRETER_METHOD_OOP_REGP] > c+1) {
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, decodeLoadNKlass_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, decodeLoadNKlass_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_DivD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORYRX_] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, divD_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, divD_reg_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, divD_reg_reg_rule, c)
+        DFA_PRODUCTION(REGD, divD_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_DivF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORYRX_] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, divF_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, divF_reg_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, divF_reg_reg_rule, c)
+        DFA_PRODUCTION(REGF, divF_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_DivI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16]+2 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(RODDREGI, divI_reg_imm16_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, divI_reg_imm16_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, divI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, divI_reg_imm16_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, divI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, divI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, divI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, divI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, divI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, divI_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGI, divI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, divI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, divI_reg_imm16_rule, c+1+1+1)
+        DFA_PRODUCTION(RARG1REGI, divI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, divI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, divI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, divI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, divI_reg_imm16_rule, c+1+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], NOODD_IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[NOODD_IREGI]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, divI_reg_reg_rule, c)
+        DFA_PRODUCTION(RODDREGI, divI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(IREGI, divI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, divI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+1+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, divI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGI, divI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, divI_reg_reg_rule, c+1+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, divI_reg_reg_rule, c+1+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, divI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, divI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, divI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, divI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, divI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, divI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, divI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, divI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, divI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, divI_reg_reg_rule, c+1+1)
       }
     }
 }
 void  State::_sub_Op_DivL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML16]+2 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(RODDREGL, divL_reg_imm16_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGL, divL_reg_imm16_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, divL_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, divL_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, divL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGL, divL_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGL, divL_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, divL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(ALLRODDREGL, divL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGL, divL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGL, divL_reg_imm16_rule, c+1+1)
     }
     if( STATE__VALID_CHILD(_kids[0], RODDREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[RODDREGL]+_kids[1]->_cost[IREGL]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, divL_reg_reg_rule, c)
+        DFA_PRODUCTION(RODDREGL, divL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(IREGL, divL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(IREGL, divL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+1+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, divL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGL, divL_reg_reg_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1+1) {
+        DFA_PRODUCTION(ALLRODDREGL, divL_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, divL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGL, divL_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, divL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGL, divL_reg_reg_rule, c+1+1)
       }
+    }
+}
+void  State::_sub_Op_UDivI(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], RODDREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
+      unsigned int c = _kids[0]->_cost[RODDREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
+        DFA_PRODUCTION(RODDREGI, udivI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, udivI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, udivI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, udivI_reg_reg_rule, c+1+1+1)
+        DFA_PRODUCTION(RARG1REGI, udivI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, udivI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, udivI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, udivI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, udivI_reg_reg_rule, c+1+1)
+    }
+}
+void  State::_sub_Op_UDivL(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], RODDREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
+      unsigned int c = _kids[0]->_cost[RODDREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
+        DFA_PRODUCTION(RODDREGL, udivL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, udivL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, udivL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(ALLRODDREGL, udivL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGL, udivL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGL, udivL_reg_reg_rule, c+1+1)
     }
 }
 void  State::_sub_Op_DivModI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RODDREGI) && STATE__VALID_CHILD(_kids[1], NOODD_IREGI) ) {
       unsigned int c = _kids[0]->_cost[RODDREGI]+_kids[1]->_cost[NOODD_IREGI]+2 * DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, divModI_reg_divmod_rule, c)
+        DFA_PRODUCTION(UNIVERSE, divModI_reg_divmod_rule, c)
     }
 }
 void  State::_sub_Op_DivModL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RODDREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[RODDREGL]+_kids[1]->_cost[IREGL]+2 * DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, divModL_reg_divmod_rule, c)
+        DFA_PRODUCTION(UNIVERSE, divModL_reg_divmod_rule, c)
     }
 }
 void  State::_sub_Op_EncodeISOArray(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IREGI) &&
+        (
+#line 10635 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+((EncodeISOArrayNode*)n)->is_ascii()
+#line 6255 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_IREGP_IREGI]+300;
-        DFA_PRODUCTION__SET_VALID(IREGI, encode_iso_array_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, encode_iso_array_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, encode_iso_array_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, encode_iso_array_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, encode_iso_array_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, encode_iso_array_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, encode_iso_array_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, encode_iso_array_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, encode_iso_array_rule, c+1)
+        DFA_PRODUCTION(IREGI, encode_ascii_array_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, encode_ascii_array_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, encode_ascii_array_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, encode_ascii_array_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, encode_ascii_array_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, encode_ascii_array_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, encode_ascii_array_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, encode_ascii_array_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, encode_ascii_array_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IREGI) &&
+        (
+#line 10617 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+!((EncodeISOArrayNode*)n)->is_ascii()
+#line 6273 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_IREGP_IREGI]+300;
+      if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
+        DFA_PRODUCTION(IREGI, encode_iso_array_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
+        DFA_PRODUCTION(REVENREGI, encode_iso_array_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
+        DFA_PRODUCTION(NOODD_IREGI, encode_iso_array_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
+        DFA_PRODUCTION(RODDREGI, encode_iso_array_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
+        DFA_PRODUCTION(RARG1REGI, encode_iso_array_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
+        DFA_PRODUCTION(RARG2REGI, encode_iso_array_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
+        DFA_PRODUCTION(RARG3REGI, encode_iso_array_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
+        DFA_PRODUCTION(RARG4REGI, encode_iso_array_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
+        DFA_PRODUCTION(RARG5REGI, encode_iso_array_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_EncodeP(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IREGP) &&
-        (
-#line 4998 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-(n->bottom_type()->make_ptr()->ptr() == TypePtr::NotNull) &&
-            (Universe::narrow_oop_base_overlaps() && ExpandLoadingBaseEncode_NN)
-#line 5795 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IREGP]+MEMORY_REF_COST+3 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGN, encodeP_NN_Ex_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, encodeP_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, encodeP_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, encodeP_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, encodeP_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, encodeP_NN_Ex_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, encodeP_NN_Ex_rule, c+1)
+    if( STATE__VALID_CHILD(_kids[0], IREGP) ) {
+      unsigned int c = _kids[0]->_cost[IREGP];
+        DFA_PRODUCTION(_ENCODEP_IREGP_, _EncodeP_iRegP__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) &&
         (
-#line 4978 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5105 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+(n->bottom_type()->make_ptr()->ptr() == TypePtr::NotNull) &&
+            (CompressedOops::base_overlaps() && ExpandLoadingBaseEncode_NN)
+#line 6318 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGP]+MEMORY_REF_COST+3 * DEFAULT_COST;
+        DFA_PRODUCTION(IREGN, encodeP_NN_Ex_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, encodeP_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, encodeP_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, encodeP_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, encodeP_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, encodeP_NN_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, encodeP_NN_Ex_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGP) &&
+        (
+#line 5085 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (n->bottom_type()->make_ptr()->ptr() != TypePtr::NotNull) &&
-            (Universe::narrow_oop_base_overlaps() && ExpandLoadingBaseEncode)
-#line 5812 "dfa_s390.cpp"
+            (CompressedOops::base_overlaps() && ExpandLoadingBaseEncode)
+#line 6335 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+MEMORY_REF_COST+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN, encodeP_Ex_rule, c)
+        DFA_PRODUCTION(IREGN, encodeP_Ex_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, encodeP_Ex_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGN, encodeP_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, encodeP_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, encodeP_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, encodeP_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, encodeP_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, encodeP_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, encodeP_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, encodeP_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, encodeP_Ex_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, encodeP_Ex_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, encodeP_Ex_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 4966 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5073 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 false
-#line 5844 "dfa_s390.cpp"
+#line 6367 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGL]+MEMORY_REF_COST+2 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN, encodeP_NN_base_rule, c)
+        DFA_PRODUCTION(IREGN, encodeP_NN_base_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, encodeP_NN_base_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGN, encodeP_NN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, encodeP_NN_base_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, encodeP_NN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, encodeP_NN_base_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, encodeP_NN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, encodeP_NN_base_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, encodeP_NN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, encodeP_NN_base_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, encodeP_NN_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, encodeP_NN_base_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, encodeP_NN_base_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGL_IREGN) &&
         (
-#line 4950 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5057 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 false
-#line 5876 "dfa_s390.cpp"
+#line 6399 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_IREGL_IREGN]+MEMORY_REF_COST+2 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN, encodeP_base_rule, c)
+        DFA_PRODUCTION(IREGN, encodeP_base_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, encodeP_base_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGN, encodeP_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, encodeP_base_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, encodeP_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, encodeP_base_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, encodeP_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, encodeP_base_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, encodeP_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, encodeP_base_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, encodeP_base_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, encodeP_base_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, encodeP_base_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) &&
         (
-#line 4935 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5042 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (n->bottom_type()->make_ptr()->ptr() == TypePtr::NotNull) &&
-            (Universe::narrow_oop_base() == 0 ||
-             Universe::narrow_oop_base_disjoint() ||
+            (CompressedOops::base() == nullptr ||
+             CompressedOops::base_disjoint() ||
              !ExpandLoadingBaseEncode_NN)
-#line 5911 "dfa_s390.cpp"
+#line 6434 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+MEMORY_REF_COST+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN, encodeP_NN_rule, c)
+        DFA_PRODUCTION(IREGN, encodeP_NN_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, encodeP_NN_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGN, encodeP_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, encodeP_NN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, encodeP_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, encodeP_NN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, encodeP_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, encodeP_NN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, encodeP_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, encodeP_NN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, encodeP_NN_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, encodeP_NN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, encodeP_NN_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) &&
         (
-#line 4912 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5019 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 (n->bottom_type()->make_ptr()->ptr() != TypePtr::NotNull) &&
-            (Universe::narrow_oop_base() == 0 ||
-             Universe::narrow_oop_base_disjoint() ||
+            (CompressedOops::base() == nullptr ||
+             CompressedOops::base_disjoint() ||
              !ExpandLoadingBaseEncode)
-#line 5946 "dfa_s390.cpp"
+#line 6469 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+MEMORY_REF_COST+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN, encodeP_rule, c)
+        DFA_PRODUCTION(IREGN, encodeP_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
       }
       if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, encodeP_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGN, encodeP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, encodeP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, encodeP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, encodeP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, encodeP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, encodeP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, encodeP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, encodeP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, encodeP_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, encodeP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, encodeP_rule, c+1)
       }
-    }
-    if( STATE__VALID_CHILD(_kids[0], IREGP) &&
-        
-#line 3488 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-Universe::narrow_oop_shift() == 0 && _leaf->as_EncodeP()->in(0) == NULL
-#line 5978 "dfa_s390.cpp"
- ) {
-      unsigned int c = _kids[0]->_cost[IREGP]+1;
-        DFA_PRODUCTION__SET_VALID(IREGP2N, iRegP2N_rule, c)
     }
 }
 void  State::_sub_Op_EncodePKlass(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGN, encodeKlass_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, encodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, encodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, encodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, encodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, encodeKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, encodeKlass_rule, c+1)
+        DFA_PRODUCTION(IREGN, encodeKlass_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, encodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, encodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, encodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, encodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, encodeKlass_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, encodeKlass_rule, c+1)
     }
 }
 void  State::_sub_Op_FastLock(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IREGP_N2P]+100;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpFastLock_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpFastLock_rule, c)
     }
 }
 void  State::_sub_Op_FastUnlock(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP_N2P) && STATE__VALID_CHILD(_kids[1], IREGP_N2P) ) {
       unsigned int c = _kids[0]->_cost[IREGP_N2P]+_kids[1]->_cost[IREGP_N2P]+100;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, cmpFastUnlock_rule, c)
+        DFA_PRODUCTION(FLAGSREG, cmpFastUnlock_rule, c)
     }
 }
 void  State::_sub_Op_FmaD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _NEGD_REGD_) && STATE__VALID_CHILD(_kids[1], _BINARY__LOADD_MEMORYRX__REGD) ) {
       unsigned int c = _kids[0]->_cost[_NEGD_REGD_]+_kids[1]->_cost[_BINARY__LOADD_MEMORYRX__REGD] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, msubD_mem_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, msubD_mem_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _BINARY__LOADD_MEMORYRX__REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_BINARY__LOADD_MEMORYRX__REGD] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, maddD_mem_reg_rule, c)
+        DFA_PRODUCTION(REGD, maddD_mem_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _NEGD_REGD_) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD__LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[_NEGD_REGD_]+_kids[1]->_cost[_BINARY_REGD__LOADD_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, msubD_reg_mem_rule, c)
+        DFA_PRODUCTION(REGD, msubD_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD__LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_BINARY_REGD__LOADD_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, maddD_reg_mem_rule, c)
+        DFA_PRODUCTION(REGD, maddD_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _NEGD_REGD_) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD_REGD) ) {
       unsigned int c = _kids[0]->_cost[_NEGD_REGD_]+_kids[1]->_cost[_BINARY_REGD_REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, msubD_reg_reg_rule, c)
+        DFA_PRODUCTION(REGD, msubD_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _BINARY_REGD_REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_BINARY_REGD_REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, maddD_reg_reg_rule, c)
+        DFA_PRODUCTION(REGD, maddD_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_FmaF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _NEGF_REGF_) && STATE__VALID_CHILD(_kids[1], _BINARY__LOADF_MEMORYRX__REGF) ) {
       unsigned int c = _kids[0]->_cost[_NEGF_REGF_]+_kids[1]->_cost[_BINARY__LOADF_MEMORYRX__REGF] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, msubF_mem_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, msubF_mem_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _BINARY__LOADF_MEMORYRX__REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_BINARY__LOADF_MEMORYRX__REGF] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, maddF_mem_reg_rule, c)
+        DFA_PRODUCTION(REGF, maddF_mem_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _NEGF_REGF_) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF__LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[_NEGF_REGF_]+_kids[1]->_cost[_BINARY_REGF__LOADF_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, msubF_reg_mem_rule, c)
+        DFA_PRODUCTION(REGF, msubF_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF__LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_BINARY_REGF__LOADF_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, maddF_reg_mem_rule, c)
+        DFA_PRODUCTION(REGF, maddF_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _NEGF_REGF_) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF_REGF) ) {
       unsigned int c = _kids[0]->_cost[_NEGF_REGF_]+_kids[1]->_cost[_BINARY_REGF_REGF] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, msubF_reg_reg_rule, c)
+        DFA_PRODUCTION(REGF, msubF_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _BINARY_REGF_REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_BINARY_REGF_REGF] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, maddF_reg_reg_rule, c)
+        DFA_PRODUCTION(REGF, maddF_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
+    }
+}
+void  State::_sub_Op_ForwardException(const Node *n){
+    {
+      unsigned int c = CALL_COST;
+        DFA_PRODUCTION(UNIVERSE, ForwardExceptionjmp_rule, c)
     }
 }
 void  State::_sub_Op_Goto(const Node *n){
     {
       unsigned int c = BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, branchFar_rule, c)
+        DFA_PRODUCTION(UNIVERSE, branchFar_rule, c)
     }
 }
 void  State::_sub_Op_Halt(const Node *n){
     {
       unsigned int c = CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, ShouldNotReachHere_rule, c)
+        DFA_PRODUCTION(UNIVERSE, ShouldNotReachHere_rule, c)
     }
 }
-void  State::_sub_Op_HasNegatives(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RARG5REGP) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
-      unsigned int c = _kids[0]->_cost[RARG5REGP]+_kids[1]->_cost[IREGI]+300;
-        DFA_PRODUCTION__SET_VALID(IREGI, has_negatives_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, has_negatives_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, has_negatives_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, has_negatives_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, has_negatives_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, has_negatives_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, has_negatives_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, has_negatives_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, has_negatives_rule, c+1)
+void  State::_sub_Op_CountPositives(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
+      unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[IREGI]+300;
+        DFA_PRODUCTION(IREGI, count_positives_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, count_positives_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, count_positives_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, count_positives_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, count_positives_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, count_positives_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, count_positives_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, count_positives_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, count_positives_rule, c+1)
     }
 }
 void  State::_sub_Op_If(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPP__DECODEN_IREGN___DECODEN_IMMN8_) &&
         (
-#line 9603 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9818 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6145 "dfa_s390.cpp"
+#line 6665 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPP__DECODEN_IREGN___DECODEN_IMMN8_]+BRANCH_COST+DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegN_immN_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegN_immN_Far_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPP__DECODEN_IREGN__IMMP0) &&
         (
-#line 9590 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9805 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6154 "dfa_s390.cpp"
+#line 6674 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPP__DECODEN_IREGN__IMMP0]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegN_immP0_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegN_immP0_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPP_IREGP_IMMP8) &&
         (
-#line 9576 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9791 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6165 "dfa_s390.cpp"
+#line 6685 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPP_IREGP_IMMP8]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegP_immP_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegP_immP_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPL_IREGL_IMML8) &&
         (
-#line 9557 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9772 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6176 "dfa_s390.cpp"
+#line 6696 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPL_IREGL_IMML8]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegL_imm_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegL_imm_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPU_IREGI_UIMMI8) &&
         (
-#line 9543 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9758 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6187 "dfa_s390.cpp"
+#line 6707 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPU_IREGI_UIMMI8]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpbU_RegI_imm_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpbU_RegI_imm_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPI_IREGI_IMMI8) &&
         (
-#line 9529 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9744 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6198 "dfa_s390.cpp"
+#line 6718 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPI_IREGI_IMMI8]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegI_imm_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegI_imm_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPP__DECODEN_IREGN___DECODEN_IREGN_) &&
         (
-#line 9501 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9716 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6209 "dfa_s390.cpp"
+#line 6729 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPP__DECODEN_IREGN___DECODEN_IREGN_]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegNN_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegNN_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPP_IREGP_IREGP) &&
         (
-#line 9488 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9703 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6220 "dfa_s390.cpp"
+#line 6740 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPP_IREGP_IREGP]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegPP_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegPP_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPL_IREGL_IREGL) &&
         (
-#line 9469 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9684 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6231 "dfa_s390.cpp"
+#line 6751 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPL_IREGL_IREGL]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegL_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegL_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPU_IREGI_IREGI) &&
         (
-#line 9455 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9670 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6242 "dfa_s390.cpp"
+#line 6762 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPU_IREGI_IREGI]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpbU_RegI_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpbU_RegI_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPI_IREGI_IREGI) &&
         (
-#line 9441 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9656 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6253 "dfa_s390.cpp"
+#line 6773 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPI_IREGI_IREGI]+BRANCH_COST+DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, cmpb_RegI_Far_rule, c)
+        DFA_PRODUCTION(UNIVERSE, cmpb_RegI_Far_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOP) && STATE__VALID_CHILD(_kids[1], FLAGSREG) ) {
       unsigned int c = _kids[0]->_cost[CMPOP]+_kids[1]->_cost[FLAGSREG]+2 * BRANCH_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, branchConFar_rule, c)
+        DFA_PRODUCTION(UNIVERSE, branchConFar_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPN_IREGN_P2N_IMMN0) &&
         (
-#line 8319 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8523 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 TrapBasedNullChecks &&
             _kids[0]->_leaf->as_Bool()->_test._test == BoolTest::ne &&
             _leaf->as_If ()->_prob >= PROB_LIKELY_MAG(4) &&
             Matcher::branches_to_uncommon_trap(_leaf)
-#line 6273 "dfa_s390.cpp"
+#line 6793 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPN_IREGN_P2N_IMMN0] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, zeroCheckN_iReg_imm0_rule, c)
+        DFA_PRODUCTION(UNIVERSE, zeroCheckN_iReg_imm0_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPP_IREGP_N2P_IMMP0) &&
         (
-#line 8302 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8506 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 TrapBasedNullChecks &&
             _kids[0]->_leaf->as_Bool()->_test._test == BoolTest::ne &&
             _leaf->as_If ()->_prob >= PROB_LIKELY_MAG(4) &&
             Matcher::branches_to_uncommon_trap(_leaf)
-#line 6287 "dfa_s390.cpp"
+#line 6807 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPP_IREGP_N2P_IMMP0] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, zeroCheckP_iReg_imm0_rule, c)
+        DFA_PRODUCTION(UNIVERSE, zeroCheckP_iReg_imm0_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPU_IREGI_UIMMI16) &&
         (
-#line 8284 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8488 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 TrapBasedRangeChecks &&
             _kids[0]->_leaf->as_Bool()->_test._test == BoolTest::lt &&
             _leaf->as_If ()->_prob >= PROB_ALWAYS &&
             Matcher::branches_to_uncommon_trap(_leaf)
-#line 6301 "dfa_s390.cpp"
+#line 6821 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPU_IREGI_UIMMI16]+1;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, rangeCheck_uimmI16_iReg_rule, c)
+        DFA_PRODUCTION(UNIVERSE, rangeCheck_uimmI16_iReg_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPU_IREGI_IREGI) &&
         (
-#line 8266 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8470 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 TrapBasedRangeChecks &&
             _kids[0]->_leaf->as_Bool()->_test._test == BoolTest::lt &&
             _leaf->as_If ()->_prob >= PROB_ALWAYS &&
             Matcher::branches_to_uncommon_trap(_leaf)
-#line 6315 "dfa_s390.cpp"
+#line 6835 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPU_IREGI_IREGI]+1;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, rangeCheck_iReg_iReg_rule, c)
+        DFA_PRODUCTION(UNIVERSE, rangeCheck_iReg_iReg_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], CMPOPT) && STATE__VALID_CHILD(_kids[1], _CMPU_IREGI_UIMMI16) &&
         (
-#line 8248 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8452 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 TrapBasedRangeChecks &&
             _kids[0]->_leaf->as_Bool()->_test._test == BoolTest::le &&
             PROB_UNLIKELY(_leaf->as_If ()->_prob) >= PROB_ALWAYS &&
             Matcher::branches_to_uncommon_trap(_leaf)
-#line 6329 "dfa_s390.cpp"
+#line 6849 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[CMPOPT]+_kids[1]->_cost[_CMPU_IREGI_UIMMI16]+1;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, rangeCheck_iReg_uimmI16_rule, c)
+        DFA_PRODUCTION(UNIVERSE, rangeCheck_iReg_uimmI16_rule, c)
       }
     }
 }
 void  State::_sub_Op_LShiftI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI_24) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI_24];
-        DFA_PRODUCTION__SET_VALID(_LSHIFTI_IREGI_IMMI_24, _LShiftI_iRegI_immI_24_rule, c)
+        DFA_PRODUCTION(_LSHIFTI_IREGI_IMMI_24, _LShiftI_iRegI_immI_24_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI_16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI_16];
-        DFA_PRODUCTION__SET_VALID(_LSHIFTI_IREGI_IMMI_16, _LShiftI_iRegI_immI_16_rule, c)
+        DFA_PRODUCTION(_LSHIFTI_IREGI_IMMI_16, _LShiftI_iRegI_immI_16_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI8];
-        DFA_PRODUCTION__SET_VALID(_LSHIFTI_IREGI_IMMI8, _LShiftI_iRegI_immI8_rule, c)
+        DFA_PRODUCTION(_LSHIFTI_IREGI_IMMI8, _LShiftI_iRegI_immI8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI_1) &&
         (
-#line 6802 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6994 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 6354 "dfa_s390.cpp"
+#line 6874 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI_1] + DEFAULT_COST_LOW;
-        DFA_PRODUCTION__SET_VALID(IREGI, sllI_reg_imm_1_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, sllI_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, sllI_reg_imm_1_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, sllI_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, sllI_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, sllI_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, sllI_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, sllI_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, sllI_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(IREGI, sllI_reg_imm_1_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, sllI_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, sllI_reg_imm_1_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, sllI_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, sllI_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, sllI_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, sllI_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, sllI_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, sllI_reg_imm_1_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, sllI_reg_imm_rule, c)
+        DFA_PRODUCTION(IREGI, sllI_reg_imm_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, sllI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, sllI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, sllI_reg_imm_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, sllI_reg_imm_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, sllI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, sllI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, sllI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, sllI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, sllI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, sllI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, sllI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, sllI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, sllI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, sllI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, sllI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, sllI_reg_imm_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, sllI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, sllI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, sllI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, sllI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, sllI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, sllI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, sllI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, sllI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, sllI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, sllI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, sllI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, sllI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, sllI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, sllI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, sllI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, sllI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, sllI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, sllI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_LShiftL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMMI8];
-        DFA_PRODUCTION__SET_VALID(_LSHIFTL_IREGL_IMMI8, _LShiftL_iRegL_immI8_rule, c)
+        DFA_PRODUCTION(_LSHIFTL_IREGL_IMMI8, _LShiftL_iRegL_immI8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMMI_1) &&
         (
-#line 6833 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 7025 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 PreferLAoverADD
-#line 6444 "dfa_s390.cpp"
+#line 6964 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMMI_1] + DEFAULT_COST_LOW;
-        DFA_PRODUCTION__SET_VALID(IREGL, sllL_reg_imm_1_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, sllL_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, sllL_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, sllL_reg_imm_1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, sllL_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(IREGL, sllL_reg_imm_1_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, sllL_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, sllL_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, sllL_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, sllL_reg_imm_1_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, sllL_reg_imm_1_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, sllL_reg_imm_rule, c)
+        DFA_PRODUCTION(IREGL, sllL_reg_imm_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, sllL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, sllL_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, sllL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, sllL_reg_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, sllL_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, sllL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, sllL_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, sllL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, sllL_reg_imm_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, sllL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, sllL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, sllL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, sllL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, sllL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, sllL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, sllL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, sllL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, sllL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, sllL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, sllL_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_LoadB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADB_MEMORY_, _LoadB_memory__rule, c)
+        DFA_PRODUCTION(_LOADB_MEMORY_, _LoadB_memory__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, loadB_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadB_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadB_rule, c+1)
+        DFA_PRODUCTION(IREGI, loadB_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, loadB_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadB_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, loadB_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, loadB_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, loadB_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, loadB_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, loadB_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, loadB_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadUB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADUB_MEMORY_, _LoadUB_memory__rule, c)
+        DFA_PRODUCTION(_LOADUB_MEMORY_, _LoadUB_memory__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, loadUB_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadUB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadUB_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadUB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadUB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadUB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadUB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadUB_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadUB_rule, c+1)
+        DFA_PRODUCTION(IREGI, loadUB_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, loadUB_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadUB_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, loadUB_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, loadUB_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, loadUB_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, loadUB_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, loadUB_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, loadUB_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadUS(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADUS_MEMORY_, _LoadUS_memory__rule, c)
+        DFA_PRODUCTION(_LOADUS_MEMORY_, _LoadUS_memory__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, loadUS_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadUS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadUS_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadUS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadUS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadUS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadUS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadUS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadUS_rule, c+1)
+        DFA_PRODUCTION(IREGI, loadUS_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, loadUS_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadUS_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, loadUS_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, loadUS_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, loadUS_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, loadUS_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, loadUS_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, loadUS_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRX) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRX];
-        DFA_PRODUCTION__SET_VALID(_LOADD_MEMORYRX_, _LoadD_memoryRX__rule, c)
+        DFA_PRODUCTION(_LOADD_MEMORYRX_, _LoadD_memoryRX__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, loadD_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, loadD_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_LoadD_unaligned(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, loadD_unaligned_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, loadD_unaligned_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_LoadF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRX) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRX];
-        DFA_PRODUCTION__SET_VALID(_LOADF_MEMORYRX_, _LoadF_memoryRX__rule, c)
+        DFA_PRODUCTION(_LOADF_MEMORYRX_, _LoadF_memoryRX__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, loadF_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, loadF_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
 }
 void  State::_sub_Op_LoadI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY];
-        DFA_PRODUCTION__SET_VALID(_LOADI_MEMORYRSY_, _LoadI_memoryRSY__rule, c)
+        DFA_PRODUCTION(_LOADI_MEMORYRSY_, _LoadI_memoryRSY__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADI_MEMORY_, _LoadI_memory__rule, c)
+        DFA_PRODUCTION(_LOADI_MEMORY_, _LoadI_memory__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, loadI_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadI_rule, c+1)
+        DFA_PRODUCTION(IREGI, loadI_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, loadI_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadI_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, loadI_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, loadI_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, loadI_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, loadI_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, loadI_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, loadI_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadKlass(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, loadKlass_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, loadKlass_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, loadKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(IREGP, loadKlass_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, loadKlass_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, loadKlass_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, loadKlass_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadNKlass(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADNKLASS_MEMORY_, _LoadNKlass_memory__rule, c)
+        DFA_PRODUCTION(_LOADNKLASS_MEMORY_, _LoadNKlass_memory__rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
+        (
+#line 4815 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UseCompactObjectHeaders
+#line 7168 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGN, loadNKlass_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, loadNKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, loadNKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, loadNKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, loadNKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, loadNKlass_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, loadNKlass_rule, c+1)
+        DFA_PRODUCTION(IREGN, loadNKlassCompactHeaders_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, loadNKlassCompactHeaders_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, loadNKlassCompactHeaders_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, loadNKlassCompactHeaders_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, loadNKlassCompactHeaders_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, loadNKlassCompactHeaders_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, loadNKlassCompactHeaders_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
+        (
+#line 4803 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+!UseCompactObjectHeaders
+#line 7184 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
+      if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
+        DFA_PRODUCTION(IREGN, loadNKlass_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
+        DFA_PRODUCTION(NOARG_IREGN, loadNKlass_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
+        DFA_PRODUCTION(RARG1REGN, loadNKlass_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
+        DFA_PRODUCTION(RARG2REGN, loadNKlass_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
+        DFA_PRODUCTION(RARG3REGN, loadNKlass_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
+        DFA_PRODUCTION(RARG4REGN, loadNKlass_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
+        DFA_PRODUCTION(RARG5REGN, loadNKlass_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_LoadL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY];
-        DFA_PRODUCTION__SET_VALID(_LOADL_MEMORYRSY_, _LoadL_memoryRSY__rule, c)
+        DFA_PRODUCTION(_LOADL_MEMORYRSY_, _LoadL_memoryRSY__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADL_MEMORY_, _LoadL_memory__rule, c)
+        DFA_PRODUCTION(_LOADL_MEMORY_, _LoadL_memory__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, loadL_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadL_rule, c+1)
+        DFA_PRODUCTION(IREGL, loadL_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, loadL_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadL_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, loadL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadL_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadL_unaligned(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, loadL_unaligned_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadL_unaligned_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadL_unaligned_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadL_unaligned_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadL_unaligned_rule, c+1)
-    }
-}
-void  State::_sub_Op_LoadPLocked(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, loadPLocked_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, loadPLocked_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, loadPLocked_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, loadPLocked_rule, c+1)
+        DFA_PRODUCTION(IREGL, loadL_unaligned_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, loadL_unaligned_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadL_unaligned_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, loadL_unaligned_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadL_unaligned_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadL_unaligned_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadP(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
+        (
+#line 373 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_Load()->barrier_data() != 0
+#line 7250 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
+        DFA_PRODUCTION(IREGP, g1LoadP_rule, c)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(R11TEMPREGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(NOARG_IREGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(RARG1REGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(RARG2REGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(RARG3REGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(RARG4REGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(RARG5REGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(MEMORYREGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, g1LoadP_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(RODDREGP, g1LoadP_rule, c+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, g1LoadP_rule, c+1)
+    }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY];
-        DFA_PRODUCTION__SET_VALID(_LOADP_MEMORYRSY_, _LoadP_memoryRSY__rule, c)
+        DFA_PRODUCTION(_LOADP_MEMORYRSY_, _LoadP_memoryRSY__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADP_MEMORY_, _LoadP_memory__rule, c)
+        DFA_PRODUCTION(_LOADP_MEMORY_, _LoadP_memory__rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
+        (
+#line 4306 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Load()->barrier_data() == 0
+#line 7287 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGP, loadP_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, loadP_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, loadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, loadP_rule, c+1)
+      if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c) {
+        DFA_PRODUCTION(IREGP, loadP_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c) {
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R10TEMPREGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1) {
+        DFA_PRODUCTION(R11TEMPREGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1) {
+        DFA_PRODUCTION(NOARG_IREGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1) {
+        DFA_PRODUCTION(RARG1REGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1) {
+        DFA_PRODUCTION(RARG2REGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1) {
+        DFA_PRODUCTION(RARG3REGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1) {
+        DFA_PRODUCTION(RARG4REGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1) {
+        DFA_PRODUCTION(RARG5REGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1) {
+        DFA_PRODUCTION(MEMORYREGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1) {
+        DFA_PRODUCTION(INDIRECT, loadP_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1) {
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1) {
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1) {
+        DFA_PRODUCTION(REVENREGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1) {
+        DFA_PRODUCTION(RODDREGP, loadP_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1) {
+        DFA_PRODUCTION(INLINE_CACHE_REGP, loadP_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_LoadN(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADN_MEMORY_, _LoadN_memory__rule, c)
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) &&
+        (
+#line 229 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_Load()->barrier_data() != 0
+#line 7360 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT] + MEMORY_REF_COST;
+        DFA_PRODUCTION(IREGN, g1LoadN_rule, c)
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+        DFA_PRODUCTION(NOARG_IREGN, g1LoadN_rule, c+1)
+        DFA_PRODUCTION(RARG1REGN, g1LoadN_rule, c+1)
+        DFA_PRODUCTION(RARG2REGN, g1LoadN_rule, c+1)
+        DFA_PRODUCTION(RARG3REGN, g1LoadN_rule, c+1)
+        DFA_PRODUCTION(RARG4REGN, g1LoadN_rule, c+1)
+        DFA_PRODUCTION(RARG5REGN, g1LoadN_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
+      unsigned int c = _kids[0]->_cost[MEMORY];
+        DFA_PRODUCTION(_LOADN_MEMORY_, _LoadN_memory__rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
+        (
+#line 4792 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Load()->barrier_data() == 0
+#line 7380 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGN, loadN_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGN_P2N, iRegN_rule, c)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGN, loadN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGN, loadN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGN, loadN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGN, loadN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGN, loadN_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGN, loadN_rule, c+1)
+      if (STATE__NOT_YET_VALID(IREGN) || _cost[IREGN] > c) {
+        DFA_PRODUCTION(IREGN, loadN_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(IREGN_P2N) || _cost[IREGN_P2N] > c) {
+        DFA_PRODUCTION(IREGN_P2N, iRegN_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(NOARG_IREGN) || _cost[NOARG_IREGN] > c+1) {
+        DFA_PRODUCTION(NOARG_IREGN, loadN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGN) || _cost[RARG1REGN] > c+1) {
+        DFA_PRODUCTION(RARG1REGN, loadN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGN) || _cost[RARG2REGN] > c+1) {
+        DFA_PRODUCTION(RARG2REGN, loadN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGN) || _cost[RARG3REGN] > c+1) {
+        DFA_PRODUCTION(RARG3REGN, loadN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGN) || _cost[RARG4REGN] > c+1) {
+        DFA_PRODUCTION(RARG4REGN, loadN_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGN) || _cost[RARG5REGN] > c+1) {
+        DFA_PRODUCTION(RARG5REGN, loadN_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_LoadRange(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, loadRange_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadRange_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadRange_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadRange_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadRange_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadRange_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadRange_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadRange_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadRange_rule, c+1)
+        DFA_PRODUCTION(IREGI, loadRange_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, loadRange_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadRange_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, loadRange_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, loadRange_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, loadRange_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, loadRange_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, loadRange_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, loadRange_rule, c+1)
     }
 }
 void  State::_sub_Op_LoadS(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY];
-        DFA_PRODUCTION__SET_VALID(_LOADS_MEMORY_, _LoadS_memory__rule, c)
+        DFA_PRODUCTION(_LOADS_MEMORY_, _LoadS_memory__rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, loadS_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, loadS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, loadS_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, loadS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, loadS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, loadS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, loadS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, loadS_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, loadS_rule, c+1)
+        DFA_PRODUCTION(IREGI, loadS_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, loadS_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, loadS_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, loadS_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, loadS_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, loadS_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, loadS_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, loadS_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, loadS_rule, c+1)
     }
 }
 void  State::_sub_Op_MaxI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8961 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9165 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6795 "dfa_s390.cpp"
+#line 7448 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI8]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, z10_maxI_reg_imm8_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z10_maxI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z10_maxI_reg_imm8_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z10_maxI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z10_maxI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z10_maxI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z10_maxI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z10_maxI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z10_maxI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(IREGI, z10_maxI_reg_imm8_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, z10_maxI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, z10_maxI_reg_imm8_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, z10_maxI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z10_maxI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z10_maxI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z10_maxI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z10_maxI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z10_maxI_reg_imm8_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, maxI_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGI, maxI_reg_imm16_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, maxI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, maxI_reg_imm16_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, maxI_reg_imm16_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) &&
         (
-#line 8918 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9122 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadStoreConditional()
-#line 6846 "dfa_s390.cpp"
+#line 7499 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z196_maxI_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGI, z196_maxI_reg_imm16_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z196_maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z196_maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z196_maxI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z196_maxI_reg_imm16_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z196_maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z196_maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z196_maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z196_maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z196_maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z196_maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z196_maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z196_maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z196_maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z196_maxI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z196_maxI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z196_maxI_reg_imm16_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, maxI_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGI, maxI_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, maxI_reg_imm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, maxI_reg_imm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, maxI_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 8874 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9078 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadStoreConditional()
-#line 6917 "dfa_s390.cpp"
+#line 7570 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z196_maxI_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGI, z196_maxI_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z196_maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z196_maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z196_maxI_reg_imm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z196_maxI_reg_imm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z196_maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z196_maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z196_maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z196_maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z196_maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z196_maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z196_maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z196_maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z196_maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z196_maxI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z196_maxI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z196_maxI_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 8836 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9040 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 !VM_Version::has_CompareBranch()
-#line 6955 "dfa_s390.cpp"
+#line 7608 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+3 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, maxI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, maxI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, maxI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, maxI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, maxI_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 8803 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9007 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 6993 "dfa_s390.cpp"
+#line 7646 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z10_maxI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, z10_maxI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z10_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z10_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z10_maxI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z10_maxI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z10_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z10_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z10_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z10_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z10_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z10_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z10_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z10_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z10_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z10_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z10_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z10_maxI_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 8771 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8975 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadStoreConditional()
-#line 7031 "dfa_s390.cpp"
+#line 7684 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z196_maxI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, z196_maxI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z196_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z196_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z196_maxI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z196_maxI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z196_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z196_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z196_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z196_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z196_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z196_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z196_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z196_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z196_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z196_maxI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z196_maxI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z196_maxI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_MemBarAcquire(const Node *n){
     {
       unsigned int c = 4*MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_acquire_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_acquire_rule, c)
     }
 }
 void  State::_sub_Op_LoadFence(const Node *n){
     {
       unsigned int c = 4*MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_acquire_0_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_acquire_0_rule, c)
     }
 }
 void  State::_sub_Op_MemBarAcquireLock(const Node *n){
     {
       unsigned int c = 0;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_acquire_lock_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_acquire_lock_rule, c)
     }
 }
 void  State::_sub_Op_MemBarCPUOrder(const Node *n){
     {
       unsigned int c = 0;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_CPUOrder_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_CPUOrder_rule, c)
     }
 }
 void  State::_sub_Op_MemBarRelease(const Node *n){
     {
       unsigned int c = 4 * MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_release_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_release_rule, c)
     }
 }
 void  State::_sub_Op_StoreFence(const Node *n){
     {
       unsigned int c = 4 * MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_release_0_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_release_0_rule, c)
+    }
+}
+void  State::_sub_Op_StoreStoreFence(const Node *n){
+    {
+      unsigned int c = 0;
+        DFA_PRODUCTION(UNIVERSE, membar_storestore_0_rule, c)
     }
 }
 void  State::_sub_Op_MemBarReleaseLock(const Node *n){
     {
       unsigned int c = 0;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_release_lock_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_release_lock_rule, c)
+    }
+}
+void  State::_sub_Op_MemBarStoreLoad(const Node *n){
+    {
+      unsigned int c = 4 * MEMORY_REF_COST;
+        DFA_PRODUCTION(UNIVERSE, membar_storeload_rule, c)
     }
 }
 void  State::_sub_Op_MemBarVolatile(const Node *n){
     if(         (
-#line 5141 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5258 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 Matcher::post_store_load_barrier(n)
-#line 7112 "dfa_s390.cpp"
+#line 7777 "dfa_s390.cpp"
 ) ) {
       unsigned int c = 0;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, unnecessary_membar_volatile_rule, c)
+        DFA_PRODUCTION(UNIVERSE, unnecessary_membar_volatile_rule, c)
     }
     {
       unsigned int c = 4 * MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_volatile_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_volatile_rule, c)
       }
     }
 }
 void  State::_sub_Op_MemBarStoreStore(const Node *n){
     {
       unsigned int c = 0;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, membar_storestore_rule, c)
+        DFA_PRODUCTION(UNIVERSE, membar_storestore_rule, c)
+    }
+}
+void  State::_sub_Op_MemBarFull(const Node *n){
+    {
+      unsigned int c = 4 * MEMORY_REF_COST;
+        DFA_PRODUCTION(UNIVERSE, membar_full_rule, c)
     }
 }
 void  State::_sub_Op_MinI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 8751 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8955 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 7135 "dfa_s390.cpp"
+#line 7806 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI8]+DEFAULT_COST + BRANCH_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, z10_minI_reg_imm8_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z10_minI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z10_minI_reg_imm8_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z10_minI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z10_minI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z10_minI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z10_minI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z10_minI_reg_imm8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z10_minI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(IREGI, z10_minI_reg_imm8_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, z10_minI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, z10_minI_reg_imm8_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, z10_minI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z10_minI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z10_minI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z10_minI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z10_minI_reg_imm8_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z10_minI_reg_imm8_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, minI_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGI, minI_reg_imm16_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, minI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, minI_reg_imm16_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, minI_reg_imm16_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) &&
         (
-#line 8707 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8911 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadStoreConditional()
-#line 7186 "dfa_s390.cpp"
+#line 7857 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z196_minI_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGI, z196_minI_reg_imm16_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z196_minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z196_minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z196_minI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z196_minI_reg_imm16_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z196_minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z196_minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z196_minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z196_minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z196_minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z196_minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z196_minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z196_minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z196_minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z196_minI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z196_minI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z196_minI_reg_imm16_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, minI_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGI, minI_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, minI_reg_imm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, minI_reg_imm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, minI_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) &&
         (
-#line 8663 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8867 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadStoreConditional()
-#line 7257 "dfa_s390.cpp"
+#line 7928 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z196_minI_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGI, z196_minI_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z196_minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z196_minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z196_minI_reg_imm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z196_minI_reg_imm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z196_minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z196_minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z196_minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z196_minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z196_minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z196_minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z196_minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z196_minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z196_minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z196_minI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z196_minI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z196_minI_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 8627 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8831 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 !VM_Version::has_CompareBranch()
-#line 7295 "dfa_s390.cpp"
+#line 7966 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+3 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, minI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, minI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, minI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, minI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, minI_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 8594 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8798 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_CompareBranch()
-#line 7333 "dfa_s390.cpp"
+#line 8004 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z10_minI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, z10_minI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z10_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z10_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z10_minI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z10_minI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z10_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z10_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z10_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z10_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z10_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z10_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z10_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z10_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z10_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z10_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z10_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z10_minI_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 8561 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 8765 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_LoadStoreConditional()
-#line 7371 "dfa_s390.cpp"
+#line 8042 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, z196_minI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, z196_minI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, z196_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, z196_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, z196_minI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, z196_minI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, z196_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, z196_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, z196_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, z196_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, z196_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, z196_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, z196_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, z196_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, z196_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, z196_minI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, z196_minI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, z196_minI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_ModI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16]+3 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REVENREGI, modI_reg_imm16_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGI, modI_reg_imm16_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, modI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, modI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, modI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, modI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, modI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, modI_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, modI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, modI_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGI, modI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGI, modI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, modI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, modI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, modI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, modI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, modI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, modI_reg_imm16_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], NOODD_IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[NOODD_IREGI]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, modI_reg_reg_rule, c)
+        DFA_PRODUCTION(REVENREGI, modI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(IREGI, modI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, modI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+1+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, modI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, modI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, modI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, modI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, modI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, modI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, modI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, modI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, modI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, modI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, modI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, modI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, modI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, modI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_ModL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML16]+3 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REVENREGL, modL_reg_imm16_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGL, modL_reg_imm16_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, modL_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, modL_reg_imm16_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, modL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGL, modL_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGL, modL_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGL, modL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(ALLRODDREGL, modL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGL, modL_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGL, modL_reg_imm16_rule, c+1+1)
     }
     if( STATE__VALID_CHILD(_kids[0], RODDREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[RODDREGL]+_kids[1]->_cost[IREGL]+2 * DEFAULT_COST + BRANCH_COST;
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, modL_reg_reg_rule, c)
+        DFA_PRODUCTION(REVENREGL, modL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(IREGL, modL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(IREGL, modL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+1+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, modL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGL, modL_reg_reg_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1+1) {
+        DFA_PRODUCTION(ALLRODDREGL, modL_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, modL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGL, modL_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, modL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGL, modL_reg_reg_rule, c+1+1)
       }
+    }
+}
+void  State::_sub_Op_UModI(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], REVENREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
+      unsigned int c = _kids[0]->_cost[REVENREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
+        DFA_PRODUCTION(REVENREGI, umodI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, umodI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGI, umodI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGI, umodI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGI, umodI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGI, umodI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGI, umodI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGI, umodI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, umodI_reg_reg_rule, c+1)
+    }
+}
+void  State::_sub_Op_UModL(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], REVENREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
+      unsigned int c = _kids[0]->_cost[REVENREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
+        DFA_PRODUCTION(REVENREGL, umodL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, umodL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGL, umodL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(ALLRODDREGL, umodL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGL, umodL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGL, umodL_reg_reg_rule, c+1+1)
     }
 }
 void  State::_sub_Op_MoveI2F(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, MoveI2F_reg_stack_rule, c)
-        DFA_PRODUCTION__SET_VALID(REGF, stkF_to_regF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, MoveI2F_reg_stack_rule, c)
+        DFA_PRODUCTION(REGF, stkF_to_regF_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], STACKSLOTI) ) {
       unsigned int c = _kids[0]->_cost[STACKSLOTI] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, MoveI2F_stack_reg_rule, c)
+        DFA_PRODUCTION(REGF, MoveI2F_stack_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_MoveF2I(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], STACKSLOTF) ) {
       unsigned int c = _kids[0]->_cost[STACKSLOTF] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, MoveF2I_stack_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, MoveF2I_stack_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, MoveF2I_stack_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, MoveF2I_stack_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, MoveF2I_stack_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, MoveF2I_stack_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, MoveF2I_stack_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, MoveF2I_stack_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, MoveF2I_stack_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, MoveF2I_stack_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, MoveF2I_stack_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, MoveF2I_stack_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, MoveF2I_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, MoveF2I_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, MoveF2I_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, MoveF2I_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, MoveF2I_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, MoveF2I_stack_reg_rule, c+1)
     }
 }
 void  State::_sub_Op_MoveL2D(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, MoveL2D_reg_stack_rule, c)
-        DFA_PRODUCTION__SET_VALID(REGD, stkD_to_regD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, MoveL2D_reg_stack_rule, c)
+        DFA_PRODUCTION(REGD, stkD_to_regD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], STACKSLOTL) ) {
       unsigned int c = _kids[0]->_cost[STACKSLOTL] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, MoveL2D_stack_reg_rule, c)
+        DFA_PRODUCTION(REGD, MoveL2D_stack_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_MoveD2L(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, MoveD2L_reg_stack_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGL, stkL_to_regL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
+        DFA_PRODUCTION(STACKSLOTL, MoveD2L_reg_stack_rule, c)
+        DFA_PRODUCTION(IREGL, stkL_to_regL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
+        DFA_PRODUCTION(RODDREGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
+        DFA_PRODUCTION(ALLRODDREGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
+        DFA_PRODUCTION(RARG1REGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
+        DFA_PRODUCTION(RARG5REGL, stkL_to_regL_rule, c+MEMORY_REF_COST+1)
     }
     if( STATE__VALID_CHILD(_kids[0], STACKSLOTD) ) {
       unsigned int c = _kids[0]->_cost[STACKSLOTD] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, MoveD2L_stack_reg_rule, c)
+        DFA_PRODUCTION(IREGL, MoveD2L_stack_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, MoveD2L_stack_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, MoveD2L_stack_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, MoveD2L_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, MoveD2L_stack_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, MoveD2L_stack_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, MoveD2L_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, MoveD2L_stack_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, MoveD2L_stack_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, MoveD2L_stack_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_MulD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADD_MEMORYRX_) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[_LOADD_MEMORYRX_]+_kids[1]->_cost[REGD] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, mulD_reg_mem_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, mulD_reg_mem_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, mulD_reg_mem_rule, c)
+        DFA_PRODUCTION(REGD, mulD_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, mulD_reg_reg_rule, c)
+        DFA_PRODUCTION(REGD, mulD_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_MulF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADF_MEMORYRX_) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[_LOADF_MEMORYRX_]+_kids[1]->_cost[REGF] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, mulF_reg_mem_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, mulF_reg_mem_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORYRX_] + ALU_MEMORY_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, mulF_reg_mem_rule, c)
+        DFA_PRODUCTION(REGF, mulF_reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, mulF_reg_reg_rule, c)
+        DFA_PRODUCTION(REGF, mulF_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_MulHiL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], RODDREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[RODDREGL]+_kids[1]->_cost[IREGL]+7*DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulHiL_reg_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGL, mulHiL_reg_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulHiL_reg_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulHiL_reg_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulHiL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(REVENREGL, mulHiL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, mulHiL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(RODDREGL, mulHiL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(ALLRODDREGL, mulHiL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGL, mulHiL_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGL, mulHiL_reg_reg_rule, c+1+1)
     }
 }
 void  State::_sub_Op_MulI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, mulI_Reg_mem_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, mulI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, mulI_Reg_mem_0_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, mulI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, mulI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, mulI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, mulI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, mulI_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, mulI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(IREGI, mulI_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, mulI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, mulI_Reg_mem_0_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, mulI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, mulI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, mulI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, mulI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, mulI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, mulI_Reg_mem_0_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, mulI_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGI, mulI_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, mulI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, mulI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, mulI_Reg_mem_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, mulI_Reg_mem_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, mulI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, mulI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, mulI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, mulI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, mulI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, mulI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, mulI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, mulI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, mulI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, mulI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, mulI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, mulI_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, mulI_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGI, mulI_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, mulI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, mulI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, mulI_reg_imm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, mulI_reg_imm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, mulI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, mulI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, mulI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, mulI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, mulI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, mulI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, mulI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, mulI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, mulI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, mulI_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, mulI_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, mulI_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, mulI_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGI, mulI_reg_imm16_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, mulI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, mulI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, mulI_reg_imm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, mulI_reg_imm16_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, mulI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, mulI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, mulI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, mulI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, mulI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, mulI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, mulI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, mulI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, mulI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, mulI_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, mulI_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, mulI_reg_imm16_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, mulI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, mulI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, mulI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, mulI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, mulI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, mulI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, mulI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, mulI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, mulI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, mulI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, mulI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, mulI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, mulI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, mulI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, mulI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, mulI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, mulI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, mulI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_MulL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_Reg_mem_0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_Reg_mem_0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(IREGL, mulL_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, mulL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, mulL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_Reg_mem_0_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_LOADL_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_Reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L__LOADI_MEMORY__) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L__LOADI_MEMORY__]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_Reg_memI_0_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_Reg_memI_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_Reg_memI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_Reg_memI_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_Reg_memI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_Reg_memI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_Reg_memI_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_Reg_memI_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L__LOADI_MEMORY__) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L__LOADI_MEMORY__] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_Reg_memI_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_Reg_memI_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_Reg_memI_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_Reg_memI_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML32) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML32] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_reg_imm32_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_reg_imm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_reg_imm32_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_reg_imm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_reg_imm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_reg_imm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_reg_imm16_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_reg_imm16_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_reg_imm16_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_reg_imm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_reg_imm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_reg_imm16_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _CONVI2L_IREGI_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_CONVI2L_IREGI_]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_reg_regI_0_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_reg_regI_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_reg_regI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_reg_regI_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_reg_regI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_reg_regI_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_reg_regI_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_reg_regI_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L_IREGI_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L_IREGI_] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, mulL_reg_regI_rule, c)
+        DFA_PRODUCTION(IREGL, mulL_reg_regI_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, mulL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, mulL_reg_regI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, mulL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, mulL_reg_regI_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, mulL_reg_regI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, mulL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, mulL_reg_regI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, mulL_reg_regI_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, mulL_reg_regI_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_NegD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, negD_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, negD_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], _ABSD_REGD_) ) {
       unsigned int c = _kids[0]->_cost[_ABSD_REGD_] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, nabsD_reg_rule, c)
+        DFA_PRODUCTION(REGD, nabsD_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD];
-        DFA_PRODUCTION__SET_VALID(_NEGD_REGD_, _NegD_regD__rule, c)
+        DFA_PRODUCTION(_NEGD_REGD_, _NegD_regD__rule, c)
     }
 }
 void  State::_sub_Op_NegF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, negF_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, negF_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], _ABSF_REGF_) ) {
       unsigned int c = _kids[0]->_cost[_ABSF_REGF_] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, nabsF_reg_rule, c)
+        DFA_PRODUCTION(REGF, nabsF_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF];
-        DFA_PRODUCTION__SET_VALID(_NEGF_REGF_, _NegF_regF__rule, c)
+        DFA_PRODUCTION(_NEGF_REGF_, _NegF_regF__rule, c)
     }
 }
 void  State::_sub_Op_OrI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMML32) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMML32] + DEFAULT_COST_HIGH;
-        DFA_PRODUCTION__SET_VALID(IREGI, orL_reg_uimm32_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, orL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, orL_reg_uimm32_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, orL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, orL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, orL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, orL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, orL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, orL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(IREGI, orL_reg_uimm32_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, orL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, orL_reg_uimm32_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, orL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, orL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, orL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, orL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, orL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, orL_reg_uimm32_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI] + DEFAULT_COST_HIGH;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, orI_reg_uimm32_rule, c)
+        DFA_PRODUCTION(IREGI, orI_reg_uimm32_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, orI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, orI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, orI_reg_uimm32_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, orI_reg_uimm32_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, orI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, orI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, orI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, orI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, orI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, orI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, orI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, orI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, orI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, orI_reg_uimm32_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, orI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, orI_reg_uimm32_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI16) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, orI_reg_uimm16_rule, c)
+        DFA_PRODUCTION(IREGI, orI_reg_uimm16_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, orI_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, orI_reg_uimm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, orI_reg_uimm16_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, orI_reg_uimm16_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, orI_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, orI_reg_uimm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, orI_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, orI_reg_uimm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, orI_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, orI_reg_uimm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, orI_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, orI_reg_uimm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, orI_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, orI_reg_uimm16_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, orI_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, orI_reg_uimm16_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, orI_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(IREGI, orI_Reg_mem_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, orI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, orI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, orI_Reg_mem_0_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, orI_Reg_mem_0_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, orI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, orI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, orI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, orI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, orI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, orI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, orI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, orI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, orI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, orI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, orI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, orI_Reg_mem_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, orI_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGI, orI_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, orI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, orI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, orI_Reg_mem_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, orI_Reg_mem_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, orI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, orI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, orI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, orI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, orI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, orI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, orI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, orI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, orI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, orI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, orI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, orI_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, orI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, orI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, orI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, orI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, orI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, orI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, orI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, orI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, orI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, orI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, orI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, orI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, orI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, orI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, orI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, orI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, orI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, orI_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _URSHIFTI_IREGI_IMMI8) && STATE__VALID_CHILD(_kids[1], _LSHIFTI_IREGI_IMMI8) &&
         (
-#line 6961 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 7153 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 0 == ((n->in(1)->in(2)->get_int() + n->in(2)->in(2)->get_int()) & 0x1f)
-#line 8175 "dfa_s390.cpp"
+#line 8907 "dfa_s390.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_URSHIFTI_IREGI_IMMI8]+_kids[1]->_cost[_LSHIFTI_IREGI_IMMI8] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, rotlI_reg_immI8_0_rule, c)
+        DFA_PRODUCTION(IREGI, rotlI_reg_immI8_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, rotlI_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, rotlI_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, rotlI_reg_immI8_0_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, rotlI_reg_immI8_0_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, rotlI_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, rotlI_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, rotlI_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, rotlI_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, rotlI_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, rotlI_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, rotlI_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, rotlI_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, rotlI_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, rotlI_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, rotlI_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, rotlI_reg_immI8_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTI_IREGI_IMMI8) && STATE__VALID_CHILD(_kids[1], _URSHIFTI_IREGI_IMMI8) &&
         (
-#line 6961 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 7153 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 0 == ((n->in(1)->in(2)->get_int() + n->in(2)->in(2)->get_int()) & 0x1f)
-#line 8213 "dfa_s390.cpp"
+#line 8945 "dfa_s390.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTI_IREGI_IMMI8]+_kids[1]->_cost[_URSHIFTI_IREGI_IMMI8] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, rotlI_reg_immI8_rule, c)
+        DFA_PRODUCTION(IREGI, rotlI_reg_immI8_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, rotlI_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, rotlI_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, rotlI_reg_immI8_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, rotlI_reg_immI8_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, rotlI_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, rotlI_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, rotlI_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, rotlI_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, rotlI_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, rotlI_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, rotlI_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, rotlI_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, rotlI_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, rotlI_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, rotlI_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, rotlI_reg_immI8_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_OrL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML16) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML16] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, orL_reg_uimm16_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, orL_reg_uimm16_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, orL_reg_uimm16_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, orL_reg_uimm16_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, orL_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(IREGL, orL_reg_uimm16_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, orL_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, orL_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, orL_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, orL_reg_uimm16_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, orL_reg_uimm16_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, orL_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(IREGL, orL_Reg_mem_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, orL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, orL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, orL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, orL_Reg_mem_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, orL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, orL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, orL_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, orL_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, orL_Reg_mem_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_LOADL_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, orL_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGL, orL_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, orL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, orL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, orL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, orL_Reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, orL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, orL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, orL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, orL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, orL_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, orL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, orL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, orL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, orL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, orL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, orL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, orL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, orL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, orL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, orL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, orL_reg_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _URSHIFTL_IREGL_IMMI8) && STATE__VALID_CHILD(_kids[1], _LSHIFTL_IREGL_IMMI8) &&
         (
-#line 6972 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 7164 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 0 == ((n->in(1)->in(2)->get_int() + n->in(2)->in(2)->get_int()) & 0x3f)
-#line 8325 "dfa_s390.cpp"
+#line 9067 "dfa_s390.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_URSHIFTL_IREGL_IMMI8]+_kids[1]->_cost[_LSHIFTL_IREGL_IMMI8] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, rotlL_reg_immI8_0_rule, c)
+        DFA_PRODUCTION(IREGL, rotlL_reg_immI8_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, rotlL_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, rotlL_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, rotlL_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, rotlL_reg_immI8_0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, rotlL_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, rotlL_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, rotlL_reg_immI8_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, rotlL_reg_immI8_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, rotlL_reg_immI8_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTL_IREGL_IMMI8) && STATE__VALID_CHILD(_kids[1], _URSHIFTL_IREGL_IMMI8) &&
         (
-#line 6972 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 7164 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 0 == ((n->in(1)->in(2)->get_int() + n->in(2)->in(2)->get_int()) & 0x3f)
-#line 8351 "dfa_s390.cpp"
+#line 9096 "dfa_s390.cpp"
 ) && /*src*/(_kids[0]->_kids[0]->_leaf == _kids[1]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTL_IREGL_IMMI8]+_kids[1]->_cost[_URSHIFTL_IREGL_IMMI8] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, rotlL_reg_immI8_rule, c)
+        DFA_PRODUCTION(IREGL, rotlL_reg_immI8_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, rotlL_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, rotlL_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, rotlL_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, rotlL_reg_immI8_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, rotlL_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, rotlL_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, rotlL_reg_immI8_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, rotlL_reg_immI8_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, rotlL_reg_immI8_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_OverflowAddI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowAddI_reg_imm_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowAddI_reg_imm_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowAddI_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowAddI_reg_reg_rule, c)
       }
     }
 }
 void  State::_sub_Op_OverflowSubI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IMMI_0) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowNegI_rReg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowNegI_rReg_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowSubI_reg_imm_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowSubI_reg_imm_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowSubI_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowSubI_reg_reg_rule, c)
       }
     }
 }
 void  State::_sub_Op_OverflowAddL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowAddL_reg_imm_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowAddL_reg_imm_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowAddL_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowAddL_reg_reg_rule, c)
       }
     }
 }
 void  State::_sub_Op_OverflowSubL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IMML_0) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IMML_0]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowNegL_rReg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowNegL_rReg_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMML) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMML] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowSubL_reg_imm_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowSubL_reg_imm_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(FLAGSREG) || _cost[FLAGSREG] > c) {
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, overflowSubL_reg_reg_rule, c)
+        DFA_PRODUCTION(FLAGSREG, overflowSubL_reg_reg_rule, c)
       }
     }
 }
 void  State::_sub_Op_PartialSubtypeCheck(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], RARG2REGP) && STATE__VALID_CHILD(_kids[1], RARG3REGP) ) {
-      unsigned int c = _kids[0]->_cost[RARG2REGP]+_kids[1]->_cost[RARG3REGP];
-        DFA_PRODUCTION__SET_VALID(_PARTIALSUBTYPECHECK_RARG2REGP_RARG3REGP, _PartialSubtypeCheck_rarg2RegP_rarg3RegP_rule, c)
+    if( STATE__VALID_CHILD(_kids[0], RARG2REGP) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG1REGP_IMMP) &&
+        (
+#line 10115 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UseSecondarySupersTable
+#line 9187 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RARG2REGP]+_kids[1]->_cost[_BINARY_RARG1REGP_IMMP]+5 * DEFAULT_COST;
+        DFA_PRODUCTION(R11TEMPREGP, partialSubtypeCheckConstSuper_rule, c)
+        DFA_PRODUCTION(IREGP, partialSubtypeCheckConstSuper_rule, c+1)
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+1+MEMORY_REF_COST)
+        DFA_PRODUCTION(R10TEMPREGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(NOARG_IREGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(RARG1REGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(RARG2REGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(RARG3REGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(RARG4REGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(RARG5REGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYREGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(INDIRECT, partialSubtypeCheckConstSuper_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1+1)
+        DFA_PRODUCTION(REVENREGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(INLINE_CACHE_REGP, partialSubtypeCheckConstSuper_rule, c+1+1)
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c+1)
     }
-    if( STATE__VALID_CHILD(_kids[0], RARG2REGP) && STATE__VALID_CHILD(_kids[1], RARG3REGP) ) {
+    if( STATE__VALID_CHILD(_kids[0], RARG2REGP) && STATE__VALID_CHILD(_kids[1], RARG3REGP) &&
+        (
+#line 10098 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UseSecondarySupersTable
+#line 9216 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[RARG2REGP]+_kids[1]->_cost[RARG3REGP]+10 * DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(RARG1REGP, partialSubtypeCheck_rule, c)
-        DFA_PRODUCTION__SET_VALID(IREGP, partialSubtypeCheck_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTP, regP_to_stkP_rule, c+1+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(NOARG_IREGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, partialSubtypeCheck_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1+1)
-        DFA_PRODUCTION__SET_VALID(REVENREGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(INLINE_CACHE_REGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(COMPILER_METHOD_OOP_REGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(INTERPRETER_METHOD_OOP_REGP, partialSubtypeCheck_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(IREGP_N2P, iRegP_rule, c+1)
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c) {
+        DFA_PRODUCTION(R11TEMPREGP, partialSubtypeCheckVarSuper_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c+1) {
+        DFA_PRODUCTION(IREGP, partialSubtypeCheckVarSuper_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+1+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+1+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1+1) {
+        DFA_PRODUCTION(R10TEMPREGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1+1) {
+        DFA_PRODUCTION(NOARG_IREGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG1REGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG2REGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG3REGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG4REGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG5REGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1+1) {
+        DFA_PRODUCTION(MEMORYREGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1+1) {
+        DFA_PRODUCTION(INDIRECT, partialSubtypeCheckVarSuper_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1+1) {
+        DFA_PRODUCTION(REVENREGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1+1) {
+        DFA_PRODUCTION(RODDREGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1+1) {
+        DFA_PRODUCTION(INLINE_CACHE_REGP, partialSubtypeCheckVarSuper_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c+1) {
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], RARG2REGP) && STATE__VALID_CHILD(_kids[1], RARG3REGP) &&
+        (
+#line 10074 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+!UseSecondarySupersTable
+#line 9287 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[RARG2REGP]+_kids[1]->_cost[RARG3REGP]+20 * DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(RARG1REGP) || _cost[RARG1REGP] > c) {
+        DFA_PRODUCTION(RARG1REGP, partialSubtypeCheck_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(IREGP) || _cost[IREGP] > c+1) {
+        DFA_PRODUCTION(IREGP, partialSubtypeCheck_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTP) || _cost[STACKSLOTP] > c+1+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTP, regP_to_stkP_rule, c+1+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(R10TEMPREGP) || _cost[R10TEMPREGP] > c+1+1) {
+        DFA_PRODUCTION(R10TEMPREGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(R11TEMPREGP) || _cost[R11TEMPREGP] > c+1+1) {
+        DFA_PRODUCTION(R11TEMPREGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(NOARG_IREGP) || _cost[NOARG_IREGP] > c+1+1) {
+        DFA_PRODUCTION(NOARG_IREGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGP) || _cost[RARG2REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG2REGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGP) || _cost[RARG3REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG3REGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGP) || _cost[RARG4REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG4REGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGP) || _cost[RARG5REGP] > c+1+1) {
+        DFA_PRODUCTION(RARG5REGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYREGP) || _cost[MEMORYREGP] > c+1+1) {
+        DFA_PRODUCTION(MEMORYREGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(INDIRECT) || _cost[INDIRECT] > c+1+1+1) {
+        DFA_PRODUCTION(INDIRECT, partialSubtypeCheck_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORY) || _cost[MEMORY] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRXY) || _cost[MEMORYRXY] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRX) || _cost[MEMORYRX] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRSY) || _cost[MEMORYRSY] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(MEMORYRS) || _cost[MEMORYRS] > c+1+1+1) {
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1+1)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGP) || _cost[REVENREGP] > c+1+1) {
+        DFA_PRODUCTION(REVENREGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGP) || _cost[RODDREGP] > c+1+1) {
+        DFA_PRODUCTION(RODDREGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(INLINE_CACHE_REGP) || _cost[INLINE_CACHE_REGP] > c+1+1) {
+        DFA_PRODUCTION(INLINE_CACHE_REGP, partialSubtypeCheck_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(IREGP_N2P) || _cost[IREGP_N2P] > c+1) {
+        DFA_PRODUCTION(IREGP_N2P, iRegP_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_PopCountI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) &&
         (
-#line 10947 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-UsePopCountInstruction && VM_Version::has_PopCount()
-#line 8469 "dfa_s390.cpp"
+#line 11872 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UsePopCountInstruction &&
+            VM_Version::has_PopCount() &&
+            (!VM_Version::has_MiscInstrExt3())
+#line 9362 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, popCountI_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, popCountI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, popCountI_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, popCountI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, popCountI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, popCountI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, popCountI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, popCountI_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, popCountI_rule, c+1)
+        DFA_PRODUCTION(IREGI, popCountI_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, popCountI_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, popCountI_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, popCountI_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, popCountI_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, popCountI_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, popCountI_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, popCountI_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, popCountI_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 11835 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UsePopCountInstruction &&
+            VM_Version::has_PopCount() &&
+            VM_Version::has_MiscInstrExt3()
+#line 9382 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
+        DFA_PRODUCTION(IREGI, popCountI_Ext3_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
+        DFA_PRODUCTION(REVENREGI, popCountI_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
+        DFA_PRODUCTION(NOODD_IREGI, popCountI_Ext3_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
+        DFA_PRODUCTION(RODDREGI, popCountI_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
+        DFA_PRODUCTION(RARG1REGI, popCountI_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
+        DFA_PRODUCTION(RARG2REGI, popCountI_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
+        DFA_PRODUCTION(RARG3REGI, popCountI_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
+        DFA_PRODUCTION(RARG4REGI, popCountI_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
+        DFA_PRODUCTION(RARG5REGI, popCountI_Ext3_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_PopCountL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) &&
         (
-#line 10974 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-UsePopCountInstruction && VM_Version::has_PopCount()
-#line 8489 "dfa_s390.cpp"
+#line 11892 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UsePopCountInstruction &&
+            VM_Version::has_PopCount() &&
+            (!VM_Version::has_MiscInstrExt3())
+#line 9424 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, popCountL_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, popCountL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, popCountL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, popCountL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, popCountL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, popCountL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, popCountL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, popCountL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, popCountL_rule, c+1)
+        DFA_PRODUCTION(IREGI, popCountL_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, popCountL_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, popCountL_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, popCountL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, popCountL_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, popCountL_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, popCountL_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, popCountL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, popCountL_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGL) &&
+        (
+#line 11854 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+UsePopCountInstruction &&
+            VM_Version::has_PopCount() &&
+            VM_Version::has_MiscInstrExt3()
+#line 9444 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
+        DFA_PRODUCTION(IREGI, popCountL_Ext3_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
+        DFA_PRODUCTION(REVENREGI, popCountL_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
+        DFA_PRODUCTION(NOODD_IREGI, popCountL_Ext3_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
+        DFA_PRODUCTION(RODDREGI, popCountL_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
+        DFA_PRODUCTION(RARG1REGI, popCountL_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
+        DFA_PRODUCTION(RARG2REGI, popCountL_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
+        DFA_PRODUCTION(RARG3REGI, popCountL_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
+        DFA_PRODUCTION(RARG4REGI, popCountL_Ext3_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
+        DFA_PRODUCTION(RARG5REGI, popCountL_Ext3_rule, c+1)
+      }
+    }
+}
+void  State::_sub_Op_PopCountVI(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && _kids[1] == nullptr ) {
+      unsigned int c = _kids[0]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vpopcnt_reg_rule, c)
     }
 }
 void  State::_sub_Op_PrefetchAllocation(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 4611 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 4700 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_Prefetch()
-#line 8509 "dfa_s390.cpp"
+#line 9490 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, prefetchAlloc_rule, c)
+        DFA_PRODUCTION(UNIVERSE, prefetchAlloc_rule, c)
     }
 }
 void  State::_sub_Op_RShiftI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTI_IREGI_IMMI_24) && STATE__VALID_CHILD(_kids[1], IMMI_24) &&
         /*amount*/(_kids[0]->_kids[1]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTI_IREGI_IMMI_24]+_kids[1]->_cost[IMMI_24] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, rShiftI24_lShiftI24_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, rShiftI24_lShiftI24_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, rShiftI24_lShiftI24_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, rShiftI24_lShiftI24_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, rShiftI24_lShiftI24_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, rShiftI24_lShiftI24_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, rShiftI24_lShiftI24_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, rShiftI24_lShiftI24_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, rShiftI24_lShiftI24_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, rShiftI24_lShiftI24_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, rShiftI24_lShiftI24_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, rShiftI24_lShiftI24_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, rShiftI24_lShiftI24_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, rShiftI24_lShiftI24_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, rShiftI24_lShiftI24_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, rShiftI24_lShiftI24_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, rShiftI24_lShiftI24_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, rShiftI24_lShiftI24_reg_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _LSHIFTI_IREGI_IMMI_16) && STATE__VALID_CHILD(_kids[1], IMMI_16) &&
         /*amount*/(_kids[0]->_kids[1]->_leaf == _kids[1]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[_LSHIFTI_IREGI_IMMI_16]+_kids[1]->_cost[IMMI_16] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, rShiftI16_lShiftI16_reg_rule, c)
+        DFA_PRODUCTION(IREGI, rShiftI16_lShiftI16_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, rShiftI16_lShiftI16_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, rShiftI16_lShiftI16_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, rShiftI16_lShiftI16_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, rShiftI16_lShiftI16_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, rShiftI16_lShiftI16_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, rShiftI16_lShiftI16_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, rShiftI16_lShiftI16_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, rShiftI16_lShiftI16_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, rShiftI16_lShiftI16_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, rShiftI16_lShiftI16_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, rShiftI16_lShiftI16_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, rShiftI16_lShiftI16_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, rShiftI16_lShiftI16_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, rShiftI16_lShiftI16_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, rShiftI16_lShiftI16_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, rShiftI16_lShiftI16_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, sraI_reg_imm_rule, c)
+        DFA_PRODUCTION(IREGI, sraI_reg_imm_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, sraI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, sraI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, sraI_reg_imm_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, sraI_reg_imm_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, sraI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, sraI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, sraI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, sraI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, sraI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, sraI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, sraI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, sraI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, sraI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, sraI_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, sraI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, sraI_reg_imm_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, sraI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, sraI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, sraI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, sraI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, sraI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, sraI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, sraI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, sraI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, sraI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, sraI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, sraI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, sraI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, sraI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, sraI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, sraI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, sraI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, sraI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, sraI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_RShiftL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMMI_32_63) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMMI_32_63];
-        DFA_PRODUCTION__SET_VALID(_RSHIFTL_IREGL_IMMI_32_63, _RShiftL_iRegL_immI_32_63_rule, c)
+        DFA_PRODUCTION(_RSHIFTL_IREGL_IMMI_32_63, _RShiftL_iRegL_immI_32_63_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, sraL_reg_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, sraL_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, sraL_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, sraL_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, sraL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(IREGL, sraL_reg_imm_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, sraL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, sraL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, sraL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, sraL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, sraL_reg_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, sraL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, sraL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, sraL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, sraL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, sraL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, sraL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, sraL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, sraL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, sraL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, sraL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, sraL_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_Rethrow(const Node *n){
     {
       unsigned int c = CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, RethrowException_rule, c)
+        DFA_PRODUCTION(UNIVERSE, RethrowException_rule, c)
     }
 }
 void  State::_sub_Op_Return(const Node *n){
     {
       unsigned int c = DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, Ret_rule, c)
+        DFA_PRODUCTION(UNIVERSE, Ret_rule, c)
     }
 }
-void  State::_sub_Op_RoundDouble(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGD) ) {
-      unsigned int c = _kids[0]->_cost[REGD];
-        DFA_PRODUCTION__SET_VALID(REGD, roundDouble_nop_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
-    }
-}
-void  State::_sub_Op_RoundFloat(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
-      unsigned int c = _kids[0]->_cost[REGF];
-        DFA_PRODUCTION__SET_VALID(REGF, roundFloat_nop_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+void  State::_sub_Op_RoundDoubleModeV(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
+        (
+#line 11597 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 9669 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[IMMI8] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vround2D_reg_rule, c)
     }
 }
 void  State::_sub_Op_SafePoint(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, safePoint_poll_rule, c)
+        DFA_PRODUCTION(UNIVERSE, safePoint_poll_rule, c)
     }
     if(         (
-#line 9667 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 9882 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 false
-#line 8701 "dfa_s390.cpp"
+#line 9683 "dfa_s390.cpp"
 ) ) {
       unsigned int c = DEFAULT_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, safePoint_rule, c)
+        DFA_PRODUCTION(UNIVERSE, safePoint_rule, c)
       }
     }
 }
 void  State::_sub_Op_SqrtD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRX) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRX] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, sqrtD_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
-    }
-    if( STATE__VALID_CHILD(_kids[0], _CONVF2D_MEMORYRX_) ) {
-      unsigned int c = _kids[0]->_cost[_CONVF2D_MEMORYRX_];
-        DFA_PRODUCTION__SET_VALID(_SQRTD__CONVF2D_MEMORYRX__, _SqrtD__ConvF2D_memoryRX___rule, c)
+        DFA_PRODUCTION(REGD, sqrtD_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, sqrtD_reg_rule, c)
+        DFA_PRODUCTION(REGD, sqrtD_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], _CONVF2D_REGF_) ) {
-      unsigned int c = _kids[0]->_cost[_CONVF2D_REGF_];
-        DFA_PRODUCTION__SET_VALID(_SQRTD__CONVF2D_REGF__, _SqrtD__ConvF2D_regF___rule, c)
+}
+void  State::_sub_Op_SqrtF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], MEMORYRX) ) {
+      unsigned int c = _kids[0]->_cost[MEMORYRX] + ALU_MEMORY_COST;
+        DFA_PRODUCTION(REGF, sqrtF_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) ) {
+      unsigned int c = _kids[0]->_cost[REGF] + ALU_REG_COST;
+      if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
+        DFA_PRODUCTION(REGF, sqrtF_reg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+      }
     }
 }
 void  State::_sub_Op_StoreB(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[IMMI8] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, memInitB_rule, c)
+        DFA_PRODUCTION(UNIVERSE, memInitB_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeB_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeB_rule, c)
       }
     }
 }
 void  State::_sub_Op_StoreC(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRS) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRS]+_kids[1]->_cost[IMMI16] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, memInitC_rule, c)
+        DFA_PRODUCTION(UNIVERSE, memInitC_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeC_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeC_rule, c)
       }
-    }
-}
-void  State::_sub_Op_StoreCM(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IMMI_0) ) {
-      unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IMMI_0] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeCM_rule, c)
-    }
-}
-void  State::_sub_Op_StorePConditional(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGP_IREGP_N2P) ) {
-      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RARG5REGP_IREGP_N2P] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, storePConditional_rule, c)
-    }
-}
-void  State::_sub_Op_StoreLConditional(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _BINARY_RARG5REGL_IREGL) ) {
-      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_BINARY_RARG5REGL_IREGL] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(FLAGSREG, storeLConditional_rule, c)
     }
 }
 void  State::_sub_Op_StoreD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[REGD] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeD_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeD_rule, c)
     }
 }
 void  State::_sub_Op_StoreF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[REGF] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeF_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeF_rule, c)
     }
 }
 void  State::_sub_Op_StoreI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], _ADDI__LOADI_MEMORYRSY__IMMI8) &&
         (
-#line 5902 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 5999 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_MemWithImmALUOps()
-#line 8792 "dfa_s390.cpp"
+#line 9764 "dfa_s390.cpp"
 ) && /*mem*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[_ADDI__LOADI_MEMORYRSY__IMMI8] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, addI_mem_imm_rule, c)
+        DFA_PRODUCTION(UNIVERSE, addI_mem_imm_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRS) && STATE__VALID_CHILD(_kids[1], IMMI16) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRS]+_kids[1]->_cost[IMMI16] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, memInitI_rule, c)
+        DFA_PRODUCTION(UNIVERSE, memInitI_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeI_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeI_rule, c)
       }
     }
 }
 void  State::_sub_Op_StoreL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], _ADDL__LOADL_MEMORYRSY__IMML8) &&
         (
-#line 6061 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6158 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_MemWithImmALUOps()
-#line 8815 "dfa_s390.cpp"
+#line 9787 "dfa_s390.cpp"
 ) && /*mem*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[_ADDL__LOADL_MEMORYRSY__IMML8] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, addL_mem_imm_rule, c)
+        DFA_PRODUCTION(UNIVERSE, addL_mem_imm_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRS) && STATE__VALID_CHILD(_kids[1], IMML16) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRS]+_kids[1]->_cost[IMML16] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, memInitL_rule, c)
+        DFA_PRODUCTION(UNIVERSE, memInitL_rule, c)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeL_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeL_rule, c)
       }
     }
 }
 void  State::_sub_Op_StoreP(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], MEMORYREGP) &&
+        (
+#line 78 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_Store()->barrier_data() != 0
+#line 9810 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[MEMORYREGP] + MEMORY_REF_COST;
+        DFA_PRODUCTION(UNIVERSE, g1StoreP_rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], MEMORYRSY) && STATE__VALID_CHILD(_kids[1], _ADDP__LOADP_MEMORYRSY__IMML8) &&
         (
-#line 6227 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-VM_Version::has_MemWithImmALUOps()
-#line 8838 "dfa_s390.cpp"
+#line 6324 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+VM_Version::has_MemWithImmALUOps() && n->as_LoadStore()->barrier_data() == 0
+#line 9819 "dfa_s390.cpp"
 ) && /*mem*/(_kids[0]->_leaf == _kids[1]->_kids[0]->_kids[0]->_leaf) ) {
       unsigned int c = _kids[0]->_cost[MEMORYRSY]+_kids[1]->_cost[_ADDP__LOADP_MEMORYRSY__IMML8] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, addP_mem_imm_rule, c)
-    }
-    if( STATE__VALID_CHILD(_kids[0], MEMORYRS) && STATE__VALID_CHILD(_kids[1], IMMP16) ) {
-      unsigned int c = _kids[0]->_cost[MEMORYRS]+_kids[1]->_cost[IMMP16] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, memInitP_rule, c)
+        DFA_PRODUCTION(UNIVERSE, addP_mem_imm_rule, c)
       }
     }
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], MEMORYREGP) ) {
+    if( STATE__VALID_CHILD(_kids[0], MEMORYRS) && STATE__VALID_CHILD(_kids[1], IMMP16) &&
+        (
+#line 4762 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Store()->barrier_data() == 0
+#line 9830 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORYRS]+_kids[1]->_cost[IMMP16] + MEMORY_REF_COST;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, memInitP_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], MEMORYREGP) &&
+        (
+#line 4659 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Store()->barrier_data() == 0
+#line 9841 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[MEMORYREGP] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeP_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeP_rule, c)
       }
     }
 }
 void  State::_sub_Op_StoreN(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGN_P2N) ) {
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], _ENCODEP_IREGP_) &&
+        (
+#line 430 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_Store()->barrier_data() != 0
+#line 9854 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[_ENCODEP_IREGP_] + DEFAULT_COST;
+        DFA_PRODUCTION(UNIVERSE, g1EncodePAndStoreN_rule, c)
+    }
+    if( STATE__VALID_CHILD(_kids[0], INDIRECT) && STATE__VALID_CHILD(_kids[1], IREGN_P2N) &&
+        (
+#line 105 "/work/jdk/src/hotspot/cpu/s390/gc/g1/g1_s390.ad"
+UseG1GC && n->as_Store()->barrier_data() != 0
+#line 9863 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[INDIRECT]+_kids[1]->_cost[IREGN_P2N] + MEMORY_REF_COST;
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, g1StoreN_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGN_P2N) &&
+        (
+#line 5127 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Store()->barrier_data() == 0
+#line 9874 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IREGN_P2N] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeN_rule, c)
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, storeN_rule, c)
+      }
     }
 }
 void  State::_sub_Op_StoreNKlass(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGN) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IREGN] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeNKlass_rule, c)
+        DFA_PRODUCTION(UNIVERSE, storeNKlass_rule, c)
     }
 }
 void  State::_sub_Op_StrComp(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_RARG5REGI) &&
         (
-#line 10082 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10346 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrCompNode*)n)->encoding() == StrIntrinsicNode::UL
-#line 8873 "dfa_s390.cpp"
+#line 9893 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_RARG5REGI]+300;
-        DFA_PRODUCTION__SET_VALID(IREGI, string_compareUL_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_compareUL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_compareUL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_compareUL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_compareUL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_compareUL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_compareUL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_compareUL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_compareUL_rule, c+1)
+        DFA_PRODUCTION(IREGI, string_compareUL_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, string_compareUL_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_compareUL_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, string_compareUL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_compareUL_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_compareUL_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_compareUL_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_compareUL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_compareUL_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_RARG5REGI) &&
         (
-#line 10067 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10331 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrCompNode*)n)->encoding() == StrIntrinsicNode::LU
-#line 8891 "dfa_s390.cpp"
+#line 9911 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_RARG5REGI]+300;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, string_compareLU_rule, c)
+        DFA_PRODUCTION(IREGI, string_compareLU_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_compareLU_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, string_compareLU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_compareLU_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_compareLU_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_compareLU_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, string_compareLU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_compareLU_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_compareLU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_compareLU_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_compareLU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_compareLU_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_compareLU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_compareLU_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_compareLU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_compareLU_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_compareLU_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_RARG5REGI) &&
         (
-#line 10052 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10316 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrCompNode*)n)->encoding() == StrIntrinsicNode::UU || ((StrCompNode*)n)->encoding() == StrIntrinsicNode::none
-#line 8929 "dfa_s390.cpp"
+#line 9949 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_RARG5REGI]+300;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, string_compareU_rule, c)
+        DFA_PRODUCTION(IREGI, string_compareU_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_compareU_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, string_compareU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_compareU_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_compareU_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_compareU_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, string_compareU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_compareU_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_compareU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_compareU_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_compareU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_compareU_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_compareU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_compareU_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_compareU_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_compareU_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_compareU_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_RARG5REGI) &&
         (
-#line 10037 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10301 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrCompNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 8967 "dfa_s390.cpp"
+#line 9987 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_RARG5REGI]+300;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, string_compareL_rule, c)
+        DFA_PRODUCTION(IREGI, string_compareL_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_compareL_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, string_compareL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_compareL_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_compareL_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_compareL_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, string_compareL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_compareL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_compareL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_compareL_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_compareL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_compareL_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_compareL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_compareL_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_compareL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_compareL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_compareL_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_StrCompressedCopy(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_IREGP_IREGI]+300;
-        DFA_PRODUCTION__SET_VALID(IREGI, string_compress_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_compress_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_compress_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_compress_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_compress_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_compress_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_compress_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_compress_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_compress_rule, c+1)
+        DFA_PRODUCTION(IREGI, string_compress_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, string_compress_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_compress_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, string_compress_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_compress_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_compress_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_compress_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_compress_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_compress_rule, c+1)
     }
 }
 void  State::_sub_Op_StrEquals(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGP) && STATE__VALID_CHILD(_kids[1], IMMI8) &&
         (
-#line 9982 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10246 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrEqualsNode*)n)->encoding() == StrIntrinsicNode::none
-#line 9022 "dfa_s390.cpp"
+#line 10042 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGP]+_kids[1]->_cost[IMMI8]+100;
-        DFA_PRODUCTION__SET_VALID(IREGI, string_equalsC_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_equalsC_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_equalsC_imm_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_equalsC_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_equalsC_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_equalsC_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_equalsC_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_equalsC_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_equalsC_imm_rule, c+1)
+        DFA_PRODUCTION(IREGI, string_equalsC_imm_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, string_equalsC_imm_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_equalsC_imm_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, string_equalsC_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_equalsC_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_equalsC_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_equalsC_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_equalsC_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_equalsC_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGP) && STATE__VALID_CHILD(_kids[1], UIMMI8) &&
         (
-#line 9957 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-((StrEqualsNode*)n)->encoding() == StrIntrinsicNode::LL || ((StrEqualsNode*)n)->encoding() == StrIntrinsicNode::UU
-#line 9040 "dfa_s390.cpp"
+#line 10221 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+((StrEqualsNode*)n)->encoding() == StrIntrinsicNode::LL
+#line 10060 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGP]+_kids[1]->_cost[UIMMI8]+100;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, string_equals_imm_rule, c)
+        DFA_PRODUCTION(IREGI, string_equals_imm_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_equals_imm_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, string_equals_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_equals_imm_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_equals_imm_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_equals_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, string_equals_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_equals_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_equals_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_equals_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_equals_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_equals_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_equals_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_equals_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_equals_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_equals_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_equals_imm_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGP) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 9943 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-((StrEqualsNode*)n)->encoding() == StrIntrinsicNode::UU || ((StrEqualsNode*)n)->encoding() == StrIntrinsicNode::none
-#line 9078 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGP]+_kids[1]->_cost[IREGI]+300;
-      if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, string_equalsU_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_equalsU_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_equalsU_rule, c+1+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_equalsU_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_equalsU_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_equalsU_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_equalsU_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_equalsU_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_equalsU_rule, c+1)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGP) && STATE__VALID_CHILD(_kids[1], IREGI) &&
-        (
-#line 9929 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10207 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrEqualsNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 9116 "dfa_s390.cpp"
+#line 10098 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGP]+_kids[1]->_cost[IREGI]+300;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, string_equalsL_rule, c)
+        DFA_PRODUCTION(IREGI, string_equalsL_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, string_equalsL_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, string_equalsL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, string_equalsL_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, string_equalsL_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, string_equalsL_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, string_equalsL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, string_equalsL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, string_equalsL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, string_equalsL_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, string_equalsL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, string_equalsL_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, string_equalsL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, string_equalsL_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, string_equalsL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, string_equalsL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, string_equalsL_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_StrIndexOf(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_RARG5REGI) &&
         (
-#line 10251 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10531 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UL
-#line 9156 "dfa_s390.cpp"
+#line 10138 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_RARG5REGI]+300;
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_UL_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_UL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_UL_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_UL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_UL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_UL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_UL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_UL_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_UL_rule, c+1)
+        DFA_PRODUCTION(IREGI, indexOf_UL_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, indexOf_UL_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_UL_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_UL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_UL_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_UL_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_UL_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_UL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_UL_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_RARG5REGI) &&
         (
-#line 10236 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10516 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 9174 "dfa_s390.cpp"
+#line 10156 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_RARG5REGI]+300;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_L_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_L_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_L_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_L_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_L_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_L_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_L_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_L_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_L_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_RARG5REGI) &&
         (
-#line 10221 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10501 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UU || ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::none
-#line 9212 "dfa_s390.cpp"
+#line 10194 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_RARG5REGI]+300;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_U_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_U_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_U_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_U_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_U_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_U_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_U_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_U_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_U_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_U_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_U_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_U_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IMMI16) &&
         (
-#line 10206 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10486 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UL
-#line 9250 "dfa_s390.cpp"
+#line 10232 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_IMMI16]+250;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_imm_UL_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_imm_UL_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_imm_UL_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_imm_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_imm_UL_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_imm_UL_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_imm_UL_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_imm_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_imm_UL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_imm_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_imm_UL_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_imm_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_imm_UL_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_imm_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_imm_UL_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_imm_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_imm_UL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_imm_UL_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IMMI16) &&
         (
-#line 10191 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10471 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 9288 "dfa_s390.cpp"
+#line 10270 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_IMMI16]+250;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_imm_L_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_imm_L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_imm_L_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_imm_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_imm_L_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_imm_L_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_imm_L_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_imm_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_imm_L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_imm_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_imm_L_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_imm_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_imm_L_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_imm_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_imm_L_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_imm_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_imm_L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_imm_L_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_RARG2REGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IMMI16) &&
         (
-#line 10176 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10456 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UU || ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::none
-#line 9326 "dfa_s390.cpp"
+#line 10308 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_RARG2REGI]+_kids[1]->_cost[_BINARY_IREGP_IMMI16]+250;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_imm_U_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_imm_U_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_imm_U_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_imm_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_imm_U_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_imm_U_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_imm_U_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_imm_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_imm_U_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_imm_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_imm_U_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_imm_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_imm_U_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_imm_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_imm_U_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_imm_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_imm_U_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_imm_U_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IMMP_IMMI_1) &&
         (
-#line 10156 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10436 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UL
-#line 9364 "dfa_s390.cpp"
+#line 10346 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGI]+_kids[1]->_cost[_BINARY_IMMP_IMMI_1]+200;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_imm1_UL_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_imm1_UL_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_imm1_UL_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_imm1_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_imm1_UL_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_imm1_UL_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_imm1_UL_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_imm1_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_imm1_UL_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_imm1_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_imm1_UL_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_imm1_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_imm1_UL_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_imm1_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_imm1_UL_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_imm1_UL_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_imm1_UL_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_imm1_UL_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IMMP_IMMI_1) &&
         (
-#line 10137 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10417 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::LL
-#line 9402 "dfa_s390.cpp"
+#line 10384 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGI]+_kids[1]->_cost[_BINARY_IMMP_IMMI_1]+200;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_imm1_L_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_imm1_L_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_imm1_L_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_imm1_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_imm1_L_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_imm1_L_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_imm1_L_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_imm1_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_imm1_L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_imm1_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_imm1_L_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_imm1_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_imm1_L_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_imm1_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_imm1_L_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_imm1_L_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_imm1_L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_imm1_L_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGI) && STATE__VALID_CHILD(_kids[1], _BINARY_IMMP_IMMI_1) &&
         (
-#line 10112 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 10392 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::UU || ((StrIndexOfNode*)n)->encoding() == StrIntrinsicNode::none
-#line 9440 "dfa_s390.cpp"
+#line 10422 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGI]+_kids[1]->_cost[_BINARY_IMMP_IMMI_1]+200;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOf_imm1_U_rule, c)
+        DFA_PRODUCTION(IREGI, indexOf_imm1_U_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOf_imm1_U_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, indexOf_imm1_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOf_imm1_U_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOf_imm1_U_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOf_imm1_U_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, indexOf_imm1_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOf_imm1_U_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOf_imm1_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOf_imm1_U_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOf_imm1_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOf_imm1_U_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOf_imm1_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOf_imm1_U_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOf_imm1_U_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOf_imm1_U_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOf_imm1_U_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_StrIndexOfChar(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
+        (
+#line 10377 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+((StrIndexOfCharNode*)n)->encoding() == StrIntrinsicNode::L
+#line 10462 "dfa_s390.cpp"
+) ) {
       unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGI]+_kids[1]->_cost[IREGI]+200;
-        DFA_PRODUCTION__SET_VALID(IREGI, indexOfChar_U_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, indexOfChar_U_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, indexOfChar_U_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, indexOfChar_U_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, indexOfChar_U_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, indexOfChar_U_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, indexOfChar_U_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, indexOfChar_U_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, indexOfChar_U_rule, c+1)
+        DFA_PRODUCTION(IREGI, indexOfChar_L_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, indexOfChar_L_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, indexOfChar_L_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, indexOfChar_L_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, indexOfChar_L_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, indexOfChar_L_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, indexOfChar_L_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, indexOfChar_L_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, indexOfChar_L_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], _BINARY_IREGP_IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
+        (
+#line 10362 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+((StrIndexOfCharNode*)n)->encoding() == StrIntrinsicNode::U
+#line 10480 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[_BINARY_IREGP_IREGI]+_kids[1]->_cost[IREGI]+200;
+      if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
+        DFA_PRODUCTION(IREGI, indexOfChar_U_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
+        DFA_PRODUCTION(REVENREGI, indexOfChar_U_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
+        DFA_PRODUCTION(NOODD_IREGI, indexOfChar_U_rule, c+1+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
+        DFA_PRODUCTION(RODDREGI, indexOfChar_U_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
+        DFA_PRODUCTION(RARG1REGI, indexOfChar_U_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
+        DFA_PRODUCTION(RARG2REGI, indexOfChar_U_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
+        DFA_PRODUCTION(RARG3REGI, indexOfChar_U_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
+        DFA_PRODUCTION(RARG4REGI, indexOfChar_U_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
+        DFA_PRODUCTION(RARG5REGI, indexOfChar_U_rule, c+1)
+      }
     }
 }
 void  State::_sub_Op_StrInflatedCopy(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_IREGP_IMMI]+300;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, string_inflate_const_rule, c)
+        DFA_PRODUCTION(UNIVERSE, string_inflate_const_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], _BINARY_IREGP_IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[_BINARY_IREGP_IREGI]+300;
       if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, string_inflate_rule, c)
+        DFA_PRODUCTION(UNIVERSE, string_inflate_rule, c)
       }
     }
 }
 void  State::_sub_Op_SubD(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], _LOADD_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[_LOADD_MEMORYRX_] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGD, subD_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGD, subD_reg_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGD) && STATE__VALID_CHILD(_kids[1], REGD) ) {
       unsigned int c = _kids[0]->_cost[REGD]+_kids[1]->_cost[REGD] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGD) || _cost[REGD] > c) {
-        DFA_PRODUCTION__SET_VALID(REGD, subD_reg_reg_rule, c)
+        DFA_PRODUCTION(REGD, subD_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTD) || _cost[STACKSLOTD] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTD, regD_to_stkD_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_SubF(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], _LOADF_MEMORYRX_) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[_LOADF_MEMORYRX_] + ALU_MEMORY_COST;
-        DFA_PRODUCTION__SET_VALID(REGF, subF_reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REGF, subF_reg_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
     }
     if( STATE__VALID_CHILD(_kids[0], REGF) && STATE__VALID_CHILD(_kids[1], REGF) ) {
       unsigned int c = _kids[0]->_cost[REGF]+_kids[1]->_cost[REGF] + ALU_REG_COST;
       if (STATE__NOT_YET_VALID(REGF) || _cost[REGF] > c) {
-        DFA_PRODUCTION__SET_VALID(REGF, subF_reg_reg_rule, c)
+        DFA_PRODUCTION(REGF, subF_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTF) || _cost[STACKSLOTF] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTF, regF_to_stkF_rule, c+MEMORY_REF_COST)
       }
     }
 }
 void  State::_sub_Op_SubI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IMMI_0) && STATE__VALID_CHILD(_kids[1], _ABSI_IREGI_) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0]+_kids[1]->_cost[_ABSI_IREGI_] + DEFAULT_COST_LOW;
-        DFA_PRODUCTION__SET_VALID(IREGI, negabsI_reg_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, negabsI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, negabsI_reg_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, negabsI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, negabsI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, negabsI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, negabsI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, negabsI_reg_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, negabsI_reg_rule, c+1)
+        DFA_PRODUCTION(IREGI, negabsI_reg_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, negabsI_reg_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, negabsI_reg_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, negabsI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, negabsI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, negabsI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, negabsI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, negabsI_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, negabsI_reg_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IMMI_0) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, subI_zero_reg_rule, c)
+        DFA_PRODUCTION(IREGI, subI_zero_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, subI_zero_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, subI_zero_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, subI_zero_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, subI_zero_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, subI_zero_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, subI_zero_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, subI_zero_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, subI_zero_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, subI_zero_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, subI_zero_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, subI_zero_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, subI_zero_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, subI_zero_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, subI_zero_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, subI_zero_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, subI_zero_reg_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, subI_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGI, subI_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, subI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, subI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, subI_Reg_mem_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, subI_Reg_mem_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, subI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, subI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, subI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, subI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, subI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, subI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, subI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, subI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, subI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, subI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, subI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, subI_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) &&
         (
-#line 6252 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6349 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_DistinctOpnds()
-#line 9618 "dfa_s390.cpp"
+#line 10643 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, subI_reg_reg_RISC_rule, c)
+        DFA_PRODUCTION(IREGI, subI_reg_reg_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, subI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, subI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, subI_reg_reg_RISC_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, subI_reg_reg_RISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, subI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, subI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, subI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, subI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, subI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, subI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, subI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, subI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, subI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, subI_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, subI_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, subI_reg_reg_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, subI_reg_reg_CISC_rule, c)
+        DFA_PRODUCTION(IREGI, subI_reg_reg_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, subI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, subI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, subI_reg_reg_CISC_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, subI_reg_reg_CISC_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, subI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, subI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, subI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, subI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, subI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, subI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, subI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, subI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, subI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, subI_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, subI_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, subI_reg_reg_CISC_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_SubL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_LOADL_MEMORY_] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, subL_Reg_mem_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, subL_Reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, subL_Reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, subL_Reg_mem_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, subL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(IREGL, subL_Reg_mem_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, subL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, subL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, subL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, subL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, subL_Reg_mem_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L__LOADI_MEMORY__) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L__LOADI_MEMORY__] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, subL_Reg_memI_rule, c)
+        DFA_PRODUCTION(IREGL, subL_Reg_memI_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, subL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, subL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, subL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, subL_Reg_memI_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, subL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, subL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, subL_Reg_memI_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, subL_Reg_memI_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, subL_Reg_memI_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _CONVI2L_IREGI_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_CONVI2L_IREGI_] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, subL_reg_regI_CISC_rule, c)
+        DFA_PRODUCTION(IREGL, subL_reg_regI_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, subL_reg_regI_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, subL_reg_regI_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, subL_reg_regI_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, subL_reg_regI_CISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, subL_reg_regI_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, subL_reg_regI_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, subL_reg_regI_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, subL_reg_regI_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, subL_reg_regI_CISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 6298 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 6395 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 VM_Version::has_DistinctOpnds()
-#line 9742 "dfa_s390.cpp"
+#line 10774 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, subL_reg_reg_RISC_rule, c)
+        DFA_PRODUCTION(IREGL, subL_reg_reg_RISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, subL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, subL_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, subL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, subL_reg_reg_RISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, subL_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, subL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, subL_reg_reg_RISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, subL_reg_reg_RISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, subL_reg_reg_RISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, subL_reg_reg_CISC_rule, c)
+        DFA_PRODUCTION(IREGL, subL_reg_reg_CISC_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, subL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, subL_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, subL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, subL_reg_reg_CISC_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, subL_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, subL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, subL_reg_reg_CISC_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, subL_reg_reg_CISC_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, subL_reg_reg_CISC_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IMML_0) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IMML_0]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, negL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, negL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, negL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, negL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, negL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, negL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, negL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, negL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, negL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, negL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, negL_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_TailCall(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], INLINE_CACHE_REGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[INLINE_CACHE_REGP] + CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, TailCalljmpInd_rule, c)
+        DFA_PRODUCTION(UNIVERSE, TailCalljmpInd_rule, c)
     }
 }
 void  State::_sub_Op_TailJump(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGP) && STATE__VALID_CHILD(_kids[1], RARG1REGP) ) {
       unsigned int c = _kids[0]->_cost[IREGP]+_kids[1]->_cost[RARG1REGP] + CALL_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, tailjmpInd_rule, c)
+        DFA_PRODUCTION(UNIVERSE, tailjmpInd_rule, c)
     }
 }
 void  State::_sub_Op_ThreadLocal(const Node *n){
     {
       unsigned int c = 0;
-        DFA_PRODUCTION__SET_VALID(THREADREGP, tlsLoadP_rule, c)
-        DFA_PRODUCTION__SET_VALID(MEMORYREGP, tlsLoadP_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(INDIRECT, tlsLoadP_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRXY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRX, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRSY, indirect_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(MEMORYRS, indirect_rule, c+1+1)
+        DFA_PRODUCTION(THREADREGP, tlsLoadP_rule, c)
+        DFA_PRODUCTION(MEMORYREGP, tlsLoadP_rule, c+1)
+        DFA_PRODUCTION(INDIRECT, tlsLoadP_rule, c+1+1)
+        DFA_PRODUCTION(MEMORY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRXY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRX, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRSY, indirect_rule, c+1+1)
+        DFA_PRODUCTION(MEMORYRS, indirect_rule, c+1+1)
     }
 }
 void  State::_sub_Op_URShiftI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI8];
-        DFA_PRODUCTION__SET_VALID(_URSHIFTI_IREGI_IMMI8, _URShiftI_iRegI_immI8_rule, c)
+        DFA_PRODUCTION(_URSHIFTI_IREGI_IMMI8, _URShiftI_iRegI_immI8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGI, srlI_reg_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, srlI_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, srlI_reg_imm_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, srlI_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, srlI_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, srlI_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, srlI_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, srlI_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, srlI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(IREGI, srlI_reg_imm_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, srlI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, srlI_reg_imm_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, srlI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, srlI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, srlI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, srlI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, srlI_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, srlI_reg_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI]+3 * DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, srlI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, srlI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, srlI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, srlI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, srlI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, srlI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, srlI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, srlI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, srlI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, srlI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, srlI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, srlI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, srlI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, srlI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, srlI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, srlI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, srlI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, srlI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_URShiftL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMMI8) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMMI8];
-        DFA_PRODUCTION__SET_VALID(_URSHIFTL_IREGL_IMMI8, _URShiftL_iRegL_immI8_rule, c)
+        DFA_PRODUCTION(_URSHIFTL_IREGL_IMMI8, _URShiftL_iRegL_immI8_rule, c)
     }
     if( STATE__VALID_CHILD(_kids[0], _CASTP2X_IREGP_N2P_) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[_CASTP2X_IREGP_N2P_]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, srlP_reg_imm_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, srlP_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, srlP_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, srlP_reg_imm_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, srlP_reg_imm_rule, c+1)
+        DFA_PRODUCTION(IREGL, srlP_reg_imm_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, srlP_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, srlP_reg_imm_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, srlP_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, srlP_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, srlP_reg_imm_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IMMI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, srlL_reg_imm_rule, c)
+        DFA_PRODUCTION(IREGL, srlL_reg_imm_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, srlL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, srlL_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, srlL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, srlL_reg_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, srlL_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, srlL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, srlL_reg_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, srlL_reg_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, srlL_reg_imm_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, srlL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, srlL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, srlL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, srlL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, srlL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, srlL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, srlL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, srlL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, srlL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, srlL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, srlL_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_XorI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], UIMMI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[UIMMI] + DEFAULT_COST_HIGH;
-        DFA_PRODUCTION__SET_VALID(IREGI, xorI_reg_uimm32_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGI, xorI_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, xorI_reg_uimm32_rule, c+1+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGI, xorI_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, xorI_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, xorI_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, xorI_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, xorI_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, xorI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(IREGI, xorI_reg_uimm32_rule, c)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGI, xorI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(NOODD_IREGI, xorI_reg_uimm32_rule, c+1+1)
+        DFA_PRODUCTION(RODDREGI, xorI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, xorI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, xorI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, xorI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, xorI_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, xorI_reg_uimm32_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], _LOADI_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[_LOADI_MEMORY_]+_kids[1]->_cost[IREGI] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, xorI_Reg_mem_0_rule, c)
+        DFA_PRODUCTION(IREGI, xorI_Reg_mem_0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, xorI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, xorI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, xorI_Reg_mem_0_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, xorI_Reg_mem_0_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, xorI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, xorI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, xorI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, xorI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, xorI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, xorI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, xorI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, xorI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, xorI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, xorI_Reg_mem_0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, xorI_Reg_mem_0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, xorI_Reg_mem_0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], _LOADI_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[_LOADI_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, xorI_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGI, xorI_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, xorI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, xorI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, xorI_Reg_mem_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, xorI_Reg_mem_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, xorI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, xorI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, xorI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, xorI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, xorI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, xorI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, xorI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, xorI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, xorI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, xorI_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, xorI_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, xorI_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) && STATE__VALID_CHILD(_kids[1], IREGI) ) {
       unsigned int c = _kids[0]->_cost[IREGI]+_kids[1]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGI) || _cost[IREGI] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGI, xorI_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGI, xorI_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTI) || _cost[STACKSLOTI] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTI, regI_to_stkI_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGI) || _cost[REVENREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGI, xorI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGI, xorI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(NOODD_IREGI) || _cost[NOODD_IREGI] > c+1+1) {
-        DFA_PRODUCTION__SET_VALID(NOODD_IREGI, xorI_reg_reg_rule, c+1+1)
+        DFA_PRODUCTION(NOODD_IREGI, xorI_reg_reg_rule, c+1+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGI) || _cost[RODDREGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGI, xorI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGI, xorI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGI) || _cost[RARG1REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGI, xorI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGI, xorI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG2REGI) || _cost[RARG2REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG2REGI, xorI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG2REGI, xorI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG3REGI) || _cost[RARG3REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG3REGI, xorI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG3REGI, xorI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG4REGI) || _cost[RARG4REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG4REGI, xorI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG4REGI, xorI_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGI) || _cost[RARG5REGI] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGI, xorI_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGI, xorI_reg_reg_rule, c+1)
       }
     }
 }
 void  State::_sub_Op_XorL(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], UIMML32) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[UIMML32] + DEFAULT_COST_HIGH;
-        DFA_PRODUCTION__SET_VALID(IREGL, xorL_reg_uimm32_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, xorL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, xorL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, xorL_reg_uimm32_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, xorL_reg_uimm32_rule, c+1)
-    }
-    if( STATE__VALID_CHILD(_kids[0], _LOADL_MEMORY_) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
-      unsigned int c = _kids[0]->_cost[_LOADL_MEMORY_]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, xorL_Reg_mem_0_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, xorL_Reg_mem_0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, xorL_Reg_mem_0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, xorL_Reg_mem_0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, xorL_Reg_mem_0_rule, c+1)
-      }
+        DFA_PRODUCTION(IREGL, xorL_reg_uimm32_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, xorL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, xorL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, xorL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, xorL_reg_uimm32_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, xorL_reg_uimm32_rule, c+1)
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], _LOADL_MEMORY_) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[_LOADL_MEMORY_] + MEMORY_REF_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, xorL_Reg_mem_rule, c)
+        DFA_PRODUCTION(IREGL, xorL_Reg_mem_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, xorL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, xorL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, xorL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, xorL_Reg_mem_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, xorL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, xorL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, xorL_Reg_mem_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, xorL_Reg_mem_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, xorL_Reg_mem_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGL) && STATE__VALID_CHILD(_kids[1], IREGL) ) {
       unsigned int c = _kids[0]->_cost[IREGL]+_kids[1]->_cost[IREGL] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, xorL_reg_reg_rule, c)
+        DFA_PRODUCTION(IREGL, xorL_reg_reg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, xorL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, xorL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, xorL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, xorL_reg_reg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, xorL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, xorL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, xorL_reg_reg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, xorL_reg_reg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, xorL_reg_reg_rule, c+1)
       }
+    }
+}
+void  State::_sub_Op_AddVB(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11335 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 16
+#line 11168 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vadd16B_reg_rule, c)
+    }
+}
+void  State::_sub_Op_AddVS(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11346 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8
+#line 11179 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vadd8S_reg_rule, c)
+    }
+}
+void  State::_sub_Op_AddVI(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11357 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11190 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vadd4I_reg_rule, c)
+    }
+}
+void  State::_sub_Op_AddVL(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11368 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 11201 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vadd2L_reg_rule, c)
+    }
+}
+void  State::_sub_Op_AddVF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11456 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11212 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vadd4F_reg_rule, c)
+    }
+}
+void  State::_sub_Op_AddVD(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11467 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 11223 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vadd2D_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SubVB(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11412 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 16
+#line 11234 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsub16B_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SubVS(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11423 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8
+#line 11245 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsub8S_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SubVI(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11434 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11256 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsub4I_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SubVL(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11445 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 11267 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsub2L_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SubVF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11478 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11278 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsub4F_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SubVD(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11489 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 11289 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsub2D_reg_rule, c)
+    }
+}
+void  State::_sub_Op_MulVB(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11379 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 16
+#line 11300 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vmul16B_reg_rule, c)
+    }
+}
+void  State::_sub_Op_MulVS(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11390 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8
+#line 11311 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vmul8S_reg_rule, c)
+    }
+}
+void  State::_sub_Op_MulVI(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11401 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11322 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vmul4I_reg_rule, c)
+    }
+}
+void  State::_sub_Op_MulVF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11500 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11333 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vmul4F_reg_rule, c)
+    }
+}
+void  State::_sub_Op_MulVD(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11511 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 11344 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vmul2D_reg_rule, c)
+    }
+}
+void  State::_sub_Op_DivVF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11522 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11355 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vdiv4F_reg_rule, c)
+    }
+}
+void  State::_sub_Op_DivVD(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11533 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 11366 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX]+_kids[1]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vdiv2D_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SqrtVD(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && _kids[1] == nullptr &&
+        (
+#line 11557 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2
+#line 11377 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsqrt2D_reg_rule, c)
+    }
+}
+void  State::_sub_Op_SqrtVF(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) && _kids[1] == nullptr &&
+        (
+#line 11546 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4
+#line 11388 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[VECX] + DEFAULT_COST;
+        DFA_PRODUCTION(VECX, vsqrt4F_reg_rule, c)
     }
 }
 void  State::_sub_Op_LoadVector(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], MEMORYRX) &&
+        (
+#line 11299 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_LoadVector()->memory_size() == 16
+#line 11399 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORYRX] + MEMORY_REF_COST;
+        DFA_PRODUCTION(VECX, loadV16_rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) &&
         (
-#line 10753 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 11288 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 n->as_LoadVector()->memory_size() == 8
-#line 10134 "dfa_s390.cpp"
+#line 11408 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, loadV8_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, loadV8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, loadV8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, loadV8_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, loadV8_rule, c+1)
+        DFA_PRODUCTION(IREGL, loadV8_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, loadV8_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, loadV8_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, loadV8_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, loadV8_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, loadV8_rule, c+1)
     }
 }
 void  State::_sub_Op_StoreVector(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], MEMORYRX) && STATE__VALID_CHILD(_kids[1], VECX) &&
+        (
+#line 11273 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_StoreVector()->memory_size() == 16
+#line 11425 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[MEMORYRX]+_kids[1]->_cost[VECX] + MEMORY_REF_COST;
+        DFA_PRODUCTION(UNIVERSE, storeV16_rule, c)
+    }
     if( STATE__VALID_CHILD(_kids[0], MEMORY) && STATE__VALID_CHILD(_kids[1], IREGL) &&
         (
-#line 10740 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
+#line 11262 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
 n->as_StoreVector()->memory_size() == 8
-#line 10150 "dfa_s390.cpp"
+#line 11434 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[MEMORY]+_kids[1]->_cost[IREGL] + MEMORY_REF_COST;
-        DFA_PRODUCTION__SET_VALID(UNIVERSE, storeA8B_rule, c)
+      if (STATE__NOT_YET_VALID(UNIVERSE) || _cost[UNIVERSE] > c) {
+        DFA_PRODUCTION(UNIVERSE, storeA8B_rule, c)
+      }
     }
 }
-void  State::_sub_Op_ReplicateB(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IMMB_MINUS1) &&
-        (
-#line 10559 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 8
-#line 10161 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IMMB_MINUS1] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl8B_immm1_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl8B_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl8B_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl8B_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl8B_immm1_rule, c+1)
-    }
+void  State::_sub_Op_Replicate(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
         (
-#line 10549 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 8
-#line 10175 "dfa_s390.cpp"
+#line 11245 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 &&
+            Matcher::vector_element_basic_type(n) == T_LONG
+#line 11448 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl8B_imm0_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl8B_imm0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl8B_imm0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl8B_imm0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl8B_imm0_rule, c+1)
-      }
+        DFA_PRODUCTION(VECX, repl2L_immI0_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], IMMB_N0M1) &&
-        (
-#line 10531 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 8
-#line 10201 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IMMB_N0M1] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl8B_imm_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl8B_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl8B_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl8B_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl8B_imm_rule, c+1)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
-        (
-#line 10515 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-(n->as_Vector()->length() == 8)
-#line 10227 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl8B_reg_risbg_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl8B_reg_risbg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl8B_reg_risbg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl8B_reg_risbg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl8B_reg_risbg_rule, c+1)
-      }
-    }
-}
-void  State::_sub_Op_ReplicateS(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IMMS_MINUS1) &&
-        (
-#line 10614 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 4
-#line 10255 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IMMS_MINUS1] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl4S_immm1_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl4S_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl4S_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl4S_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl4S_immm1_rule, c+1)
-    }
-    if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
-        (
-#line 10604 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 4
-#line 10269 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl4S_imm0_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl4S_imm0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl4S_imm0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl4S_imm0_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl4S_imm0_rule, c+1)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], IMMS_N0M1) &&
-        (
-#line 10586 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 4
-#line 10295 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IMMS_N0M1] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl4S_imm_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl4S_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl4S_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl4S_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl4S_imm_rule, c+1)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
-        (
-#line 10571 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-(n->as_Vector()->length() == 4)
-#line 10321 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl4S_reg_risbg_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl4S_reg_risbg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl4S_reg_risbg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl4S_reg_risbg_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl4S_reg_risbg_rule, c+1)
-      }
-    }
-}
-void  State::_sub_Op_ReplicateI(const Node *n){
     if( STATE__VALID_CHILD(_kids[0], IMMI_MINUS1) &&
         (
-#line 10666 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 2
-#line 10349 "dfa_s390.cpp"
+#line 11232 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 &&
+            Matcher::vector_element_basic_type(n) == T_LONG
+#line 11458 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMI_MINUS1] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2I_immm1_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2I_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2I_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2I_immm1_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2I_immm1_rule, c+1)
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl2L_immIminus1_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGL) &&
+        (
+#line 11219 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 &&
+            Matcher::vector_element_basic_type(n) == T_LONG
+#line 11470 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGL] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl2L_reg_Ex_rule, c)
+      }
     }
     if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
         (
-#line 10656 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 2
-#line 10363 "dfa_s390.cpp"
+#line 11206 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 16 &&
+            Matcher::vector_element_basic_type(n) == T_BYTE
+#line 11482 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl16B_immI0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_MINUS1) &&
+        (
+#line 11193 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 16 &&
+            Matcher::vector_element_basic_type(n) == T_BYTE
+#line 11494 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_MINUS1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl16B_immIminus1_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 11180 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 16 &&
+            Matcher::vector_element_basic_type(n) == T_BYTE
+#line 11506 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl16B_reg_Ex_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMDP0) &&
+        (
+#line 11167 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 &&
+            Matcher::vector_element_basic_type(n) == T_DOUBLE
+#line 11518 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMDP0] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl2D_immD0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGD) &&
+        (
+#line 11153 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 &&
+            Matcher::vector_element_basic_type(n) == T_DOUBLE
+#line 11530 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGD] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl2D_reg_Ex_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMFP0) &&
+        (
+#line 11140 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 &&
+            Matcher::vector_element_basic_type(n) == T_FLOAT
+#line 11542 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMFP0] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl4F_immF0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) &&
+        (
+#line 11126 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 &&
+            Matcher::vector_element_basic_type(n) == T_FLOAT
+#line 11554 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl4F_reg_Ex_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMFP0) &&
+        (
+#line 11117 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 && Matcher::vector_element_basic_type(n) == T_FLOAT
+#line 11565 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMFP0] + DEFAULT_COST;
+        DFA_PRODUCTION(IREGL, Repl2F_imm0_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, Repl2F_imm0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, Repl2F_imm0_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, Repl2F_imm0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, Repl2F_imm0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, Repl2F_imm0_rule, c+1)
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMF) &&
+        (
+#line 11098 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 && Matcher::vector_element_basic_type(n) == T_FLOAT
+#line 11580 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMF] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl2F_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl2F_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl2F_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl2F_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl2F_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl2F_imm_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) &&
+        (
+#line 11081 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+VM_Version::has_FPSupportEnhancements() && n->as_Vector()->length() == 2 &&
+            Matcher::vector_element_basic_type(n) == T_FLOAT
+#line 11610 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl2F_reg_direct_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl2F_reg_direct_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl2F_reg_direct_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl2F_reg_direct_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl2F_reg_direct_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl2F_reg_direct_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], REGF) &&
+        (
+#line 11065 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+!VM_Version::has_FPSupportEnhancements() && n->as_Vector()->length() == 2 &&
+            Matcher::vector_element_basic_type(n) == T_FLOAT
+#line 11640 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl2F_reg_indirect_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl2F_reg_indirect_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl2F_reg_indirect_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl2F_reg_indirect_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl2F_reg_indirect_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl2F_reg_indirect_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_MINUS1) &&
+        (
+#line 11051 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 &&
+            Matcher::vector_element_basic_type(n) == T_INT
+#line 11670 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_MINUS1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl4I_immIminus1_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
+        (
+#line 11038 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 &&
+            Matcher::vector_element_basic_type(n) == T_INT
+#line 11682 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl4I_immI0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 11025 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 &&
+            Matcher::vector_element_basic_type(n) == T_INT
+#line 11694 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl4I_reg_Ex_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_MINUS1) &&
+        (
+#line 11016 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 && Matcher::vector_element_basic_type(n) == T_INT
+#line 11705 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_MINUS1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl2I_immm1_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl2I_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl2I_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl2I_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl2I_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl2I_immm1_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
+        (
+#line 11006 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 && Matcher::vector_element_basic_type(n) == T_INT
+#line 11734 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2I_imm0_rule, c)
+        DFA_PRODUCTION(IREGL, Repl2I_imm0_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2I_imm0_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, Repl2I_imm0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2I_imm0_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, Repl2I_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl2I_imm0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2I_imm0_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, Repl2I_imm0_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2I_imm0_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, Repl2I_imm0_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IMMI_N0M1) &&
         (
-#line 10640 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 2
-#line 10389 "dfa_s390.cpp"
+#line 10990 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 2 && Matcher::vector_element_basic_type(n) == T_INT
+#line 11763 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IMMI_N0M1] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2I_imm_rule, c)
+        DFA_PRODUCTION(IREGL, Repl2I_imm_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2I_imm_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, Repl2I_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2I_imm_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, Repl2I_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl2I_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2I_imm_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, Repl2I_imm_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2I_imm_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, Repl2I_imm_rule, c+1)
       }
     }
     if( STATE__VALID_CHILD(_kids[0], IREGI) &&
         (
-#line 10626 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-(n->as_Vector()->length() == 2)
-#line 10415 "dfa_s390.cpp"
+#line 10976 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+(n->as_Vector()->length() == 2) && Matcher::vector_element_basic_type(n) == T_INT
+#line 11792 "dfa_s390.cpp"
 ) ) {
       unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
       if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2I_reg_risbg_rule, c)
+        DFA_PRODUCTION(IREGL, Repl2I_reg_risbg_rule, c)
       }
       if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
       }
       if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2I_reg_risbg_rule, c+1)
+        DFA_PRODUCTION(REVENREGL, Repl2I_reg_risbg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2I_reg_risbg_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, Repl2I_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl2I_reg_risbg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2I_reg_risbg_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, Repl2I_reg_risbg_rule, c+1)
       }
       if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2I_reg_risbg_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, Repl2I_reg_risbg_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
+        (
+#line 10960 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8 &&
+            Matcher::vector_element_basic_type(n) == T_SHORT
+#line 11822 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl8S_immI0_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_MINUS1) &&
+        (
+#line 10947 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8 &&
+            Matcher::vector_element_basic_type(n) == T_SHORT
+#line 11834 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_MINUS1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl8S_immIminus1_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 10934 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8 &&
+            Matcher::vector_element_basic_type(n) == T_SHORT
+#line 11846 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(VECX) || _cost[VECX] > c) {
+        DFA_PRODUCTION(VECX, repl8S_reg_Ex_rule, c)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMS_MINUS1) &&
+        (
+#line 10925 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 && Matcher::vector_element_basic_type(n) == T_SHORT
+#line 11857 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMS_MINUS1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl4S_immm1_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl4S_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl4S_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl4S_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl4S_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl4S_immm1_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
+        (
+#line 10915 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 && Matcher::vector_element_basic_type(n) == T_SHORT
+#line 11886 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl4S_imm0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl4S_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl4S_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl4S_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl4S_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl4S_imm0_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMS_N0M1) &&
+        (
+#line 10897 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 4 && Matcher::vector_element_basic_type(n) == T_SHORT
+#line 11915 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMS_N0M1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl4S_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl4S_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl4S_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl4S_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl4S_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl4S_imm_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 10882 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+(n->as_Vector()->length() == 4) && Matcher::vector_element_basic_type(n) == T_SHORT
+#line 11944 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl4S_reg_risbg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl4S_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl4S_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl4S_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl4S_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl4S_reg_risbg_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMB_MINUS1) &&
+        (
+#line 10870 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8 && Matcher::vector_element_basic_type(n) == T_BYTE
+#line 11973 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMB_MINUS1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl8B_immm1_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl8B_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl8B_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl8B_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl8B_immm1_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl8B_immm1_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMI_0) &&
+        (
+#line 10860 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8 && Matcher::vector_element_basic_type(n) == T_BYTE
+#line 12002 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMI_0] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl8B_imm0_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl8B_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl8B_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl8B_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl8B_imm0_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl8B_imm0_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IMMB_N0M1) &&
+        (
+#line 10842 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8 && Matcher::vector_element_basic_type(n) == T_BYTE
+#line 12031 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IMMB_N0M1] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl8B_imm_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl8B_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl8B_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl8B_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl8B_imm_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl8B_imm_rule, c+1)
+      }
+    }
+    if( STATE__VALID_CHILD(_kids[0], IREGI) &&
+        (
+#line 10826 "/work/jdk/src/hotspot/cpu/s390/s390.ad"
+n->as_Vector()->length() == 8 && Matcher::vector_element_basic_type(n) == T_BYTE
+#line 12060 "dfa_s390.cpp"
+) ) {
+      unsigned int c = _kids[0]->_cost[IREGI] + DEFAULT_COST;
+      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
+        DFA_PRODUCTION(IREGL, Repl8B_reg_risbg_rule, c)
+      }
+      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+      }
+      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
+        DFA_PRODUCTION(REVENREGL, Repl8B_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
+        DFA_PRODUCTION(RODDREGL, Repl8B_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(ALLRODDREGL) || _cost[ALLRODDREGL] > c+1) {
+        DFA_PRODUCTION(ALLRODDREGL, Repl8B_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
+        DFA_PRODUCTION(RARG1REGL, Repl8B_reg_risbg_rule, c+1)
+      }
+      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
+        DFA_PRODUCTION(RARG5REGL, Repl8B_reg_risbg_rule, c+1)
       }
     }
 }
-void  State::_sub_Op_ReplicateF(const Node *n){
-    if( STATE__VALID_CHILD(_kids[0], IMMFP0) &&
-        (
-#line 10728 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 2
-#line 10443 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IMMFP0] + DEFAULT_COST;
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2F_imm0_rule, c)
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2F_imm0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2F_imm0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2F_imm0_rule, c+1)
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2F_imm0_rule, c+1)
+void  State::_sub_Op_VectorReinterpret(const Node *n){
+    if( STATE__VALID_CHILD(_kids[0], VECX) ) {
+      unsigned int c = _kids[0]->_cost[VECX];
+        DFA_PRODUCTION(VECX, reinterpretX_rule, c)
     }
-    if( STATE__VALID_CHILD(_kids[0], IMMF) &&
-        (
-#line 10709 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-n->as_Vector()->length() == 2
-#line 10457 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[IMMF] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2F_imm_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2F_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2F_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2F_imm_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2F_imm_rule, c+1)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], REGF) &&
-        (
-#line 10693 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-VM_Version::has_FPSupportEnhancements() && n->as_Vector()->length() == 2
-#line 10483 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2F_reg_direct_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2F_reg_direct_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2F_reg_direct_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2F_reg_direct_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2F_reg_direct_rule, c+1)
-      }
-    }
-    if( STATE__VALID_CHILD(_kids[0], REGF) &&
-        (
-#line 10678 "/usr/work/d038402/hg/jdk/src/hotspot/cpu/s390/s390.ad"
-!VM_Version::has_FPSupportEnhancements() && n->as_Vector()->length() == 2
-#line 10509 "dfa_s390.cpp"
-) ) {
-      unsigned int c = _kids[0]->_cost[REGF] + DEFAULT_COST;
-      if (STATE__NOT_YET_VALID(IREGL) || _cost[IREGL] > c) {
-        DFA_PRODUCTION__SET_VALID(IREGL, Repl2F_reg_indirect_rule, c)
-      }
-      if (STATE__NOT_YET_VALID(STACKSLOTL) || _cost[STACKSLOTL] > c+MEMORY_REF_COST) {
-        DFA_PRODUCTION__SET_VALID(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
-      }
-      if (STATE__NOT_YET_VALID(REVENREGL) || _cost[REVENREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(REVENREGL, Repl2F_reg_indirect_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RODDREGL) || _cost[RODDREGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RODDREGL, Repl2F_reg_indirect_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG1REGL) || _cost[RARG1REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG1REGL, Repl2F_reg_indirect_rule, c+1)
-      }
-      if (STATE__NOT_YET_VALID(RARG5REGL) || _cost[RARG5REGL] > c+1) {
-        DFA_PRODUCTION__SET_VALID(RARG5REGL, Repl2F_reg_indirect_rule, c+1)
-      }
+    if( STATE__VALID_CHILD(_kids[0], IREGL) ) {
+      unsigned int c = _kids[0]->_cost[IREGL];
+        DFA_PRODUCTION(IREGL, reinterpret_rule, c)
+        DFA_PRODUCTION(STACKSLOTL, regL_to_stkL_rule, c+MEMORY_REF_COST)
+        DFA_PRODUCTION(REVENREGL, reinterpret_rule, c+1)
+        DFA_PRODUCTION(RODDREGL, reinterpret_rule, c+1)
+        DFA_PRODUCTION(ALLRODDREGL, reinterpret_rule, c+1)
+        DFA_PRODUCTION(RARG1REGL, reinterpret_rule, c+1)
+        DFA_PRODUCTION(RARG5REGL, reinterpret_rule, c+1)
     }
 }
 bool State::DFA(int opcode, const Node *n) {
@@ -10549,6 +12119,9 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_RegL: { _sub_Op_RegL(n);
     break;
   }
+  case Op_VecX: { _sub_Op_VecX(n);
+    break;
+  }
   case Op_RegFlags: { _sub_Op_RegFlags(n);
     break;
   }
@@ -10559,6 +12132,9 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_AbsI: { _sub_Op_AbsI(n);
+    break;
+  }
+  case Op_AbsL: { _sub_Op_AbsL(n);
     break;
   }
   case Op_AddD: { _sub_Op_AddD(n);
@@ -10597,6 +12173,12 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_ReverseBytesL: { _sub_Op_ReverseBytesL(n);
     break;
   }
+  case Op_ReverseBytesUS: { _sub_Op_ReverseBytesUS(n);
+    break;
+  }
+  case Op_ReverseBytesS: { _sub_Op_ReverseBytesS(n);
+    break;
+  }
   case Op_CallDynamicJava: { _sub_Op_CallDynamicJava(n);
     break;
   }
@@ -10612,7 +12194,19 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_CallStaticJava: { _sub_Op_CallStaticJava(n);
     break;
   }
+  case Op_CastDD: { _sub_Op_CastDD(n);
+    break;
+  }
+  case Op_CastFF: { _sub_Op_CastFF(n);
+    break;
+  }
   case Op_CastII: { _sub_Op_CastII(n);
+    break;
+  }
+  case Op_CastLL: { _sub_Op_CastLL(n);
+    break;
+  }
+  case Op_CastVV: { _sub_Op_CastVV(n);
     break;
   }
   case Op_CastX2P: { _sub_Op_CastX2P(n);
@@ -10694,6 +12288,18 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_CompareAndSwapN: { _sub_Op_CompareAndSwapN(n);
+    break;
+  }
+  case Op_WeakCompareAndSwapP: { _sub_Op_WeakCompareAndSwapP(n);
+    break;
+  }
+  case Op_WeakCompareAndSwapN: { _sub_Op_WeakCompareAndSwapN(n);
+    break;
+  }
+  case Op_CompareAndExchangeP: { _sub_Op_CompareAndExchangeP(n);
+    break;
+  }
+  case Op_CompareAndExchangeN: { _sub_Op_CompareAndExchangeN(n);
     break;
   }
   case Op_GetAndAddI: { _sub_Op_GetAndAddI(n);
@@ -10810,6 +12416,12 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_DivL: { _sub_Op_DivL(n);
     break;
   }
+  case Op_UDivI: { _sub_Op_UDivI(n);
+    break;
+  }
+  case Op_UDivL: { _sub_Op_UDivL(n);
+    break;
+  }
   case Op_DivModI: { _sub_Op_DivModI(n);
     break;
   }
@@ -10837,13 +12449,16 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_FmaF: { _sub_Op_FmaF(n);
     break;
   }
+  case Op_ForwardException: { _sub_Op_ForwardException(n);
+    break;
+  }
   case Op_Goto: { _sub_Op_Goto(n);
     break;
   }
   case Op_Halt: { _sub_Op_Halt(n);
     break;
   }
-  case Op_HasNegatives: { _sub_Op_HasNegatives(n);
+  case Op_CountPositives: { _sub_Op_CountPositives(n);
     break;
   }
   case Op_If: { _sub_Op_If(n);
@@ -10888,9 +12503,6 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_LoadL_unaligned: { _sub_Op_LoadL_unaligned(n);
     break;
   }
-  case Op_LoadPLocked: { _sub_Op_LoadPLocked(n);
-    break;
-  }
   case Op_LoadP: { _sub_Op_LoadP(n);
     break;
   }
@@ -10924,13 +12536,22 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_StoreFence: { _sub_Op_StoreFence(n);
     break;
   }
+  case Op_StoreStoreFence: { _sub_Op_StoreStoreFence(n);
+    break;
+  }
   case Op_MemBarReleaseLock: { _sub_Op_MemBarReleaseLock(n);
+    break;
+  }
+  case Op_MemBarStoreLoad: { _sub_Op_MemBarStoreLoad(n);
     break;
   }
   case Op_MemBarVolatile: { _sub_Op_MemBarVolatile(n);
     break;
   }
   case Op_MemBarStoreStore: { _sub_Op_MemBarStoreStore(n);
+    break;
+  }
+  case Op_MemBarFull: { _sub_Op_MemBarFull(n);
     break;
   }
   case Op_MinI: { _sub_Op_MinI(n);
@@ -10940,6 +12561,12 @@ bool State::DFA(int opcode, const Node *n) {
     break;
   }
   case Op_ModL: { _sub_Op_ModL(n);
+    break;
+  }
+  case Op_UModI: { _sub_Op_UModI(n);
+    break;
+  }
+  case Op_UModL: { _sub_Op_UModL(n);
     break;
   }
   case Op_MoveI2F: { _sub_Op_MoveI2F(n);
@@ -11002,6 +12629,9 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_PopCountL: { _sub_Op_PopCountL(n);
     break;
   }
+  case Op_PopCountVI: { _sub_Op_PopCountVI(n);
+    break;
+  }
   case Op_PrefetchAllocation: { _sub_Op_PrefetchAllocation(n);
     break;
   }
@@ -11017,10 +12647,7 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_Return: { _sub_Op_Return(n);
     break;
   }
-  case Op_RoundDouble: { _sub_Op_RoundDouble(n);
-    break;
-  }
-  case Op_RoundFloat: { _sub_Op_RoundFloat(n);
+  case Op_RoundDoubleModeV: { _sub_Op_RoundDoubleModeV(n);
     break;
   }
   case Op_SafePoint: { _sub_Op_SafePoint(n);
@@ -11029,19 +12656,13 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_SqrtD: { _sub_Op_SqrtD(n);
     break;
   }
+  case Op_SqrtF: { _sub_Op_SqrtF(n);
+    break;
+  }
   case Op_StoreB: { _sub_Op_StoreB(n);
     break;
   }
   case Op_StoreC: { _sub_Op_StoreC(n);
-    break;
-  }
-  case Op_StoreCM: { _sub_Op_StoreCM(n);
-    break;
-  }
-  case Op_StorePConditional: { _sub_Op_StorePConditional(n);
-    break;
-  }
-  case Op_StoreLConditional: { _sub_Op_StoreLConditional(n);
     break;
   }
   case Op_StoreD: { _sub_Op_StoreD(n);
@@ -11116,22 +12737,79 @@ bool State::DFA(int opcode, const Node *n) {
   case Op_XorL: { _sub_Op_XorL(n);
     break;
   }
+  case Op_AddVB: { _sub_Op_AddVB(n);
+    break;
+  }
+  case Op_AddVS: { _sub_Op_AddVS(n);
+    break;
+  }
+  case Op_AddVI: { _sub_Op_AddVI(n);
+    break;
+  }
+  case Op_AddVL: { _sub_Op_AddVL(n);
+    break;
+  }
+  case Op_AddVF: { _sub_Op_AddVF(n);
+    break;
+  }
+  case Op_AddVD: { _sub_Op_AddVD(n);
+    break;
+  }
+  case Op_SubVB: { _sub_Op_SubVB(n);
+    break;
+  }
+  case Op_SubVS: { _sub_Op_SubVS(n);
+    break;
+  }
+  case Op_SubVI: { _sub_Op_SubVI(n);
+    break;
+  }
+  case Op_SubVL: { _sub_Op_SubVL(n);
+    break;
+  }
+  case Op_SubVF: { _sub_Op_SubVF(n);
+    break;
+  }
+  case Op_SubVD: { _sub_Op_SubVD(n);
+    break;
+  }
+  case Op_MulVB: { _sub_Op_MulVB(n);
+    break;
+  }
+  case Op_MulVS: { _sub_Op_MulVS(n);
+    break;
+  }
+  case Op_MulVI: { _sub_Op_MulVI(n);
+    break;
+  }
+  case Op_MulVF: { _sub_Op_MulVF(n);
+    break;
+  }
+  case Op_MulVD: { _sub_Op_MulVD(n);
+    break;
+  }
+  case Op_DivVF: { _sub_Op_DivVF(n);
+    break;
+  }
+  case Op_DivVD: { _sub_Op_DivVD(n);
+    break;
+  }
+  case Op_SqrtVD: { _sub_Op_SqrtVD(n);
+    break;
+  }
+  case Op_SqrtVF: { _sub_Op_SqrtVF(n);
+    break;
+  }
   case Op_LoadVector: { _sub_Op_LoadVector(n);
     break;
   }
   case Op_StoreVector: { _sub_Op_StoreVector(n);
     break;
   }
-  case Op_ReplicateB: { _sub_Op_ReplicateB(n);
+  case Op_Replicate: { _sub_Op_Replicate(n);
     break;
   }
-  case Op_ReplicateS: { _sub_Op_ReplicateS(n);
-    break;
-  }
-  case Op_ReplicateI: { _sub_Op_ReplicateI(n);
-    break;
-  }
-  case Op_ReplicateF: { _sub_Op_ReplicateF(n);
+  case Op_VectorReinterpret: { _sub_Op_VectorReinterpret(n);
     break;
   }
   
